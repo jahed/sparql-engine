@@ -22,19 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-describe('SPARQL BIND', () => {
-  let engine = null
+describe("SPARQL BIND", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(g)
-  })
+    const g = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(g);
+  });
 
-  it('should evaluate a simple BIND clause', done => {
+  it("should evaluate a simple BIND clause", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -42,22 +42,26 @@ describe('SPARQL BIND', () => {
     SELECT * WHERE {
       ?s rdf:type dblp-rdf:Person .
       BIND ("Thomas Minier"@fr AS ?name)
-    }`
-    const results = []
+    }`;
+    const results = [];
 
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.all.keys('?s', '?name')
-      expect(b['?name']).to.equal('"Thomas Minier"@fr')
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(1)
-      done()
-    })
-  })
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.all.keys("?s", "?name");
+        expect(b["?name"]).to.equal('"Thomas Minier"@fr');
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(1);
+        done();
+      },
+    );
+  });
 
-  it('should evaluate BIND clauses with complex SPARQL expressions', done => {
+  it("should evaluate BIND clauses with complex SPARQL expressions", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -65,22 +69,28 @@ describe('SPARQL BIND', () => {
     SELECT * WHERE {
       ?s rdf:type dblp-rdf:Person .
       BIND (10 + 20 AS ?foo)
-    }`
-    const results = []
+    }`;
+    const results = [];
 
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.all.keys('?s', '?foo')
-      expect(b['?foo']).to.equal('"30"^^http://www.w3.org/2001/XMLSchema#integer')
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(1)
-      done()
-    })
-  })
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.all.keys("?s", "?foo");
+        expect(b["?foo"]).to.equal(
+          '"30"^^http://www.w3.org/2001/XMLSchema#integer',
+        );
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(1);
+        done();
+      },
+    );
+  });
 
-  it('should evaluate chained BIND clauses', done => {
+  it("should evaluate chained BIND clauses", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -89,23 +99,29 @@ describe('SPARQL BIND', () => {
       ?s rdf:type dblp-rdf:Person .
       BIND ("Thomas Minier"@fr AS ?name)
       BIND (10 + 20 AS ?foo)
-    }`
-    const results = []
+    }`;
+    const results = [];
 
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.all.keys('?s', '?name', '?foo')
-      expect(b['?name']).to.equal('"Thomas Minier"@fr')
-      expect(b['?foo']).to.equal('"30"^^http://www.w3.org/2001/XMLSchema#integer')
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(1)
-      done()
-    })
-  })
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.all.keys("?s", "?name", "?foo");
+        expect(b["?name"]).to.equal('"Thomas Minier"@fr');
+        expect(b["?foo"]).to.equal(
+          '"30"^^http://www.w3.org/2001/XMLSchema#integer',
+        );
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(1);
+        done();
+      },
+    );
+  });
 
-  it('should evaluate a BIND clause with the COALESCE function', done => {
+  it("should evaluate a BIND clause with the COALESCE function", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -115,20 +131,24 @@ describe('SPARQL BIND', () => {
       BIND(COALESCE(?s, "toto") AS ?s2)
       BIND(COALESCE(?x, "Thomas Minier") AS ?name)
       BIND(COALESCE(?x, ?y) AS ?undefined)
-    }`
-    const results = []
+    }`;
+    const results = [];
 
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.all.keys('?s', '?s2', '?name', '?undefined')
-      expect(b['?s2']).to.equal(b['?s'])
-      expect(b['?name']).to.equal('"Thomas Minier"')
-      expect(b['?undefined']).to.equal('"UNBOUND"')
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(1)
-      done()
-    })
-  })
-})
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.all.keys("?s", "?s2", "?name", "?undefined");
+        expect(b["?s2"]).to.equal(b["?s"]);
+        expect(b["?name"]).to.equal('"Thomas Minier"');
+        expect(b["?undefined"]).to.equal('"UNBOUND"');
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(1);
+        done();
+      },
+    );
+  });
+});

@@ -22,24 +22,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { rdf } = require('../../dist/api.js')
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { rdf } = require("../../dist/api.js");
+const { getGraph, TestEngine } = require("../utils.js");
 
-describe('SPARQL custom operators', () => {
-
-  it('should allow for custom functions in BIND', done => {
-
+describe("SPARQL custom operators", () => {
+  it("should allow for custom functions in BIND", (done) => {
     const customFunctions = {
-      'http://test.com#REVERSE': function (a) {        
-        return rdf.shallowCloneTerm(a, a.value.split("").reverse().join(""))
-      }
-    }
+      "http://test.com#REVERSE": function (a) {
+        return rdf.shallowCloneTerm(a, a.value.split("").reverse().join(""));
+      },
+    };
 
-    const g = getGraph('./tests/data/dblp.nt')
-    const engine = new TestEngine(g, null, customFunctions)
+    const g = getGraph("./tests/data/dblp.nt");
+    const engine = new TestEngine(g, null, customFunctions);
 
     const query = `
     PREFIX test: <http://test.com#>
@@ -49,28 +47,31 @@ describe('SPARQL custom operators', () => {
       <https://dblp.org/pers/m/Minier:Thomas> <https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName> ?thomas .
       BIND(test:REVERSE(?thomas) as ?reversed) .
     }
-    `
-    const results = []
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.keys('?reversed')
-      expect(b['?reversed']).to.equal('"reiniM samohT"@en')
-      results.push(b)
-    }, done, () => {
-      done()
-    })
-  })
+    `;
+    const results = [];
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?reversed");
+        expect(b["?reversed"]).to.equal('"reiniM samohT"@en');
+        results.push(b);
+      },
+      done,
+      () => {
+        done();
+      },
+    );
+  });
 
-  it('should allow for custom functions in FILTER', done => {
-
+  it("should allow for custom functions in FILTER", (done) => {
     const customFunctions = {
-      'http://test.com#CONTAINS_THOMAS': function (a) {
-        return rdf.createBoolean(a.value.toLowerCase().indexOf("thomas") >= 0)
-      }
-    }
-    const g = getGraph('./tests/data/dblp.nt')
-    const engine = new TestEngine(g, null, customFunctions)
+      "http://test.com#CONTAINS_THOMAS": function (a) {
+        return rdf.createBoolean(a.value.toLowerCase().indexOf("thomas") >= 0);
+      },
+    };
+    const g = getGraph("./tests/data/dblp.nt");
+    const engine = new TestEngine(g, null, customFunctions);
 
     const query = `
     PREFIX test: <http://test.com#>
@@ -79,29 +80,32 @@ describe('SPARQL custom operators', () => {
     {
       ?s ?p ?o . FILTER(test:CONTAINS_THOMAS(?o))
     }
-    `
-    const results = []
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.keys('?o')
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(3)
-      done()
-    })
-  })
+    `;
+    const results = [];
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?o");
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(3);
+        done();
+      },
+    );
+  });
 
-  it('should allow for custom functions in HAVING', done => {
-
+  it("should allow for custom functions in HAVING", (done) => {
     const customFunctions = {
-      'http://test.com#IS_EVEN': function (a) {
-        const value = rdf.asJS(a.value, a.datatype.value)
-        return rdf.createBoolean(value % 2 === 0)
-      }
-    }
-    const g = getGraph('./tests/data/dblp.nt')
-    const engine = new TestEngine(g, null, customFunctions)
+      "http://test.com#IS_EVEN": function (a) {
+        const value = rdf.asJS(a.value, a.datatype.value);
+        return rdf.createBoolean(value % 2 === 0);
+      },
+    };
+    const g = getGraph("./tests/data/dblp.nt");
+    const engine = new TestEngine(g, null, customFunctions);
 
     const query = `
     PREFIX test: <http://test.com#>
@@ -113,34 +117,37 @@ describe('SPARQL custom operators', () => {
     }
     GROUP BY ?length
     HAVING (test:IS_EVEN(?length))
-    `
-    const results = []
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
+    `;
+    const results = [];
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?length");
+        const length = parseInt(b["?length"].split("^^")[0].replace(/"/g, ""));
+        expect(length % 2).to.equal(0);
 
-      b = b.toObject()
-      expect(b).to.have.keys('?length')
-      const length = parseInt(b["?length"].split("^^")[0].replace(/"/g, ""))
-      expect(length % 2).to.equal(0)
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(8);
+        done();
+      },
+    );
+  });
 
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(8)
-      done()
-    })
-  })
-
-  it('should consider the solution "unbound" on an error, but query should continue continue', done => {
-
+  it('should consider the solution "unbound" on an error, but query should continue continue', (done) => {
     const customFunctions = {
-      'http://test.com#ERROR': function (a) {
-        throw new Error("This should result in an unbould solution, but the query should still evaluate")
-      }
-    }
+      "http://test.com#ERROR": function (a) {
+        throw new Error(
+          "This should result in an unbould solution, but the query should still evaluate",
+        );
+      },
+    };
 
-    const g = getGraph('./tests/data/dblp.nt')
-    const engine = new TestEngine(g, null, customFunctions)
-
+    const g = getGraph("./tests/data/dblp.nt");
+    const engine = new TestEngine(g, null, customFunctions);
 
     const query = `
     PREFIX test: <http://test.com#>
@@ -150,23 +157,26 @@ describe('SPARQL custom operators', () => {
       <https://dblp.org/pers/m/Minier:Thomas> <https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName> ?thomas .
       BIND(test:ERROR(?thomas) as ?error) .
     }
-    `
-    const results = []
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.keys('?error')
-      expect(b['?error']).to.equal('"UNBOUND"')
-      results.push(b)
-    }, done, () => {
-      done()
-    })
-  })
+    `;
+    const results = [];
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?error");
+        expect(b["?error"]).to.equal('"UNBOUND"');
+        results.push(b);
+      },
+      done,
+      () => {
+        done();
+      },
+    );
+  });
 
-  it('should fail if the custom function does not exist', done => {
-
-    const g = getGraph('./tests/data/dblp.nt')
-    const engine = new TestEngine(g)
+  it("should fail if the custom function does not exist", (done) => {
+    const g = getGraph("./tests/data/dblp.nt");
+    const engine = new TestEngine(g);
 
     const query = `
     PREFIX test: <http://test.com#>
@@ -176,9 +186,8 @@ describe('SPARQL custom operators', () => {
       <https://dblp.org/pers/m/Minier:Thomas> <https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName> ?thomas .
       BIND(test:REVERSE(?thomas) as ?reversed) .
     }
-    `
-    expect(() => engine.execute(query)).to.throw(Error)
-    done()
-  })
-
-})
+    `;
+    expect(() => engine.execute(query)).to.throw(Error);
+    done();
+  });
+});

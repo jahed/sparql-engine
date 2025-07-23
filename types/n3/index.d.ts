@@ -23,15 +23,15 @@ SOFTWARE.
 */
 
 interface Triple {
-  subject?: string,
-  predicate?:string,
-  object?:string,
-  graph?: string
+  subject?: string;
+  predicate?: string;
+  object?: string;
+  graph?: string;
 }
 
-declare module 'n3' {
+declare module "n3" {
   export class Parser {
-    parse (input: string): Triple[];
+    parse(input: string): Triple[];
   }
 
   export namespace Util {

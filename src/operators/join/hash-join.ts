@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { Pipeline } from '../../engine/pipeline/pipeline'
-import { PipelineStage } from '../../engine/pipeline/pipeline-engine'
-import HashJoinTable from './hash-join-table'
-import { Bindings } from '../../rdf/bindings'
+import { Pipeline } from "../../engine/pipeline/pipeline";
+import { PipelineStage } from "../../engine/pipeline/pipeline-engine";
+import HashJoinTable from "./hash-join-table";
+import { Bindings } from "../../rdf/bindings";
 
 /**
  * Perform a traditional Hash join between two sources, i.e., materialize the right source in a hash table and then read from the left source while probing into the hash table.
@@ -34,19 +34,23 @@ import { Bindings } from '../../rdf/bindings'
  * @param  joinKey - SPARQL variable used as join attribute
  * @return A {@link PipelineStage} which performs a Hash join
  */
-export default function hashJoin (left: PipelineStage<Bindings>, right: PipelineStage<Bindings>, joinKey: string) {
-  const joinTable = new HashJoinTable()
-  const engine = Pipeline.getInstance()
+export default function hashJoin(
+  left: PipelineStage<Bindings>,
+  right: PipelineStage<Bindings>,
+  joinKey: string,
+) {
+  const joinTable = new HashJoinTable();
+  const engine = Pipeline.getInstance();
   return engine.mergeMap(engine.collect(right), (values: Bindings[]) => {
     // materialize right relation into the hash table
-    values.forEach(v => {
+    values.forEach((v) => {
       if (v.has(joinKey)) {
-        joinTable.put(v.get(joinKey)!, v)
+        joinTable.put(v.get(joinKey)!, v);
       }
-    })
+    });
     // read from left and probe each value into the hash table
     return engine.mergeMap(left, (bindings: Bindings) => {
-      return engine.from(joinTable.join(bindings.get(joinKey)!, bindings))
-    })
-  })
+      return engine.from(joinTable.join(bindings.get(joinKey)!, bindings));
+    });
+  });
 }

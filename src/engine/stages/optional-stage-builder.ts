@@ -22,21 +22,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import StageBuilder from './stage-builder'
-import { Algebra } from 'sparqljs'
-import { PipelineStage } from '../pipeline/pipeline-engine'
-import { Bindings } from '../../rdf/bindings'
-import ExecutionContext from '../context/execution-context'
-import optional from '../../operators/optional'
+import StageBuilder from "./stage-builder";
+import { Algebra } from "sparqljs";
+import { PipelineStage } from "../pipeline/pipeline-engine";
+import { Bindings } from "../../rdf/bindings";
+import ExecutionContext from "../context/execution-context";
+import optional from "../../operators/optional";
 
 /**
  * A OptionalStageBuilder evaluates OPTIONAL clauses
  * @author Thomas Minier
  */
 export default class OptionalStageBuilder extends StageBuilder {
-  execute (source: PipelineStage<Bindings>, node: Algebra.GroupNode, context: ExecutionContext): PipelineStage<Bindings> {
-    return optional(source, node.patterns, this.builder!, context)
+  execute(
+    source: PipelineStage<Bindings>,
+    node: Algebra.GroupNode,
+    context: ExecutionContext,
+  ): PipelineStage<Bindings> {
+    return optional(source, node.patterns, this.builder!, context);
   }
 }

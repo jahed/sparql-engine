@@ -22,42 +22,48 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-describe('DESCRIBE SPARQL queries', () => {
-  let engine = null
+describe("DESCRIBE SPARQL queries", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(g)
-  })
+    const g = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(g);
+  });
 
-  it('should evaluate simple DESCRIBE queries', done => {
+  it("should evaluate simple DESCRIBE queries", (done) => {
     const query = `
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     DESCRIBE ?s
     WHERE {
       ?s rdf:type dblp-rdf:Person .
-    }`
-    const results = []
+    }`;
+    const results = [];
 
-    const iterator = engine.execute(query)
-    iterator.subscribe(triple => {
-      expect(triple).to.have.all.keys('subject', 'predicate', 'object')
-      expect(triple.subject).to.equal('https://dblp.org/pers/m/Minier:Thomas')
-      expect(triple.predicate).to.be.oneOf([
-        'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
-        'https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName',
-        'https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf',
-        'https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith'
-      ])
-      results.push(triple)
-    }, done, () => {
-      expect(results.length).to.equal(11)
-      done()
-    })
-  })
-})
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (triple) => {
+        expect(triple).to.have.all.keys("subject", "predicate", "object");
+        expect(triple.subject).to.equal(
+          "https://dblp.org/pers/m/Minier:Thomas",
+        );
+        expect(triple.predicate).to.be.oneOf([
+          "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName",
+          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf",
+          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith",
+        ]);
+        results.push(triple);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(11);
+        done();
+      },
+    );
+  });
+});

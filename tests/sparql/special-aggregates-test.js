@@ -22,21 +22,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-describe('Non standard SPARQL aggregates', () => {
-  let engine = null
+describe("Non standard SPARQL aggregates", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(g)
-  })
+    const g = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(g);
+  });
 
   const data = [
     {
-      name: 'sea:accuracy',
+      name: "sea:accuracy",
       query: `
       PREFIX sea: <https://callidon.github.io/sparql-engine/aggregates#>
       SELECT (sea:accuracy(?x, ?y) AS ?acc) WHERE {
@@ -47,12 +47,12 @@ describe('Non standard SPARQL aggregates', () => {
       GROUP BY ?x`,
       results: [
         {
-          '?acc': '"0.5"^^http://www.w3.org/2001/XMLSchema#float'
-        }
-      ]
+          "?acc": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+        },
+      ],
     },
     {
-      name: 'sea:gmean',
+      name: "sea:gmean",
       query: `
       PREFIX sea: <https://callidon.github.io/sparql-engine/aggregates#>
       SELECT (sea:gmean(?x) AS ?gmean) WHERE {
@@ -67,12 +67,12 @@ describe('Non standard SPARQL aggregates', () => {
       GROUP BY ?g`,
       results: [
         {
-          '?gmean': '"0.5"^^http://www.w3.org/2001/XMLSchema#float'
-        }
-      ]
+          "?gmean": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+        },
+      ],
     },
     {
-      name: 'sea:rmse',
+      name: "sea:rmse",
       query: `
       PREFIX sea: <https://callidon.github.io/sparql-engine/aggregates#>
       SELECT (sea:rmse(?x, ?y) AS ?mse) WHERE { 
@@ -83,22 +83,26 @@ describe('Non standard SPARQL aggregates', () => {
       GROUP BY ?g`,
       results: [
         {
-          '?mse': '"4.123105625617661"^^http://www.w3.org/2001/XMLSchema#float'
-        }
-      ]
+          "?mse": '"4.123105625617661"^^http://www.w3.org/2001/XMLSchema#float',
+        },
+      ],
     },
-  ]
+  ];
 
-  data.forEach(d => {
-    it(`should evaluate the "${d.name}" SPARQL aggregate`, done => {
-      const results = []
-      const iterator = engine.execute(d.query)
-      iterator.subscribe(b => {
-        results.push(b.toObject())
-      }, done, () => {
-        expect(results).to.deep.equals(d.results)
-        done()
-      })
-    })
-  })
-})
+  data.forEach((d) => {
+    it(`should evaluate the "${d.name}" SPARQL aggregate`, (done) => {
+      const results = [];
+      const iterator = engine.execute(d.query);
+      iterator.subscribe(
+        (b) => {
+          results.push(b.toObject());
+        },
+        done,
+        () => {
+          expect(results).to.deep.equals(d.results);
+          done();
+        },
+      );
+    });
+  });
+});

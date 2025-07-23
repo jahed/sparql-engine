@@ -22,21 +22,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-describe('Non standard SPARQL functions', () => {
-  let engine = null
+describe("Non standard SPARQL functions", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(g)
-  })
+    const g = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(g);
+  });
 
   const data = [
     {
-      name: 'sef:cosh',
+      name: "sef:cosh",
       query: `
       PREFIX sef: <https://callidon.github.io/sparql-engine/functions#>
       SELECT ?x WHERE {
@@ -44,12 +44,12 @@ describe('Non standard SPARQL functions', () => {
       }`,
       results: [
         {
-          '?x': '"1.5430806348152437"^^http://www.w3.org/2001/XMLSchema#float'
-        }
-      ]
+          "?x": '"1.5430806348152437"^^http://www.w3.org/2001/XMLSchema#float',
+        },
+      ],
     },
     {
-      name: 'sef:sinh',
+      name: "sef:sinh",
       query: `
       PREFIX sef: <https://callidon.github.io/sparql-engine/functions#>
       SELECT ?x WHERE {
@@ -57,12 +57,12 @@ describe('Non standard SPARQL functions', () => {
       }`,
       results: [
         {
-          '?x': '"1.1752011936438014"^^http://www.w3.org/2001/XMLSchema#float'
-        }
-      ]
+          "?x": '"1.1752011936438014"^^http://www.w3.org/2001/XMLSchema#float',
+        },
+      ],
     },
     {
-      name: 'sef:tanh',
+      name: "sef:tanh",
       query: `
       PREFIX sef: <https://callidon.github.io/sparql-engine/functions#>
       SELECT ?x WHERE {
@@ -70,12 +70,12 @@ describe('Non standard SPARQL functions', () => {
       }`,
       results: [
         {
-          '?x': '"0.7615941559557649"^^http://www.w3.org/2001/XMLSchema#float'
-        }
-      ]
+          "?x": '"0.7615941559557649"^^http://www.w3.org/2001/XMLSchema#float',
+        },
+      ],
     },
     {
-      name: 'sef:coth',
+      name: "sef:coth",
       query: `
       PREFIX sef: <https://callidon.github.io/sparql-engine/functions#>
       SELECT ?x WHERE {
@@ -83,12 +83,12 @@ describe('Non standard SPARQL functions', () => {
       }`,
       results: [
         {
-          '?x': '"1.3130352854993312"^^http://www.w3.org/2001/XMLSchema#float'
-        }
-      ]
+          "?x": '"1.3130352854993312"^^http://www.w3.org/2001/XMLSchema#float',
+        },
+      ],
     },
     {
-      name: 'sef:sech',
+      name: "sef:sech",
       query: `
       PREFIX sef: <https://callidon.github.io/sparql-engine/functions#>
       SELECT ?x WHERE {
@@ -96,12 +96,12 @@ describe('Non standard SPARQL functions', () => {
       }`,
       results: [
         {
-          '?x': '"0.6480542736638853"^^http://www.w3.org/2001/XMLSchema#float'
-        }
-      ]
+          "?x": '"0.6480542736638853"^^http://www.w3.org/2001/XMLSchema#float',
+        },
+      ],
     },
     {
-      name: 'sef:csch',
+      name: "sef:csch",
       query: `
       PREFIX sef: <https://callidon.github.io/sparql-engine/functions#>
       SELECT ?x WHERE {
@@ -109,12 +109,12 @@ describe('Non standard SPARQL functions', () => {
       }`,
       results: [
         {
-          '?x': '"0.8509181282393214"^^http://www.w3.org/2001/XMLSchema#float'
-        }
-      ]
+          "?x": '"0.8509181282393214"^^http://www.w3.org/2001/XMLSchema#float',
+        },
+      ],
     },
     {
-      name: 'sef:strsplit',
+      name: "sef:strsplit",
       query: `
       PREFIX sef: <https://callidon.github.io/sparql-engine/functions#>
       SELECT ?y WHERE {
@@ -123,25 +123,29 @@ describe('Non standard SPARQL functions', () => {
       }`,
       results: [
         {
-          '?y': '"Thomas"'
+          "?y": '"Thomas"',
         },
         {
-          '?y': '"Minier"'
-        }
-      ]
+          "?y": '"Minier"',
+        },
+      ],
     },
-  ]
+  ];
 
-  data.forEach(d => {
-    it(`should evaluate the "${d.name}" SPARQL function`, done => {
-      const results = []
-      const iterator = engine.execute(d.query)
-      iterator.subscribe(b => {
-        results.push(b.toObject())
-      }, done, () => {
-        expect(results).to.deep.equals(d.results)
-        done()
-      })
-    })
-  })
-})
+  data.forEach((d) => {
+    it(`should evaluate the "${d.name}" SPARQL function`, (done) => {
+      const results = [];
+      const iterator = engine.execute(d.query);
+      iterator.subscribe(
+        (b) => {
+          results.push(b.toObject());
+        },
+        done,
+        () => {
+          expect(results).to.deep.equals(d.results);
+          done();
+        },
+      );
+    });
+  });
+});

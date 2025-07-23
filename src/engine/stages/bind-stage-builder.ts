@@ -22,22 +22,32 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import StageBuilder from './stage-builder'
-import bind from '../../operators/bind'
-import { Algebra } from 'sparqljs'
-import { PipelineStage } from '../pipeline/pipeline-engine'
-import { Bindings } from '../../rdf/bindings'
-import ExecutionContext from '../context/execution-context'
-import { CustomFunctions } from '../../operators/expressions/sparql-expression'
+import StageBuilder from "./stage-builder";
+import bind from "../../operators/bind";
+import { Algebra } from "sparqljs";
+import { PipelineStage } from "../pipeline/pipeline-engine";
+import { Bindings } from "../../rdf/bindings";
+import ExecutionContext from "../context/execution-context";
+import { CustomFunctions } from "../../operators/expressions/sparql-expression";
 
 /**
  * A BindStageBuilder evaluates BIND clauses
  * @author Thomas Minier
  */
 export default class BindStageBuilder extends StageBuilder {
-  execute (source: PipelineStage<Bindings>, bindNode: Algebra.BindNode, customFunctions: CustomFunctions, context: ExecutionContext): PipelineStage<Bindings> {
-    return bind(source, bindNode.variable, bindNode.expression, customFunctions)
+  execute(
+    source: PipelineStage<Bindings>,
+    bindNode: Algebra.BindNode,
+    customFunctions: CustomFunctions,
+    context: ExecutionContext,
+  ): PipelineStage<Bindings> {
+    return bind(
+      source,
+      bindNode.variable,
+      bindNode.expression,
+      customFunctions,
+    );
   }
 }

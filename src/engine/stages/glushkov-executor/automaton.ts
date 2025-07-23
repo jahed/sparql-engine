@@ -29,40 +29,40 @@ SOFTWARE.
  * @author Julien Aimonier-Davat
  */
 export class State<T> {
-
   /**
    * Constructor
    * @param name - Name of the State. Must be unique.
    * @param isInitial - True to construct an initial State, False otherwise
    * @param isFinal - True to construct a final State, False otherwise
    */
-  constructor (
-        private _name: T,
-        private _isInitial: boolean,
-        private _isFinal: boolean) {}
+  constructor(
+    private _name: T,
+    private _isInitial: boolean,
+    private _isFinal: boolean,
+  ) {}
 
   /**
    * Get the name of the State
    * @return The name of the State
    */
-  get name (): T {
-    return this._name
+  get name(): T {
+    return this._name;
   }
 
   /**
    * Get the flag that indicates whether the state is an initial state
    * @return True if the State is an initial State, False otherwise
    */
-  get isInitial (): boolean {
-    return this._isInitial
+  get isInitial(): boolean {
+    return this._isInitial;
   }
 
   /**
    * Get the flag that indicates whether the state is a final state
    * @return True if the State is a final State, False otherwise
    */
-  get isFinal (): boolean {
-    return this._isFinal
+  get isFinal(): boolean {
+    return this._isFinal;
   }
 
   /**
@@ -70,8 +70,8 @@ export class State<T> {
    * @param name - Name tested
    * @return True if the given name is equal to the name of the State, False otherwise
    */
-  hasName (name: T): boolean {
-    return this.name === name
+  hasName(name: T): boolean {
+    return this.name === name;
   }
 
   /**
@@ -80,14 +80,16 @@ export class State<T> {
    * @param state - State tested
    * @return True if the States are equal, False otherwise
    */
-  equals (state: State<T>): boolean {
-    return this.name === state.name
-        && this._isInitial === state._isInitial
-        && this._isFinal === state.isFinal
+  equals(state: State<T>): boolean {
+    return (
+      this.name === state.name &&
+      this._isInitial === state._isInitial &&
+      this._isFinal === state.isFinal
+    );
   }
 
-  toString (): string {
-    return `State = {name: ${this.name}, isFinal: ${this.isFinal}}`
+  toString(): string {
+    return `State = {name: ${this.name}, isFinal: ${this.isFinal}}`;
   }
 }
 
@@ -95,7 +97,6 @@ export class State<T> {
  * A transition of the automaton
  */
 export class Transition<T, P> {
-
   /**
    * Constructor
    * @param from - State from which the transition starts
@@ -106,55 +107,56 @@ export class Transition<T, P> {
    *                   False if to go throught this transition, we have to look for an edge for which the label musn't be in the predicates array
    * @param predicates
    */
-  constructor (
+  constructor(
     private _from: State<T>,
     private _to: State<T>,
     private _reverse: boolean,
     private _negation: boolean,
-    private _predicates: Array<P>) {}
+    private _predicates: Array<P>,
+  ) {}
 
   /**
    * Get the State from which the transition starts
    * @return The State from which the transition starts
    */
-  get from () {
-    return this._from
+  get from() {
+    return this._from;
   }
 
   /**
    * Get the State to which the transition arrives
    * @return The State to which the transition arrives
    */
-  get to () {
-    return this._to
+  get to() {
+    return this._to;
   }
 
   /**
    * Get the predicates
    * @return if negation == False then an array of length 1, else an array of length 1 or more
    */
-  get predicates (): Array<P> {
-    return this._predicates
+  get predicates(): Array<P> {
+    return this._predicates;
   }
 
   /**
    * Get the flag which indicates whether we have to look for an outgoing or an incoming edge in the RDF graph
    * @return The flag which indicates whether we have to look for an outgoing or an incoming edge in the RDF graph
    */
-  get reverse (): boolean {
-    return this._reverse
+  get reverse(): boolean {
+    return this._reverse;
   }
 
   /**
    * Get the flag which indicates whether the edge's label must or musn't be in the predicates array
    * @return The flag which indicates whether the edge's label must or musn't be in the predicates array
    */
-  get negation (): boolean {
-    return this._negation
+  get negation(): boolean {
+    return this._negation;
   }
 
-  hasPredicate (predicate: P) {
-    return this.predicates.indexOf(predicate) > -1
+  hasPredicate(predicate: P) {
+    return this.predicates.indexOf(predicate) > -1;
   }
 
   /**
@@ -163,33 +165,35 @@ export class Transition<T, P> {
    * @param transition - Transition tested
    * @return True if the Transitions are equal, False otherwise
    */
-  equals (transition: Transition<T, P>): boolean {
-    return this.from === transition.from
-        && this.to === transition.to
-        && this.reverse === transition.reverse
-        && this.negation === transition.negation
-        && this.predicates === transition.predicates
+  equals(transition: Transition<T, P>): boolean {
+    return (
+      this.from === transition.from &&
+      this.to === transition.to &&
+      this.reverse === transition.reverse &&
+      this.negation === transition.negation &&
+      this.predicates === transition.predicates
+    );
   }
 
-  toString (): string {
+  toString(): string {
     let result = `Transition = {\n\t
         from: ${this.from.toString()},\n\t
         to: ${this.to.toString()},\n\t
         reverse: ${this.reverse},\n\t
-        negation: ${this.negation},\n\t`
-    let self = this
+        negation: ${this.negation},\n\t`;
+    let self = this;
     this.predicates.forEach((pred, index) => {
       if (index === 0) {
-        result += ',\n\t\tpredicates: [\n'
+        result += ",\n\t\tpredicates: [\n";
       }
       if (index < self.predicates.length - 1) {
-        result += `\t\t\t${pred},\n`
+        result += `\t\t\t${pred},\n`;
       } else {
-        result += `\t\t\t${pred}\n\t\t]`
+        result += `\t\t\t${pred}\n\t\t]`;
       }
-    })
-    result += '\n\t}'
-    return result
+    });
+    result += "\n\t}";
+    return result;
   }
 }
 
@@ -199,15 +203,15 @@ export class Transition<T, P> {
  * then we have found a Path in the Graph that matches the Property Path.
  */
 export class Automaton<T, P> {
-  private states: Array<State<T>>
-  private transitions: Array<Transition<T, P>>
+  private states: Array<State<T>>;
+  private transitions: Array<Transition<T, P>>;
 
   /**
    * Constructor
    */
-  constructor () {
-    this.states = new Array<State<T>>()
-    this.transitions = new Array<Transition<T, P>>()
+  constructor() {
+    this.states = new Array<State<T>>();
+    this.transitions = new Array<Transition<T, P>>();
   }
 
   /**
@@ -215,29 +219,29 @@ export class Automaton<T, P> {
    * @param name - Name of the State we're looking for
    * @return A State if there is a State with the given name, null otherwise
    */
-  findState (name: T): State<T> | null {
+  findState(name: T): State<T> | null {
     for (let i = 0; i < this.states.length; i++) {
       if (this.states[i].hasName(name)) {
-        return this.states[i]
+        return this.states[i];
       }
     }
-    return null
+    return null;
   }
 
   /**
    * Add a State to the Automaton
    * @param state - State to be added
    */
-  addState (state: State<T>) {
-    this.states.push(state)
+  addState(state: State<T>) {
+    this.states.push(state);
   }
 
   /**
    * Add a Transition to the Automaton
    * @param transition - Transition to be added
    */
-  addTransition (transition: Transition<T, P>) {
-    this.transitions.push(transition)
+  addTransition(transition: Transition<T, P>) {
+    this.transitions.push(transition);
   }
 
   /**
@@ -245,10 +249,10 @@ export class Automaton<T, P> {
    * @param from - State from which the Transitions we are looking for must start
    * @return Transitions which start from the given State
    */
-  getTransitionsFrom (from: T): Array<Transition<T, P>> {
+  getTransitionsFrom(from: T): Array<Transition<T, P>> {
     return this.transitions.filter((transition: Transition<T, P>) => {
-      return transition.from.hasName(from)
-    })
+      return transition.from.hasName(from);
+    });
   }
 
   /**
@@ -256,25 +260,25 @@ export class Automaton<T, P> {
    * @param to - State to which the Transitions we are looking for must arrive
    * @return Transitions which arrives to the given State
    */
-  getTransitionsTo (to: T): Array<Transition<T, P>> {
+  getTransitionsTo(to: T): Array<Transition<T, P>> {
     return this.transitions.filter((transition: Transition<T, P>) => {
-      return transition.to.hasName(to)
-    })
+      return transition.to.hasName(to);
+    });
   }
 
   /**
    * Return the Transitions which arrives to a final State
    * @return Transitions which arrives to a final State
    */
-  getTransitionsToFinalStates (): Array<Transition<T, P>> {
-    let transitions: Array<Transition<T, P>> = []
+  getTransitionsToFinalStates(): Array<Transition<T, P>> {
+    let transitions: Array<Transition<T, P>> = [];
     let finalStates = this.states.filter((state: State<T>) => {
-      return state.isFinal
-    })
+      return state.isFinal;
+    });
     finalStates.forEach((state: State<T>) => {
-      transitions.push(...this.getTransitionsTo(state.name))
-    })
-    return transitions
+      transitions.push(...this.getTransitionsTo(state.name));
+    });
+    return transitions;
   }
 
   /**
@@ -282,12 +286,12 @@ export class Automaton<T, P> {
    * @param stateName - Name of the tested State
    * @return True if the State is an initial State, False otherwise
    */
-  isInitial (stateName: T): boolean {
-    let state: State<T> | null = this.findState(stateName)
+  isInitial(stateName: T): boolean {
+    let state: State<T> | null = this.findState(stateName);
     if (state !== null) {
-      return state.isInitial
+      return state.isInitial;
     }
-    return false
+    return false;
   }
 
   /**
@@ -295,25 +299,25 @@ export class Automaton<T, P> {
    * @param stateName - Name of the tested State
    * @return True if the State is a final State, False otherwise
    */
-  isFinal (stateName: T): boolean {
-    let state: State<T> | null = this.findState(stateName)
+  isFinal(stateName: T): boolean {
+    let state: State<T> | null = this.findState(stateName);
     if (state !== null) {
-      return state.isFinal
+      return state.isFinal;
     }
-    return false
+    return false;
   }
 
-  toString (): string {
-    let result: string = '\n============ Automate ============\n'
-    result += '\nETATS:\n\n'
-    this.states.forEach(state => {
-      result += `${state.toString()}\n`
-    })
-    result += '\nTRANSITIONS:\n\n'
-    this.transitions.forEach(transition => {
-      result += `${transition.toString()}\n`
-    })
-    result += '\n============ Automate ============\n'
-    return result
+  toString(): string {
+    let result: string = "\n============ Automate ============\n";
+    result += "\nETATS:\n\n";
+    this.states.forEach((state) => {
+      result += `${state.toString()}\n`;
+    });
+    result += "\nTRANSITIONS:\n\n";
+    this.transitions.forEach((transition) => {
+      result += `${transition.toString()}\n`;
+    });
+    result += "\n============ Automate ============\n";
+    return result;
   }
 }

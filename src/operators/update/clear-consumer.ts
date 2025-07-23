@@ -22,27 +22,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { Consumable } from './consumer'
-import Graph from '../../rdf/graph'
+import { Consumable } from "./consumer";
+import Graph from "../../rdf/graph";
 
 /**
  * Clear all RDF triples in a RDF Graph
  * @author Thomas Minier
  */
 export default class ClearConsumer implements Consumable {
-  private readonly _graph: Graph
+  private readonly _graph: Graph;
 
   /**
    * Consuctor
    * @param graph - Input RDF Graph
    */
-  constructor (graph: Graph) {
-    this._graph = graph
+  constructor(graph: Graph) {
+    this._graph = graph;
   }
 
-  execute (): Promise<void> {
-    return this._graph.clear()
+  execute(): Promise<void> {
+    return this._graph.clear();
   }
 }

@@ -22,13 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { PlanBuilder } from '../plan-builder'
-import { PipelineStage } from '../pipeline/pipeline-engine'
-import { Consumable } from '../../operators/update/consumer'
-import Dataset from '../../rdf/dataset'
-import { Bindings } from '../../rdf/bindings'
+import { PlanBuilder } from "../plan-builder";
+import { PipelineStage } from "../pipeline/pipeline-engine";
+import { Consumable } from "../../operators/update/consumer";
+import Dataset from "../../rdf/dataset";
+import { Bindings } from "../../rdf/bindings";
 
 /**
  * A StageBuilder encapsulate a strategy for executing a class of SPARQL operations
@@ -36,25 +36,25 @@ import { Bindings } from '../../rdf/bindings'
  * @author Thomas Minier
  */
 export default abstract class StageBuilder {
-  protected _builder: PlanBuilder | null = null
+  protected _builder: PlanBuilder | null = null;
 
-  constructor (protected _dataset: Dataset) {}
+  constructor(protected _dataset: Dataset) {}
 
-  get builder (): PlanBuilder | null {
-    return this._builder
+  get builder(): PlanBuilder | null {
+    return this._builder;
   }
 
-  set builder (builder: PlanBuilder | null) {
-    this._builder = builder
+  set builder(builder: PlanBuilder | null) {
+    this._builder = builder;
   }
 
-  get dataset (): Dataset {
-    return this._dataset
+  get dataset(): Dataset {
+    return this._dataset;
   }
 
-  set dataset (dataset: Dataset) {
-    this._dataset = dataset
+  set dataset(dataset: Dataset) {
+    this._dataset = dataset;
   }
 
-  abstract execute (...args: any[]): PipelineStage<Bindings> | Consumable
+  abstract execute(...args: any[]): PipelineStage<Bindings> | Consumable;
 }

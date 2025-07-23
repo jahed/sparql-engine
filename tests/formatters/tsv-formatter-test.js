@@ -22,20 +22,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
-const { tsvFormatter } = require('../../dist/formatters/csv-tsv-formatter')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
+const { tsvFormatter } = require("../../dist/formatters/csv-tsv-formatter");
 
-describe('W3C TSV formatter', () => {
-  let engine = null
+describe("W3C TSV formatter", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(g)
-  })
+    const g = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(g);
+  });
 
-  it('should evaluate SELECT queries', done => {
+  it("should evaluate SELECT queries", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -44,25 +44,29 @@ describe('W3C TSV formatter', () => {
       ?s rdf:type dblp-rdf:Person .
       ?s dblp-rdf:primaryFullPersonName ?name .
       ?s dblp-rdf:authorOf ?article .
-    }`
-    let results = ''
+    }`;
+    let results = "";
     const expected = `name\tarticle
 "Thomas Minier"@en\thttps://dblp.org/rec/conf/esws/MinierMSM17a
 "Thomas Minier"@en\thttps://dblp.org/rec/conf/esws/MinierMSM17
 "Thomas Minier"@en\thttps://dblp.org/rec/journals/corr/abs-1806-00227
 "Thomas Minier"@en\thttps://dblp.org/rec/conf/esws/MinierSMV18
 "Thomas Minier"@en\thttps://dblp.org/rec/conf/esws/MinierSMV18a
-`
-    const iterator = engine.execute(query).pipe(tsvFormatter)
-    iterator.subscribe(b => {
-      results += b
-    }, done, () => {
-      expect(results).to.equals(expected)
-      done()
-    })
-  })
+`;
+    const iterator = engine.execute(query).pipe(tsvFormatter);
+    iterator.subscribe(
+      (b) => {
+        results += b;
+      },
+      done,
+      () => {
+        expect(results).to.equals(expected);
+        done();
+      },
+    );
+  });
 
-  it('should evaluate ASK queries', done => {
+  it("should evaluate ASK queries", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -71,17 +75,21 @@ describe('W3C TSV formatter', () => {
       ?s rdf:type dblp-rdf:Person .
       ?s dblp-rdf:primaryFullPersonName ?name .
       ?s dblp-rdf:authorOf ?article .
-    }`
-    let results = ''
-    const iterator = engine.execute(query).pipe(tsvFormatter)
+    }`;
+    let results = "";
+    const iterator = engine.execute(query).pipe(tsvFormatter);
     const expected = `boolean
 true
-`
-    iterator.subscribe(b => {
-      results += b
-    }, done, () => {
-      expect(results).to.equals(expected)
-      done()
-    })
-  })
-})
+`;
+    iterator.subscribe(
+      (b) => {
+        results += b;
+      },
+      done,
+      () => {
+        expect(results).to.equals(expected);
+        done();
+      },
+    );
+  });
+});

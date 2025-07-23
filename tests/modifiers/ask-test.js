@@ -22,19 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-describe('SPARQL ASK queries', () => {
-  let engine = null
+describe("SPARQL ASK queries", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(g)
-  })
+    const g = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(g);
+  });
 
-  it('should evaluate ASK queries that evaluates to true', done => {
+  it("should evaluate ASK queries that evaluates to true", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -43,19 +43,23 @@ describe('SPARQL ASK queries', () => {
       ?s rdf:type dblp-rdf:Person .
       ?s dblp-rdf:primaryFullPersonName ?name .
       ?s dblp-rdf:authorOf ?article .
-    }`
-    const results = []
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      expect(b).to.equal(true)
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(1)
-      done()
-    })
-  })
+    }`;
+    const results = [];
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        expect(b).to.equal(true);
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(1);
+        done();
+      },
+    );
+  });
 
-  it('should evaluate ASK queries that evaluates to false', done => {
+  it("should evaluate ASK queries that evaluates to false", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -64,15 +68,19 @@ describe('SPARQL ASK queries', () => {
       ?s rdf:type rdf:People .
       ?s dblp-rdf:primaryFullPersonName ?name .
       ?s dblp-rdf:authorOf ?article .
-    }`
-    const results = []
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      expect(b).to.equal(false)
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(1)
-      done()
-    })
-  })
-})
+    }`;
+    const results = [];
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        expect(b).to.equal(false);
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(1);
+        done();
+      },
+    );
+  });
+});

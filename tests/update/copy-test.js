@@ -22,63 +22,72 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-const GRAPH_A_IRI = 'http://example.org#some-graph-a'
-const GRAPH_B_IRI = 'http://example.org#some-graph-b'
+const GRAPH_A_IRI = "http://example.org#some-graph-a";
+const GRAPH_B_IRI = "http://example.org#some-graph-b";
 
-describe('SPARQL UPDATE: COPY queries', () => {
-  let engine = null
+describe("SPARQL UPDATE: COPY queries", () => {
+  let engine = null;
   beforeEach(() => {
-    const gA = getGraph('./tests/data/dblp.nt')
-    const gB = getGraph('./tests/data/dblp2.nt')
-    engine = new TestEngine(gA, GRAPH_A_IRI)
-    engine.addNamedGraph(GRAPH_B_IRI, gB)
-  })
+    const gA = getGraph("./tests/data/dblp.nt");
+    const gB = getGraph("./tests/data/dblp2.nt");
+    engine = new TestEngine(gA, GRAPH_A_IRI);
+    engine.addNamedGraph(GRAPH_B_IRI, gB);
+  });
 
   const data = [
     {
-      name: 'COPY DEFAULT to NAMED',
+      name: "COPY DEFAULT to NAMED",
       query: `COPY DEFAULT TO <${GRAPH_B_IRI}>`,
       testFun: () => {
         // destination graph should only contains data from the source
-        let triples = engine.getNamedGraph(GRAPH_B_IRI)._store.getTriples('https://dblp.org/pers/m/Minier:Thomas')
-        expect(triples.length).to.equal(11)
-        triples = engine.getNamedGraph(GRAPH_B_IRI)._store.getTriples('https://dblp.org/pers/g/Grall:Arnaud')
-        expect(triples.length).to.equal(0)
+        let triples = engine
+          .getNamedGraph(GRAPH_B_IRI)
+          ._store.getTriples("https://dblp.org/pers/m/Minier:Thomas");
+        expect(triples.length).to.equal(11);
+        triples = engine
+          .getNamedGraph(GRAPH_B_IRI)
+          ._store.getTriples("https://dblp.org/pers/g/Grall:Arnaud");
+        expect(triples.length).to.equal(0);
         // source graph should not be empty
-        triples = engine._graph._store.getTriples()
-        expect(triples.length).to.not.equal(0)
-      }
+        triples = engine._graph._store.getTriples();
+        expect(triples.length).to.not.equal(0);
+      },
     },
     {
-      name: 'COPY NAMED to DEFAULT',
+      name: "COPY NAMED to DEFAULT",
       query: `COPY <${GRAPH_B_IRI}> TO DEFAULT`,
       testFun: () => {
         // destination graph should only contains data from the source
-        let triples = engine._graph._store.getTriples('https://dblp.org/pers/g/Grall:Arnaud')
-        expect(triples.length).to.equal(10)
-        triples = engine._graph._store.getTriples('https://dblp.org/pers/m/Minier:Thomas')
-        expect(triples.length).to.equal(0)
+        let triples = engine._graph._store.getTriples(
+          "https://dblp.org/pers/g/Grall:Arnaud",
+        );
+        expect(triples.length).to.equal(10);
+        triples = engine._graph._store.getTriples(
+          "https://dblp.org/pers/m/Minier:Thomas",
+        );
+        expect(triples.length).to.equal(0);
         // source graph should not be empty
-        triples = engine.getNamedGraph(GRAPH_B_IRI)._store.getTriples()
-        expect(triples.length).to.not.equal(0)
-      }
-    }
-  ]
+        triples = engine.getNamedGraph(GRAPH_B_IRI)._store.getTriples();
+        expect(triples.length).to.not.equal(0);
+      },
+    },
+  ];
 
-  data.forEach(d => {
-    it(`should evaluate "${d.name}" queries`, done => {
-      engine.execute(d.query)
+  data.forEach((d) => {
+    it(`should evaluate "${d.name}" queries`, (done) => {
+      engine
+        .execute(d.query)
         .execute()
         .then(() => {
-          d.testFun()
-          done()
+          d.testFun();
+          done();
         })
-        .catch(done)
-    })
-  })
-})
+        .catch(done);
+    });
+  });
+});

@@ -22,104 +22,122 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const UnionGraph = require('../../dist/rdf/union-graph.js').default
-const { getGraph } = require('../utils.js')
+const expect = require("chai").expect;
+const UnionGraph = require("../../dist/rdf/union-graph.js").default;
+const { getGraph } = require("../utils.js");
 
-const GRAPH_A_IRI = 'http://example.org#some-graph-a'
-const GRAPH_B_IRI = 'http://example.org#some-graph-b'
+const GRAPH_A_IRI = "http://example.org#some-graph-a";
+const GRAPH_B_IRI = "http://example.org#some-graph-b";
 
-describe('Union Graph', () => {
-  let gA = null
-  let gB = null
+describe("Union Graph", () => {
+  let gA = null;
+  let gB = null;
   beforeEach(() => {
-    gA = getGraph('./tests/data/dblp.nt')
-    gA.iri = GRAPH_A_IRI
-    gB = getGraph('./tests/data/dblp.nt')
-    gB.iri = GRAPH_B_IRI
-  })
+    gA = getGraph("./tests/data/dblp.nt");
+    gA.iri = GRAPH_A_IRI;
+    gB = getGraph("./tests/data/dblp.nt");
+    gB.iri = GRAPH_B_IRI;
+  });
 
-  describe('#insert', done => {
-    it('should evaluates insertion of the left-most graphs of the Union', done => {
-      const union = new UnionGraph([gA, gB])
+  describe("#insert", (done) => {
+    it("should evaluates insertion of the left-most graphs of the Union", (done) => {
+      const union = new UnionGraph([gA, gB]);
       const triple = {
-        subject: 'http://example.org#toto',
-        predicate: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
-        object: 'http://example.org#Person'
-      }
-      union.insert(triple)
-        .then(() => {
-          // check triples have been inserted in gA and not gB
-          let triples = gA._store.getTriples(triple.subject, triple.predicate, triple.object)
-          expect(triples.length).to.equal(1)
-          expect(triples[0].subject).to.equal(triple.subject)
-          expect(triples[0].predicate).to.equal(triple.predicate)
-          expect(triples[0].object).to.equal(triple.object)
-          triples = gB._store.getTriples(triple.subject, triple.predicate, triple.object)
-          expect(triples.length).to.equal(0)
-          done()
-        })
-    })
-  })
+        subject: "http://example.org#toto",
+        predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        object: "http://example.org#Person",
+      };
+      union.insert(triple).then(() => {
+        // check triples have been inserted in gA and not gB
+        let triples = gA._store.getTriples(
+          triple.subject,
+          triple.predicate,
+          triple.object,
+        );
+        expect(triples.length).to.equal(1);
+        expect(triples[0].subject).to.equal(triple.subject);
+        expect(triples[0].predicate).to.equal(triple.predicate);
+        expect(triples[0].object).to.equal(triple.object);
+        triples = gB._store.getTriples(
+          triple.subject,
+          triple.predicate,
+          triple.object,
+        );
+        expect(triples.length).to.equal(0);
+        done();
+      });
+    });
+  });
 
-  describe('#delete', done => {
-    it('should evaluates deletions on all graphs in the Union', done => {
-      const union = new UnionGraph([gA, gB])
+  describe("#delete", (done) => {
+    it("should evaluates deletions on all graphs in the Union", (done) => {
+      const union = new UnionGraph([gA, gB]);
       const triple = {
-        subject: 'https://dblp.org/pers/m/Minier:Thomas',
-        predicate: 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf',
-        object: 'https://dblp.org/rec/conf/esws/MinierSMV18a'
-      }
-      union.delete(triple)
-        .then(() => {
-          // check triples have been inserted in gA and not gB
-          let triples = gA._store.getTriples(triple.subject, triple.predicate, triple.object)
-          expect(triples.length).to.equal(0)
-          triples = gB._store.getTriples(triple.subject, triple.predicate, triple.object)
-          expect(triples.length).to.equal(0)
-          done()
-        })
-    })
-  })
+        subject: "https://dblp.org/pers/m/Minier:Thomas",
+        predicate: "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf",
+        object: "https://dblp.org/rec/conf/esws/MinierSMV18a",
+      };
+      union.delete(triple).then(() => {
+        // check triples have been inserted in gA and not gB
+        let triples = gA._store.getTriples(
+          triple.subject,
+          triple.predicate,
+          triple.object,
+        );
+        expect(triples.length).to.equal(0);
+        triples = gB._store.getTriples(
+          triple.subject,
+          triple.predicate,
+          triple.object,
+        );
+        expect(triples.length).to.equal(0);
+        done();
+      });
+    });
+  });
 
-  describe('#find', done => {
-    it('should searches for RDF triples in all graphs', done => {
-      const union = new UnionGraph([gA, gB])
+  describe("#find", (done) => {
+    it("should searches for RDF triples in all graphs", (done) => {
+      const union = new UnionGraph([gA, gB]);
       const triple = {
-        subject: 'https://dblp.org/pers/m/Minier:Thomas',
-        predicate: 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf',
-        object: '?article'
-      }
-      let nbResults = 0
+        subject: "https://dblp.org/pers/m/Minier:Thomas",
+        predicate: "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf",
+        object: "?article",
+      };
+      let nbResults = 0;
       let expectedArticles = [
-        'https://dblp.org/rec/conf/esws/MinierSMV18a',
-        'https://dblp.org/rec/conf/esws/MinierSMV18a',
-        'https://dblp.org/rec/conf/esws/MinierSMV18',
-        'https://dblp.org/rec/conf/esws/MinierSMV18',
-        'https://dblp.org/rec/journals/corr/abs-1806-00227',
-        'https://dblp.org/rec/journals/corr/abs-1806-00227',
-        'https://dblp.org/rec/conf/esws/MinierMSM17',
-        'https://dblp.org/rec/conf/esws/MinierMSM17',
-        'https://dblp.org/rec/conf/esws/MinierMSM17a',
-        'https://dblp.org/rec/conf/esws/MinierMSM17a'
-      ]
-      const iterator = union.find(triple)
+        "https://dblp.org/rec/conf/esws/MinierSMV18a",
+        "https://dblp.org/rec/conf/esws/MinierSMV18a",
+        "https://dblp.org/rec/conf/esws/MinierSMV18",
+        "https://dblp.org/rec/conf/esws/MinierSMV18",
+        "https://dblp.org/rec/journals/corr/abs-1806-00227",
+        "https://dblp.org/rec/journals/corr/abs-1806-00227",
+        "https://dblp.org/rec/conf/esws/MinierMSM17",
+        "https://dblp.org/rec/conf/esws/MinierMSM17",
+        "https://dblp.org/rec/conf/esws/MinierMSM17a",
+        "https://dblp.org/rec/conf/esws/MinierMSM17a",
+      ];
+      const iterator = union.find(triple);
 
-      iterator.subscribe(b => {
-        expect(b).to.have.all.keys(['subject', 'predicate', 'object'])
-        expect(b.subject).to.equal(triple.subject)
-        expect(b.predicate).to.equal(triple.predicate)
-        expect(b.object).to.be.oneOf(expectedArticles)
-        const index = expectedArticles.findIndex(v => v === b.object)
-        expectedArticles.splice(index, 1)
-        nbResults++
-      }, done, () => {
-        expect(nbResults).to.equal(10)
-        expect(expectedArticles.length).to.equal(0)
-        done()
-      })
-    })
-  })
-})
+      iterator.subscribe(
+        (b) => {
+          expect(b).to.have.all.keys(["subject", "predicate", "object"]);
+          expect(b.subject).to.equal(triple.subject);
+          expect(b.predicate).to.equal(triple.predicate);
+          expect(b.object).to.be.oneOf(expectedArticles);
+          const index = expectedArticles.findIndex((v) => v === b.object);
+          expectedArticles.splice(index, 1);
+          nbResults++;
+        },
+        done,
+        () => {
+          expect(nbResults).to.equal(10);
+          expect(expectedArticles.length).to.equal(0);
+          done();
+        },
+      );
+    });
+  });
+});

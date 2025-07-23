@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import Graph from './graph'
-import Dataset from './dataset'
+import Graph from "./graph";
+import Dataset from "./dataset";
 
 /**
  * A simple Dataset backed by a HashMap.
@@ -33,55 +33,55 @@ import Dataset from './dataset'
  * @author Thomas Minier
  */
 export default class HashMapDataset extends Dataset {
-  private _defaultGraph: Graph
-  private readonly _namedGraphs: Map<string, Graph>
+  private _defaultGraph: Graph;
+  private readonly _namedGraphs: Map<string, Graph>;
   /**
    * Constructor
    * @param defaultGraphIRI - IRI of the Default Graph
    * @param defaultGraph     - Default Graph
    */
-  constructor (defaultGraphIRI: string, defaultGraph: Graph) {
-    super()
-    defaultGraph.iri = defaultGraphIRI
-    this._defaultGraph = defaultGraph
-    this._namedGraphs = new Map()
+  constructor(defaultGraphIRI: string, defaultGraph: Graph) {
+    super();
+    defaultGraph.iri = defaultGraphIRI;
+    this._defaultGraph = defaultGraph;
+    this._namedGraphs = new Map();
   }
 
-  get iris (): string[] {
-    return Array.from(this._namedGraphs.keys())
+  get iris(): string[] {
+    return Array.from(this._namedGraphs.keys());
   }
 
-  setDefaultGraph (g: Graph): void {
-    this._defaultGraph = g
+  setDefaultGraph(g: Graph): void {
+    this._defaultGraph = g;
   }
 
-  getDefaultGraph (): Graph {
-    return this._defaultGraph
+  getDefaultGraph(): Graph {
+    return this._defaultGraph;
   }
 
-  addNamedGraph (iri: string, g: Graph): void {
-    g.iri = iri
-    this._namedGraphs.set(iri, g)
+  addNamedGraph(iri: string, g: Graph): void {
+    g.iri = iri;
+    this._namedGraphs.set(iri, g);
   }
 
-  getNamedGraph (iri: string): Graph {
+  getNamedGraph(iri: string): Graph {
     if (iri === this._defaultGraph.iri) {
-      return this.getDefaultGraph()
+      return this.getDefaultGraph();
     } else if (!this._namedGraphs.has(iri)) {
-      throw new Error(`Unknown graph with iri ${iri}`)
+      throw new Error(`Unknown graph with iri ${iri}`);
     }
-    return this._namedGraphs.get(iri)!
+    return this._namedGraphs.get(iri)!;
   }
 
-  hasNamedGraph (iri: string): boolean {
-    return this._namedGraphs.has(iri)
+  hasNamedGraph(iri: string): boolean {
+    return this._namedGraphs.has(iri);
   }
 
-  deleteNamedGraph (iri: string): void {
+  deleteNamedGraph(iri: string): void {
     if (this._namedGraphs.has(iri)) {
-      this._namedGraphs.delete(iri)
+      this._namedGraphs.delete(iri);
     } else {
-      throw new Error(`Cannot delete unknown graph with iri ${iri}`)
+      throw new Error(`Cannot delete unknown graph with iri ${iri}`);
     }
   }
 }

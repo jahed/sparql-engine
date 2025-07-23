@@ -22,24 +22,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import Dataset from '../../rdf/dataset'
-import { rdf } from '../../utils'
-import { Algebra } from 'sparqljs'
-import { partition } from 'lodash'
+import Dataset from "../../rdf/dataset";
+import { rdf } from "../../utils";
+import { Algebra } from "sparqljs";
+import { partition } from "lodash";
 
 /**
  * Create a triple pattern that matches all RDF triples in a graph
  * @private
  * @return A triple pattern that matches all RDF triples in a graph
  */
-function allPattern (): Algebra.TripleObject {
+function allPattern(): Algebra.TripleObject {
   return {
-    subject: '?s',
-    predicate: '?p',
-    object: '?o'
-  }
+    subject: "?s",
+    predicate: "?p",
+    object: "?o",
+  };
 }
 
 /**
@@ -47,11 +47,11 @@ function allPattern (): Algebra.TripleObject {
  * @private
  * @return A BGP that matches all RDF triples in a graph
  */
-function allBGP (): Algebra.BGPNode {
+function allBGP(): Algebra.BGPNode {
   return {
-    type: 'bgp',
-    triples: [allPattern()]
-  }
+    type: "bgp",
+    triples: [allPattern()],
+  };
 }
 
 /**
@@ -63,19 +63,23 @@ function allBGP (): Algebra.BGPNode {
  * @param  [isWhere=false] - True if the GROUP should belong to a WHERE clause
  * @return The SPARQL GROUP clasue
  */
-function buildGroupClause (source: Algebra.UpdateGraphTarget, dataset: Dataset, isSilent: boolean): Algebra.BGPNode | Algebra.UpdateGraphNode {
+function buildGroupClause(
+  source: Algebra.UpdateGraphTarget,
+  dataset: Dataset,
+  isSilent: boolean,
+): Algebra.BGPNode | Algebra.UpdateGraphNode {
   if (source.default) {
-    return allBGP()
+    return allBGP();
   } else {
     // a SILENT modifier prevents errors when using an unknown graph
-    if (!(dataset.hasNamedGraph(source.name!)) && !isSilent) {
-      throw new Error(`Unknown Source Graph in ADD query ${source.name}`)
+    if (!dataset.hasNamedGraph(source.name!) && !isSilent) {
+      throw new Error(`Unknown Source Graph in ADD query ${source.name}`);
     }
     return {
-      type: 'graph',
+      type: "graph",
       name: source.name!,
-      triples: [allPattern()]
-    }
+      triples: [allPattern()],
+    };
   }
 }
 
@@ -88,23 +92,27 @@ function buildGroupClause (source: Algebra.UpdateGraphTarget, dataset: Dataset, 
  * @param  [isWhere=false] - True if the GROUP should belong to a WHERE clause
  * @return The SPARQL GROUP clasue
  */
-function buildWhereClause (source: Algebra.UpdateGraphTarget, dataset: Dataset, isSilent: boolean): Algebra.BGPNode | Algebra.GraphNode {
+function buildWhereClause(
+  source: Algebra.UpdateGraphTarget,
+  dataset: Dataset,
+  isSilent: boolean,
+): Algebra.BGPNode | Algebra.GraphNode {
   if (source.default) {
-    return allBGP()
+    return allBGP();
   } else {
     // a SILENT modifier prevents errors when using an unknown graph
-    if (!(dataset.hasNamedGraph(source.name!)) && !isSilent) {
-      throw new Error(`Unknown Source Graph in ADD query ${source.name}`)
+    if (!dataset.hasNamedGraph(source.name!) && !isSilent) {
+      throw new Error(`Unknown Source Graph in ADD query ${source.name}`);
     }
     const bgp: Algebra.BGPNode = {
-      type: 'bgp',
-      triples: [allPattern()]
-    }
+      type: "bgp",
+      triples: [allPattern()],
+    };
     return {
-      type: 'graph',
+      type: "graph",
       name: source.name!,
-      patterns: [bgp]
-    }
+      patterns: [bgp],
+    };
   }
 }
 
@@ -115,13 +123,16 @@ function buildWhereClause (source: Algebra.UpdateGraphTarget, dataset: Dataset, 
  * @param  dataset - related RDF dataset
  * @return Rewritten ADD query
  */
-export function rewriteAdd (addQuery: Algebra.UpdateCopyMoveNode, dataset: Dataset): Algebra.UpdateQueryNode {
+export function rewriteAdd(
+  addQuery: Algebra.UpdateCopyMoveNode,
+  dataset: Dataset,
+): Algebra.UpdateQueryNode {
   return {
-    updateType: 'insertdelete',
+    updateType: "insertdelete",
     silent: addQuery.silent,
     insert: [buildGroupClause(addQuery.destination, dataset, addQuery.silent)],
-    where: [buildWhereClause(addQuery.source, dataset, addQuery.silent)]
-  }
+    where: [buildWhereClause(addQuery.source, dataset, addQuery.silent)],
+  };
 }
 
 /**
@@ -131,22 +142,25 @@ export function rewriteAdd (addQuery: Algebra.UpdateCopyMoveNode, dataset: Datas
  * @param dataset - related RDF dataset
  * @return Rewritten COPY query, i.e., a sequence [CLEAR query, INSERT query]
  */
-export function rewriteCopy (copyQuery: Algebra.UpdateCopyMoveNode, dataset: Dataset): [Algebra.UpdateClearNode, Algebra.UpdateQueryNode] {
+export function rewriteCopy(
+  copyQuery: Algebra.UpdateCopyMoveNode,
+  dataset: Dataset,
+): [Algebra.UpdateClearNode, Algebra.UpdateQueryNode] {
   // first, build a CLEAR query to empty the destination
   const clear: Algebra.UpdateClearNode = {
-    type: 'clear',
+    type: "clear",
     silent: copyQuery.silent,
-    graph: { type: 'graph' }
-  }
+    graph: { type: "graph" },
+  };
   if (copyQuery.destination.default) {
-    clear.graph.default = true
+    clear.graph.default = true;
   } else {
-    clear.graph.type = copyQuery.destination.type
-    clear.graph.name = copyQuery.destination.name
+    clear.graph.type = copyQuery.destination.type;
+    clear.graph.name = copyQuery.destination.name;
   }
   // then, build an INSERT query to copy the data
-  const update = rewriteAdd(copyQuery, dataset)
-  return [clear, update]
+  const update = rewriteAdd(copyQuery, dataset);
+  return [clear, update];
 }
 
 /**
@@ -156,22 +170,25 @@ export function rewriteCopy (copyQuery: Algebra.UpdateCopyMoveNode, dataset: Dat
  * @param dataset - related RDF dataset
  * @return Rewritten MOVE query, i.e., a sequence [CLEAR query, INSERT query, CLEAR query]
  */
-export function rewriteMove (moveQuery: Algebra.UpdateCopyMoveNode, dataset: Dataset): [Algebra.UpdateClearNode, Algebra.UpdateQueryNode, Algebra.UpdateClearNode] {
+export function rewriteMove(
+  moveQuery: Algebra.UpdateCopyMoveNode,
+  dataset: Dataset,
+): [Algebra.UpdateClearNode, Algebra.UpdateQueryNode, Algebra.UpdateClearNode] {
   // first, build a classic COPY query
-  const [ clearBefore, update ] = rewriteCopy(moveQuery, dataset)
+  const [clearBefore, update] = rewriteCopy(moveQuery, dataset);
   // then, append a CLEAR query to clear the source graph
   const clearAfter: Algebra.UpdateClearNode = {
-    type: 'clear',
+    type: "clear",
     silent: moveQuery.silent,
-    graph: { type: 'graph' }
-  }
+    graph: { type: "graph" },
+  };
   if (moveQuery.source.default) {
-    clearAfter.graph.default = true
+    clearAfter.graph.default = true;
   } else {
-    clearAfter.graph.type = moveQuery.source.type
-    clearAfter.graph.name = moveQuery.source.name
+    clearAfter.graph.type = moveQuery.source.type;
+    clearAfter.graph.name = moveQuery.source.name;
   }
-  return [clearBefore, update, clearAfter]
+  return [clearBefore, update, clearAfter];
 }
 
 /**
@@ -180,11 +197,18 @@ export function rewriteMove (moveQuery: Algebra.UpdateCopyMoveNode, dataset: Dat
  * @param  bgp - Set of RDF triples
  * @return A tuple [classic triples, triples with property paths, set of variables added during rewriting]
  */
-export function extractPropertyPaths (bgp: Algebra.BGPNode): [Algebra.TripleObject[], Algebra.PathTripleObject[], string[]] {
-  const parts = partition(bgp.triples, triple => typeof(triple.predicate) === 'string')
-  let classicTriples: Algebra.TripleObject[] = parts[0] as Algebra.TripleObject[]
-  let pathTriples: Algebra.PathTripleObject[] = parts[1] as Algebra.PathTripleObject[]
-  let variables: string[] = []
+export function extractPropertyPaths(
+  bgp: Algebra.BGPNode,
+): [Algebra.TripleObject[], Algebra.PathTripleObject[], string[]] {
+  const parts = partition(
+    bgp.triples,
+    (triple) => typeof triple.predicate === "string",
+  );
+  let classicTriples: Algebra.TripleObject[] =
+    parts[0] as Algebra.TripleObject[];
+  let pathTriples: Algebra.PathTripleObject[] =
+    parts[1] as Algebra.PathTripleObject[];
+  let variables: string[] = [];
 
   // TODO: change bgp evaluation's behavior for ask queries when subject and object are given
   /*if (pathTriples.length > 0) {
@@ -220,7 +244,7 @@ export function extractPropertyPaths (bgp: Algebra.BGPNode): [Algebra.TripleObje
     })
     pathTriples = paths
   }*/
-  return [classicTriples, pathTriples, variables]
+  return [classicTriples, pathTriples, variables];
 }
 
 /**
@@ -232,11 +256,11 @@ export namespace fts {
    */
   export interface FullTextSearchQuery {
     /** The pattern queried by the full text search */
-    pattern: Algebra.TripleObject,
+    pattern: Algebra.TripleObject;
     /** The SPARQL varibale on which the full text search is performed */
-    variable: string,
+    variable: string;
     /** The magic triples sued to configured the full text search query */
-    magicTriples: Algebra.TripleObject[]
+    magicTriples: Algebra.TripleObject[];
   }
 
   /**
@@ -244,9 +268,9 @@ export namespace fts {
    */
   export interface ExtractionResults {
     /** The set of full text search queries extracted from the BGP */
-    queries: FullTextSearchQuery[],
+    queries: FullTextSearchQuery[];
     /** Regular triple patterns, i.e., those who should be evaluated as a regular BGP */
-    classicPatterns: Algebra.TripleObject[]
+    classicPatterns: Algebra.TripleObject[];
   }
 
   /**
@@ -255,47 +279,51 @@ export namespace fts {
    * @param bgp - BGP to analyze
    * @return The extraction results
    */
-  export function extractFullTextSearchQueries (bgp: Algebra.TripleObject[]): ExtractionResults {
-    const queries: FullTextSearchQuery[] = []
-    const classicPatterns: Algebra.TripleObject[] = []
+  export function extractFullTextSearchQueries(
+    bgp: Algebra.TripleObject[],
+  ): ExtractionResults {
+    const queries: FullTextSearchQuery[] = [];
+    const classicPatterns: Algebra.TripleObject[] = [];
     // find, validate and group all magic triples per query variable
-    const patterns: Algebra.TripleObject[] = []
-    const magicGroups = new Map<string, Algebra.TripleObject[]>()
-    const prefix = rdf.SES('')
-    bgp.forEach(triple => {
+    const patterns: Algebra.TripleObject[] = [];
+    const magicGroups = new Map<string, Algebra.TripleObject[]>();
+    const prefix = rdf.SES("");
+    bgp.forEach((triple) => {
       // A magic triple is an IRI prefixed by 'https://callidon.github.io/sparql-engine/search#'
       if (rdf.isIRI(triple.predicate) && triple.predicate.startsWith(prefix)) {
         // assert that the magic triple's subject is a variable
         if (!rdf.isVariable(triple.subject)) {
-          throw new SyntaxError(`Invalid Full Text Search query: the subject of the magic triple ${triple} must a valid URI/IRI.`)
+          throw new SyntaxError(
+            `Invalid Full Text Search query: the subject of the magic triple ${triple} must a valid URI/IRI.`,
+          );
         }
         if (!magicGroups.has(triple.subject)) {
-          magicGroups.set(triple.subject, [ triple ])
+          magicGroups.set(triple.subject, [triple]);
         } else {
-          magicGroups.get(triple.subject)!.push(triple)
+          magicGroups.get(triple.subject)!.push(triple);
         }
       } else {
-        patterns.push(triple)
+        patterns.push(triple);
       }
-    })
+    });
     // find all triple pattern whose object is the subject of some magic triples
-    patterns.forEach(pattern => {
+    patterns.forEach((pattern) => {
       if (magicGroups.has(pattern.subject)) {
         queries.push({
           pattern,
           variable: pattern.subject,
-          magicTriples: magicGroups.get(pattern.subject)!
-        })
+          magicTriples: magicGroups.get(pattern.subject)!,
+        });
       } else if (magicGroups.has(pattern.object)) {
         queries.push({
           pattern,
           variable: pattern.object,
-          magicTriples: magicGroups.get(pattern.object)!
-        })
+          magicTriples: magicGroups.get(pattern.object)!,
+        });
       } else {
-        classicPatterns.push(pattern)
+        classicPatterns.push(pattern);
       }
-    })
-    return { queries, classicPatterns }
+    });
+    return { queries, classicPatterns };
   }
 }

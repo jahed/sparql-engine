@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { Algebra } from 'sparqljs'
-import { cloneDeep } from 'lodash'
+import { Algebra } from "sparqljs";
+import { cloneDeep } from "lodash";
 
 /**
  * A Visitor which performs a Depth-first traversal of a SPARQL query expression tree
@@ -40,30 +40,32 @@ export default class PlanVisitor {
    * @param  node - Root of the expression tree to traverse
    * @return The transformed expression tree
    */
-  visit (node: Algebra.PlanNode): Algebra.PlanNode {
+  visit(node: Algebra.PlanNode): Algebra.PlanNode {
     switch (node.type) {
-      case 'query':
-        const newNode = cloneDeep(node) as Algebra.RootNode
-        newNode.where = (node as Algebra.RootNode).where.map(n => this.visit(n))
-        return newNode
-      case 'bgp':
-        return this.visitBGP(node as Algebra.BGPNode)
-      case 'union':
-        return this.visitUnion(node as Algebra.GroupNode)
-      case 'optional':
-        return this.visitOptional(node as Algebra.GroupNode)
-      case 'group':
-        return this.visitGroup(node as Algebra.GroupNode)
-      case 'filter':
-        return this.visitFilter(node as Algebra.FilterNode)
-      case 'service':
-        return this.visitService(node as Algebra.ServiceNode)
-      case 'bind':
-        return this.visitBind(node as Algebra.BindNode)
-      case 'values':
-        return this.visitValues(node as Algebra.ValuesNode)
+      case "query":
+        const newNode = cloneDeep(node) as Algebra.RootNode;
+        newNode.where = (node as Algebra.RootNode).where.map((n) =>
+          this.visit(n),
+        );
+        return newNode;
+      case "bgp":
+        return this.visitBGP(node as Algebra.BGPNode);
+      case "union":
+        return this.visitUnion(node as Algebra.GroupNode);
+      case "optional":
+        return this.visitOptional(node as Algebra.GroupNode);
+      case "group":
+        return this.visitGroup(node as Algebra.GroupNode);
+      case "filter":
+        return this.visitFilter(node as Algebra.FilterNode);
+      case "service":
+        return this.visitService(node as Algebra.ServiceNode);
+      case "bind":
+        return this.visitBind(node as Algebra.BindNode);
+      case "values":
+        return this.visitValues(node as Algebra.ValuesNode);
       default:
-        return node
+        return node;
     }
   }
 
@@ -73,8 +75,8 @@ export default class PlanVisitor {
    * @param  node - Basic Graph Pattern node
    * @return The transformed Basic Graph Pattern node
    */
-  visitBGP (node: Algebra.BGPNode): Algebra.PlanNode {
-    return node
+  visitBGP(node: Algebra.BGPNode): Algebra.PlanNode {
+    return node;
   }
 
   /**
@@ -83,10 +85,10 @@ export default class PlanVisitor {
    * @param  node - SPARQL Group pattern node
    * @return The transformed SPARQL Group pattern node
    */
-  visitGroup (node: Algebra.GroupNode): Algebra.PlanNode {
-    const newNode = cloneDeep(node)
-    newNode.patterns = newNode.patterns.map(p => this.visit(p))
-    return newNode
+  visitGroup(node: Algebra.GroupNode): Algebra.PlanNode {
+    const newNode = cloneDeep(node);
+    newNode.patterns = newNode.patterns.map((p) => this.visit(p));
+    return newNode;
   }
 
   /**
@@ -95,10 +97,10 @@ export default class PlanVisitor {
    * @param  node - SPARQL OPTIONAL node
    * @return The transformed SPARQL OPTIONAL node
    */
-  visitOptional (node: Algebra.GroupNode): Algebra.PlanNode {
-    const newNode = cloneDeep(node)
-    newNode.patterns = newNode.patterns.map(p => this.visit(p))
-    return newNode
+  visitOptional(node: Algebra.GroupNode): Algebra.PlanNode {
+    const newNode = cloneDeep(node);
+    newNode.patterns = newNode.patterns.map((p) => this.visit(p));
+    return newNode;
   }
 
   /**
@@ -107,10 +109,10 @@ export default class PlanVisitor {
    * @param  node - SPARQL UNION node
    * @return The transformed SPARQL UNION node
    */
-  visitUnion (node: Algebra.GroupNode): Algebra.PlanNode {
-    const newNode = cloneDeep(node)
-    newNode.patterns = newNode.patterns.map(p => this.visit(p))
-    return newNode
+  visitUnion(node: Algebra.GroupNode): Algebra.PlanNode {
+    const newNode = cloneDeep(node);
+    newNode.patterns = newNode.patterns.map((p) => this.visit(p));
+    return newNode;
   }
 
   /**
@@ -119,8 +121,8 @@ export default class PlanVisitor {
    * @param  node - SPARQL FILTER node
    * @return The transformed SPARQL FILTER node
    */
-  visitFilter (node: Algebra.FilterNode): Algebra.PlanNode {
-    return node
+  visitFilter(node: Algebra.FilterNode): Algebra.PlanNode {
+    return node;
   }
 
   /**
@@ -129,10 +131,10 @@ export default class PlanVisitor {
    * @param  node - SPARQL GRAPH node
    * @return The transformed SPARQL GRAPH node
    */
-  visitGraph (node: Algebra.GraphNode): Algebra.PlanNode {
-    const newNode = cloneDeep(node)
-    newNode.patterns = newNode.patterns.map(p => this.visit(p))
-    return newNode
+  visitGraph(node: Algebra.GraphNode): Algebra.PlanNode {
+    const newNode = cloneDeep(node);
+    newNode.patterns = newNode.patterns.map((p) => this.visit(p));
+    return newNode;
   }
 
   /**
@@ -141,10 +143,10 @@ export default class PlanVisitor {
    * @param  node - SPARQL SERVICE node
    * @return The transformed SPARQL SERVICE node
    */
-  visitService (node: Algebra.ServiceNode): Algebra.PlanNode {
-    const newNode = cloneDeep(node)
-    newNode.patterns = newNode.patterns.map(p => this.visit(p))
-    return newNode
+  visitService(node: Algebra.ServiceNode): Algebra.PlanNode {
+    const newNode = cloneDeep(node);
+    newNode.patterns = newNode.patterns.map((p) => this.visit(p));
+    return newNode;
   }
 
   /**
@@ -153,8 +155,8 @@ export default class PlanVisitor {
    * @param  node - SPARQL BIND node
    * @return The transformed SPARQL BIND node
    */
-  visitBind (node: Algebra.BindNode): Algebra.PlanNode {
-    return node
+  visitBind(node: Algebra.BindNode): Algebra.PlanNode {
+    return node;
   }
 
   /**
@@ -163,7 +165,7 @@ export default class PlanVisitor {
    * @param  node - SPARQL VALUES node
    * @return The transformed SPARQL VALUES node
    */
-  visitValues (node: Algebra.ValuesNode): Algebra.PlanNode {
-    return node
+  visitValues(node: Algebra.ValuesNode): Algebra.PlanNode {
+    return node;
   }
 }

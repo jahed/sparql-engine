@@ -22,29 +22,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { Graph } = require('../../dist/api.js')
+const expect = require("chai").expect;
+const { Graph } = require("../../dist/api.js");
 
-describe('Graph', () => {
+describe("Graph", () => {
   it('should enforce subclasses to implement an "insert" method', () => {
-    const g = new Graph()
-    expect(() => g.insert()).to.throw(Error)
-  })
+    const g = new Graph();
+    expect(() => g.insert()).to.throw(Error);
+  });
 
   it('should enforce subclasses to implement a "delete" method', () => {
-    const g = new Graph()
-    expect(() => g.delete()).to.throw(Error)
-  })
+    const g = new Graph();
+    expect(() => g.delete()).to.throw(Error);
+  });
 
   it('should enforce subclasses to implement a "find" method', () => {
-    const g = new Graph()
-    expect(() => g.find()).to.throw(Error)
-  })
+    const g = new Graph();
+    expect(() => g.find()).to.throw(Error);
+  });
 
   it('should enforce subclasses to implement a "clear" method', () => {
-    const g = new Graph()
-    expect(() => g.clear()).to.throw(Error)
-  })
-})
+    const g = new Graph();
+    expect(() => g.clear()).to.throw(Error);
+  });
+});

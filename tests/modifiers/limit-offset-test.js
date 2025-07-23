@@ -22,21 +22,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-describe('SPARQL queries with LIMIT/OFFSET', () => {
-  let engine = null
+describe("SPARQL queries with LIMIT/OFFSET", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(g)
-  })
+    const g = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(g);
+  });
 
   const data = [
     {
-      text: 'should evaluate SPARQL queries with OFFSET',
+      text: "should evaluate SPARQL queries with OFFSET",
       query: `
       PREFIX dblp-pers: <https://dblp.org/pers/m/>
       PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -48,13 +48,13 @@ describe('SPARQL queries with LIMIT/OFFSET', () => {
       }
       OFFSET 2`,
       results: [
-        'https://dblp.org/rec/conf/esws/MinierSMV18',
-        'https://dblp.org/rec/conf/esws/MinierSMV18a',
-        'https://dblp.org/rec/journals/corr/abs-1806-00227'
-      ]
+        "https://dblp.org/rec/conf/esws/MinierSMV18",
+        "https://dblp.org/rec/conf/esws/MinierSMV18a",
+        "https://dblp.org/rec/journals/corr/abs-1806-00227",
+      ],
     },
     {
-      text: 'should evaluate SPARQL queries with LIMIT',
+      text: "should evaluate SPARQL queries with LIMIT",
       query: `
       PREFIX dblp-pers: <https://dblp.org/pers/m/>
       PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -66,12 +66,12 @@ describe('SPARQL queries with LIMIT/OFFSET', () => {
       }
       LIMIT 2`,
       results: [
-        'https://dblp.org/rec/conf/esws/MinierMSM17',
-        'https://dblp.org/rec/conf/esws/MinierMSM17a'
-      ]
+        "https://dblp.org/rec/conf/esws/MinierMSM17",
+        "https://dblp.org/rec/conf/esws/MinierMSM17a",
+      ],
     },
     {
-      text: 'should evaluate SPARQL queries with LIMIT & OFFSET',
+      text: "should evaluate SPARQL queries with LIMIT & OFFSET",
       query: `
       PREFIX dblp-pers: <https://dblp.org/pers/m/>
       PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -84,26 +84,30 @@ describe('SPARQL queries with LIMIT/OFFSET', () => {
       OFFSET 3
       LIMIT 2`,
       results: [
-        'https://dblp.org/rec/conf/esws/MinierSMV18',
-        'https://dblp.org/rec/conf/esws/MinierSMV18a'
-      ]
-    }
-  ]
+        "https://dblp.org/rec/conf/esws/MinierSMV18",
+        "https://dblp.org/rec/conf/esws/MinierSMV18a",
+      ],
+    },
+  ];
 
-  data.forEach(d => {
-    it(d.text, done => {
-      const expectedCardinality = d.results.length
-      let nbResults = 0
-      const iterator = engine.execute(d.query)
-      iterator.subscribe(b => {
-        b = b.toObject()
-        expect(b['?article']).to.be.oneOf(d.results)
-        d.results.splice(d.results.indexOf(b['?article']), 1)
-        nbResults++
-      }, done, () => {
-        expect(nbResults).to.equal(expectedCardinality)
-        done()
-      })
-    })
-  })
-})
+  data.forEach((d) => {
+    it(d.text, (done) => {
+      const expectedCardinality = d.results.length;
+      let nbResults = 0;
+      const iterator = engine.execute(d.query);
+      iterator.subscribe(
+        (b) => {
+          b = b.toObject();
+          expect(b["?article"]).to.be.oneOf(d.results);
+          d.results.splice(d.results.indexOf(b["?article"]), 1);
+          nbResults++;
+        },
+        done,
+        () => {
+          expect(nbResults).to.equal(expectedCardinality);
+          done();
+        },
+      );
+    });
+  });
+});

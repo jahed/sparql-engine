@@ -22,18 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { PipelineStage } from '../pipeline/pipeline-engine'
-import StageBuilder from './stage-builder'
-import { CustomFunctions } from '../../operators/expressions/sparql-expression'
-import bind from '../../operators/bind'
-import filter from '../../operators/sparql-filter'
-import groupBy from '../../operators/sparql-groupby'
-import { isString } from 'lodash'
-import { Algebra } from 'sparqljs'
-import { Bindings } from '../../rdf/bindings'
-import ExecutionContext from '../context/execution-context'
+import { PipelineStage } from "../pipeline/pipeline-engine";
+import StageBuilder from "./stage-builder";
+import { CustomFunctions } from "../../operators/expressions/sparql-expression";
+import bind from "../../operators/bind";
+import filter from "../../operators/sparql-filter";
+import groupBy from "../../operators/sparql-groupby";
+import { isString } from "lodash";
+import { Algebra } from "sparqljs";
+import { Bindings } from "../../rdf/bindings";
+import ExecutionContext from "../context/execution-context";
 
 /**
  * An AggregateStageBuilder handles the evaluation of Aggregations operations,
@@ -49,16 +49,31 @@ export default class AggregateStageBuilder extends StageBuilder {
    * @param options - Execution options
    * @return A {@link PipelineStage} which evaluate SPARQL aggregations
    */
-  execute (source: PipelineStage<Bindings>, query: Algebra.RootNode, context: ExecutionContext, customFunctions?: CustomFunctions): PipelineStage<Bindings> {
-    let iterator = source
+  execute(
+    source: PipelineStage<Bindings>,
+    query: Algebra.RootNode,
+    context: ExecutionContext,
+    customFunctions?: CustomFunctions,
+  ): PipelineStage<Bindings> {
+    let iterator = source;
     // group bindings using the GROUP BY clause
     // WARNING: an empty GROUP BY clause will create a single group with all bindings
-    iterator = this._executeGroupBy(source, query.group || [], context, customFunctions)
+    iterator = this._executeGroupBy(
+      source,
+      query.group || [],
+      context,
+      customFunctions,
+    );
     // next, apply the optional HAVING clause to filter groups
-    if ('having' in query) {
-      iterator = this._executeHaving(iterator, query.having || [], context, customFunctions)
+    if ("having" in query) {
+      iterator = this._executeHaving(
+        iterator,
+        query.having || [],
+        context,
+        customFunctions,
+      );
     }
-    return iterator
+    return iterator;
   }
 
   /**
@@ -68,19 +83,24 @@ export default class AggregateStageBuilder extends StageBuilder {
    * @param  options - Execution options
    * @return A {@link PipelineStage} which evaluate a GROUP BY clause
    */
-  _executeGroupBy (source: PipelineStage<Bindings>, groupby: Algebra.Aggregation[], context: ExecutionContext, customFunctions?: CustomFunctions): PipelineStage<Bindings> {
-    let iterator = source
+  _executeGroupBy(
+    source: PipelineStage<Bindings>,
+    groupby: Algebra.Aggregation[],
+    context: ExecutionContext,
+    customFunctions?: CustomFunctions,
+  ): PipelineStage<Bindings> {
+    let iterator = source;
     // extract GROUP By variables & rewrite SPARQL expressions into BIND clauses
-    const groupingVars: string[] = []
-    groupby.forEach(g => {
+    const groupingVars: string[] = [];
+    groupby.forEach((g) => {
       if (isString(g.expression)) {
-        groupingVars.push(g.expression)
+        groupingVars.push(g.expression);
       } else {
-        groupingVars.push(g.variable)
-        iterator = bind(iterator, g.variable, g.expression, customFunctions)
+        groupingVars.push(g.variable);
+        iterator = bind(iterator, g.variable, g.expression, customFunctions);
       }
-    })
-    return groupBy(iterator, groupingVars)
+    });
+    return groupBy(iterator, groupingVars);
   }
 
   /**
@@ -90,11 +110,16 @@ export default class AggregateStageBuilder extends StageBuilder {
    * @param  options - Execution options
    * @return A {@link PipelineStage} which evaluate a HAVING clause
    */
-  _executeHaving (source: PipelineStage<Bindings>, having: Algebra.Expression[], context: ExecutionContext, customFunctions?: CustomFunctions): PipelineStage<Bindings> {
+  _executeHaving(
+    source: PipelineStage<Bindings>,
+    having: Algebra.Expression[],
+    context: ExecutionContext,
+    customFunctions?: CustomFunctions,
+  ): PipelineStage<Bindings> {
     // thanks to the flexibility of SPARQL expressions,
     // we can rewrite a HAVING clause in a set of FILTER clauses!
     return having.reduce((iter, expression) => {
-      return filter(iter, expression, customFunctions)
-    }, source)
+      return filter(iter, expression, customFunctions);
+    }, source);
   }
 }

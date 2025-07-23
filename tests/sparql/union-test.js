@@ -22,19 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-describe('SPARQL UNION', () => {
-  let engine = null
+describe("SPARQL UNION", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(g)
-  })
+    const g = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(g);
+  });
 
-  it('should evaluate UNION queries', done => {
+  it("should evaluate UNION queries", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -47,16 +47,20 @@ describe('SPARQL UNION', () => {
         ?s rdf:type dblp-rdf:Person .
         ?s dblp-rdf:primaryFullPersonName ?name .
       }
-    }`
-    const results = []
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.keys('?name')
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(2)
-      done()
-    })
-  })
-})
+    }`;
+    const results = [];
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?name");
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(2);
+        done();
+      },
+    );
+  });
+});

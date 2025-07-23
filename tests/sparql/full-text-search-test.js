@@ -22,21 +22,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-describe('Full Text Search SPARQL queries', () => {
-  let engine = null
+describe("Full Text Search SPARQL queries", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph(['./tests/data/dblp.nt', './tests/data/dblp2.nt'])
-    engine = new TestEngine(g)
-  })
+    const g = getGraph(["./tests/data/dblp.nt", "./tests/data/dblp2.nt"]);
+    engine = new TestEngine(g);
+  });
 
   const data = [
     {
-      description: 'a simple full text search query',
+      description: "a simple full text search query",
       query: `
       PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -48,13 +48,13 @@ describe('Full Text Search SPARQL queries', () => {
       }`,
       results: [
         {
-          '?s': 'https://dblp.org/pers/m/Minier:Thomas',
-          '?name': '"Thomas Minier"@en'
-        }
-      ]
+          "?s": "https://dblp.org/pers/m/Minier:Thomas",
+          "?name": '"Thomas Minier"@en',
+        },
+      ],
     },
     {
-      description: 'a query with the ses:matchAllTerms parameter',
+      description: "a query with the ses:matchAllTerms parameter",
       query: `
       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       PREFIX ses: <https://callidon.github.io/sparql-engine/search#>
@@ -65,12 +65,12 @@ describe('Full Text Search SPARQL queries', () => {
       }`,
       results: [
         {
-          '?s': 'https://dblp.org/pers/m/Minier:Thomas.nt'
-        }
-      ]
+          "?s": "https://dblp.org/pers/m/Minier:Thomas.nt",
+        },
+      ],
     },
     {
-      description: 'a query which includes the rank and the relevance score',
+      description: "a query which includes the rank and the relevance score",
       query: `
       PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -84,15 +84,15 @@ describe('Full Text Search SPARQL queries', () => {
       }`,
       results: [
         {
-          '?s': 'https://dblp.org/pers/m/Minier:Thomas',
-          '?name': '"Thomas Minier"@en',
-          '?score': '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
-          '?rank': '"0"^^http://www.w3.org/2001/XMLSchema#integer'
-        }
-      ]
+          "?s": "https://dblp.org/pers/m/Minier:Thomas",
+          "?name": '"Thomas Minier"@en',
+          "?score": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+          "?rank": '"0"^^http://www.w3.org/2001/XMLSchema#integer',
+        },
+      ],
     },
     {
-      description: 'a query which a minimum relevance score',
+      description: "a query which a minimum relevance score",
       query: `
       PREFIX ses: <https://callidon.github.io/sparql-engine/search#>
       SELECT ?o ?score WHERE {
@@ -103,13 +103,13 @@ describe('Full Text Search SPARQL queries', () => {
       }`,
       results: [
         {
-          '?o': 'https://dblp.org/pers/m/Minier:Thomas',
-          '?score': '"1"^^http://www.w3.org/2001/XMLSchema#float'
-        }
-      ]
+          "?o": "https://dblp.org/pers/m/Minier:Thomas",
+          "?score": '"1"^^http://www.w3.org/2001/XMLSchema#float',
+        },
+      ],
     },
     {
-      description: 'a query which minimum and maximum relevance scores',
+      description: "a query which minimum and maximum relevance scores",
       query: `
       PREFIX ses: <https://callidon.github.io/sparql-engine/search#>
       SELECT ?o ?score WHERE {
@@ -121,13 +121,13 @@ describe('Full Text Search SPARQL queries', () => {
       }`,
       results: [
         {
-          '?o': '"provenance information for RDF data of dblp person \'m/Minier:Thomas\'"',
-          '?score': '"0.111"^^http://www.w3.org/2001/XMLSchema#float'
-        }
-      ]
+          "?o": "\"provenance information for RDF data of dblp person 'm/Minier:Thomas'\"",
+          "?score": '"0.111"^^http://www.w3.org/2001/XMLSchema#float',
+        },
+      ],
     },
     {
-      description: 'a query which a maximum rank',
+      description: "a query which a maximum rank",
       query: `
       PREFIX ses: <https://callidon.github.io/sparql-engine/search#>
       SELECT ?o ?score ?rank WHERE {
@@ -139,24 +139,24 @@ describe('Full Text Search SPARQL queries', () => {
       }`,
       results: [
         {
-          '?o': 'https://dblp.org/pers/m/Minier:Thomas',
-          '?score': '"1"^^http://www.w3.org/2001/XMLSchema#float',
-          '?rank': '"0"^^http://www.w3.org/2001/XMLSchema#integer'
+          "?o": "https://dblp.org/pers/m/Minier:Thomas",
+          "?score": '"1"^^http://www.w3.org/2001/XMLSchema#float',
+          "?rank": '"0"^^http://www.w3.org/2001/XMLSchema#integer',
         },
         {
-          '?o': '"Thomas Minier"@en',
-          '?score': '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
-          '?rank': '"1"^^http://www.w3.org/2001/XMLSchema#integer'
+          "?o": '"Thomas Minier"@en',
+          "?score": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+          "?rank": '"1"^^http://www.w3.org/2001/XMLSchema#integer',
         },
         {
-          '?o': 'https://dblp.org/rec/conf/esws/MinierMSM17a',
-          '?score': '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
-          '?rank': '"2"^^http://www.w3.org/2001/XMLSchema#integer'
-        }
-      ]
+          "?o": "https://dblp.org/rec/conf/esws/MinierMSM17a",
+          "?score": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+          "?rank": '"2"^^http://www.w3.org/2001/XMLSchema#integer',
+        },
+      ],
     },
     {
-      description: 'a query which minimum and maximum ranks',
+      description: "a query which minimum and maximum ranks",
       query: `
       PREFIX ses: <https://callidon.github.io/sparql-engine/search#>
       SELECT ?o ?score ?rank WHERE {
@@ -169,29 +169,33 @@ describe('Full Text Search SPARQL queries', () => {
       }`,
       results: [
         {
-          '?o': '"Thomas Minier"@en',
-          '?score': '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
-          '?rank': '"1"^^http://www.w3.org/2001/XMLSchema#integer'
+          "?o": '"Thomas Minier"@en',
+          "?score": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+          "?rank": '"1"^^http://www.w3.org/2001/XMLSchema#integer',
         },
         {
-          '?o': 'https://dblp.org/rec/conf/esws/MinierMSM17a',
-          '?score': '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
-          '?rank': '"2"^^http://www.w3.org/2001/XMLSchema#integer'
-        }
-      ]
+          "?o": "https://dblp.org/rec/conf/esws/MinierMSM17a",
+          "?score": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+          "?rank": '"2"^^http://www.w3.org/2001/XMLSchema#integer',
+        },
+      ],
     },
-  ]
+  ];
 
-  data.forEach(d => {
-    it(`should evaluate ${d.description}`, done => {
-      const results = []
-      const iterator = engine.execute(d.query)
-      iterator.subscribe(b => {
-        results.push(b.toObject())
-      }, done, () => {
-        expect(results).to.deep.equals(d.results)
-        done()
-      })
-    })
-  })
-})
+  data.forEach((d) => {
+    it(`should evaluate ${d.description}`, (done) => {
+      const results = [];
+      const iterator = engine.execute(d.query);
+      iterator.subscribe(
+        (b) => {
+          results.push(b.toObject());
+        },
+        done,
+        () => {
+          expect(results).to.deep.equals(d.results);
+          done();
+        },
+      );
+    });
+  });
+});

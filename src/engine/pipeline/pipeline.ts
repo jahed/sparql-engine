@@ -22,13 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { PipelineEngine } from './pipeline-engine'
-import RxjsPipeline from './rxjs-pipeline'
+import { PipelineEngine } from "./pipeline-engine";
+import RxjsPipeline from "./rxjs-pipeline";
 
 // current pipeline engine used for processing bindings
-let _currentEngine: PipelineEngine = new RxjsPipeline()
+let _currentEngine: PipelineEngine = new RxjsPipeline();
 
 /**
  * Singleton class used to access the current pipeline engine
@@ -39,15 +39,15 @@ export class Pipeline {
    * Get the instance of the current pipeline engine
    * @return The instance of the current pipeline engine
    */
-  static getInstance (): PipelineEngine {
-    return _currentEngine
+  static getInstance(): PipelineEngine {
+    return _currentEngine;
   }
 
   /**
    * Set the instance of the current pipeline engine
    * @param instance  - New pipeline engine to use as the current one
    */
-  static setInstance (instance: PipelineEngine): void {
-    _currentEngine = instance
+  static setInstance(instance: PipelineEngine): void {
+    _currentEngine = instance;
   }
 }

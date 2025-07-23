@@ -22,14 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { Pipeline } from '../engine/pipeline/pipeline'
-import { PipelineStage } from '../engine/pipeline/pipeline-engine'
-import { Algebra } from 'sparqljs'
-import { PlanBuilder } from '../engine/plan-builder'
-import { Bindings } from '../rdf/bindings'
-import ExecutionContext from '../engine/context/execution-context'
+import { Pipeline } from "../engine/pipeline/pipeline";
+import { PipelineStage } from "../engine/pipeline/pipeline-engine";
+import { Algebra } from "sparqljs";
+import { PlanBuilder } from "../engine/plan-builder";
+import { Bindings } from "../rdf/bindings";
+import ExecutionContext from "../engine/context/execution-context";
 
 /**
  * Handles an SPARQL OPTIONAL clause
@@ -41,21 +41,26 @@ import ExecutionContext from '../engine/context/execution-context'
  * @param context - Execution context
  * @return A {@link PipelineStage} which evaluate the OPTIONAL operation
  */
-export default function optional (source: PipelineStage<Bindings>, patterns: Algebra.PlanNode[], builder: PlanBuilder, context: ExecutionContext): PipelineStage<Bindings> {
-  const seenBefore: Bindings[] = []
-  const engine = Pipeline.getInstance()
+export default function optional(
+  source: PipelineStage<Bindings>,
+  patterns: Algebra.PlanNode[],
+  builder: PlanBuilder,
+  context: ExecutionContext,
+): PipelineStage<Bindings> {
+  const seenBefore: Bindings[] = [];
+  const engine = Pipeline.getInstance();
   const start = engine.tap(source, (bindings: Bindings) => {
-    seenBefore.push(bindings)
-  })
-  let leftOp = builder._buildWhere(start, patterns, context)
+    seenBefore.push(bindings);
+  });
+  let leftOp = builder._buildWhere(start, patterns, context);
   leftOp = engine.tap(leftOp, (bindings: Bindings) => {
     // remove values that matches a results from seenBefore
     const index = seenBefore.findIndex((b: Bindings) => {
-      return b.isSubset(bindings)
-    })
+      return b.isSubset(bindings);
+    });
     if (index >= 0) {
-      seenBefore.splice(index, 1)
+      seenBefore.splice(index, 1);
     }
-  })
-  return engine.merge(leftOp, engine.from(seenBefore))
+  });
+  return engine.merge(leftOp, engine.from(seenBefore));
 }

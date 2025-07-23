@@ -22,37 +22,51 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { from } = require('rxjs')
-const { BindingBase } = require('../../dist/api.js')
-const bind = require('../../dist/operators/bind.js').default
+const expect = require("chai").expect;
+const { from } = require("rxjs");
+const { BindingBase } = require("../../dist/api.js");
+const bind = require("../../dist/operators/bind.js").default;
 
-describe('Bind operator', () => {
-  it('should bind results of valid SPARQL expression to a variable', done => {
-    let nbResults = 0
+describe("Bind operator", () => {
+  it("should bind results of valid SPARQL expression to a variable", (done) => {
+    let nbResults = 0;
     const source = from([
-      BindingBase.fromObject({ '?x': '"1"^^http://www.w3.org/2001/XMLSchema#integer', '?y': '"2"^^http://www.w3.org/2001/XMLSchema#integer' }),
-      BindingBase.fromObject({ '?x': '"2"^^http://www.w3.org/2001/XMLSchema#integer', '?y': '"3"^^http://www.w3.org/2001/XMLSchema#integer' })
-    ])
+      BindingBase.fromObject({
+        "?x": '"1"^^http://www.w3.org/2001/XMLSchema#integer',
+        "?y": '"2"^^http://www.w3.org/2001/XMLSchema#integer',
+      }),
+      BindingBase.fromObject({
+        "?x": '"2"^^http://www.w3.org/2001/XMLSchema#integer',
+        "?y": '"3"^^http://www.w3.org/2001/XMLSchema#integer',
+      }),
+    ]);
     const expr = {
-      type: 'operation',
-      operator: '+',
-      args: ['?x', '?y']
-    }
-    const op = bind(source, '?z', expr)
-    op.subscribe(value => {
-      expect(value.toObject()).to.have.all.keys('?x', '?y', '?z')
-      if (value.get('?x').startsWith('"1"')) {
-        expect(value.get('?z')).to.equal('"3"^^http://www.w3.org/2001/XMLSchema#integer')
-      } else {
-        expect(value.get('?z')).to.equal('"5"^^http://www.w3.org/2001/XMLSchema#integer')
-      }
-      nbResults++
-    }, done, () => {
-      expect(nbResults).to.equal(2)
-      done()
-    })
-  })
-})
+      type: "operation",
+      operator: "+",
+      args: ["?x", "?y"],
+    };
+    const op = bind(source, "?z", expr);
+    op.subscribe(
+      (value) => {
+        expect(value.toObject()).to.have.all.keys("?x", "?y", "?z");
+        if (value.get("?x").startsWith('"1"')) {
+          expect(value.get("?z")).to.equal(
+            '"3"^^http://www.w3.org/2001/XMLSchema#integer',
+          );
+        } else {
+          expect(value.get("?z")).to.equal(
+            '"5"^^http://www.w3.org/2001/XMLSchema#integer',
+          );
+        }
+        nbResults++;
+      },
+      done,
+      () => {
+        expect(nbResults).to.equal(2);
+        done();
+      },
+    );
+  });
+});

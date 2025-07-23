@@ -22,25 +22,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { Algebra } from 'sparqljs'
-import { Bindings } from '../../rdf/bindings'
-import { Pipeline } from '../../engine/pipeline/pipeline'
-import { PipelineStage } from '../../engine/pipeline/pipeline-engine'
-import { rdf, evaluation } from '../../utils'
-import BGPStageBuilder from '../../engine/stages/bgp-stage-builder'
-import ExecutionContext from '../../engine/context/execution-context'
-import ContextSymbols from '../../engine/context/symbols'
-import Graph from '../../rdf/graph'
-import rewritingOp from './rewriting-op'
+import { Algebra } from "sparqljs";
+import { Bindings } from "../../rdf/bindings";
+import { Pipeline } from "../../engine/pipeline/pipeline";
+import { PipelineStage } from "../../engine/pipeline/pipeline-engine";
+import { rdf, evaluation } from "../../utils";
+import BGPStageBuilder from "../../engine/stages/bgp-stage-builder";
+import ExecutionContext from "../../engine/context/execution-context";
+import ContextSymbols from "../../engine/context/symbols";
+import Graph from "../../rdf/graph";
+import rewritingOp from "./rewriting-op";
 
 // The default size of the bucket of Basic Graph Patterns used by the Bound Join algorithm
-const BOUND_JOIN_BUFFER_SIZE = 15
+const BOUND_JOIN_BUFFER_SIZE = 15;
 
 // A Basic graph pattern, i.e., a set of triple patterns
 // This type alias is defined to make the algorithm more readable ;)
-type BasicGraphPattern = Algebra.TripleObject[]
+type BasicGraphPattern = Algebra.TripleObject[];
 
 /**
  * Rewrite a triple pattern using a rewriting key,
@@ -50,18 +50,21 @@ type BasicGraphPattern = Algebra.TripleObject[]
  * @param tp - Triple pattern to rewrite
  * @return The rewritten triple pattern
  */
-function rewriteTriple (triple: Algebra.TripleObject, key: number): Algebra.TripleObject {
-  const res = Object.assign({}, triple)
+function rewriteTriple(
+  triple: Algebra.TripleObject,
+  key: number,
+): Algebra.TripleObject {
+  const res = Object.assign({}, triple);
   if (rdf.isVariable(triple.subject)) {
-    res.subject = `${triple.subject}_${key}`
+    res.subject = `${triple.subject}_${key}`;
   }
   if (rdf.isVariable(triple.predicate)) {
-    res.predicate = `${triple.predicate}_${key}`
+    res.predicate = `${triple.predicate}_${key}`;
   }
   if (rdf.isVariable(triple.object)) {
-    res.object = `${triple.object}_${key}`
+    res.object = `${triple.object}_${key}`;
   }
-  return res
+  return res;
 }
 
 /**
@@ -73,76 +76,108 @@ function rewriteTriple (triple: Algebra.TripleObject, key: number): Algebra.Trip
  * @param  Context - Query execution context
  * @return A pipeline stage which evaluates the bound join
  */
-export default function boundJoin (source: PipelineStage<Bindings>, bgp: Algebra.TripleObject[], graph: Graph, builder: BGPStageBuilder, context: ExecutionContext) {
-  let bufferSize = BOUND_JOIN_BUFFER_SIZE
+export default function boundJoin(
+  source: PipelineStage<Bindings>,
+  bgp: Algebra.TripleObject[],
+  graph: Graph,
+  builder: BGPStageBuilder,
+  context: ExecutionContext,
+) {
+  let bufferSize = BOUND_JOIN_BUFFER_SIZE;
   if (context.hasProperty(ContextSymbols.BOUND_JOIN_BUFFER_SIZE)) {
-    bufferSize = context.getProperty(ContextSymbols.BOUND_JOIN_BUFFER_SIZE)
+    bufferSize = context.getProperty(ContextSymbols.BOUND_JOIN_BUFFER_SIZE);
   }
-  return Pipeline.getInstance().mergeMap(Pipeline.getInstance().bufferCount(source, bufferSize), bucket => {
-    // simple case: first join in the pipeline
-    if (bucket.length === 1 && bucket[0].isEmpty) {
-      if (context.cachingEnabled()) {
-        return evaluation.cacheEvalBGP(bgp, graph, context.cache!, builder, context)
-      }
-      return graph.evalBGP(bgp, context)
-    } else {
-      // The bucket of rewritten basic graph patterns
-      const bgpBucket: BasicGraphPattern[] = []
-      // The bindings of the bucket that cannot be evaluated with a bound join for this BGP
-      const regularBindings: Bindings[] = []
-      // A rewriting table dedicated to this instance of the bound join
-      const rewritingTable = new Map()
-      // The rewriting key (a simple counter) for this instance of the bound join
-      let key = 0
-      // Build the bucket of Basic Graph patterns
-      bucket.map(binding => {
-        const boundedBGP: BasicGraphPattern = []
-        let nbBounded = 0
-
-        // build the bounded BGP using the current set of bindings
-        bgp.forEach(triple => {
-          const boundedTriple = rewriteTriple(binding.bound(triple), key)
-          boundedBGP.push(boundedTriple)
-          // track the number of fully bounded triples, i.e., triple patterns without any SPARQL variables
-          if (!rdf.isVariable(boundedTriple.subject) && !rdf.isVariable(boundedTriple.predicate) && !rdf.isVariable(boundedTriple.object)) {
-            nbBounded++
-          }
-        })
-
-        // if the whole BGP is bounded, then the current set of bindings cannot be processed
-        // using a bound join and we must process it using a regular Index Join.
-        // Otherwise, the partially bounded BGP is suitable for a bound join
-        if (nbBounded === bgp.length) {
-          regularBindings.push(binding)
-        } else {
-          // save the rewriting into the table
-          rewritingTable.set(key, binding)
-          bgpBucket.push(boundedBGP)
+  return Pipeline.getInstance().mergeMap(
+    Pipeline.getInstance().bufferCount(source, bufferSize),
+    (bucket) => {
+      // simple case: first join in the pipeline
+      if (bucket.length === 1 && bucket[0].isEmpty) {
+        if (context.cachingEnabled()) {
+          return evaluation.cacheEvalBGP(
+            bgp,
+            graph,
+            context.cache!,
+            builder,
+            context,
+          );
         }
-        key++
-      })
+        return graph.evalBGP(bgp, context);
+      } else {
+        // The bucket of rewritten basic graph patterns
+        const bgpBucket: BasicGraphPattern[] = [];
+        // The bindings of the bucket that cannot be evaluated with a bound join for this BGP
+        const regularBindings: Bindings[] = [];
+        // A rewriting table dedicated to this instance of the bound join
+        const rewritingTable = new Map();
+        // The rewriting key (a simple counter) for this instance of the bound join
+        let key = 0;
+        // Build the bucket of Basic Graph patterns
+        bucket.map((binding) => {
+          const boundedBGP: BasicGraphPattern = [];
+          let nbBounded = 0;
 
-      let boundJoinStage: PipelineStage<Bindings> = Pipeline.getInstance().empty()
-      let regularJoinStage: PipelineStage<Bindings> = Pipeline.getInstance().empty()
+          // build the bounded BGP using the current set of bindings
+          bgp.forEach((triple) => {
+            const boundedTriple = rewriteTriple(binding.bound(triple), key);
+            boundedBGP.push(boundedTriple);
+            // track the number of fully bounded triples, i.e., triple patterns without any SPARQL variables
+            if (
+              !rdf.isVariable(boundedTriple.subject) &&
+              !rdf.isVariable(boundedTriple.predicate) &&
+              !rdf.isVariable(boundedTriple.object)
+            ) {
+              nbBounded++;
+            }
+          });
 
-      // first, evaluates the bucket of partially bounded BGPs using a bound join
-      if (bgpBucket.length > 0) {
-        boundJoinStage = rewritingOp(graph, bgpBucket, rewritingTable, builder, context)
+          // if the whole BGP is bounded, then the current set of bindings cannot be processed
+          // using a bound join and we must process it using a regular Index Join.
+          // Otherwise, the partially bounded BGP is suitable for a bound join
+          if (nbBounded === bgp.length) {
+            regularBindings.push(binding);
+          } else {
+            // save the rewriting into the table
+            rewritingTable.set(key, binding);
+            bgpBucket.push(boundedBGP);
+          }
+          key++;
+        });
+
+        let boundJoinStage: PipelineStage<Bindings> =
+          Pipeline.getInstance().empty();
+        let regularJoinStage: PipelineStage<Bindings> =
+          Pipeline.getInstance().empty();
+
+        // first, evaluates the bucket of partially bounded BGPs using a bound join
+        if (bgpBucket.length > 0) {
+          boundJoinStage = rewritingOp(
+            graph,
+            bgpBucket,
+            rewritingTable,
+            builder,
+            context,
+          );
+        }
+
+        // then, evaluates the remaining bindings using a bound join
+        if (regularBindings.length > 0) {
+          // otherwiwe, we create a new context to force the execution using Index Joins
+          const newContext = context.clone();
+          newContext.setProperty(ContextSymbols.FORCE_INDEX_JOIN, true);
+          // Invoke the BGPStageBuilder to evaluate the bucket
+          regularJoinStage = builder._buildIterator(
+            Pipeline.getInstance().of(...regularBindings),
+            graph,
+            bgp,
+            newContext,
+          );
+        }
+
+        // merge the two pipeline stages to produce the join results
+        return Pipeline.getInstance().merge(boundJoinStage, regularJoinStage);
       }
-
-      // then, evaluates the remaining bindings using a bound join
-      if (regularBindings.length > 0) {
-        // otherwiwe, we create a new context to force the execution using Index Joins
-        const newContext = context.clone()
-        newContext.setProperty(ContextSymbols.FORCE_INDEX_JOIN, true)
-        // Invoke the BGPStageBuilder to evaluate the bucket
-        regularJoinStage = builder._buildIterator(Pipeline.getInstance().of(...regularBindings), graph, bgp, newContext)
-      }
-
-      // merge the two pipeline stages to produce the join results
-      return Pipeline.getInstance().merge(boundJoinStage, regularJoinStage)
-    }
-  })
+    },
+  );
   /*return Pipeline.getInstance().fromAsync((input: StreamPipelineInput<Bindings>) => {
     let sourceClosed = false
     let activeIterators = 0

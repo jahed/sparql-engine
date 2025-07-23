@@ -22,12 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const testPipelineEngine = require('./fixtures.js')
-const RxjsPipeline = require('../../dist/engine/pipeline/rxjs-pipeline.js').default
+const testPipelineEngine = require("./fixtures.js");
+const RxjsPipeline =
+  require("../../dist/engine/pipeline/rxjs-pipeline.js").default;
 
-describe('RxjsPipeline', () => {
-  const pipeline = new RxjsPipeline()
-  testPipelineEngine(pipeline)
-})
+describe("RxjsPipeline", () => {
+  const pipeline = new RxjsPipeline();
+  testPipelineEngine(pipeline);
+});

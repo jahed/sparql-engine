@@ -22,57 +22,65 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-describe('SPARQL MINUS', () => {
-  let engine = null
+describe("SPARQL MINUS", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(g)
-  })
+    const g = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(g);
+  });
 
-  it('should evaluate SPARQL queries with MINUS clauses', done => {
+  it("should evaluate SPARQL queries with MINUS clauses", (done) => {
     const query = `
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     SELECT * WHERE {
       ?s ?p ?o .
       MINUS { ?s rdf:type dblp-rdf:Person . }
-    }`
-    let nbResults = 0
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.keys('?s', '?p', '?o')
-      expect(b['?s']).to.be.oneOf([
-        'https://dblp.uni-trier.de/pers/m/Minier:Thomas',
-        'https://dblp.org/pers/m/Minier:Thomas.nt'
-      ])
-      nbResults++
-    }, done, () => {
-      expect(nbResults).to.equal(6)
-      done()
-    })
-  })
+    }`;
+    let nbResults = 0;
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?s", "?p", "?o");
+        expect(b["?s"]).to.be.oneOf([
+          "https://dblp.uni-trier.de/pers/m/Minier:Thomas",
+          "https://dblp.org/pers/m/Minier:Thomas.nt",
+        ]);
+        nbResults++;
+      },
+      done,
+      () => {
+        expect(nbResults).to.equal(6);
+        done();
+      },
+    );
+  });
 
-  it('should evaluate SPARQL queries with MINUS clauses that found nothing', done => {
+  it("should evaluate SPARQL queries with MINUS clauses that found nothing", (done) => {
     const query = `
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     SELECT * WHERE {
       ?s rdf:type dblp-rdf:Person .
       MINUS { ?s dblp-rdf:primaryFullPersonName ?name }
-    }`
-    let nbResults = 0
-    const iterator = engine.execute(query)
-    iterator.subscribe(() => {
-      nbResults++
-    }, done, () => {
-      expect(nbResults).to.equal(0)
-      done()
-    })
-  })
-})
+    }`;
+    let nbResults = 0;
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      () => {
+        nbResults++;
+      },
+      done,
+      () => {
+        expect(nbResults).to.equal(0);
+        done();
+      },
+    );
+  });
+});

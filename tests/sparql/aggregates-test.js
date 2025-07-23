@@ -22,338 +22,366 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { XSD } = require('../../dist/utils.js').rdf
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { XSD } = require("../../dist/utils.js").rdf;
+const { getGraph, TestEngine } = require("../utils.js");
 
-describe('SPARQL aggregates', () => {
-  let engine = null
+describe("SPARQL aggregates", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(g)
-  })
+    const g = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(g);
+  });
 
-  it('should evaluate simple SPARQL queries with GROUP BY', done => {
+  it("should evaluate simple SPARQL queries with GROUP BY", (done) => {
     const query = `
     SELECT ?p (COUNT(?p) AS ?nbPreds) WHERE {
       <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
     }
     GROUP BY ?p
-    `
-    const results = []
+    `;
+    const results = [];
 
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.keys('?p', '?nbPreds')
-      switch (b['?p']) {
-        case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName':
-        case 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type':
-          expect(b['?nbPreds']).to.equal(`"1"^^${XSD('integer')}`)
-          break
-        case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf':
-          expect(b['?nbPreds']).to.equal(`"5"^^${XSD('integer')}`)
-          break
-        case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith':
-          expect(b['?nbPreds']).to.equal(`"4"^^${XSD('integer')}`)
-          break
-        default:
-          expect().fail(`Unexpected predicate found: ${b['?p']}`)
-          break
-      }
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(4)
-      done()
-    })
-  })
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?p", "?nbPreds");
+        switch (b["?p"]) {
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
+          case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
+            expect(b["?nbPreds"]).to.equal(`"1"^^${XSD("integer")}`);
+            break;
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
+            expect(b["?nbPreds"]).to.equal(`"5"^^${XSD("integer")}`);
+            break;
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
+            expect(b["?nbPreds"]).to.equal(`"4"^^${XSD("integer")}`);
+            break;
+          default:
+            expect().fail(`Unexpected predicate found: ${b["?p"]}`);
+            break;
+        }
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(4);
+        done();
+      },
+    );
+  });
 
-  it('should evaluate queries with SPARQL expressions in GROUP BY', done => {
+  it("should evaluate queries with SPARQL expressions in GROUP BY", (done) => {
     const query = `
     SELECT ?p ?z (COUNT(?p) AS ?nbPreds) WHERE {
       <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
     }
     GROUP BY ?p (5 * 2 AS ?z)
-    `
-    const results = []
+    `;
+    const results = [];
 
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.keys('?p', '?nbPreds', '?z')
-      expect(b['?z']).to.equal(`"10"^^${XSD('integer')}`)
-      switch (b['?p']) {
-        case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName':
-        case 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type':
-          expect(b['?nbPreds']).to.equal(`"1"^^${XSD('integer')}`)
-          break
-        case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf':
-          expect(b['?nbPreds']).to.equal(`"5"^^${XSD('integer')}`)
-          break
-        case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith':
-          expect(b['?nbPreds']).to.equal(`"4"^^${XSD('integer')}`)
-          break
-        default:
-          expect().fail(`Unexpected predicate found: ${b['?p']}`)
-          break
-      }
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(4)
-      done()
-    })
-  })
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?p", "?nbPreds", "?z");
+        expect(b["?z"]).to.equal(`"10"^^${XSD("integer")}`);
+        switch (b["?p"]) {
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
+          case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
+            expect(b["?nbPreds"]).to.equal(`"1"^^${XSD("integer")}`);
+            break;
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
+            expect(b["?nbPreds"]).to.equal(`"5"^^${XSD("integer")}`);
+            break;
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
+            expect(b["?nbPreds"]).to.equal(`"4"^^${XSD("integer")}`);
+            break;
+          default:
+            expect().fail(`Unexpected predicate found: ${b["?p"]}`);
+            break;
+        }
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(4);
+        done();
+      },
+    );
+  });
 
-  it('should allow aggregate queries without a GROUP BY clause', done => {
+  it("should allow aggregate queries without a GROUP BY clause", (done) => {
     const query = `
     SELECT (COUNT(?p) AS ?nbPreds) WHERE {
       <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
-    }`
-    let nbResults = 0
+    }`;
+    let nbResults = 0;
 
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.keys('?nbPreds')
-      expect(b['?nbPreds']).to.equal(`"11"^^${XSD('integer')}`)
-      nbResults++
-    }, done, () => {
-      expect(nbResults).to.equal(1)
-      done()
-    })
-  })
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?nbPreds");
+        expect(b["?nbPreds"]).to.equal(`"11"^^${XSD("integer")}`);
+        nbResults++;
+      },
+      done,
+      () => {
+        expect(nbResults).to.equal(1);
+        done();
+      },
+    );
+  });
 
-  it('should evaluate queries that mix aggregations and numeric operations', done => {
+  it("should evaluate queries that mix aggregations and numeric operations", (done) => {
     const query = `
     SELECT ?p (COUNT(?p) * 2 AS ?nbPreds) WHERE {
       <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
     }
     GROUP BY ?p
-    `
-    const results = []
+    `;
+    const results = [];
 
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.keys('?p', '?nbPreds')
-      switch (b['?p']) {
-        case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName':
-        case 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type':
-          expect(b['?nbPreds']).to.equal(`"2"^^${XSD('integer')}`)
-          break
-        case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf':
-          expect(b['?nbPreds']).to.equal(`"10"^^${XSD('integer')}`)
-          break
-        case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith':
-          expect(b['?nbPreds']).to.equal(`"8"^^${XSD('integer')}`)
-          break
-        default:
-          expect().fail(`Unexpected predicate found: ${b['?p']}`)
-          break
-      }
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(4)
-      done()
-    })
-  })
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?p", "?nbPreds");
+        switch (b["?p"]) {
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
+          case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
+            expect(b["?nbPreds"]).to.equal(`"2"^^${XSD("integer")}`);
+            break;
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
+            expect(b["?nbPreds"]).to.equal(`"10"^^${XSD("integer")}`);
+            break;
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
+            expect(b["?nbPreds"]).to.equal(`"8"^^${XSD("integer")}`);
+            break;
+          default:
+            expect().fail(`Unexpected predicate found: ${b["?p"]}`);
+            break;
+        }
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(4);
+        done();
+      },
+    );
+  });
 
-  it('should evaluate aggregates with HAVING clauses', done => {
+  it("should evaluate aggregates with HAVING clauses", (done) => {
     const query = `
     SELECT ?p (COUNT(?p) AS ?nbPreds) WHERE {
       <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
     }
     GROUP BY ?p
     HAVING (COUNT(?p) > 1)
-    `
-    const results = []
+    `;
+    const results = [];
 
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.keys('?p', '?nbPreds')
-      switch (b['?p']) {
-        case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf':
-          expect(b['?nbPreds']).to.equal(`"5"^^${XSD('integer')}`)
-          break
-        case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith':
-          expect(b['?nbPreds']).to.equal(`"4"^^${XSD('integer')}`)
-          break
-        default:
-          throw new Error(`Unexpected predicate found: ${b['?p']}`)
-      }
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(2)
-      done()
-    })
-  })
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?p", "?nbPreds");
+        switch (b["?p"]) {
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
+            expect(b["?nbPreds"]).to.equal(`"5"^^${XSD("integer")}`);
+            break;
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
+            expect(b["?nbPreds"]).to.equal(`"4"^^${XSD("integer")}`);
+            break;
+          default:
+            throw new Error(`Unexpected predicate found: ${b["?p"]}`);
+        }
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(2);
+        done();
+      },
+    );
+  });
 
-  it('should evaluate aggregation queries with non-compatible UNION clauses', done => {
+  it("should evaluate aggregation queries with non-compatible UNION clauses", (done) => {
     const query = `
     SELECT ?s (COUNT(?s) AS ?nbSubjects) WHERE {
       { ?s a ?o1 . } UNION { ?s a ?o2}
     }
     GROUP BY ?s
-    `
-    const results = []
+    `;
+    const results = [];
 
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.keys('?s', '?nbSubjects')
-      expect(b['?s']).to.equal('https://dblp.org/pers/m/Minier:Thomas')
-      expect(b['?nbSubjects']).to.equal(`"2"^^${XSD('integer')}`)
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(1)
-      done()
-    })
-  })
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?s", "?nbSubjects");
+        expect(b["?s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
+        expect(b["?nbSubjects"]).to.equal(`"2"^^${XSD("integer")}`);
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(1);
+        done();
+      },
+    );
+  });
 
   const data = [
     {
-      name: 'COUNT-DISTINCT',
+      name: "COUNT-DISTINCT",
       query: `
       SELECT (COUNT(DISTINCT ?p) as ?count) WHERE {
         ?s ?p ?o
       }
       `,
-      keys: ['?count'],
+      keys: ["?count"],
       nbResults: 1,
       testFun: function (b) {
-        expect(b['?count']).to.equal(`"10"^^${XSD('integer')}`)
-      }
+        expect(b["?count"]).to.equal(`"10"^^${XSD("integer")}`);
+      },
     },
     {
-      name: 'SUM',
+      name: "SUM",
       query: `
       SELECT ?p (SUM(?x) AS ?sum) WHERE {
         <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
         BIND(10 AS ?x)
       }
       GROUP BY ?p`,
-      keys: ['?p', '?sum'],
+      keys: ["?p", "?sum"],
       nbResults: 4,
       testFun: function (b) {
-        switch (b['?p']) {
-          case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName':
-          case 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type':
-            expect(b['?sum']).to.equal(`"10"^^${XSD('integer')}`)
-            break
-          case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf':
-            expect(b['?sum']).to.equal(`"50"^^${XSD('integer')}`)
-            break
-          case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith':
-            expect(b['?sum']).to.equal(`"40"^^${XSD('integer')}`)
-            break
+        switch (b["?p"]) {
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
+          case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
+            expect(b["?sum"]).to.equal(`"10"^^${XSD("integer")}`);
+            break;
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
+            expect(b["?sum"]).to.equal(`"50"^^${XSD("integer")}`);
+            break;
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
+            expect(b["?sum"]).to.equal(`"40"^^${XSD("integer")}`);
+            break;
           default:
-            expect().fail(`Unexpected predicate found: ${b['?sum']}`)
-            break
+            expect().fail(`Unexpected predicate found: ${b["?sum"]}`);
+            break;
         }
-      }
+      },
     },
     {
-      name: 'AVG',
+      name: "AVG",
       query: `
       SELECT ?p (AVG(?x) AS ?avg) WHERE {
         <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
         BIND(10 AS ?x)
       }
       GROUP BY ?p`,
-      keys: ['?p', '?avg'],
+      keys: ["?p", "?avg"],
       nbResults: 4,
       testFun: function (b) {
-        expect(b['?avg']).to.equal(`"10"^^${XSD('integer')}`)
-      }
+        expect(b["?avg"]).to.equal(`"10"^^${XSD("integer")}`);
+      },
     },
     {
-      name: 'MIN',
+      name: "MIN",
       query: `
       SELECT ?p (MIN(?x) AS ?min) WHERE {
         <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
         BIND(10 AS ?x)
       }
       GROUP BY ?p`,
-      keys: ['?p', '?min'],
+      keys: ["?p", "?min"],
       nbResults: 4,
       testFun: function (b) {
-        expect(b['?min']).to.equal(`"10"^^${XSD('integer')}`)
-      }
+        expect(b["?min"]).to.equal(`"10"^^${XSD("integer")}`);
+      },
     },
     {
-      name: 'MAX',
+      name: "MAX",
       query: `
       SELECT ?p (MAX(?x) AS ?max) WHERE {
         <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
         BIND(10 AS ?x)
       }
       GROUP BY ?p`,
-      keys: ['?p', '?max'],
+      keys: ["?p", "?max"],
       nbResults: 4,
       testFun: function (b) {
-        expect(b['?max']).to.equal(`"10"^^${XSD('integer')}`)
-      }
+        expect(b["?max"]).to.equal(`"10"^^${XSD("integer")}`);
+      },
     },
     {
-      name: 'GROUP_CONCAT',
+      name: "GROUP_CONCAT",
       query: `
       SELECT ?p (GROUP_CONCAT(?x; separator=".") AS ?concat) WHERE {
         <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
         BIND(10 AS ?x)
       }
       GROUP BY ?p`,
-      keys: ['?p', '?concat'],
+      keys: ["?p", "?concat"],
       nbResults: 4,
       testFun: function (b) {
-        switch (b['?p']) {
-          case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName':
-          case 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type':
-            expect(b['?concat']).to.equal('"10"')
-            break
-          case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf':
-            expect(b['?concat']).to.equal('"10.10.10.10.10"')
-            break
-          case 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith':
-            expect(b['?concat']).to.equal('"10.10.10.10"')
-            break
+        switch (b["?p"]) {
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
+          case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
+            expect(b["?concat"]).to.equal('"10"');
+            break;
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
+            expect(b["?concat"]).to.equal('"10.10.10.10.10"');
+            break;
+          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
+            expect(b["?concat"]).to.equal('"10.10.10.10"');
+            break;
           default:
-            expect().fail(`Unexpected predicate found: ${b['?concat']}`)
-            break
+            expect().fail(`Unexpected predicate found: ${b["?concat"]}`);
+            break;
         }
-      }
+      },
     },
     {
-      name: 'SAMPLE',
+      name: "SAMPLE",
       query: `
       SELECT ?p (SAMPLE(?x) AS ?sample) WHERE {
         <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
         BIND(10 AS ?x)
       }
       GROUP BY ?p`,
-      keys: ['?p', '?sample'],
+      keys: ["?p", "?sample"],
       nbResults: 4,
       testFun: function (b) {
-        expect(b['?sample']).to.equal(`"10"^^${XSD('integer')}`)
-      }
-    }
-  ]
+        expect(b["?sample"]).to.equal(`"10"^^${XSD("integer")}`);
+      },
+    },
+  ];
 
-  data.forEach(d => {
-    it(`should evaluate the "${d.name}" aggregate`, done => {
-      const results = []
-      const iterator = engine.execute(d.query)
-      iterator.subscribe(b => {
-        b = b.toObject()
-        expect(b).to.have.keys(...d.keys)
-        d.testFun(b)
-        results.push(b)
-      }, done, () => {
-        expect(results.length).to.equal(d.nbResults)
-        done()
-      })
-    })
-  })
-})
+  data.forEach((d) => {
+    it(`should evaluate the "${d.name}" aggregate`, (done) => {
+      const results = [];
+      const iterator = engine.execute(d.query);
+      iterator.subscribe(
+        (b) => {
+          b = b.toObject();
+          expect(b).to.have.keys(...d.keys);
+          d.testFun(b);
+          results.push(b);
+        },
+        done,
+        () => {
+          expect(results.length).to.equal(d.nbResults);
+          done();
+        },
+      );
+    });
+  });
+});

@@ -22,22 +22,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import SPARQL_AGGREGATES from './sparql-aggregates'
-import SPARQL_OPERATIONS from './sparql-operations'
-import CUSTOM_AGGREGATES from './custom-aggregates'
-import CUSTOM_OPERATIONS from './custom-operations'
-import { rdf } from '../../utils'
-import { merge, isArray, isString, uniqBy } from 'lodash'
-import { Algebra } from 'sparqljs'
-import { Bindings } from '../../rdf/bindings'
-import { Term } from 'rdf-js'
+import SPARQL_AGGREGATES from "./sparql-aggregates";
+import SPARQL_OPERATIONS from "./sparql-operations";
+import CUSTOM_AGGREGATES from "./custom-aggregates";
+import CUSTOM_OPERATIONS from "./custom-operations";
+import { rdf } from "../../utils";
+import { merge, isArray, isString, uniqBy } from "lodash";
+import { Algebra } from "sparqljs";
+import { Bindings } from "../../rdf/bindings";
+import { Term } from "rdf-js";
 
 /**
  * An input SPARQL expression to be compiled
  */
-export type InputExpression = Algebra.Expression | string | string[]
+export type InputExpression = Algebra.Expression | string | string[];
 
 /**
  * The output of a SPARQL expression's evaluation, one of the following
@@ -46,25 +46,29 @@ export type InputExpression = Algebra.Expression | string | string[]
  * * An iterator that yields RDFJS Terms or null values.
  * * A `null` value, which indicates that the expression's evaluation has failed.
  */
-export type ExpressionOutput = Term | Term[] | Iterable<Term | null> | null
+export type ExpressionOutput = Term | Term[] | Iterable<Term | null> | null;
 
 /**
  * A SPARQL expression compiled as a function
  */
-export type CompiledExpression = (bindings: Bindings) => ExpressionOutput
+export type CompiledExpression = (bindings: Bindings) => ExpressionOutput;
 
 /**
  * Type alias to describe the shape of custom functions. It's basically a JSON object from an IRI (in string form) to a function of 0 to many RDFTerms that produces an RDFTerm.
  */
-export type CustomFunctions = { [key: string]: (...args: (Term | Term[] | null)[]) => ExpressionOutput }
+export type CustomFunctions = {
+  [key: string]: (...args: (Term | Term[] | null)[]) => ExpressionOutput;
+};
 
 /**
  * Test if a SPARQL expression is a SPARQL operation
  * @param expr - SPARQL expression, in sparql.js format
  * @return True if the SPARQL expression is a SPARQL operation, False otherwise
  */
-function isOperation (expr: Algebra.Expression): expr is Algebra.SPARQLExpression {
-  return expr.type === 'operation'
+function isOperation(
+  expr: Algebra.Expression,
+): expr is Algebra.SPARQLExpression {
+  return expr.type === "operation";
 }
 
 /**
@@ -72,8 +76,10 @@ function isOperation (expr: Algebra.Expression): expr is Algebra.SPARQLExpressio
  * @param expr - SPARQL expression, in sparql.js format
  * @return True if the SPARQL expression is a SPARQL aggregation, False otherwise
  */
-function isAggregation (expr: Algebra.Expression): expr is Algebra.AggregateExpression {
-  return expr.type === 'aggregate'
+function isAggregation(
+  expr: Algebra.Expression,
+): expr is Algebra.AggregateExpression {
+  return expr.type === "aggregate";
 }
 
 /**
@@ -81,8 +87,10 @@ function isAggregation (expr: Algebra.Expression): expr is Algebra.AggregateExpr
  * @param expr - SPARQL expression, in sparql.js format
  * @return True if the SPARQL expression is a SPARQL function call, False otherwise
  */
-function isFunctionCall (expr: Algebra.Expression): expr is Algebra.FunctionCallExpression {
-  return expr.type === 'functionCall'
+function isFunctionCall(
+  expr: Algebra.Expression,
+): expr is Algebra.FunctionCallExpression {
+  return expr.type === "functionCall";
 }
 
 /**
@@ -91,13 +99,13 @@ function isFunctionCall (expr: Algebra.Expression): expr is Algebra.FunctionCall
  * @param variable - SPARQL variable
  * A fetch the RDF Term associated with the variable in an input set of bindings, or null if it was not found.
  */
-function bindArgument (variable: string): (bindings: Bindings) => Term | null {
+function bindArgument(variable: string): (bindings: Bindings) => Term | null {
   return (bindings: Bindings) => {
     if (bindings.has(variable)) {
-      return rdf.fromN3(bindings.get(variable)!)
+      return rdf.fromN3(bindings.get(variable)!);
     }
-    return null
-  }
+    return null;
+  };
 }
 
 /**
@@ -105,16 +113,16 @@ function bindArgument (variable: string): (bindings: Bindings) => Term | null {
  * @author Thomas Minier
  */
 export class SPARQLExpression {
-  private readonly _expression: CompiledExpression
+  private readonly _expression: CompiledExpression;
 
   /**
    * Constructor
    * @param expression - SPARQL expression
    */
-  constructor (expression: InputExpression, customFunctions?: CustomFunctions) {
+  constructor(expression: InputExpression, customFunctions?: CustomFunctions) {
     // merge custom operations defined by the framework & by the user
-    const customs = merge({}, CUSTOM_OPERATIONS, customFunctions)
-    this._expression = this._compileExpression(expression, customs)
+    const customs = merge({}, CUSTOM_OPERATIONS, customFunctions);
+    this._expression = this._compileExpression(expression, customs);
   }
 
   /**
@@ -122,84 +130,110 @@ export class SPARQLExpression {
    * @param  expression - SPARQL expression
    * @return Compiled SPARQL expression
    */
-  private _compileExpression (expression: InputExpression, customFunctions: CustomFunctions): CompiledExpression {
+  private _compileExpression(
+    expression: InputExpression,
+    customFunctions: CustomFunctions,
+  ): CompiledExpression {
     // case 1: the expression is a SPARQL variable to bound or a RDF term
     if (isString(expression)) {
       if (rdf.isVariable(expression)) {
-        return bindArgument(expression)
+        return bindArgument(expression);
       }
-      const compiledTerm = rdf.fromN3(expression)
-      return () => compiledTerm
+      const compiledTerm = rdf.fromN3(expression);
+      return () => compiledTerm;
     } else if (isArray(expression)) {
       // case 2: the expression is a list of RDF terms
       // because IN and NOT IN expressions accept arrays as argument
-      const compiledTerms = expression.map(rdf.fromN3)
-      return () => compiledTerms
+      const compiledTerms = expression.map(rdf.fromN3);
+      return () => compiledTerms;
     } else if (isOperation(expression)) {
       // case 3: a SPARQL operation, so we recursively compile each argument
       // and then evaluate the expression
-      const args = expression.args.map(arg => this._compileExpression(arg, customFunctions))
+      const args = expression.args.map((arg) =>
+        this._compileExpression(arg, customFunctions),
+      );
       if (!(expression.operator in SPARQL_OPERATIONS)) {
-        throw new Error(`Unsupported SPARQL operation: ${expression.operator}`)
+        throw new Error(`Unsupported SPARQL operation: ${expression.operator}`);
       }
-      const operation = SPARQL_OPERATIONS[expression.operator as keyof typeof SPARQL_OPERATIONS] as (...args: ExpressionOutput[]) => ExpressionOutput
-      return (bindings: Bindings) => operation(...args.map(arg => arg(bindings)))
+      const operation = SPARQL_OPERATIONS[
+        expression.operator as keyof typeof SPARQL_OPERATIONS
+      ] as (...args: ExpressionOutput[]) => ExpressionOutput;
+      return (bindings: Bindings) =>
+        operation(...args.map((arg) => arg(bindings)));
     } else if (isAggregation(expression)) {
       // case 3: a SPARQL aggregation
       if (!(expression.aggregation in SPARQL_AGGREGATES)) {
-        throw new Error(`Unsupported SPARQL aggregation: ${expression.aggregation}`)
+        throw new Error(
+          `Unsupported SPARQL aggregation: ${expression.aggregation}`,
+        );
       }
-      const aggregation = SPARQL_AGGREGATES[expression.aggregation as keyof typeof SPARQL_AGGREGATES]
+      const aggregation =
+        SPARQL_AGGREGATES[
+          expression.aggregation as keyof typeof SPARQL_AGGREGATES
+        ];
       return (bindings: Bindings) => {
-        if (bindings.hasProperty('__aggregate')) {
-          const aggVariable = expression.expression as string
-          let rows = bindings.getProperty('__aggregate')
+        if (bindings.hasProperty("__aggregate")) {
+          const aggVariable = expression.expression as string;
+          let rows = bindings.getProperty("__aggregate");
           if (expression.distinct) {
-            rows[aggVariable] = uniqBy(rows[aggVariable], rdf.toN3)
+            rows[aggVariable] = uniqBy(rows[aggVariable], rdf.toN3);
           }
-          return aggregation(aggVariable, rows, expression.separator || "")
+          return aggregation(aggVariable, rows, expression.separator || "");
         }
-        throw new SyntaxError(`SPARQL aggregation error: you are trying to use the ${expression.aggregation} SPARQL aggregate outside of an aggregation query.`)
-      }
+        throw new SyntaxError(
+          `SPARQL aggregation error: you are trying to use the ${expression.aggregation} SPARQL aggregate outside of an aggregation query.`,
+        );
+      };
     } else if (isFunctionCall(expression)) {
       // last case: the expression is a custom function
-      let customFunction: any
-      let isAggregate = false
-      const functionName = expression.function
+      let customFunction: any;
+      let isAggregate = false;
+      const functionName = expression.function;
       // custom aggregations defined by the framework
-      const functionNameLower = functionName.toLowerCase()
+      const functionNameLower = functionName.toLowerCase();
       if (functionNameLower in CUSTOM_AGGREGATES) {
-        isAggregate = true
-        customFunction = CUSTOM_AGGREGATES[functionNameLower as keyof typeof CUSTOM_AGGREGATES]
+        isAggregate = true;
+        customFunction =
+          CUSTOM_AGGREGATES[
+            functionNameLower as keyof typeof CUSTOM_AGGREGATES
+          ];
       } else if (functionName in customFunctions) {
         // custom operations defined by the user & the framework
-        customFunction = customFunctions[functionName]
+        customFunction = customFunctions[functionName];
       } else {
-        throw new SyntaxError(`Custom function could not be found: ${functionName}`)
+        throw new SyntaxError(
+          `Custom function could not be found: ${functionName}`,
+        );
       }
       if (isAggregate) {
         return (bindings: Bindings) => {
-          if (bindings.hasProperty('__aggregate')) {
-            const rows = bindings.getProperty('__aggregate')
-            return customFunction(...expression.args, rows)
+          if (bindings.hasProperty("__aggregate")) {
+            const rows = bindings.getProperty("__aggregate");
+            return customFunction(...expression.args, rows);
           }
-          throw new SyntaxError(`SPARQL aggregation error: you are trying to use the ${functionName} SPARQL aggregate outside of an aggregation query.`)
-        }
+          throw new SyntaxError(
+            `SPARQL aggregation error: you are trying to use the ${functionName} SPARQL aggregate outside of an aggregation query.`,
+          );
+        };
       }
       return (bindings: Bindings) => {
         try {
-          const args = expression.args.map(args => this._compileExpression(args, customFunctions))
-          return customFunction(...args.map(arg => arg(bindings)))
+          const args = expression.args.map((args) =>
+            this._compileExpression(args, customFunctions),
+          );
+          return customFunction(...args.map((arg) => arg(bindings)));
         } catch (e) {
           // In section 10 of the sparql docs (https://www.w3.org/TR/sparql11-query/#assignment) it states:
           // "If the evaluation of the expression produces an error, the variable remains unbound for that solution but the query evaluation continues."
           // unfortunately this means the error is silent unless some logging is introduced here,
           // which is probably not desired unless a logging framework is introduced
-          return null
+          return null;
         }
-      }
+      };
     }
-    throw new Error(`Unsupported SPARQL operation type found: ${expression.type}`)
+    throw new Error(
+      `Unsupported SPARQL operation type found: ${expression.type}`,
+    );
   }
 
   /**
@@ -207,7 +241,7 @@ export class SPARQLExpression {
    * @param  bindings - Set of mappings
    * @return Results of the evaluation
    */
-  evaluate (bindings: Bindings): ExpressionOutput {
-    return this._expression(bindings)
+  evaluate(bindings: Bindings): ExpressionOutput {
+    return this._expression(bindings);
   }
 }

@@ -22,17 +22,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const UnionMerge = require('../../dist/optimizer/visitors/union-merge.js').default
-const { query, union, placeholder } = require('./utils.js')
+const expect = require("chai").expect;
+const UnionMerge =
+  require("../../dist/optimizer/visitors/union-merge.js").default;
+const { query, union, placeholder } = require("./utils.js");
 
-describe('Union merge optimization', () => {
-  it('should merge several unions into a single top-level union', () => {
-    const rule = new UnionMerge()
-    const plan = query(union(union(placeholder('?s1')), union(placeholder('?s2'))))
-    const res = rule.visit(plan)
-    expect(res).to.deep.equal(query(union(placeholder('?s1'), placeholder('?s2'))))
-  })
-})
+describe("Union merge optimization", () => {
+  it("should merge several unions into a single top-level union", () => {
+    const rule = new UnionMerge();
+    const plan = query(
+      union(union(placeholder("?s1")), union(placeholder("?s2"))),
+    );
+    const res = rule.visit(plan);
+    expect(res).to.deep.equal(
+      query(union(placeholder("?s1"), placeholder("?s2"))),
+    );
+  });
+});

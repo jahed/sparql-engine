@@ -22,13 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { Pipeline } from '../engine/pipeline/pipeline'
-import { PipelineStage } from '../engine/pipeline/pipeline-engine'
-import { rdf } from '../utils'
-import { Bindings } from '../rdf/bindings'
-import { sortedIndexOf } from 'lodash'
+import { Pipeline } from "../engine/pipeline/pipeline";
+import { PipelineStage } from "../engine/pipeline/pipeline-engine";
+import { rdf } from "../utils";
+import { Bindings } from "../rdf/bindings";
+import { sortedIndexOf } from "lodash";
 
 /**
  * Hash functions for set of bindings
@@ -37,18 +37,20 @@ import { sortedIndexOf } from 'lodash'
  * @param  bindings  - Set of bindings to hash
  * @return Hashed set of bindings
  */
-function _hashBindings (variables: string[], bindings: Bindings): string {
+function _hashBindings(variables: string[], bindings: Bindings): string {
   // if no GROUP BY variables are used (in the case of an empty GROUP BY)
   // then we use a default grouping key
   if (variables.length === 0) {
-    return 'http://callidon.github.io/sparql-engine#DefaultGroupKey'
+    return "http://callidon.github.io/sparql-engine#DefaultGroupKey";
   }
-  return variables.map(v => {
-    if (bindings.has(v)) {
-      return bindings.get(v)
-    }
-    return 'null'
-  }).join(';')
+  return variables
+    .map((v) => {
+      if (bindings.has(v)) {
+        return bindings.get(v);
+      }
+      return "null";
+    })
+    .join(";");
 }
 
 /**
@@ -59,38 +61,46 @@ function _hashBindings (variables: string[], bindings: Bindings): string {
  * @param variables - GROUP BY variables
  * @return A {@link PipelineStage} which evaluate the GROUP BY operation
  */
-export default function sparqlGroupBy (source: PipelineStage<Bindings>, variables: string[]) {
-  const groups: Map<string, any> = new Map()
-  const keys: Map<string, Bindings> = new Map()
-  const engine = Pipeline.getInstance()
-  const groupVariables = variables.sort()
+export default function sparqlGroupBy(
+  source: PipelineStage<Bindings>,
+  variables: string[],
+) {
+  const groups: Map<string, any> = new Map();
+  const keys: Map<string, Bindings> = new Map();
+  const engine = Pipeline.getInstance();
+  const groupVariables = variables.sort();
   let op = engine.map(source, (bindings: Bindings) => {
-    const key = _hashBindings(variables, bindings)
-      // create a new group is needed
+    const key = _hashBindings(variables, bindings);
+    // create a new group is needed
     if (!groups.has(key)) {
-      keys.set(key, bindings.filter(variable => sortedIndexOf(groupVariables, variable) > -1))
-      groups.set(key, {})
+      keys.set(
+        key,
+        bindings.filter(
+          (variable) => sortedIndexOf(groupVariables, variable) > -1,
+        ),
+      );
+      groups.set(key, {});
     }
     // parse each binding in the intermediate format used by SPARQL expressions
     // and insert it into the corresponding group
     bindings.forEach((variable, value) => {
       if (!(variable in groups.get(key))) {
-        groups.get(key)[variable] = [ rdf.fromN3(value) ]
+        groups.get(key)[variable] = [rdf.fromN3(value)];
       } else {
-        groups.get(key)[variable].push(rdf.fromN3(value))
+        groups.get(key)[variable].push(rdf.fromN3(value));
       }
-    })
-    return null
-  })
+    });
+    return null;
+  });
   return engine.mergeMap(engine.collect(op), () => {
-    const aggregates: any[] = []
-      // transform each group in a set of bindings
+    const aggregates: any[] = [];
+    // transform each group in a set of bindings
     groups.forEach((group, key) => {
-        // also add the GROUP BY keys to the set of bindings
-      const b = keys.get(key)!.clone()
-      b.setProperty('__aggregate', group)
-      aggregates.push(b)
-    })
-    return engine.from(aggregates)
-  })
+      // also add the GROUP BY keys to the set of bindings
+      const b = keys.get(key)!.clone();
+      b.setProperty("__aggregate", group);
+      aggregates.push(b);
+    });
+    return engine.from(aggregates);
+  });
 }

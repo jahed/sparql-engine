@@ -22,68 +22,78 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-const GRAPH_IRI = 'htpp://example.org#some-graph'
+const GRAPH_IRI = "htpp://example.org#some-graph";
 
-describe('SPARQL UPDATE: DELETE DATA queries', () => {
-  let engine = null
+describe("SPARQL UPDATE: DELETE DATA queries", () => {
+  let engine = null;
   beforeEach(() => {
-    const gA = getGraph(null)
-    const gB = getGraph(null)
-    engine = new TestEngine(gA)
-    engine.addNamedGraph(GRAPH_IRI, gB)
-  })
+    const gA = getGraph(null);
+    const gB = getGraph(null);
+    engine = new TestEngine(gA);
+    engine.addNamedGraph(GRAPH_IRI, gB);
+  });
 
-  it('should evaluate DELETE DATA queries without a named Graph', done => {
+  it("should evaluate DELETE DATA queries without a named Graph", (done) => {
     const query = `
     DELETE DATA {
       <https://dblp.org/pers/m/Minier:Thomas> <https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf> <https://dblp.org/rec/conf/esws/MinierSMV18a>
-    }`
+    }`;
 
     engine._graph._store.addTriple(
-      'https://dblp.org/pers/m/Minier:Thomas',
-      'https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf',
-      'https://dblp.org/rec/conf/esws/MinierSMV18a')
+      "https://dblp.org/pers/m/Minier:Thomas",
+      "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf",
+      "https://dblp.org/rec/conf/esws/MinierSMV18a",
+    );
 
-    engine.execute(query)
+    engine
+      .execute(query)
       .execute()
       .then(() => {
         const triples = engine._graph._store.getTriples(
-          'https://dblp.org/pers/m/Minier:Thomas',
-          'https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf',
-          'https://dblp.org/rec/conf/esws/MinierSMV18a')
-        expect(triples.length).to.equal(0)
-        done()
+          "https://dblp.org/pers/m/Minier:Thomas",
+          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf",
+          "https://dblp.org/rec/conf/esws/MinierSMV18a",
+        );
+        expect(triples.length).to.equal(0);
+        done();
       })
-      .catch(done)
-  })
+      .catch(done);
+  });
 
-  it('should evaluate DELETE DATA queries using a named Graph', done => {
+  it("should evaluate DELETE DATA queries using a named Graph", (done) => {
     const query = `
     DELETE DATA {
       GRAPH <${GRAPH_IRI}> {
         <https://dblp.org/pers/m/Minier:Thomas> <https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf> <https://dblp.org/rec/conf/esws/MinierSMV18a>
       }
-    }`
-    engine.getNamedGraph(GRAPH_IRI)._store.addTriple(
-      'https://dblp.org/pers/m/Minier:Thomas',
-      'https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf',
-      'https://dblp.org/rec/conf/esws/MinierSMV18a')
+    }`;
+    engine
+      .getNamedGraph(GRAPH_IRI)
+      ._store.addTriple(
+        "https://dblp.org/pers/m/Minier:Thomas",
+        "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf",
+        "https://dblp.org/rec/conf/esws/MinierSMV18a",
+      );
 
-    engine.execute(query)
+    engine
+      .execute(query)
       .execute()
       .then(() => {
-        const triples = engine.getNamedGraph(GRAPH_IRI)._store.getTriples(
-          'https://dblp.org/pers/m/Minier:Thomas',
-          'https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf',
-          'https://dblp.org/rec/conf/esws/MinierSMV18a')
-        expect(triples.length).to.equal(0)
-        done()
+        const triples = engine
+          .getNamedGraph(GRAPH_IRI)
+          ._store.getTriples(
+            "https://dblp.org/pers/m/Minier:Thomas",
+            "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf",
+            "https://dblp.org/rec/conf/esws/MinierSMV18a",
+          );
+        expect(triples.length).to.equal(0);
+        done();
       })
-      .catch(done)
-  })
-})
+      .catch(done);
+  });
+});

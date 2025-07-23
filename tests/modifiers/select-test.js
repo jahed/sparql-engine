@@ -22,19 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-describe('SELECT SPARQL queries', () => {
-  let engine = null
+describe("SELECT SPARQL queries", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(g)
-  })
+    const g = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(g);
+  });
 
-  it('should evaluate simple SELECT SPARQL queries', done => {
+  it("should evaluate simple SELECT SPARQL queries", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -43,20 +43,24 @@ describe('SELECT SPARQL queries', () => {
       ?s rdf:type dblp-rdf:Person .
       ?s dblp-rdf:primaryFullPersonName ?name .
       ?s dblp-rdf:authorOf ?article .
-    }`
-    const results = []
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.keys('?name', '?article')
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(5)
-      done()
-    })
-  })
+    }`;
+    const results = [];
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?name", "?article");
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(5);
+        done();
+      },
+    );
+  });
 
-  it('should evaluate SELECT * queries', done => {
+  it("should evaluate SELECT * queries", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -65,20 +69,24 @@ describe('SELECT SPARQL queries', () => {
       ?s rdf:type dblp-rdf:Person .
       ?s dblp-rdf:primaryFullPersonName ?name .
       ?s dblp-rdf:authorOf ?article .
-    }`
-    const results = []
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.keys('?name', '?article', '?s')
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(5)
-      done()
-    })
-  })
+    }`;
+    const results = [];
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?name", "?article", "?s");
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(5);
+        done();
+      },
+    );
+  });
 
-  it('should evaluate SELECT DISTINCT queries', done => {
+  it("should evaluate SELECT DISTINCT queries", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -91,16 +99,20 @@ describe('SELECT SPARQL queries', () => {
         ?s rdf:type dblp-rdf:Person .
         ?s dblp-rdf:primaryFullPersonName ?name .
       }
-    }`
-    const results = []
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.keys('?name')
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(1)
-      done()
-    })
-  })
-})
+    }`;
+    const results = [];
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?name");
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(1);
+        done();
+      },
+    );
+  });
+});

@@ -22,31 +22,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { Consumable } from './consumer'
+import { Consumable } from "./consumer";
 
 /**
  * ManyConsumers group multiple {@link Consumable} to be evaluated in sequence
  * @author Thomas Minier
  */
 export default class ManyConsumers implements Consumable {
-  private readonly _consumers: Consumable[]
+  private readonly _consumers: Consumable[];
 
   /**
    * Constructor
    * @param consumers - Set of consumables
    */
-  constructor (consumers: Consumable[]) {
-    this._consumers = consumers
+  constructor(consumers: Consumable[]) {
+    this._consumers = consumers;
   }
 
-  execute (): Promise<void> {
+  execute(): Promise<void> {
     if (this._consumers.length === 1) {
-      return this._consumers[0].execute()
+      return this._consumers[0].execute();
     }
     return this._consumers.reduce((prev, consumer) => {
-      return prev.then(() => consumer.execute())
-    }, Promise.resolve())
+      return prev.then(() => consumer.execute());
+    }, Promise.resolve());
   }
 }

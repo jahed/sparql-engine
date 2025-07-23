@@ -5,6 +5,7 @@
   "main": "dist/api.js",
   "types": "dist/api.d.ts",
   "scripts": {
+    "format": "prettier -w .",
     "build": "tsc",
     "pretest": "npm run build",
     "test": "mocha tests/**/*-test.js"
@@ -43,6 +44,7 @@
     "chai": "^4.1.2",
     "chai-xml": "^0.3.2",
     "mocha": "^5.2.0",
+    "prettier": "^3.6.2",
     "sparqljs-legacy-type": "^1.0.2",
     "standard": "^11.0.1",
     "typescript": "5.8.x"

@@ -22,12 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
 /**
  * Enum describing the query capabilities of a Graph
  */
 export enum GRAPH_CAPABILITY {
   UNION,
-  ESTIMATE_TRIPLE_CARD
+  ESTIMATE_TRIPLE_CARD,
 }

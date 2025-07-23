@@ -22,15 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import StageBuilder from './stage-builder'
-import { Algebra } from 'sparqljs'
-import { Pipeline } from '../pipeline/pipeline'
-import { PipelineStage } from '../pipeline/pipeline-engine'
-import { Bindings } from '../../rdf/bindings'
-import ExecutionContext from '../context/execution-context'
-import ContextSymbols from '../context/symbols'
+import StageBuilder from "./stage-builder";
+import { Algebra } from "sparqljs";
+import { Pipeline } from "../pipeline/pipeline";
+import { PipelineStage } from "../pipeline/pipeline-engine";
+import { Bindings } from "../../rdf/bindings";
+import ExecutionContext from "../context/execution-context";
+import ContextSymbols from "../context/symbols";
 
 /**
  * A ServiceStageBuilder is responsible for evaluation a SERVICE clause in a SPARQL query.
@@ -45,31 +45,41 @@ export default class ServiceStageBuilder extends StageBuilder {
    * @param  options - Execution options
    * @return A {@link PipelineStage} used to evaluate a SERVICE clause
    */
-  execute (source: PipelineStage<Bindings>, node: Algebra.ServiceNode, context: ExecutionContext): PipelineStage<Bindings> {
-    let subquery: Algebra.RootNode
-    if (node.patterns[0].type === 'query') {
-      subquery = node.patterns[0] as Algebra.RootNode
+  execute(
+    source: PipelineStage<Bindings>,
+    node: Algebra.ServiceNode,
+    context: ExecutionContext,
+  ): PipelineStage<Bindings> {
+    let subquery: Algebra.RootNode;
+    if (node.patterns[0].type === "query") {
+      subquery = node.patterns[0] as Algebra.RootNode;
     } else {
       subquery = {
         prefixes: context.getProperty(ContextSymbols.PREFIXES),
-        queryType: 'SELECT',
-        variables: ['*'],
-        type: 'query',
-        where: node.patterns
-      }
+        queryType: "SELECT",
+        variables: ["*"],
+        type: "query",
+        where: node.patterns,
+      };
     }
     // auto-add the graph used to evaluate the SERVICE close if it is missing from the dataset
-    if ((this.dataset.getDefaultGraph().iri !== node.name) && (!this.dataset.hasNamedGraph(node.name))) {
-      const graph = this.dataset.createGraph(node.name)
-      this.dataset.addNamedGraph(node.name, graph)
+    if (
+      this.dataset.getDefaultGraph().iri !== node.name &&
+      !this.dataset.hasNamedGraph(node.name)
+    ) {
+      const graph = this.dataset.createGraph(node.name);
+      this.dataset.addNamedGraph(node.name, graph);
     }
-    let handler = undefined
+    let handler = undefined;
     if (node.silent) {
       handler = () => {
-        return Pipeline.getInstance().empty<Bindings>()
-      }
+        return Pipeline.getInstance().empty<Bindings>();
+      };
     }
-    return Pipeline.getInstance().catch<Bindings, Bindings>(this._buildIterator(source, node.name, subquery, context), handler)
+    return Pipeline.getInstance().catch<Bindings, Bindings>(
+      this._buildIterator(source, node.name, subquery, context),
+      handler,
+    );
   }
 
   /**
@@ -81,9 +91,14 @@ export default class ServiceStageBuilder extends StageBuilder {
    * @param options   - Execution options
    * @return A {@link PipelineStage} used to evaluate a SERVICE clause
    */
-  _buildIterator (source: PipelineStage<Bindings>, iri: string, subquery: Algebra.RootNode, context: ExecutionContext): PipelineStage<Bindings> {
-    const opts = context.clone()
-    opts.defaultGraphs = [ iri ]
-    return this._builder!._buildQueryPlan(subquery, opts, source)
+  _buildIterator(
+    source: PipelineStage<Bindings>,
+    iri: string,
+    subquery: Algebra.RootNode,
+    context: ExecutionContext,
+  ): PipelineStage<Bindings> {
+    const opts = context.clone();
+    opts.defaultGraphs = [iri];
+    return this._builder!._buildQueryPlan(subquery, opts, source);
   }
 }

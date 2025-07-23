@@ -22,66 +22,66 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { Dataset, Graph, HashMapDataset } = require('../../dist/api.js')
+const expect = require("chai").expect;
+const { Dataset, Graph, HashMapDataset } = require("../../dist/api.js");
 
-describe('Dataset', () => {
+describe("Dataset", () => {
   it('should enforce subclasses to implement a "setDefaultGraph" method', () => {
-    const d = new Dataset()
-    expect(() => d.setDefaultGraph()).to.throw(Error)
-  })
+    const d = new Dataset();
+    expect(() => d.setDefaultGraph()).to.throw(Error);
+  });
 
   it('should enforce subclasses to implement a "getDefaultGraph" method', () => {
-    const d = new Dataset()
-    expect(() => d.getDefaultGraph()).to.throw(Error)
-  })
+    const d = new Dataset();
+    expect(() => d.getDefaultGraph()).to.throw(Error);
+  });
 
   it('should enforce subclasses to implement a "addNamedGraph" method', () => {
-    const d = new Dataset()
-    expect(() => d.addNamedGraph()).to.throw(Error)
-  })
+    const d = new Dataset();
+    expect(() => d.addNamedGraph()).to.throw(Error);
+  });
 
   it('should enforce subclasses to implement a "getNamedGraph" method', () => {
-    const d = new Dataset()
-    expect(() => d.getNamedGraph()).to.throw(Error)
-  })
+    const d = new Dataset();
+    expect(() => d.getNamedGraph()).to.throw(Error);
+  });
 
   it('should provides a generic "getAllGraphs()" implementation', () => {
-    const gA = new Graph()
-    const gB = new Graph()
-    const GRAPH_A_IRI = 'http://example.org#A'
-    const GRAPH_B_IRI = 'http://example.org#B'
-    const d = new HashMapDataset(GRAPH_A_IRI, gA)
-    d.addNamedGraph(GRAPH_B_IRI, gB)
-    const all = d.getAllGraphs()
-    expect(all.length).to.equal(2)
-    all.forEach(g => {
-      expect(g.iri).to.be.oneOf([GRAPH_A_IRI, GRAPH_B_IRI])
-    })
-  })
+    const gA = new Graph();
+    const gB = new Graph();
+    const GRAPH_A_IRI = "http://example.org#A";
+    const GRAPH_B_IRI = "http://example.org#B";
+    const d = new HashMapDataset(GRAPH_A_IRI, gA);
+    d.addNamedGraph(GRAPH_B_IRI, gB);
+    const all = d.getAllGraphs();
+    expect(all.length).to.equal(2);
+    all.forEach((g) => {
+      expect(g.iri).to.be.oneOf([GRAPH_A_IRI, GRAPH_B_IRI]);
+    });
+  });
 
-  describe('#getUnionGraph', () => {
-    const gA = new Graph()
-    const gB = new Graph()
-    const GRAPH_A_IRI = 'http://example.org#A'
-    const GRAPH_B_IRI = 'http://example.org#B'
-    const d = new HashMapDataset(GRAPH_A_IRI, gA)
-    d.addNamedGraph(GRAPH_B_IRI, gB)
+  describe("#getUnionGraph", () => {
+    const gA = new Graph();
+    const gB = new Graph();
+    const GRAPH_A_IRI = "http://example.org#A";
+    const GRAPH_B_IRI = "http://example.org#B";
+    const d = new HashMapDataset(GRAPH_A_IRI, gA);
+    d.addNamedGraph(GRAPH_B_IRI, gB);
 
-    it('should provides an UnionGraph (including the Default Graph)', () => {
-      const union = d.getUnionGraph([GRAPH_B_IRI], true)
-      expect(union._graphs.length).to.equal(2)
-      union._graphs.forEach(g => {
-        expect(g.iri).to.be.oneOf([GRAPH_A_IRI, GRAPH_B_IRI])
-      })
-    })
+    it("should provides an UnionGraph (including the Default Graph)", () => {
+      const union = d.getUnionGraph([GRAPH_B_IRI], true);
+      expect(union._graphs.length).to.equal(2);
+      union._graphs.forEach((g) => {
+        expect(g.iri).to.be.oneOf([GRAPH_A_IRI, GRAPH_B_IRI]);
+      });
+    });
 
-    it('should provides an UnionGraph (excluding the Default Graph)', () => {
-      const union = d.getUnionGraph([GRAPH_B_IRI], false)
-      expect(union._graphs.length).to.equal(1)
-      expect(union._graphs[0].iri).to.equal(GRAPH_B_IRI)
-    })
-  })
-})
+    it("should provides an UnionGraph (excluding the Default Graph)", () => {
+      const union = d.getUnionGraph([GRAPH_B_IRI], false);
+      expect(union._graphs.length).to.equal(1);
+      expect(union._graphs[0].iri).to.equal(GRAPH_B_IRI);
+    });
+  });
+});

@@ -22,16 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { Pipeline } from '../../engine/pipeline/pipeline'
-import { PipelineStage } from '../../engine/pipeline/pipeline-engine'
-import Graph from '../../rdf/graph'
-import { Bindings, BindingBase } from '../../rdf/bindings'
-import { Algebra } from 'sparqljs'
-import { rdf } from '../../utils'
-import { mapKeys, pickBy } from 'lodash'
-import ExecutionContext from '../../engine/context/execution-context'
+import { Pipeline } from "../../engine/pipeline/pipeline";
+import { PipelineStage } from "../../engine/pipeline/pipeline-engine";
+import Graph from "../../rdf/graph";
+import { Bindings, BindingBase } from "../../rdf/bindings";
+import { Algebra } from "sparqljs";
+import { rdf } from "../../utils";
+import { mapKeys, pickBy } from "lodash";
+import ExecutionContext from "../../engine/context/execution-context";
 
 /**
  * Perform a join between a source of solution bindings (left relation)
@@ -45,20 +45,30 @@ import ExecutionContext from '../../engine/context/execution-context'
  * @return A {@link PipelineStage} which evaluate the join
  * @author Thomas Minier
  */
-export default function indexJoin (source: PipelineStage<Bindings>, pattern: Algebra.TripleObject, graph: Graph, context: ExecutionContext) {
-  const engine = Pipeline.getInstance()
+export default function indexJoin(
+  source: PipelineStage<Bindings>,
+  pattern: Algebra.TripleObject,
+  graph: Graph,
+  context: ExecutionContext,
+) {
+  const engine = Pipeline.getInstance();
   return engine.mergeMap(source, (bindings: Bindings) => {
-    const boundedPattern = bindings.bound(pattern)
+    const boundedPattern = bindings.bound(pattern);
     // const hasVars = some(boundedPattern, (v: any) => v.startsWith('?'))
-    return engine.map(engine.from(graph.find(boundedPattern, context)), (item: Algebra.TripleObject) => {
-      let temp = pickBy(item, (v, k) => {
-        return rdf.isVariable(boundedPattern[k as keyof Algebra.TripleObject])
-      })
-      temp = mapKeys(temp, (v, k) => {
-        return boundedPattern[k as keyof Algebra.TripleObject]
-      })
-      // if (size(temp) === 0 && hasVars) return null
-      return BindingBase.fromObject(temp).union(bindings)
-    })
-  })
+    return engine.map(
+      engine.from(graph.find(boundedPattern, context)),
+      (item: Algebra.TripleObject) => {
+        let temp = pickBy(item, (v, k) => {
+          return rdf.isVariable(
+            boundedPattern[k as keyof Algebra.TripleObject],
+          );
+        });
+        temp = mapKeys(temp, (v, k) => {
+          return boundedPattern[k as keyof Algebra.TripleObject];
+        });
+        // if (size(temp) === 0 && hasVars) return null
+        return BindingBase.fromObject(temp).union(bindings);
+      },
+    );
+  });
 }

@@ -22,19 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-describe('Queries with Turtle notation', () => {
-  let engine = null
+describe("Queries with Turtle notation", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(g)
-  })
+    const g = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(g);
+  });
 
-  it('should evaluate SPARQL queries with Turtle notation', done => {
+  it("should evaluate SPARQL queries with Turtle notation", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -45,16 +45,20 @@ describe('Queries with Turtle notation', () => {
         dblp-rdf:primaryFullPersonName ?name ;
         dblp-rdf:authorOf ?article
       ] .
-    }`
-    const results = []
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.keys('?name', '?article')
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(5)
-      done()
-    })
-  })
-})
+    }`;
+    const results = [];
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.keys("?name", "?article");
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(5);
+        done();
+      },
+    );
+  });
+});

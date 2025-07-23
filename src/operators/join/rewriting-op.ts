@@ -22,64 +22,74 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { Pipeline } from '../../engine/pipeline/pipeline'
-import ExecutionContext from '../../engine/context/execution-context'
-import Graph from '../../rdf/graph'
-import { Bindings } from '../../rdf/bindings'
-import { evaluation } from '../../utils'
-import { Algebra } from 'sparqljs'
-import { PipelineStage } from '../../engine/pipeline/pipeline-engine'
-import BGPStageBuilder from '../../engine/stages/bgp-stage-builder'
+import { Pipeline } from "../../engine/pipeline/pipeline";
+import ExecutionContext from "../../engine/context/execution-context";
+import Graph from "../../rdf/graph";
+import { Bindings } from "../../rdf/bindings";
+import { evaluation } from "../../utils";
+import { Algebra } from "sparqljs";
+import { PipelineStage } from "../../engine/pipeline/pipeline-engine";
+import BGPStageBuilder from "../../engine/stages/bgp-stage-builder";
 
 /**
  * Find a rewriting key in a list of variables
  * For example, in [ ?s, ?o_1 ], the rewriting key is 1
  * @private
  */
-function findKey (variables: IterableIterator<string>, maxValue: number = 15): number {
-  let key = -1
+function findKey(
+  variables: IterableIterator<string>,
+  maxValue: number = 15,
+): number {
+  let key = -1;
   for (let v of variables) {
     for (let i = 0; i < maxValue; i++) {
       if (v.endsWith(`_${i}`)) {
-        return i
+        return i;
       }
     }
   }
-  return key
+  return key;
 }
 
 /**
  * Undo the bound join rewriting on solutions bindings, e.g., rewrite all variables "?o_1" to "?o"
  * @private
  */
-function revertBinding (key: number, input: Bindings, variables: IterableIterator<string>): Bindings {
-  const newBinding = input.empty()
+function revertBinding(
+  key: number,
+  input: Bindings,
+  variables: IterableIterator<string>,
+): Bindings {
+  const newBinding = input.empty();
   for (let vName of variables) {
-    let suffix = `_${key}`
+    let suffix = `_${key}`;
     if (vName.endsWith(suffix)) {
-      const index = vName.indexOf(suffix)
-      newBinding.set(vName.substring(0, index), input.get(vName)!)
+      const index = vName.indexOf(suffix);
+      newBinding.set(vName.substring(0, index), input.get(vName)!);
     } else {
-      newBinding.set(vName, input.get(vName)!)
+      newBinding.set(vName, input.get(vName)!);
     }
   }
-  return newBinding
+  return newBinding;
 }
 
 /**
  * Undo the rewriting on solutions bindings, and then merge each of them with the corresponding input binding
  * @private
  */
-function rewriteSolutions (bindings: Bindings, rewritingMap: Map<number, Bindings>): Bindings {
-  const key = findKey(bindings.variables())
+function rewriteSolutions(
+  bindings: Bindings,
+  rewritingMap: Map<number, Bindings>,
+): Bindings {
+  const key = findKey(bindings.variables());
   // rewrite binding, and then merge it with the corresponding one in the bucket
-  let newBinding = revertBinding(key, bindings, bindings.variables())
+  let newBinding = revertBinding(key, bindings, bindings.variables());
   if (rewritingMap.has(key)) {
-    newBinding = newBinding.union(rewritingMap.get(key)!)
+    newBinding = newBinding.union(rewritingMap.get(key)!);
   }
-  return newBinding
+  return newBinding;
 }
 
 /**
@@ -94,23 +104,42 @@ function rewriteSolutions (bindings: Bindings, rewritingMap: Map<number, Binding
  * @param  context - Query execution context
  * @return A pipeline stage which evaluates the query.
  */
-export default function rewritingOp (graph: Graph, bgpBucket: Algebra.TripleObject[][], rewritingTable: Map<number, Bindings>, builder: BGPStageBuilder, context: ExecutionContext) {
-  let source
+export default function rewritingOp(
+  graph: Graph,
+  bgpBucket: Algebra.TripleObject[][],
+  rewritingTable: Map<number, Bindings>,
+  builder: BGPStageBuilder,
+  context: ExecutionContext,
+) {
+  let source;
   if (context.cachingEnabled()) {
     // partition the BGPs that can be evaluated using the cache from the others
-    const stages: PipelineStage<Bindings>[] = []
-    const others: Algebra.TripleObject[][] = []
-    bgpBucket.forEach(patterns => {
+    const stages: PipelineStage<Bindings>[] = [];
+    const others: Algebra.TripleObject[][] = [];
+    bgpBucket.forEach((patterns) => {
       if (context.cache!.has({ patterns, graphIRI: graph.iri })) {
-        stages.push(evaluation.cacheEvalBGP(patterns, graph, context.cache!, builder, context))
+        stages.push(
+          evaluation.cacheEvalBGP(
+            patterns,
+            graph,
+            context.cache!,
+            builder,
+            context,
+          ),
+        );
       } else {
-        others.push(patterns)
+        others.push(patterns);
       }
-    })
+    });
     // merge all sources from the cache first, and then the evaluation of bgp that are not in the cache
-    source = Pipeline.getInstance().merge(Pipeline.getInstance().merge(...stages), graph.evalUnion(others, context))
+    source = Pipeline.getInstance().merge(
+      Pipeline.getInstance().merge(...stages),
+      graph.evalUnion(others, context),
+    );
   } else {
-    source = graph.evalUnion(bgpBucket, context)
+    source = graph.evalUnion(bgpBucket, context);
   }
-  return Pipeline.getInstance().map(source, bindings => rewriteSolutions(bindings, rewritingTable))
+  return Pipeline.getInstance().map(source, (bindings) =>
+    rewriteSolutions(bindings, rewritingTable),
+  );
 }

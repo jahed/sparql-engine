@@ -22,220 +22,220 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const _ = require('lodash')
+const _ = require("lodash");
 
 // rewriting rules for property paths
 
-function transformPath (bgp, group, options) {
-  let i = 0
-  var queryChange = false
-  var ret = [bgp, null, []]
+function transformPath(bgp, group, options) {
+  let i = 0;
+  var queryChange = false;
+  var ret = [bgp, null, []];
   while (i < bgp.length && !queryChange) {
-    var curr = bgp[i]
-    if (typeof curr.predicate !== 'string' && curr.predicate.type === 'path') {
+    var curr = bgp[i];
+    if (typeof curr.predicate !== "string" && curr.predicate.type === "path") {
       switch (curr.predicate.pathType) {
-        case '/':
-          ret = pathSeq(bgp, curr, i, group, ret[2], options)
+        case "/":
+          ret = pathSeq(bgp, curr, i, group, ret[2], options);
           if (ret[1] != null) {
-            queryChange = true
+            queryChange = true;
           }
-          break
-        case '^':
-          ret = pathInv(bgp, curr, i, group, ret[2], options)
+          break;
+        case "^":
+          ret = pathInv(bgp, curr, i, group, ret[2], options);
           if (ret[1] != null) {
-            queryChange = true
+            queryChange = true;
           }
-          break
-        case '|':
-          ret = pathAlt(bgp, curr, i, group, ret[2], options)
-          queryChange = true
-          break
-        case '!':
-          ret = pathNeg(bgp, curr, i, group, ret[2], options)
-          queryChange = true
-          break
+          break;
+        case "|":
+          ret = pathAlt(bgp, curr, i, group, ret[2], options);
+          queryChange = true;
+          break;
+        case "!":
+          ret = pathNeg(bgp, curr, i, group, ret[2], options);
+          queryChange = true;
+          break;
         default:
-          break
+          break;
       }
     }
-    i++
+    i++;
   }
-  return ret
+  return ret;
 }
 
-function pathSeq (bgp, pathTP, ind, group, filter, options) {
-  let s = pathTP.subject
-  let p = pathTP.predicate
-  let o = pathTP.object
-  var union = null
-  var newTPs = []
-  var blank = '?tmp_' + Math.random().toString(36).substring(8)
+function pathSeq(bgp, pathTP, ind, group, filter, options) {
+  let s = pathTP.subject;
+  let p = pathTP.predicate;
+  let o = pathTP.object;
+  var union = null;
+  var newTPs = [];
+  var blank = "?tmp_" + Math.random().toString(36).substring(8);
   if (options.artificials == null) {
-    options.artificials = []
+    options.artificials = [];
   }
-  options.artificials.push(blank)
+  options.artificials.push(blank);
   for (var j = 0; j < p.items.length; j++) {
-    var newTP = {}
+    var newTP = {};
     if (j === 0) {
-      newTP.subject = s
-      newTP.predicate = p.items[j]
-      newTP.object = blank
+      newTP.subject = s;
+      newTP.predicate = p.items[j];
+      newTP.object = blank;
     } else {
-      var prev = blank
-      blank = '?tmp_' + Math.random().toString(36).substring(8)
+      var prev = blank;
+      blank = "?tmp_" + Math.random().toString(36).substring(8);
       if (options.artificials == null) {
-        options.artificials = []
+        options.artificials = [];
       }
-      options.artificials.push(blank)
-      newTP.subject = prev
-      newTP.predicate = p.items[j]
-      newTP.object = blank
+      options.artificials.push(blank);
+      newTP.subject = prev;
+      newTP.predicate = p.items[j];
+      newTP.object = blank;
       if (j === p.items.length - 1) {
-        newTP.object = o
+        newTP.object = o;
       }
     }
-    var recurs = transformPath([newTP], group, options)
+    var recurs = transformPath([newTP], group, options);
     if (recurs[1] != null) {
-      union = recurs[1]
-      return [bgp, union, filter]
+      union = recurs[1];
+      return [bgp, union, filter];
     }
     if (recurs[2] != null) {
       for (let i = 0; i < recurs[2].length; i++) {
-        filter.push(recurs[2][i])
+        filter.push(recurs[2][i]);
       }
     }
-    var recursedBGP = recurs[0]
-    recursedBGP.map(tp => newTPs.push(tp))
+    var recursedBGP = recurs[0];
+    recursedBGP.map((tp) => newTPs.push(tp));
   }
-  bgp[ind] = newTPs[0]
+  bgp[ind] = newTPs[0];
   for (var k = 1; k < newTPs.length; k++) {
-    bgp.splice(ind + k, 0, newTPs[k])
+    bgp.splice(ind + k, 0, newTPs[k]);
   }
-  return [bgp, union, filter]
+  return [bgp, union, filter];
 }
 
-function pathInv (bgp, pathTP, ind, group, filter, options) {
-  var union = null
-  let s = pathTP.subject
-  let p = pathTP.predicate.items[0]
-  let o = pathTP.object
-  var newTP = {subject: o, predicate: p, object: s}
-  var recurs = transformPath([newTP], group, options)
+function pathInv(bgp, pathTP, ind, group, filter, options) {
+  var union = null;
+  let s = pathTP.subject;
+  let p = pathTP.predicate.items[0];
+  let o = pathTP.object;
+  var newTP = { subject: o, predicate: p, object: s };
+  var recurs = transformPath([newTP], group, options);
   if (recurs[1] != null) {
-    union = recurs[1]
-    return [bgp, union, filter]
+    union = recurs[1];
+    return [bgp, union, filter];
   }
   if (recurs[2] != null) {
     for (let i = 0; i < recurs[2].length; i++) {
-      filter.push(recurs[2][i])
+      filter.push(recurs[2][i]);
     }
   }
-  var recursedBGP = recurs[0]
-  bgp[ind] = recursedBGP[0]
+  var recursedBGP = recurs[0];
+  bgp[ind] = recursedBGP[0];
   if (recursedBGP.length > 1) {
     for (let i = 1; i < recursedBGP.length; i++) {
-      bgp.push(recursedBGP[i])
+      bgp.push(recursedBGP[i]);
     }
   }
-  return [bgp, union, filter]
+  return [bgp, union, filter];
 }
 
-function pathAlt (bgp, pathTP, ind, group, filter, options) {
-  var pathIndex = 0
+function pathAlt(bgp, pathTP, ind, group, filter, options) {
+  var pathIndex = 0;
   for (let i = 0; i < group.triples.length; i++) {
     if (containsPath(group.triples[i].predicate, pathTP)) {
-      pathIndex = i
+      pathIndex = i;
     }
   }
   // let s = pathTP.subject
-  let p = pathTP.predicate.items
+  let p = pathTP.predicate.items;
   // let o = pathTP.object
-  var union = {type: 'union'}
-  union.patterns = []
+  var union = { type: "union" };
+  union.patterns = [];
   for (let i = 0; i < p.length; i++) {
-    var newBGP = _.cloneDeep(group)
+    var newBGP = _.cloneDeep(group);
     if (_.isEqual(newBGP.triples[pathIndex].predicate, pathTP.predicate)) {
-      newBGP.triples[pathIndex].predicate = p[i]
+      newBGP.triples[pathIndex].predicate = p[i];
     } else {
-      replPath(newBGP.triples[pathIndex].predicate, pathTP, p[i])
+      replPath(newBGP.triples[pathIndex].predicate, pathTP, p[i]);
     }
-    union.patterns.push(newBGP)
+    union.patterns.push(newBGP);
   }
-  bgp.splice(ind, 1)
-  return [bgp, union, filter]
+  bgp.splice(ind, 1);
+  return [bgp, union, filter];
 }
 
-function pathNeg (bgp, pathTP, ind, group, filter, options) {
-  var union = null
-  let flt = null
-  let s = pathTP.subject
-  let p = pathTP.predicate.items[0]
-  let o = pathTP.object
-  var blank = '?tmp_' + Math.random().toString(36).substring(8)
+function pathNeg(bgp, pathTP, ind, group, filter, options) {
+  var union = null;
+  let flt = null;
+  let s = pathTP.subject;
+  let p = pathTP.predicate.items[0];
+  let o = pathTP.object;
+  var blank = "?tmp_" + Math.random().toString(36).substring(8);
   if (options.artificials == null) {
-    options.artificials = []
+    options.artificials = [];
   }
-  options.artificials.push(blank)
-  var newTP = {subject: s, predicate: blank, object: o}
-  if (typeof p === 'string') {
+  options.artificials.push(blank);
+  var newTP = { subject: s, predicate: blank, object: o };
+  if (typeof p === "string") {
     flt = {
-      type: 'filter',
+      type: "filter",
       expression: {
-        type: 'operation',
-        operator: '!=',
-        args: [blank, p]
-      }
-    }
-    filter.push(flt)
+        type: "operation",
+        operator: "!=",
+        args: [blank, p],
+      },
+    };
+    filter.push(flt);
   } else {
-    var preds = p.items
+    var preds = p.items;
     for (let i = 0; i < preds.length; i++) {
-      let pred = preds[i]
+      let pred = preds[i];
       flt = {
-        type: 'filter',
+        type: "filter",
         expression: {
-          type: 'operation',
-          operator: '!=',
-          args: [blank, pred]
-        }
-      }
-      filter.push(flt)
+          type: "operation",
+          operator: "!=",
+          args: [blank, pred],
+        },
+      };
+      filter.push(flt);
     }
   }
-  bgp[ind] = newTP
-  return [bgp, union, filter]
+  bgp[ind] = newTP;
+  return [bgp, union, filter];
 }
 
-function containsPath (branch, path) {
-  if (typeof branch === 'string') {
-    return false
+function containsPath(branch, path) {
+  if (typeof branch === "string") {
+    return false;
   } else if (branch === path.predicate) {
-    return true
+    return true;
   } else {
-    var result = false
+    var result = false;
     for (let i = 0; i < branch.items.length; i++) {
       if (containsPath(branch.items[i], path)) {
-        result = true
+        result = true;
       }
     }
-    return result
+    return result;
   }
 }
 
-function replPath (tp, path, pred) {
+function replPath(tp, path, pred) {
   if (_.isEqual(tp, path.predicate)) {
-    return true
-  } else if (typeof tp !== 'string') {
+    return true;
+  } else if (typeof tp !== "string") {
     for (let i = 0; i < tp.items.length; i++) {
       if (replPath(tp.items[i], path, pred)) {
-        tp.items[i] = pred
+        tp.items[i] = pred;
       }
     }
   }
 }
 
 module.exports = {
-  transformPath
-}
+  transformPath,
+};

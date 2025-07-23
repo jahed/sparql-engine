@@ -22,19 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-describe('SPARQL VALUES', () => {
-  let engine = null
+describe("SPARQL VALUES", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(g)
-  })
+    const g = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(g);
+  });
 
-  it('should evaluates VALUES clauses', done => {
+  it("should evaluates VALUES clauses", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -45,25 +45,29 @@ describe('SPARQL VALUES', () => {
       ?s dblp-rdf:primaryFullPersonName ?name .
       ?s dblp-rdf:authorOf ?article .
       VALUES ?article { esws:MinierSMV18a esws:MinierMSM17 }
-    }`
-    const results = []
+    }`;
+    const results = [];
 
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.all.keys('?name', '?article')
-      expect(b['?article']).to.be.oneOf([
-        'https://dblp.org/rec/conf/esws/MinierMSM17',
-        'https://dblp.org/rec/conf/esws/MinierSMV18a'
-      ])
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(2)
-      done()
-    })
-  })
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.all.keys("?name", "?article");
+        expect(b["?article"]).to.be.oneOf([
+          "https://dblp.org/rec/conf/esws/MinierMSM17",
+          "https://dblp.org/rec/conf/esws/MinierSMV18a",
+        ]);
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(2);
+        done();
+      },
+    );
+  });
 
-  it('should evaluates VALUES clauses mixed with Property Paths', done => {
+  it("should evaluates VALUES clauses mixed with Property Paths", (done) => {
     const query = `
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
     PREFIX esws: <https://dblp.org/rec/conf/esws/>
@@ -71,22 +75,28 @@ describe('SPARQL VALUES', () => {
     SELECT ?author ?article WHERE {
       ?author owl:sameAs/dblp-rdf:authorOf ?article .
       VALUES ?article { esws:MinierSMV18a esws:MinierMSM17 }
-    }`
-    const results = []
+    }`;
+    const results = [];
 
-    const iterator = engine.execute(query)
-    iterator.subscribe(b => {
-      b = b.toObject()
-      expect(b).to.have.all.keys('?author', '?article')
-      expect(b['?author']).to.equal('https://dblp.uni-trier.de/pers/m/Minier:Thomas')
-      expect(b['?article']).to.be.oneOf([
-        'https://dblp.org/rec/conf/esws/MinierMSM17',
-        'https://dblp.org/rec/conf/esws/MinierSMV18a'
-      ])
-      results.push(b)
-    }, done, () => {
-      expect(results.length).to.equal(2)
-      done()
-    })
-  })
-})
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (b) => {
+        b = b.toObject();
+        expect(b).to.have.all.keys("?author", "?article");
+        expect(b["?author"]).to.equal(
+          "https://dblp.uni-trier.de/pers/m/Minier:Thomas",
+        );
+        expect(b["?article"]).to.be.oneOf([
+          "https://dblp.org/rec/conf/esws/MinierMSM17",
+          "https://dblp.org/rec/conf/esws/MinierSMV18a",
+        ]);
+        results.push(b);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(2);
+        done();
+      },
+    );
+  });
+});

@@ -22,14 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { Pipeline } from '../../engine/pipeline/pipeline'
-import { PipelineStage } from '../../engine/pipeline/pipeline-engine'
-import { Algebra } from 'sparqljs'
-import { compact } from 'lodash'
-import { rdf } from '../../utils'
-import { Bindings } from '../../rdf/bindings'
+import { Pipeline } from "../../engine/pipeline/pipeline";
+import { PipelineStage } from "../../engine/pipeline/pipeline-engine";
+import { Algebra } from "sparqljs";
+import { compact } from "lodash";
+import { rdf } from "../../utils";
+import { Bindings } from "../../rdf/bindings";
 
 /**
  * A ConstructOperator transform solution mappings into RDF triples, according to a template
@@ -39,17 +39,24 @@ import { Bindings } from '../../rdf/bindings'
  * @return A {@link PipelineStage} which evaluate the CONSTRUCT modifier
  * @author Thomas Minier
  */
-export default function construct (source: PipelineStage<Bindings>, query: any) {
-  const rawTriples: Algebra.TripleObject[] = []
+export default function construct(source: PipelineStage<Bindings>, query: any) {
+  const rawTriples: Algebra.TripleObject[] = [];
   const templates: Algebra.TripleObject[] = query.template.filter((t: any) => {
-    if (rdf.isVariable(t.subject) || rdf.isVariable(t.predicate) || rdf.isVariable(t.object)) {
-      return true
+    if (
+      rdf.isVariable(t.subject) ||
+      rdf.isVariable(t.predicate) ||
+      rdf.isVariable(t.object)
+    ) {
+      return true;
     }
-    rawTriples.push(t)
-    return false
-  })
-  const engine = Pipeline.getInstance()
-  return engine.endWith(engine.flatMap(source, (bindings: Bindings) => {
-    return compact(templates.map(t => bindings.bound(t)))
-  }), rawTriples)
+    rawTriples.push(t);
+    return false;
+  });
+  const engine = Pipeline.getInstance();
+  return engine.endWith(
+    engine.flatMap(source, (bindings: Bindings) => {
+      return compact(templates.map((t) => bindings.bound(t)));
+    }),
+    rawTriples,
+  );
 }

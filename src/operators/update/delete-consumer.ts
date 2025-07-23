@@ -22,12 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { Consumer } from './consumer'
-import Graph from '../../rdf/graph'
-import { PipelineStage } from '../../engine/pipeline/pipeline-engine'
-import { Algebra } from 'sparqljs'
+import { Consumer } from "./consumer";
+import Graph from "../../rdf/graph";
+import { PipelineStage } from "../../engine/pipeline/pipeline-engine";
+import { Algebra } from "sparqljs";
 
 /**
  * A DeleteConsumer evaluates a SPARQL DELETE clause
@@ -35,7 +35,7 @@ import { Algebra } from 'sparqljs'
  * @author Thomas Minier
  */
 export default class DeleteConsumer extends Consumer {
-  private readonly _graph: Graph
+  private readonly _graph: Graph;
 
   /**
    * Constructor
@@ -43,17 +43,26 @@ export default class DeleteConsumer extends Consumer {
    * @param graph - Input RDF Graph
    * @param options - Execution options
    */
-  constructor (source: PipelineStage<Algebra.TripleObject>, graph: Graph, options: Object) {
-    super(source, options)
-    this._graph = graph
+  constructor(
+    source: PipelineStage<Algebra.TripleObject>,
+    graph: Graph,
+    options: Object,
+  ) {
+    super(source, options);
+    this._graph = graph;
   }
 
-  _write (triple: Algebra.TripleObject, encoding: string | undefined, done: (err?: Error) => void): void {
-    this._graph.delete(triple)
+  _write(
+    triple: Algebra.TripleObject,
+    encoding: string | undefined,
+    done: (err?: Error) => void,
+  ): void {
+    this._graph
+      .delete(triple)
       .then(() => done())
-      .catch(err => {
-        this.emit('error', err)
-        done(err)
-      })
+      .catch((err) => {
+        this.emit("error", err);
+        done(err);
+      });
   }
 }

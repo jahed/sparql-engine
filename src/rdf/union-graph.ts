@@ -22,13 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import Graph from './graph'
-import { PipelineInput } from '../engine/pipeline/pipeline-engine'
-import { Pipeline } from '../engine/pipeline/pipeline'
-import { Algebra } from 'sparqljs'
-import ExecutionContext from '../engine/context/execution-context'
+import Graph from "./graph";
+import { PipelineInput } from "../engine/pipeline/pipeline-engine";
+import { Pipeline } from "../engine/pipeline/pipeline";
+import { Algebra } from "sparqljs";
+import ExecutionContext from "../engine/context/execution-context";
 
 /**
  * An UnionGraph represents the dynamic union of several graphs.
@@ -39,38 +39,50 @@ import ExecutionContext from '../engine/context/execution-context'
  * @author Thomas Minier
  */
 export default class UnionGraph extends Graph {
-  private readonly _graphs: Graph[]
+  private readonly _graphs: Graph[];
 
   /**
    * Constructor
    * @param graphs - Set of RDF graphs
    */
-  constructor (graphs: Graph[]) {
-    super()
-    this.iri = graphs.map(g => g.iri).join('+')
-    this._graphs = graphs
+  constructor(graphs: Graph[]) {
+    super();
+    this.iri = graphs.map((g) => g.iri).join("+");
+    this._graphs = graphs;
   }
 
-  insert (triple: Algebra.TripleObject): Promise<void> {
-    return this._graphs[0].insert(triple)
+  insert(triple: Algebra.TripleObject): Promise<void> {
+    return this._graphs[0].insert(triple);
   }
 
-  delete (triple: Algebra.TripleObject): Promise<void> {
-    return this._graphs.reduce((prev, g) => prev.then(() => g.delete(triple)), Promise.resolve())
+  delete(triple: Algebra.TripleObject): Promise<void> {
+    return this._graphs.reduce(
+      (prev, g) => prev.then(() => g.delete(triple)),
+      Promise.resolve(),
+    );
   }
 
-  find (triple: Algebra.TripleObject, context: ExecutionContext): PipelineInput<Algebra.TripleObject> {
-    return Pipeline.getInstance().merge(...this._graphs.map(g => g.find(triple, context)))
+  find(
+    triple: Algebra.TripleObject,
+    context: ExecutionContext,
+  ): PipelineInput<Algebra.TripleObject> {
+    return Pipeline.getInstance().merge(
+      ...this._graphs.map((g) => g.find(triple, context)),
+    );
   }
 
-  clear (): Promise<void> {
-    return this._graphs.reduce((prev, g) => prev.then(() => g.clear()), Promise.resolve())
+  clear(): Promise<void> {
+    return this._graphs.reduce(
+      (prev, g) => prev.then(() => g.clear()),
+      Promise.resolve(),
+    );
   }
 
-  estimateCardinality (triple: Algebra.TripleObject): Promise<number> {
-    return Promise.all(this._graphs.map(g => g.estimateCardinality(triple)))
-      .then((cardinalities: number[]) => {
-        return Promise.resolve(cardinalities.reduce((acc, x) => acc + x, 0))
-      })
+  estimateCardinality(triple: Algebra.TripleObject): Promise<number> {
+    return Promise.all(
+      this._graphs.map((g) => g.estimateCardinality(triple)),
+    ).then((cardinalities: number[]) => {
+      return Promise.resolve(cardinalities.reduce((acc, x) => acc + x, 0));
+    });
   }
 }

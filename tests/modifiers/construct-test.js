@@ -22,19 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-describe('CONSTRUCT SPARQL queries', () => {
-  let engine = null
+describe("CONSTRUCT SPARQL queries", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(g)
-  })
+    const g = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(g);
+  });
 
-  it('should evaluate simple CONSTRUCT queries', done => {
+  it("should evaluate simple CONSTRUCT queries", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -47,35 +47,46 @@ describe('CONSTRUCT SPARQL queries', () => {
       ?s rdf:type dblp-rdf:Person .
       ?s dblp-rdf:primaryFullPersonName ?name .
       ?s dblp-rdf:authorOf ?article .
-    }`
+    }`;
     let expectedArticles = [
-      'https://dblp.org/rec/conf/esws/MinierSMV18a',
-      'https://dblp.org/rec/conf/esws/MinierSMV18',
-      'https://dblp.org/rec/journals/corr/abs-1806-00227',
-      'https://dblp.org/rec/conf/esws/MinierMSM17',
-      'https://dblp.org/rec/conf/esws/MinierMSM17a'
-    ]
-    const results = []
+      "https://dblp.org/rec/conf/esws/MinierSMV18a",
+      "https://dblp.org/rec/conf/esws/MinierSMV18",
+      "https://dblp.org/rec/journals/corr/abs-1806-00227",
+      "https://dblp.org/rec/conf/esws/MinierMSM17",
+      "https://dblp.org/rec/conf/esws/MinierMSM17a",
+    ];
+    const results = [];
 
-    const iterator = engine.execute(query)
-    iterator.subscribe(triple => {
-      expect(triple).to.have.all.keys('subject', 'predicate', 'object')
-      expect(triple.subject).to.equal('https://dblp.org/pers/m/Minier:Thomas')
-      expect(triple.predicate).to.be.oneOf([
-        'https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName',
-        'https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf'
-      ])
-      if (triple.predicate === 'https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName') {
-        expect(triple.object).to.equal('"Thomas Minier"@en')
-      } else {
-        expect(triple.object).to.be.oneOf(expectedArticles)
-        expectedArticles = expectedArticles.filter(a => a !== triple.object)
-      }
-      results.push(triple)
-    }, done, () => {
-      expect(results.length).to.equal(10)
-      expect(expectedArticles.length).to.equal(0)
-      done()
-    })
-  })
-})
+    const iterator = engine.execute(query);
+    iterator.subscribe(
+      (triple) => {
+        expect(triple).to.have.all.keys("subject", "predicate", "object");
+        expect(triple.subject).to.equal(
+          "https://dblp.org/pers/m/Minier:Thomas",
+        );
+        expect(triple.predicate).to.be.oneOf([
+          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName",
+          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf",
+        ]);
+        if (
+          triple.predicate ===
+          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName"
+        ) {
+          expect(triple.object).to.equal('"Thomas Minier"@en');
+        } else {
+          expect(triple.object).to.be.oneOf(expectedArticles);
+          expectedArticles = expectedArticles.filter(
+            (a) => a !== triple.object,
+          );
+        }
+        results.push(triple);
+      },
+      done,
+      () => {
+        expect(results.length).to.equal(10);
+        expect(expectedArticles.length).to.equal(0);
+        done();
+      },
+    );
+  });
+});

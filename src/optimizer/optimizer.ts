@@ -22,39 +22,39 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { Algebra } from 'sparqljs'
-import PlanVisitor from './plan-visitor'
-import UnionMerge from './visitors/union-merge'
+import { Algebra } from "sparqljs";
+import PlanVisitor from "./plan-visitor";
+import UnionMerge from "./visitors/union-merge";
 
 /**
  * An Optimizer applies a set of optimization rules, implemented using subclasses of {@link PlanVisitor}.
  * @author Thomas Minier
  */
 export default class Optimizer {
-  private _visitors: PlanVisitor[]
+  private _visitors: PlanVisitor[];
 
-  constructor () {
-    this._visitors = []
+  constructor() {
+    this._visitors = [];
   }
 
   /**
    * Get an optimizer configured with the default optimization rules
    * @return A new Optimizer pre-configured with default rules
    */
-  static getDefault (): Optimizer {
-    const opt = new Optimizer()
-    opt.addVisitor(new UnionMerge())
-    return opt
+  static getDefault(): Optimizer {
+    const opt = new Optimizer();
+    opt.addVisitor(new UnionMerge());
+    return opt;
   }
 
   /**
    * Register a new visitor, which implements an optimization rule.
    * @param visitor - Visitor
    */
-  addVisitor (visitor: PlanVisitor): void {
-    this._visitors.push(visitor)
+  addVisitor(visitor: PlanVisitor): void {
+    this._visitors.push(visitor);
   }
 
   /**
@@ -62,7 +62,7 @@ export default class Optimizer {
    * @param  plan - SPARQL query expression tree to iptimize
    * @return Optimized SPARQL query expression tree
    */
-  optimize (plan: Algebra.PlanNode): Algebra.PlanNode {
-    return this._visitors.reduce((current, v) => v.visit(current), plan)
+  optimize(plan: Algebra.PlanNode): Algebra.PlanNode {
+    return this._visitors.reduce((current, v) => v.visit(current), plan);
   }
 }

@@ -22,21 +22,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
-const jsonFormatter = require('../../dist/formatters/json-formatter').default
-const expected = require('./select.json')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
+const jsonFormatter = require("../../dist/formatters/json-formatter").default;
+const expected = require("./select.json");
 
-describe('W3C JSON formatter', () => {
-  let engine = null
+describe("W3C JSON formatter", () => {
+  let engine = null;
   before(() => {
-    const g = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(g)
-  })
+    const g = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(g);
+  });
 
-  it('should evaluate SELECT queries', done => {
+  it("should evaluate SELECT queries", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -45,19 +45,23 @@ describe('W3C JSON formatter', () => {
       ?s rdf:type dblp-rdf:Person .
       ?s dblp-rdf:primaryFullPersonName ?name .
       ?s dblp-rdf:authorOf ?article .
-    }`
-    let results = ''
-    const iterator = engine.execute(query).pipe(jsonFormatter)
-    iterator.subscribe(b => {
-      results += b
-    }, done, () => {
-      const json = JSON.parse(results)
-      expect(json).to.deep.equals(expected)
-      done()
-    })
-  })
+    }`;
+    let results = "";
+    const iterator = engine.execute(query).pipe(jsonFormatter);
+    iterator.subscribe(
+      (b) => {
+        results += b;
+      },
+      done,
+      () => {
+        const json = JSON.parse(results);
+        expect(json).to.deep.equals(expected);
+        done();
+      },
+    );
+  });
 
-  it('should evaluate ASK queries', done => {
+  it("should evaluate ASK queries", (done) => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -66,17 +70,21 @@ describe('W3C JSON formatter', () => {
       ?s rdf:type dblp-rdf:Person .
       ?s dblp-rdf:primaryFullPersonName ?name .
       ?s dblp-rdf:authorOf ?article .
-    }`
-    let results = ''
-    const iterator = engine.execute(query).pipe(jsonFormatter)
-    iterator.subscribe(b => {
-      results += b
-    }, done, () => {
-      const json = JSON.parse(results)
-      expect(json).to.deep.equals({
-        boolean: true
-      })
-      done()
-    })
-  })
-})
+    }`;
+    let results = "";
+    const iterator = engine.execute(query).pipe(jsonFormatter);
+    iterator.subscribe(
+      (b) => {
+        results += b;
+      },
+      done,
+      () => {
+        const json = JSON.parse(results);
+        expect(json).to.deep.equals({
+          boolean: true,
+        });
+        done();
+      },
+    );
+  });
+});

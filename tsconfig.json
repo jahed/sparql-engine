@@ -5,7 +5,7 @@
     "declaration": true,
     "outDir": "./dist/",
     "strict": true,
-    "lib": [ "ES2015" ],
+    "lib": ["ES2015"],
     "allowSyntheticDefaultImports": true,
     "downlevelIteration": true,
     "typeRoots": [
@@ -14,11 +14,6 @@
       "./types/"
     ]
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules/",
-    "tests/"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules/", "tests/"]
 }

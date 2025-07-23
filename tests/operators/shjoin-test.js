@@ -22,53 +22,63 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { from } = require('rxjs')
-const { BindingBase } = require('../../dist/api.js')
-const symHashJoin = require('../../dist/operators/join/shjoin.js').default
+const expect = require("chai").expect;
+const { from } = require("rxjs");
+const { BindingBase } = require("../../dist/api.js");
+const symHashJoin = require("../../dist/operators/join/shjoin.js").default;
 
-describe('Symmetric Hash Join operator', () => {
-  it('should perform a join between two sources of bindings', done => {
-    let nbResults = 0
-    let nbEach = new Map()
-    nbEach.set('http://example.org#toto', 0)
-    nbEach.set('http://example.org#titi', 0)
-    nbEach.set('http://example.org#tata', 0)
+describe("Symmetric Hash Join operator", () => {
+  it("should perform a join between two sources of bindings", (done) => {
+    let nbResults = 0;
+    let nbEach = new Map();
+    nbEach.set("http://example.org#toto", 0);
+    nbEach.set("http://example.org#titi", 0);
+    nbEach.set("http://example.org#tata", 0);
     const left = from([
-      BindingBase.fromObject({'?x': 'http://example.org#toto'}),
-      BindingBase.fromObject({'?x': 'http://example.org#titi'})
-    ])
+      BindingBase.fromObject({ "?x": "http://example.org#toto" }),
+      BindingBase.fromObject({ "?x": "http://example.org#titi" }),
+    ]);
     const right = from([
-      BindingBase.fromObject({'?x': 'http://example.org#toto', '?y': '"1"'}),
-      BindingBase.fromObject({'?x': 'http://example.org#toto', '?y': '"2"'}),
-      BindingBase.fromObject({'?x': 'http://example.org#toto', '?y': '"3"'}),
-      BindingBase.fromObject({'?x': 'http://example.org#titi', '?y': '"4"'}),
-      BindingBase.fromObject({'?x': 'http://example.org#tata', '?y': '"5"'})
-    ])
+      BindingBase.fromObject({ "?x": "http://example.org#toto", "?y": '"1"' }),
+      BindingBase.fromObject({ "?x": "http://example.org#toto", "?y": '"2"' }),
+      BindingBase.fromObject({ "?x": "http://example.org#toto", "?y": '"3"' }),
+      BindingBase.fromObject({ "?x": "http://example.org#titi", "?y": '"4"' }),
+      BindingBase.fromObject({ "?x": "http://example.org#tata", "?y": '"5"' }),
+    ]);
 
-    const op = symHashJoin('?x', left, right)
-    op.subscribe(value => {
-      expect(value.toObject()).to.have.all.keys('?x', '?y')
-      switch (value.get('?x')) {
-        case 'http://example.org#toto':
-          expect(value.get('?y')).to.be.oneOf([ '"1"', '"2"', '"3"' ])
-          nbEach.set('http://example.org#toto', nbEach.get('http://example.org#toto') + 1)
-          break
-        case 'http://example.org#titi':
-          expect(value.get('?y')).to.be.oneOf([ '"4"' ])
-          nbEach.set('http://example.org#titi', nbEach.get('http://example.org#titi') + 1)
-          break
-        default:
-          throw new Error(`Unexpected "?x" value: ${value.get('?x')}`)
-      }
-      nbResults++
-    }, done, () => {
-      expect(nbResults).to.equal(4)
-      expect(nbEach.get('http://example.org#toto')).to.equal(3)
-      expect(nbEach.get('http://example.org#titi')).to.equal(1)
-      done()
-    })
-  })
-})
+    const op = symHashJoin("?x", left, right);
+    op.subscribe(
+      (value) => {
+        expect(value.toObject()).to.have.all.keys("?x", "?y");
+        switch (value.get("?x")) {
+          case "http://example.org#toto":
+            expect(value.get("?y")).to.be.oneOf(['"1"', '"2"', '"3"']);
+            nbEach.set(
+              "http://example.org#toto",
+              nbEach.get("http://example.org#toto") + 1,
+            );
+            break;
+          case "http://example.org#titi":
+            expect(value.get("?y")).to.be.oneOf(['"4"']);
+            nbEach.set(
+              "http://example.org#titi",
+              nbEach.get("http://example.org#titi") + 1,
+            );
+            break;
+          default:
+            throw new Error(`Unexpected "?x" value: ${value.get("?x")}`);
+        }
+        nbResults++;
+      },
+      done,
+      () => {
+        expect(nbResults).to.equal(4);
+        expect(nbEach.get("http://example.org#toto")).to.equal(3);
+        expect(nbEach.get("http://example.org#titi")).to.equal(1);
+        done();
+      },
+    );
+  });
+});

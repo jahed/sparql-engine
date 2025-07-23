@@ -22,41 +22,42 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine, N3Graph } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine, N3Graph } = require("../utils.js");
 
-const GRAPH_A_IRI = 'http://example.org#some-graph-a'
-const GRAPH_B_IRI = 'http://example.org#some-graph-b'
+const GRAPH_A_IRI = "http://example.org#some-graph-a";
+const GRAPH_B_IRI = "http://example.org#some-graph-b";
 
-describe('SPARQL UPDATE: CREATE queries', () => {
-  let engine = null
+describe("SPARQL UPDATE: CREATE queries", () => {
+  let engine = null;
   beforeEach(() => {
-    const gA = getGraph('./tests/data/dblp.nt')
-    engine = new TestEngine(gA, GRAPH_A_IRI)
-    engine._dataset.setGraphFactory(iri => new N3Graph())
-  })
+    const gA = getGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(gA, GRAPH_A_IRI);
+    engine._dataset.setGraphFactory((iri) => new N3Graph());
+  });
 
   const data = [
     {
-      name: 'CREATE GRAPH',
+      name: "CREATE GRAPH",
       query: `CREATE GRAPH <${GRAPH_B_IRI}>`,
       testFun: () => {
-        expect(engine.hasNamedGraph(GRAPH_B_IRI)).to.equal(true)
-      }
-    }
-  ]
+        expect(engine.hasNamedGraph(GRAPH_B_IRI)).to.equal(true);
+      },
+    },
+  ];
 
-  data.forEach(d => {
-    it(`should evaluate "${d.name}" queries`, done => {
-      engine.execute(d.query)
+  data.forEach((d) => {
+    it(`should evaluate "${d.name}" queries`, (done) => {
+      engine
+        .execute(d.query)
         .execute()
         .then(() => {
-          d.testFun()
-          done()
+          d.testFun();
+          done();
         })
-        .catch(done)
-    })
-  })
-})
+        .catch(done);
+    });
+  });
+});

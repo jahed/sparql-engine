@@ -22,12 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { Pipeline } from '../engine/pipeline/pipeline'
-import { PipelineStage } from '../engine/pipeline/pipeline-engine'
-import { Algebra } from 'sparqljs'
-import { Bindings } from '../rdf/bindings'
+import { Pipeline } from "../engine/pipeline/pipeline";
+import { PipelineStage } from "../engine/pipeline/pipeline-engine";
+import { Algebra } from "sparqljs";
+import { Bindings } from "../rdf/bindings";
 
 /**
  * Build a comparator function from an ORDER BY clause content
@@ -35,27 +35,27 @@ import { Bindings } from '../rdf/bindings'
  * @param  comparators - ORDER BY comparators
  * @return A comparator function
  */
-function _compileComparators (comparators: Algebra.OrderComparator[]) {
+function _compileComparators(comparators: Algebra.OrderComparator[]) {
   const comparatorsFuncs = comparators.map((c: Algebra.OrderComparator) => {
     return (left: Bindings, right: Bindings) => {
       if (left.get(c.expression)! < right.get(c.expression)!) {
-        return (c.ascending) ? -1 : 1
+        return c.ascending ? -1 : 1;
       } else if (left.get(c.expression)! > right.get(c.expression)!) {
-        return (c.ascending) ? 1 : -1
+        return c.ascending ? 1 : -1;
       }
-      return 0
-    }
-  })
+      return 0;
+    };
+  });
   return (left: Bindings, right: Bindings) => {
-    let temp
+    let temp;
     for (let comp of comparatorsFuncs) {
-      temp = comp(left, right)
+      temp = comp(left, right);
       if (temp !== 0) {
-        return temp
+        return temp;
       }
     }
-    return 0
-  }
+    return 0;
+  };
 }
 
 /**
@@ -67,17 +67,22 @@ function _compileComparators (comparators: Algebra.OrderComparator[]) {
  * @param comparators - Set of ORDER BY comparators
  * @return A {@link PipelineStage} which evaluate the ORDER BY operation
  */
-export default function orderby (source: PipelineStage<Bindings>, comparators: Algebra.OrderComparator[]) {
-  const comparator = _compileComparators(comparators.map((c: Algebra.OrderComparator) => {
-    // explicity tag ascending comparators (sparqljs leaves them untagged)
-    if (!('descending' in c)) {
-      c.ascending = true
-    }
-    return c
-  }))
-  const engine = Pipeline.getInstance()
+export default function orderby(
+  source: PipelineStage<Bindings>,
+  comparators: Algebra.OrderComparator[],
+) {
+  const comparator = _compileComparators(
+    comparators.map((c: Algebra.OrderComparator) => {
+      // explicity tag ascending comparators (sparqljs leaves them untagged)
+      if (!("descending" in c)) {
+        c.ascending = true;
+      }
+      return c;
+    }),
+  );
+  const engine = Pipeline.getInstance();
   return engine.mergeMap(engine.collect(source), (values: Bindings[]) => {
-    values.sort((a, b) => comparator(a, b))
-    return engine.from(values)
-  })
+    values.sort((a, b) => comparator(a, b));
+    return engine.from(values);
+  });
 }

@@ -22,23 +22,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import StageBuilder from './stage-builder'
-import { Algebra } from 'sparqljs'
-import { Pipeline } from '../../engine/pipeline/pipeline'
-import { PipelineStage } from '../pipeline/pipeline-engine'
-import { Bindings } from '../../rdf/bindings'
-import ExecutionContext from '../context/execution-context'
+import StageBuilder from "./stage-builder";
+import { Algebra } from "sparqljs";
+import { Pipeline } from "../../engine/pipeline/pipeline";
+import { PipelineStage } from "../pipeline/pipeline-engine";
+import { Bindings } from "../../rdf/bindings";
+import ExecutionContext from "../context/execution-context";
 
 /**
  * A UnionStageBuilder evaluates UNION clauses
  * @author Thomas Minier
  */
 export default class UnionStageBuilder extends StageBuilder {
-  execute (source: PipelineStage<Bindings>, node: Algebra.GroupNode, context: ExecutionContext): PipelineStage<Bindings> {
-    return Pipeline.getInstance().merge(...node.patterns.map(patternToken => {
-      return this.builder!._buildGroup(source, patternToken, context)
-    }))
+  execute(
+    source: PipelineStage<Bindings>,
+    node: Algebra.GroupNode,
+    context: ExecutionContext,
+  ): PipelineStage<Bindings> {
+    return Pipeline.getInstance().merge(
+      ...node.patterns.map((patternToken) => {
+        return this.builder!._buildGroup(source, patternToken, context);
+      }),
+    );
   }
 }

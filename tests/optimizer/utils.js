@@ -22,33 +22,36 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
 module.exports = {
   query: (...where) => {
-    return { type: 'query', where }
+    return { type: "query", where };
   },
   triple: (s, p, o) => {
-    return {subject: s, predicate: p, object: o}
+    return { subject: s, predicate: p, object: o };
   },
   bgp: (...triples) => {
-    return { type: 'bgp', triples }
+    return { type: "bgp", triples };
   },
   union: (...patterns) => {
-    return { type: 'union', patterns }
+    return { type: "union", patterns };
   },
   group: (...patterns) => {
-    return { type: 'group', patterns }
+    return { type: "group", patterns };
   },
   optional: (...patterns) => {
-    return { type: 'optional', patterns }
+    return { type: "optional", patterns };
   },
-  filter: expression => {
-    return { type: 'filter', expression }
+  filter: (expression) => {
+    return { type: "filter", expression };
   },
   placeholder: (s) => {
-    return { type: 'bgp', triples: [
-      {subject: s, predicate: 'http://example.org#foo', object: '"foo"@en'}
-    ] }
-  }
-}
+    return {
+      type: "bgp",
+      triples: [
+        { subject: s, predicate: "http://example.org#foo", object: '"foo"@en' },
+      ],
+    };
+  },
+};

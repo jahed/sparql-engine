@@ -22,19 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-import { Algebra } from 'sparqljs'
+import { Algebra } from "sparqljs";
 
-const HINT_PREFIX = 'http://callidon.github.io/sparql-engine/hints#'
+const HINT_PREFIX = "http://callidon.github.io/sparql-engine/hints#";
 
 /**
  * Build an URI under the <http://www.bigdata.com/queryHints#> namespace
  * @param  suffix - Suffix append to the HINT namespace
  * @return A new URI under the HINT namespace
  */
-export function HINT (suffix: string) {
-  return HINT_PREFIX + suffix
+export function HINT(suffix: string) {
+  return HINT_PREFIX + suffix;
 }
 
 /**
@@ -42,7 +42,7 @@ export function HINT (suffix: string) {
  */
 export enum QUERY_HINT_SCOPE {
   QUERY,
-  BGP
+  BGP,
 }
 
 /**
@@ -51,24 +51,24 @@ export enum QUERY_HINT_SCOPE {
 export enum QUERY_HINT {
   USE_HASH_JOIN,
   USE_SYMMETRIC_HASH_JOIN,
-  SORTED_TRIPLES
+  SORTED_TRIPLES,
 }
 
 export class QueryHints {
-  protected _bgpHints: Map<QUERY_HINT, boolean>
+  protected _bgpHints: Map<QUERY_HINT, boolean>;
 
-  constructor () {
-    this._bgpHints = new Map()
+  constructor() {
+    this._bgpHints = new Map();
   }
 
   /**
    * Clone the set of query hints
    * @return The cloned set of query hints
    */
-  clone (): QueryHints {
-    const res = new QueryHints()
-    this._bgpHints.forEach((value, key) => res.add(QUERY_HINT_SCOPE.BGP, key))
-    return res
+  clone(): QueryHints {
+    const res = new QueryHints();
+    this._bgpHints.forEach((value, key) => res.add(QUERY_HINT_SCOPE.BGP, key));
+    return res;
   }
 
   /**
@@ -76,10 +76,10 @@ export class QueryHints {
    * @param  other - Query hints to merge with
    * @return The merged set of query hints
    */
-  merge (other: QueryHints): QueryHints {
-    const res = this.clone()
-    other._bgpHints.forEach((value, key) => res.add(QUERY_HINT_SCOPE.BGP, key))
-    return res
+  merge(other: QueryHints): QueryHints {
+    const res = this.clone();
+    other._bgpHints.forEach((value, key) => res.add(QUERY_HINT_SCOPE.BGP, key));
+    return res;
   }
 
   /**
@@ -87,9 +87,9 @@ export class QueryHints {
    * @param scope - Scope of the hint (Query, BGP, etc)
    * @param hint - Type of hint
    */
-  add (scope: QUERY_HINT_SCOPE, hint: QUERY_HINT): void {
+  add(scope: QUERY_HINT_SCOPE, hint: QUERY_HINT): void {
     if (scope === QUERY_HINT_SCOPE.BGP) {
-      this._bgpHints.set(hint, true)
+      this._bgpHints.set(hint, true);
     }
   }
 
@@ -99,56 +99,59 @@ export class QueryHints {
    * @param hint - Type of hint
    * @return True if the hint exists, False otherwise
    */
-  has (scope: QUERY_HINT_SCOPE, hint: QUERY_HINT): boolean {
+  has(scope: QUERY_HINT_SCOPE, hint: QUERY_HINT): boolean {
     if (scope === QUERY_HINT_SCOPE.BGP) {
-      return this._bgpHints.has(hint)
+      return this._bgpHints.has(hint);
     }
-    return false
+    return false;
   }
 
   /**
    * Serialize the set of query hints into a string
    * @return A string which represents the set of query hints
    */
-  toString (): string {
-    let res = ''
+  toString(): string {
+    let res = "";
     this._bgpHints.forEach((value, key) => {
       switch (key) {
         case QUERY_HINT.USE_SYMMETRIC_HASH_JOIN:
-          res += `<${HINT('BGP')}> <${HINT('SymmetricHashJoin')}> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .\n`
-          break
+          res += `<${HINT("BGP")}> <${HINT("SymmetricHashJoin")}> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .\n`;
+          break;
         default:
-          res += `<${HINT('BGP')}> _:${key} "${value}".\n`
-          break
+          res += `<${HINT("BGP")}> _:${key} "${value}".\n`;
+          break;
       }
-    })
-    return res
+    });
+    return res;
   }
 }
 
-export function parseHints (bgp: Algebra.TripleObject[], previous?: QueryHints): [Algebra.TripleObject[], QueryHints] {
-  let res = new QueryHints()
-  const regularTriples: Algebra.TripleObject[] = []
-  bgp.forEach(triple => {
+export function parseHints(
+  bgp: Algebra.TripleObject[],
+  previous?: QueryHints,
+): [Algebra.TripleObject[], QueryHints] {
+  let res = new QueryHints();
+  const regularTriples: Algebra.TripleObject[] = [];
+  bgp.forEach((triple) => {
     if (triple.subject.startsWith(HINT_PREFIX)) {
-      if (triple.subject === HINT('Group')) {
+      if (triple.subject === HINT("Group")) {
         switch (triple.predicate) {
-          case HINT('HashJoin') :
-            res.add(QUERY_HINT_SCOPE.BGP, QUERY_HINT.USE_HASH_JOIN)
-            break
-          case HINT('SymmetricHashJoin') :
-            res.add(QUERY_HINT_SCOPE.BGP, QUERY_HINT.USE_SYMMETRIC_HASH_JOIN)
-            break
+          case HINT("HashJoin"):
+            res.add(QUERY_HINT_SCOPE.BGP, QUERY_HINT.USE_HASH_JOIN);
+            break;
+          case HINT("SymmetricHashJoin"):
+            res.add(QUERY_HINT_SCOPE.BGP, QUERY_HINT.USE_SYMMETRIC_HASH_JOIN);
+            break;
           default:
-            break
+            break;
         }
       }
     } else {
-      regularTriples.push(triple)
+      regularTriples.push(triple);
     }
-  })
+  });
   if (previous !== undefined) {
-    res = res.merge(previous)
+    res = res.merge(previous);
   }
-  return [regularTriples, res]
+  return [regularTriples, res];
 }

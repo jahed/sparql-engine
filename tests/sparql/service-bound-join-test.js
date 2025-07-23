@@ -22,33 +22,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const expect = require('chai').expect
-const { getGraph, TestEngine } = require('../utils.js')
+const expect = require("chai").expect;
+const { getGraph, TestEngine } = require("../utils.js");
 
-const GRAPH_A_IRI = 'http://example.org#some-graph-a'
-const GRAPH_B_IRI = 'http://example.org#some-graph-b'
+const GRAPH_A_IRI = "http://example.org#some-graph-a";
+const GRAPH_B_IRI = "http://example.org#some-graph-b";
 
-describe('SERVICE queries (using bound joins)', () => {
-  let engine = null
-  let gA = null
-  let gB = null
+describe("SERVICE queries (using bound joins)", () => {
+  let engine = null;
+  let gA = null;
+  let gB = null;
   beforeEach(() => {
-    gA = getGraph('./tests/data/dblp.nt', true)
-    gB = getGraph('./tests/data/dblp2.nt', true)
-    engine = new TestEngine(gA, GRAPH_A_IRI)
-    engine._dataset.setGraphFactory(iri => {
+    gA = getGraph("./tests/data/dblp.nt", true);
+    gB = getGraph("./tests/data/dblp2.nt", true);
+    engine = new TestEngine(gA, GRAPH_A_IRI);
+    engine._dataset.setGraphFactory((iri) => {
       if (iri === GRAPH_B_IRI) {
-        return gB
+        return gB;
       }
-      return null
-    })
-  })
+      return null;
+    });
+  });
 
   const data = [
     {
-      text: 'should evaluate simple SPARQL SERVICE queries using the bound join algorithm',
+      text: "should evaluate simple SPARQL SERVICE queries using the bound join algorithm",
       query: `
       PREFIX dblp-pers: <https://dblp.org/pers/m/>
       PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -62,19 +62,19 @@ describe('SERVICE queries (using bound joins)', () => {
       }`,
       nbResults: 5,
       testFun: function (b) {
-        expect(b).to.have.all.keys(['?name', '?article'])
-        expect(b['?name']).to.equal('"Thomas Minier"@en')
-        expect(b['?article']).to.be.oneOf([
-          'https://dblp.org/rec/conf/esws/MinierSMV18a',
-          'https://dblp.org/rec/conf/esws/MinierSMV18',
-          'https://dblp.org/rec/journals/corr/abs-1806-00227',
-          'https://dblp.org/rec/conf/esws/MinierMSM17',
-          'https://dblp.org/rec/conf/esws/MinierMSM17a'
-        ])
-      }
+        expect(b).to.have.all.keys(["?name", "?article"]);
+        expect(b["?name"]).to.equal('"Thomas Minier"@en');
+        expect(b["?article"]).to.be.oneOf([
+          "https://dblp.org/rec/conf/esws/MinierSMV18a",
+          "https://dblp.org/rec/conf/esws/MinierSMV18",
+          "https://dblp.org/rec/journals/corr/abs-1806-00227",
+          "https://dblp.org/rec/conf/esws/MinierMSM17",
+          "https://dblp.org/rec/conf/esws/MinierMSM17a",
+        ]);
+      },
     },
     {
-      text: 'should evaluate simple SERVICE queries that requires containement queries',
+      text: "should evaluate simple SERVICE queries that requires containement queries",
       query: `
       PREFIX dblp-pers: <https://dblp.org/pers/m/>
       PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -87,12 +87,12 @@ describe('SERVICE queries (using bound joins)', () => {
       }`,
       nbResults: 1,
       testFun: function (b) {
-        expect(b).to.have.all.keys(['?s'])
-        expect(b['?s']).to.equal('https://dblp.org/pers/m/Minier:Thomas')
-      }
+        expect(b).to.have.all.keys(["?s"]);
+        expect(b["?s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
+      },
     },
     {
-      text: 'should evaluate complex SERVICE queries that requires containement queries',
+      text: "should evaluate complex SERVICE queries that requires containement queries",
       query: `
       PREFIX dblp-pers: <https://dblp.org/pers/m/>
       PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -106,31 +106,35 @@ describe('SERVICE queries (using bound joins)', () => {
       }`,
       nbResults: 5,
       testFun: function (b) {
-        expect(b).to.have.all.keys(['?s', '?article'])
-        expect(b['?s']).to.equal('https://dblp.org/pers/m/Minier:Thomas')
-        expect(b['?article']).to.be.oneOf([
-          'https://dblp.org/rec/conf/esws/MinierSMV18a',
-          'https://dblp.org/rec/conf/esws/MinierSMV18',
-          'https://dblp.org/rec/journals/corr/abs-1806-00227',
-          'https://dblp.org/rec/conf/esws/MinierMSM17',
-          'https://dblp.org/rec/conf/esws/MinierMSM17a'
-        ])
-      }
+        expect(b).to.have.all.keys(["?s", "?article"]);
+        expect(b["?s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
+        expect(b["?article"]).to.be.oneOf([
+          "https://dblp.org/rec/conf/esws/MinierSMV18a",
+          "https://dblp.org/rec/conf/esws/MinierSMV18",
+          "https://dblp.org/rec/journals/corr/abs-1806-00227",
+          "https://dblp.org/rec/conf/esws/MinierMSM17",
+          "https://dblp.org/rec/conf/esws/MinierMSM17a",
+        ]);
+      },
     },
-  ]
+  ];
 
-  data.forEach(d => {
-    it(d.text, done => {
-      let nbResults = 0
-      const iterator = engine.execute(d.query)
-      iterator.subscribe(b => {
-        b = b.toObject()
-        d.testFun(b)
-        nbResults++
-      }, done, () => {
-        expect(nbResults).to.equal(d.nbResults)
-        done()
-      })
-    })
-  })
-})
+  data.forEach((d) => {
+    it(d.text, (done) => {
+      let nbResults = 0;
+      const iterator = engine.execute(d.query);
+      iterator.subscribe(
+        (b) => {
+          b = b.toObject();
+          d.testFun(b);
+          nbResults++;
+        },
+        done,
+        () => {
+          expect(nbResults).to.equal(d.nbResults);
+          done();
+        },
+      );
+    });
+  });
+});
