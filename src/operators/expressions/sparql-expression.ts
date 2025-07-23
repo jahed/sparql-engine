@@ -142,14 +142,14 @@ export class SPARQLExpression {
       if (!(expression.operator in SPARQL_OPERATIONS)) {
         throw new Error(`Unsupported SPARQL operation: ${expression.operator}`)
       }
-      const operation = SPARQL_OPERATIONS[expression.operator]
+      const operation = SPARQL_OPERATIONS[expression.operator as keyof typeof SPARQL_OPERATIONS] as (...args: ExpressionOutput[]) => ExpressionOutput
       return (bindings: Bindings) => operation(...args.map(arg => arg(bindings)))
     } else if (isAggregation(expression)) {
       // case 3: a SPARQL aggregation
       if (!(expression.aggregation in SPARQL_AGGREGATES)) {
         throw new Error(`Unsupported SPARQL aggregation: ${expression.aggregation}`)
       }
-      const aggregation = SPARQL_AGGREGATES[expression.aggregation]
+      const aggregation = SPARQL_AGGREGATES[expression.aggregation as keyof typeof SPARQL_AGGREGATES]
       return (bindings: Bindings) => {
         if (bindings.hasProperty('__aggregate')) {
           const aggVariable = expression.expression as string
@@ -157,7 +157,7 @@ export class SPARQLExpression {
           if (expression.distinct) {
             rows[aggVariable] = uniqBy(rows[aggVariable], rdf.toN3)
           }
-          return aggregation(aggVariable, rows, expression.separator)
+          return aggregation(aggVariable, rows, expression.separator || "")
         }
         throw new SyntaxError(`SPARQL aggregation error: you are trying to use the ${expression.aggregation} SPARQL aggregate outside of an aggregation query.`)
       }
@@ -167,9 +167,10 @@ export class SPARQLExpression {
       let isAggregate = false
       const functionName = expression.function
       // custom aggregations defined by the framework
-      if (functionName.toLowerCase() in CUSTOM_AGGREGATES) {
+      const functionNameLower = functionName.toLowerCase()
+      if (functionNameLower in CUSTOM_AGGREGATES) {
         isAggregate = true
-        customFunction = CUSTOM_AGGREGATES[functionName.toLowerCase()]
+        customFunction = CUSTOM_AGGREGATES[functionNameLower as keyof typeof CUSTOM_AGGREGATES]
       } else if (functionName in customFunctions) {
         // custom operations defined by the user & the framework
         customFunction = customFunctions[functionName]

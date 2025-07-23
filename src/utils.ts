@@ -378,7 +378,7 @@ export namespace rdf {
    * @param  str - String to test
    * @return True if the string is a SPARQL variable, False otherwise
    */
-  export function isVariable (str: string): boolean {
+  export function isVariable (str: unknown): boolean {
     if (typeof str !== 'string') {
       return false
     }

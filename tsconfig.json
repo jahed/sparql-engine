@@ -7,7 +7,6 @@
     "strict": true,
     "lib": [ "ES2015" ],
     "allowSyntheticDefaultImports": true,
-    "suppressImplicitAnyIndexErrors": true,
     "downlevelIteration": true,
     "typeRoots": [
       "./node_modules/@types/",

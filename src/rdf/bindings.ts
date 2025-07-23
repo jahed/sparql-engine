@@ -135,8 +135,8 @@ export abstract class Bindings {
    * Serialize the set of mappings as a plain JS Object
    * @return The set of mappings as a plain JS Object
    */
-  toObject (): Object {
-    return this.reduce((acc, variable, value) => {
+  toObject (): Record<string, string> {
+    return this.reduce<Record<string, string>>((acc, variable, value) => {
       acc[variable] = value
       return acc
     }, {})
@@ -387,7 +387,7 @@ export class BindingBase extends Bindings {
    * @param obj - Source object to turn into a set of mappings
    * @return A set of mappings
    */
-  static fromObject (obj: Object): Bindings {
+  static fromObject (obj: Record<string, string>): Bindings {
     const res = new BindingBase()
     for (let key in obj) {
       res.set(!key.startsWith('?') ? `?${key}` : key, obj[key])

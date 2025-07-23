@@ -52,10 +52,10 @@ export default function indexJoin (source: PipelineStage<Bindings>, pattern: Alg
     // const hasVars = some(boundedPattern, (v: any) => v.startsWith('?'))
     return engine.map(engine.from(graph.find(boundedPattern, context)), (item: Algebra.TripleObject) => {
       let temp = pickBy(item, (v, k) => {
-        return rdf.isVariable(boundedPattern[k])
+        return rdf.isVariable(boundedPattern[k as keyof Algebra.TripleObject])
       })
       temp = mapKeys(temp, (v, k) => {
-        return boundedPattern[k]
+        return boundedPattern[k as keyof Algebra.TripleObject]
       })
       // if (size(temp) === 0 && hasVars) return null
       return BindingBase.fromObject(temp).union(bindings)

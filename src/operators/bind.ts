@@ -39,7 +39,7 @@ import { isArray } from 'lodash'
  * @return True if the input obkect is an iterator, False otherwise
  */
 function isIterable (obj: Object): obj is Iterable<Term | null> {
-  return typeof obj[Symbol.iterator] === 'function'
+  return Symbol.iterator in obj && typeof obj[Symbol.iterator] === 'function'
 }
 
 /**

@@ -311,7 +311,7 @@ export class PlanBuilder {
     if (!(query.queryType in QUERY_MODIFIERS)) {
       throw new Error(`Unsupported SPARQL query type: ${query.queryType}`)
     }
-    graphIterator = QUERY_MODIFIERS[query.queryType](graphIterator, query, context)
+    graphIterator = QUERY_MODIFIERS[query.queryType as keyof typeof QUERY_MODIFIERS](graphIterator, query) as PipelineStage<Bindings>
 
     // Create iterators for modifiers
     if (query.distinct) {

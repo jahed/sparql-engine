@@ -24,7 +24,7 @@ SOFTWARE.
 
 'use strict'
 
-import * as LRU from 'lru-cache'
+import LRUCache, * as LRU from 'lru-cache'
 import { Cache, AsyncCache } from './cache-interfaces'
 
 /**
@@ -42,7 +42,7 @@ export class BaseLRUCache<K, T> implements Cache<K, T> {
    * @param onDispose - Function that is called on items when they are dropped from the cache
    */
   constructor (maxSize: number, maxAge: number, length?: (item: T) => number, onDispose?: (key: K, item: T) => void) {
-    const options = {
+    const options: LRUCache.Options<K, T> = {
       max: maxSize,
       maxAge,
       length,
