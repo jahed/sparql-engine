@@ -24,8 +24,8 @@ SOFTWARE.
 
 "use strict";
 
-import { Consumable } from "./consumer";
-import Graph from "../../rdf/graph";
+import type { Consumable } from "./consumer.ts";
+import Graph from "../../rdf/graph.ts";
 
 /**
  * Clear all RDF triples in a RDF Graph

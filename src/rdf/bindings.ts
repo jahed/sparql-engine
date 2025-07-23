@@ -24,9 +24,9 @@ SOFTWARE.
 
 "use strict";
 
-import { Algebra } from "sparqljs";
-import { isNull, isUndefined } from "lodash";
-import { rdf } from "../utils";
+import { isNull, isUndefined } from "lodash-es";
+import type { Algebra } from "sparqljs";
+import * as rdf from "../utils/rdf.ts";
 
 /**
  * A set of mappings from a variable to a RDF Term.
@@ -279,7 +279,7 @@ export abstract class Bindings {
    * @return A new set of mappings
    */
   map(
-    mapper: (variable: string, value: string) => [string | null, string | null],
+    mapper: (variable: string, value: string) => [string | null, string | null]
   ): Bindings {
     const result = this.empty();
     this.forEach((variable, value) => {
@@ -304,7 +304,7 @@ export abstract class Bindings {
    * @return A new set of mappings
    */
   mapVariables(
-    mapper: (variable: string, value: string) => string | null,
+    mapper: (variable: string, value: string) => string | null
   ): Bindings {
     return this.map((variable, value) => [mapper(variable, value), value]);
   }
@@ -315,7 +315,7 @@ export abstract class Bindings {
    * @return A new set of mappings
    */
   mapValues(
-    mapper: (variable: string, value: string) => string | null,
+    mapper: (variable: string, value: string) => string | null
   ): Bindings {
     return this.map((variable, value) => [variable, mapper(variable, value)]);
   }
@@ -342,7 +342,7 @@ export abstract class Bindings {
    */
   reduce<T>(
     reducer: (acc: T, variable: string, value: string) => T,
-    start: T,
+    start: T
   ): T {
     let acc: T = start;
     this.forEach((variable, value) => {

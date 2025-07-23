@@ -24,7 +24,7 @@ SOFTWARE.
 
 "use strict";
 
-import { identity, isUndefined, uniqBy } from "lodash";
+import { identity, isUndefined, uniqBy } from "lodash-es";
 
 /**
  * The input of a {@link PipelineStage}, either another {@link PipelineStage}, an array, an iterable or a promise.
@@ -79,7 +79,7 @@ export interface PipelineStage<T> {
   subscribe(
     onData: (value: T) => void,
     onError: (err: any) => void,
-    onEnd: () => void,
+    onEnd: () => void
   ): void;
 
   /**
@@ -122,7 +122,7 @@ export abstract class PipelineEngine {
    * @return A PipelineStage that emits the values produces asynchronously
    */
   abstract fromAsync<T>(
-    cb: (input: StreamPipelineInput<T>) => void,
+    cb: (input: StreamPipelineInput<T>) => void
   ): PipelineStage<T>;
 
   /**
@@ -142,7 +142,7 @@ export abstract class PipelineEngine {
    */
   abstract catch<T, O>(
     input: PipelineStage<T>,
-    handler?: (err: Error) => PipelineStage<O>,
+    handler?: (err: Error) => PipelineStage<O>
   ): PipelineStage<T | O>;
 
   /**
@@ -162,7 +162,7 @@ export abstract class PipelineEngine {
    */
   abstract map<F, T>(
     input: PipelineStage<F>,
-    mapper: (value: F) => T,
+    mapper: (value: F) => T
   ): PipelineStage<T>;
 
   /**
@@ -173,7 +173,7 @@ export abstract class PipelineEngine {
    */
   abstract mergeMap<F, T>(
     input: PipelineStage<F>,
-    mapper: (value: F) => PipelineStage<T>,
+    mapper: (value: F) => PipelineStage<T>
   ): PipelineStage<T>;
 
   /**
@@ -184,7 +184,7 @@ export abstract class PipelineEngine {
    */
   abstract finalize<T>(
     input: PipelineStage<T>,
-    callback: () => void,
+    callback: () => void
   ): PipelineStage<T>;
 
   /**
@@ -195,7 +195,7 @@ export abstract class PipelineEngine {
    */
   flatMap<F, T>(
     input: PipelineStage<F>,
-    mapper: (value: F) => T[],
+    mapper: (value: F) => T[]
   ): PipelineStage<T> {
     return this.mergeMap(input, (value: F) => this.of(...mapper(value)));
   }
@@ -217,7 +217,7 @@ export abstract class PipelineEngine {
    */
   abstract filter<T>(
     input: PipelineStage<T>,
-    predicate: (value: T) => boolean,
+    predicate: (value: T) => boolean
   ): PipelineStage<T>;
 
   /**
@@ -229,7 +229,7 @@ export abstract class PipelineEngine {
   abstract reduce<F, T>(
     input: PipelineStage<F>,
     reducer: (acc: T, value: F) => T,
-    initial: T,
+    initial: T
   ): PipelineStage<T>;
 
   /**
@@ -274,7 +274,7 @@ export abstract class PipelineEngine {
    */
   abstract bufferCount<T>(
     input: PipelineStage<T>,
-    count: number,
+    count: number
   ): PipelineStage<T[]>;
 
   /**
@@ -292,13 +292,13 @@ export abstract class PipelineEngine {
    */
   distinct<T, K>(
     input: PipelineStage<T>,
-    selector?: (value: T) => T | K,
+    selector?: (value: T) => T | K
   ): PipelineStage<T> {
     if (isUndefined(selector)) {
       selector = identity;
     }
     return this.flatMap(this.collect(input), (values: T[]) =>
-      uniqBy(values, selector!),
+      uniqBy(values, selector!)
     );
   }
 
@@ -345,7 +345,7 @@ export abstract class PipelineEngine {
    */
   min<T>(
     input: PipelineStage<T>,
-    ranking?: (x: T, y: T) => boolean,
+    ranking?: (x: T, y: T) => boolean
   ): PipelineStage<T> {
     if (isUndefined(ranking)) {
       ranking = (x: T, y: T) => x < y;
@@ -372,7 +372,7 @@ export abstract class PipelineEngine {
    */
   max<T>(
     input: PipelineStage<T>,
-    ranking?: (x: T, y: T) => boolean,
+    ranking?: (x: T, y: T) => boolean
   ): PipelineStage<T> {
     if (isUndefined(ranking)) {
       ranking = (x: T, y: T) => x > y;
@@ -398,7 +398,7 @@ export abstract class PipelineEngine {
   groupBy<T, K, R>(
     input: PipelineStage<T>,
     keySelector: (value: T) => K,
-    elementSelector?: (value: T) => R,
+    elementSelector?: (value: T) => R
   ): PipelineStage<[K, R[]]> {
     if (isUndefined(elementSelector)) {
       elementSelector = identity;
@@ -441,7 +441,7 @@ export abstract class PipelineEngine {
     count: number,
     predicate: (values: T[]) => boolean,
     ifCase: (values: T[]) => PipelineStage<O>,
-    elseCase: (values: T[]) => PipelineStage<O>,
+    elseCase: (values: T[]) => PipelineStage<O>
   ): PipelineStage<O> {
     const peekable = this.limit(this.clone(input), count);
     return this.mergeMap(this.collect(peekable), (values) => {

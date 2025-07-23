@@ -24,12 +24,12 @@ SOFTWARE.
 
 "use strict";
 
-import StageBuilder from "./stage-builder";
-import { Algebra } from "sparqljs";
-import { PipelineStage } from "../pipeline/pipeline-engine";
-import { Bindings } from "../../rdf/bindings";
-import ExecutionContext from "../context/execution-context";
-import orderby from "../../operators/orderby";
+import StageBuilder from "./stage-builder.ts";
+import type { Algebra } from "sparqljs";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
+import ExecutionContext from "../context/execution-context.ts";
+import orderby from "../../operators/orderby.ts";
 
 /**
  * A OrderByStageBuilder evaluates ORDER BY clauses
@@ -39,7 +39,7 @@ export default class OrderByStageBuilder extends StageBuilder {
   execute(
     source: PipelineStage<Bindings>,
     orders: Algebra.OrderComparator[],
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     return orderby(source, orders);
   }

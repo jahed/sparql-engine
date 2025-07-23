@@ -24,12 +24,12 @@ SOFTWARE.
 
 "use strict";
 
-import StageBuilder from "./stage-builder";
-import { Algebra } from "sparqljs";
-import { PipelineStage } from "../pipeline/pipeline-engine";
-import { Bindings } from "../../rdf/bindings";
-import ExecutionContext from "../context/execution-context";
-import optional from "../../operators/optional";
+import StageBuilder from "./stage-builder.ts";
+import type { Algebra } from "sparqljs";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
+import ExecutionContext from "../context/execution-context.ts";
+import optional from "../../operators/optional.ts";
 
 /**
  * A OptionalStageBuilder evaluates OPTIONAL clauses
@@ -39,7 +39,7 @@ export default class OptionalStageBuilder extends StageBuilder {
   execute(
     source: PipelineStage<Bindings>,
     node: Algebra.GroupNode,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     return optional(source, node.patterns, this.builder!, context);
   }

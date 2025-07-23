@@ -1,3 +1,9 @@
 {
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "javascript.preferences.importModuleSpecifierEnding": "js",
+  "editor.formatOnSave": true,
+  "typescript.preferences.importModuleSpecifierEnding": "js",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "always"
+  }
 }

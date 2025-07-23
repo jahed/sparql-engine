@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { Consumable } from "./consumer";
+import type { Consumable } from "./consumer.ts";
 
 /**
  * A Consumer that does nothing

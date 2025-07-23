@@ -24,8 +24,8 @@ SOFTWARE.
 
 "use strict";
 
-import { QueryHints } from "./query-hints";
-import { BGPCache } from "../cache/bgp-cache";
+import { QueryHints } from "./query-hints.ts";
+import type { BGPCache } from "../cache/bgp-cache.ts";
 
 /**
  * An execution context conatains control information for query execution.

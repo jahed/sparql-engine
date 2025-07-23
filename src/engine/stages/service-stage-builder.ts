@@ -24,13 +24,13 @@ SOFTWARE.
 
 "use strict";
 
-import StageBuilder from "./stage-builder";
-import { Algebra } from "sparqljs";
-import { Pipeline } from "../pipeline/pipeline";
-import { PipelineStage } from "../pipeline/pipeline-engine";
-import { Bindings } from "../../rdf/bindings";
-import ExecutionContext from "../context/execution-context";
-import ContextSymbols from "../context/symbols";
+import StageBuilder from "./stage-builder.ts";
+import type { Algebra } from "sparqljs";
+import { Pipeline } from "../pipeline/pipeline.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
+import ExecutionContext from "../context/execution-context.ts";
+import ContextSymbols from "../context/symbols.ts";
 
 /**
  * A ServiceStageBuilder is responsible for evaluation a SERVICE clause in a SPARQL query.
@@ -48,7 +48,7 @@ export default class ServiceStageBuilder extends StageBuilder {
   execute(
     source: PipelineStage<Bindings>,
     node: Algebra.ServiceNode,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     let subquery: Algebra.RootNode;
     if (node.patterns[0].type === "query") {
@@ -78,7 +78,7 @@ export default class ServiceStageBuilder extends StageBuilder {
     }
     return Pipeline.getInstance().catch<Bindings, Bindings>(
       this._buildIterator(source, node.name, subquery, context),
-      handler,
+      handler
     );
   }
 
@@ -95,7 +95,7 @@ export default class ServiceStageBuilder extends StageBuilder {
     source: PipelineStage<Bindings>,
     iri: string,
     subquery: Algebra.RootNode,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     const opts = context.clone();
     opts.defaultGraphs = [iri];

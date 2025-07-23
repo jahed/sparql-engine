@@ -24,9 +24,9 @@ SOFTWARE.
 
 "use strict";
 
-import { rdf } from "../../utils";
-import { maxBy, meanBy, minBy, sample } from "lodash";
-import { Term } from "rdf-js";
+import { maxBy, meanBy, minBy, sample } from "lodash-es";
+import type { Term } from "rdf-js";
+import * as rdf from "../../utils/rdf.ts";
 
 type TermRows = { [key: string]: Term[] };
 

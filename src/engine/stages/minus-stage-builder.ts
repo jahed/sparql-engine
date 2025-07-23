@@ -24,13 +24,13 @@ SOFTWARE.
 
 "use strict";
 
-import StageBuilder from "./stage-builder";
-import { Algebra } from "sparqljs";
-import { Pipeline } from "../../engine/pipeline/pipeline";
-import { PipelineStage } from "../pipeline/pipeline-engine";
-import { Bindings, BindingBase } from "../../rdf/bindings";
-import ExecutionContext from "../context/execution-context";
-import minus from "../../operators/minus";
+import StageBuilder from "./stage-builder.ts";
+import type { Algebra } from "sparqljs";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import { Bindings, BindingBase } from "../../rdf/bindings.ts";
+import ExecutionContext from "../context/execution-context.ts";
+import minus from "../../operators/minus.ts";
 
 /**
  * A MinusStageBuilder evaluates MINUS clauses
@@ -40,13 +40,13 @@ export default class MinusStageBuilder extends StageBuilder {
   execute(
     source: PipelineStage<Bindings>,
     node: Algebra.GroupNode,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     const engine = Pipeline.getInstance();
     const rightSource = this.builder!._buildWhere(
       engine.of(new BindingBase()),
       node.patterns,
-      context,
+      context
     );
     return minus(source, rightSource);
   }

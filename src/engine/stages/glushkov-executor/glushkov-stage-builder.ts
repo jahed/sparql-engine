@@ -22,17 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import PathStageBuilder from "../path-stage-builder";
-import { Algebra } from "sparqljs";
-import Graph from "../../../rdf/graph";
-import ExecutionContext from "../../context/execution-context";
-import Dataset from "../../../rdf/dataset";
-import { Automaton, Transition } from "./automaton";
-import { GlushkovBuilder } from "./automatonBuilder";
-import { Bindings } from "../../../rdf/bindings";
-import { rdf } from "../../../utils";
-import { Pipeline } from "../../../engine/pipeline/pipeline";
-import { PipelineStage } from "../../../engine/pipeline/pipeline-engine";
+import type { Algebra } from "sparqljs";
+import type { PipelineStage } from "../../../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../../../engine/pipeline/pipeline.ts";
+import { Bindings } from "../../../rdf/bindings.ts";
+import Graph from "../../../rdf/graph.ts";
+import * as rdf from "../../../utils/rdf.ts";
+import ExecutionContext from "../../context/execution-context.ts";
+import PathStageBuilder from "../path-stage-builder.ts";
+import { Automaton, Transition } from "./automaton.ts";
+import { GlushkovBuilder } from "./automatonBuilder.ts";
 
 /**
  * A Step in the evaluation of a property path
@@ -41,15 +40,18 @@ import { PipelineStage } from "../../../engine/pipeline/pipeline-engine";
  * @author Julien Aimonier-Davat
  */
 class Step {
+  private _node: string;
+  private _state: number;
+
   /**
    * Constructor
    * @param node - The label of a node in the RDF Graph
    * @param state - The ID of a State in the Automaton
    */
-  constructor(
-    private _node: string,
-    private _state: number,
-  ) {}
+  constructor(node: string, state: number) {
+    this._node = node;
+    this._state = state;
+  }
 
   /**
    * Get the Automaton's state associated with this Step of the ResultPath
@@ -175,7 +177,7 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
     graph: Graph,
     context: ExecutionContext,
     automaton: Automaton<number, string>,
-    forward: boolean,
+    forward: boolean
   ): PipelineStage<Algebra.TripleObject> {
     const engine = Pipeline.getInstance();
     let self = this;
@@ -235,14 +237,14 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
                   graph,
                   context,
                   automaton,
-                  forward,
+                  forward
                 );
               }
             }
             return engine.empty();
-          },
+          }
         );
-      },
+      }
     );
     return engine.merge(...obs, result);
   }
@@ -259,7 +261,7 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
     subject: string,
     obj: string,
     graph: Graph,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Algebra.TripleObject> {
     const engine = Pipeline.getInstance();
     if (rdf.isVariable(subject) && !rdf.isVariable(obj)) {
@@ -297,9 +299,9 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
               object: o,
             };
             return engine.of(t1, t2);
-          },
+          }
         ),
-        (triple: Algebra.TripleObject) => triple.subject,
+        (triple: Algebra.TripleObject) => triple.subject
       );
     }
     if (subject === obj) {
@@ -331,7 +333,7 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
     graph: Graph,
     context: ExecutionContext,
     automaton: Automaton<number, string>,
-    forward: boolean,
+    forward: boolean
   ): PipelineStage<Algebra.TripleObject> {
     const engine = Pipeline.getInstance();
     let self = this;
@@ -381,13 +383,13 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
                 graph,
                 context,
                 automaton,
-                forward,
+                forward
               );
             }
             return engine.empty();
-          },
+          }
         );
-      },
+      }
     );
     return engine.merge(...obs, reflexiveClosureResults);
   }
@@ -406,10 +408,10 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
     path: Algebra.PropertyPath,
     obj: string,
     graph: Graph,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Algebra.TripleObject> {
     let automaton: Automaton<number, string> = new GlushkovBuilder(
-      path,
+      path
     ).build();
     if (rdf.isVariable(subject) && !rdf.isVariable(obj)) {
       return this.startPropertyPathEvaluation(
@@ -418,7 +420,7 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
         graph,
         context,
         automaton,
-        false,
+        false
       );
     } else {
       return this.startPropertyPathEvaluation(
@@ -427,7 +429,7 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
         graph,
         context,
         automaton,
-        true,
+        true
       );
     }
   }

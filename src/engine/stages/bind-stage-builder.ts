@@ -24,13 +24,13 @@ SOFTWARE.
 
 "use strict";
 
-import StageBuilder from "./stage-builder";
-import bind from "../../operators/bind";
-import { Algebra } from "sparqljs";
-import { PipelineStage } from "../pipeline/pipeline-engine";
-import { Bindings } from "../../rdf/bindings";
-import ExecutionContext from "../context/execution-context";
-import { CustomFunctions } from "../../operators/expressions/sparql-expression";
+import type { Algebra } from "sparqljs";
+import bind from "../../operators/bind.ts";
+import type { CustomFunctions } from "../../operators/expressions/sparql-expression.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
+import ExecutionContext from "../context/execution-context.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import StageBuilder from "./stage-builder.ts";
 
 /**
  * A BindStageBuilder evaluates BIND clauses
@@ -41,13 +41,13 @@ export default class BindStageBuilder extends StageBuilder {
     source: PipelineStage<Bindings>,
     bindNode: Algebra.BindNode,
     customFunctions: CustomFunctions,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     return bind(
       source,
       bindNode.variable,
       bindNode.expression,
-      customFunctions,
+      customFunctions
     );
   }
 }

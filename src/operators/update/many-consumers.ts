@@ -24,7 +24,7 @@ SOFTWARE.
 
 "use strict";
 
-import { Consumable } from "./consumer";
+import type { Consumable } from "./consumer.ts";
 
 /**
  * ManyConsumers group multiple {@link Consumable} to be evaluated in sequence

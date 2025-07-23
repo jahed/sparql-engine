@@ -24,12 +24,12 @@ SOFTWARE.
 
 "use strict";
 
-import StageBuilder from "./stage-builder";
-import { Algebra } from "sparqljs";
-import { Pipeline } from "../../engine/pipeline/pipeline";
-import { PipelineStage } from "../pipeline/pipeline-engine";
-import { Bindings } from "../../rdf/bindings";
-import ExecutionContext from "../context/execution-context";
+import StageBuilder from "./stage-builder.ts";
+import type { Algebra } from "sparqljs";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
+import ExecutionContext from "../context/execution-context.ts";
 
 /**
  * A UnionStageBuilder evaluates UNION clauses
@@ -39,12 +39,12 @@ export default class UnionStageBuilder extends StageBuilder {
   execute(
     source: PipelineStage<Bindings>,
     node: Algebra.GroupNode,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     return Pipeline.getInstance().merge(
       ...node.patterns.map((patternToken) => {
         return this.builder!._buildGroup(source, patternToken, context);
-      }),
+      })
     );
   }
 }

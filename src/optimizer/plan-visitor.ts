@@ -24,8 +24,8 @@ SOFTWARE.
 
 "use strict";
 
-import { Algebra } from "sparqljs";
-import { cloneDeep } from "lodash";
+import { cloneDeep } from "lodash-es";
+import type { Algebra } from "sparqljs";
 
 /**
  * A Visitor which performs a Depth-first traversal of a SPARQL query expression tree
@@ -45,7 +45,7 @@ export default class PlanVisitor {
       case "query":
         const newNode = cloneDeep(node) as Algebra.RootNode;
         newNode.where = (node as Algebra.RootNode).where.map((n) =>
-          this.visit(n),
+          this.visit(n)
         );
         return newNode;
       case "bgp":

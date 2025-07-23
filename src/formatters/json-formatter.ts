@@ -24,14 +24,14 @@ SOFTWARE.
 
 "use strict";
 
-import {
+import { isBoolean } from "lodash-es";
+import type {
   PipelineStage,
   StreamPipelineInput,
-} from "../engine/pipeline/pipeline-engine";
-import { Pipeline } from "../engine/pipeline/pipeline";
-import { Bindings } from "../rdf/bindings";
-import { rdf } from "../utils";
-import { isBoolean } from "lodash";
+} from "../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import { Bindings } from "../rdf/bindings.ts";
+import * as rdf from "../utils/rdf.ts";
 
 /**
  * Write the JSON headers
@@ -54,7 +54,7 @@ function writeHead(bindings: Bindings, input: StreamPipelineInput<string>) {
  */
 function writeBindings(
   bindings: Bindings,
-  input: StreamPipelineInput<string>,
+  input: StreamPipelineInput<string>
 ): void {
   let cpt = 0;
   bindings.forEach((variable, value) => {
@@ -62,7 +62,7 @@ function writeBindings(
       input.next(",");
     }
     input.next(
-      `"${variable.startsWith("?") ? variable.substring(1) : variable}":`,
+      `"${variable.startsWith("?") ? variable.substring(1) : variable}":`
     );
     const term = rdf.fromN3(value);
     if (rdf.termIsIRI(term)) {
@@ -72,18 +72,18 @@ function writeBindings(
     } else if (rdf.termIsLiteral(term)) {
       if (term.language.length > 0) {
         input.next(
-          `{"type":"literal","value":"${term.value}","xml:lang":"${term.language}"}`,
+          `{"type":"literal","value":"${term.value}","xml:lang":"${term.language}"}`
         );
       } else if (term.datatype) {
         input.next(
-          `{"type":"literal","value":"${term.value}","datatype":"${term.datatype.value}"}`,
+          `{"type":"literal","value":"${term.value}","datatype":"${term.datatype.value}"}`
         );
       } else {
         input.next(`{"type":"literal","value":"${term.value}"}`);
       }
     } else {
       input.error(
-        `Invalid RDF term "${value}" encountered during JSON serialization`,
+        `Invalid RDF term "${value}" encountered during JSON serialization`
       );
     }
     cpt++;
@@ -98,7 +98,7 @@ function writeBindings(
  * @return A pipeline that yields results in W3C SPARQL JSON format
  */
 export default function jsonFormat(
-  source: PipelineStage<Bindings | boolean>,
+  source: PipelineStage<Bindings | boolean>
 ): PipelineStage<string> {
   return Pipeline.getInstance().fromAsync((input) => {
     input.next("{");
@@ -130,7 +130,7 @@ export default function jsonFormat(
       () => {
         input.next(isAsk ? "}" : "]}}");
         input.complete();
-      },
+      }
     );
   });
 }

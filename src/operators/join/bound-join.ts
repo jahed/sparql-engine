@@ -24,16 +24,17 @@ SOFTWARE.
 
 "use strict";
 
-import { Algebra } from "sparqljs";
-import { Bindings } from "../../rdf/bindings";
-import { Pipeline } from "../../engine/pipeline/pipeline";
-import { PipelineStage } from "../../engine/pipeline/pipeline-engine";
-import { rdf, evaluation } from "../../utils";
-import BGPStageBuilder from "../../engine/stages/bgp-stage-builder";
-import ExecutionContext from "../../engine/context/execution-context";
-import ContextSymbols from "../../engine/context/symbols";
-import Graph from "../../rdf/graph";
-import rewritingOp from "./rewriting-op";
+import type { Algebra } from "sparqljs";
+import type { Bindings } from "../../rdf/bindings.ts";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
+import * as rdf from "../../utils/rdf.ts";
+import * as evaluation from "../../utils/evaluation.ts";
+import BGPStageBuilder from "../../engine/stages/bgp-stage-builder.ts";
+import ExecutionContext from "../../engine/context/execution-context.ts";
+import ContextSymbols from "../../engine/context/symbols.ts";
+import Graph from "../../rdf/graph.ts";
+import rewritingOp from "./rewriting-op.ts";
 
 // The default size of the bucket of Basic Graph Patterns used by the Bound Join algorithm
 const BOUND_JOIN_BUFFER_SIZE = 15;
@@ -52,7 +53,7 @@ type BasicGraphPattern = Algebra.TripleObject[];
  */
 function rewriteTriple(
   triple: Algebra.TripleObject,
-  key: number,
+  key: number
 ): Algebra.TripleObject {
   const res = Object.assign({}, triple);
   if (rdf.isVariable(triple.subject)) {
@@ -81,7 +82,7 @@ export default function boundJoin(
   bgp: Algebra.TripleObject[],
   graph: Graph,
   builder: BGPStageBuilder,
-  context: ExecutionContext,
+  context: ExecutionContext
 ) {
   let bufferSize = BOUND_JOIN_BUFFER_SIZE;
   if (context.hasProperty(ContextSymbols.BOUND_JOIN_BUFFER_SIZE)) {
@@ -98,7 +99,7 @@ export default function boundJoin(
             graph,
             context.cache!,
             builder,
-            context,
+            context
           );
         }
         return graph.evalBGP(bgp, context);
@@ -155,7 +156,7 @@ export default function boundJoin(
             bgpBucket,
             rewritingTable,
             builder,
-            context,
+            context
           );
         }
 
@@ -169,14 +170,14 @@ export default function boundJoin(
             Pipeline.getInstance().of(...regularBindings),
             graph,
             bgp,
-            newContext,
+            newContext
           );
         }
 
         // merge the two pipeline stages to produce the join results
         return Pipeline.getInstance().merge(boundJoinStage, regularJoinStage);
       }
-    },
+    }
   );
   /*return Pipeline.getInstance().fromAsync((input: StreamPipelineInput<Bindings>) => {
     let sourceClosed = false

@@ -24,8 +24,8 @@ SOFTWARE.
 
 "use strict";
 
-import Graph from "./graph";
-import UnionGraph from "./union-graph";
+import Graph from "./graph.ts";
+import UnionGraph from "./union-graph.ts";
 
 /**
  * An abstraction over an RDF datasets, i.e., a collection of RDF graphs.
@@ -132,7 +132,7 @@ export default abstract class Dataset {
     const graph = this._graphFactory(iri);
     if (graph === null) {
       throw new Error(
-        `Impossible to create a new Graph with IRI "${iri}". The RDF dataset does not seems to have a graph factory. Please set it using the "setGraphFactory" method.`,
+        `Impossible to create a new Graph with IRI "${iri}". The RDF dataset does not seems to have a graph factory. Please set it using the "setGraphFactory" method.`
       );
     }
     return graph;

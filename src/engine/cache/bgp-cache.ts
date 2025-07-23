@@ -24,15 +24,16 @@ SOFTWARE.
 
 "use strict";
 
-import { AsyncCacheEntry, AsyncLRUCache } from "./cache-base";
-import { AsyncCache } from "./cache-interfaces";
-import { Pipeline } from "../pipeline/pipeline";
-import { PipelineStage } from "../pipeline/pipeline-engine";
-import { Bindings } from "../../rdf/bindings";
-import { Algebra } from "sparqljs";
-import { rdf, sparql } from "../../utils";
 import { BinarySearchTree } from "binary-search-tree";
-import { differenceWith, findIndex, maxBy } from "lodash";
+import { differenceWith, findIndex, maxBy } from "lodash-es";
+import type { Algebra } from "sparqljs";
+import { Bindings } from "../../rdf/bindings.ts";
+import * as rdf from "../../utils/rdf.ts";
+import * as sparql from "../../utils/sparql.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import { Pipeline } from "../pipeline/pipeline.ts";
+import { type AsyncCacheEntry, AsyncLRUCache } from "./cache-base.ts";
+import type { AsyncCache } from "./cache-interfaces.ts";
 
 export interface BasicGraphPattern {
   patterns: Algebra.TripleObject[];
@@ -66,7 +67,7 @@ export interface BGPCache
    * @return A pair [subset BGP, set of patterns not in cache]
    */
   findSubset(
-    bgp: BasicGraphPattern,
+    bgp: BasicGraphPattern
   ): [Algebra.TripleObject[], Algebra.TripleObject[]];
 
   /**
@@ -77,7 +78,7 @@ export interface BGPCache
    */
   getAsPipeline(
     bgp: BasicGraphPattern,
-    onCancel?: () => PipelineStage<Bindings>,
+    onCancel?: () => PipelineStage<Bindings>
   ): PipelineStage<Bindings>;
 }
 
@@ -116,11 +117,11 @@ export class LRUBGPCache implements BGPCache {
         if (this._patternsPerBGP.has(key)) {
           const bgp = this._patternsPerBGP.get(key)!;
           bgp.patterns.forEach((pattern) =>
-            this._allKeys.delete(rdf.hashTriple(pattern), { bgp, key }),
+            this._allKeys.delete(rdf.hashTriple(pattern), { bgp, key })
           );
           this._patternsPerBGP.delete(key);
         }
-      },
+      }
     );
   }
 
@@ -134,7 +135,7 @@ export class LRUBGPCache implements BGPCache {
       // update the indexes
       this._patternsPerBGP.set(key, bgp);
       bgp.patterns.forEach((pattern) =>
-        this._allKeys.insert(rdf.hashTriple(pattern), { bgp, key }),
+        this._allKeys.insert(rdf.hashTriple(pattern), { bgp, key })
       );
     }
     this._cache.update(key, item, writerID);
@@ -146,7 +147,7 @@ export class LRUBGPCache implements BGPCache {
 
   getAsPipeline(
     bgp: BasicGraphPattern,
-    onCancel?: () => PipelineStage<Bindings>,
+    onCancel?: () => PipelineStage<Bindings>
   ): PipelineStage<Bindings> {
     const bindings = this.get(bgp);
     if (bindings === null) {
@@ -175,7 +176,7 @@ export class LRUBGPCache implements BGPCache {
     // clear the indexes
     this._patternsPerBGP.delete(key);
     bgp.patterns.forEach((pattern) =>
-      this._allKeys.delete(rdf.hashTriple(pattern), { bgp, key }),
+      this._allKeys.delete(rdf.hashTriple(pattern), { bgp, key })
     );
   }
 
@@ -184,7 +185,7 @@ export class LRUBGPCache implements BGPCache {
   }
 
   findSubset(
-    bgp: BasicGraphPattern,
+    bgp: BasicGraphPattern
   ): [Algebra.TripleObject[], Algebra.TripleObject[]] {
     // if the bgp is in the cache, then the computation is simple
     if (this.has(bgp)) {
@@ -199,7 +200,7 @@ export class LRUBGPCache implements BGPCache {
           // remove all BGPs that are not a subset of the input BGP
           // we use lodash.findIndex + rdf.tripleEquals to check for triple pattern equality
           return v.bgp.patterns.every(
-            (a) => findIndex(bgp.patterns, (b) => rdf.tripleEquals(a, b)) > -1,
+            (a) => findIndex(bgp.patterns, (b) => rdf.tripleEquals(a, b)) > -1
           );
         });
       matches.push({ pattern, searchResults });
@@ -211,7 +212,7 @@ export class LRUBGPCache implements BGPCache {
       if (match.searchResults.length > 0) {
         const localMax = maxBy(
           match.searchResults,
-          (v) => v.bgp.patterns.length,
+          (v) => v.bgp.patterns.length
         );
         if (
           localMax !== undefined &&

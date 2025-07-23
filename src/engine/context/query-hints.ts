@@ -24,7 +24,7 @@ SOFTWARE.
 
 "use strict";
 
-import { Algebra } from "sparqljs";
+import type { Algebra } from "sparqljs";
 
 const HINT_PREFIX = "http://callidon.github.io/sparql-engine/hints#";
 
@@ -40,22 +40,24 @@ export function HINT(suffix: string) {
 /**
  * Scopes of a query hint, i.e., Query or Basic Graph pattern
  */
-export enum QUERY_HINT_SCOPE {
-  QUERY,
-  BGP,
-}
+type QueryHintScope = number;
+export const QUERY_HINT_SCOPE = {
+  QUERY: 0,
+  BGP: 1,
+};
 
 /**
  * Types of query hints
  */
-export enum QUERY_HINT {
-  USE_HASH_JOIN,
-  USE_SYMMETRIC_HASH_JOIN,
-  SORTED_TRIPLES,
-}
+type QueryHint = number;
+export const QUERY_HINT = {
+  USE_HASH_JOIN: 0,
+  USE_SYMMETRIC_HASH_JOIN: 1,
+  SORTED_TRIPLES: 2,
+};
 
 export class QueryHints {
-  protected _bgpHints: Map<QUERY_HINT, boolean>;
+  protected _bgpHints: Map<QueryHint, boolean>;
 
   constructor() {
     this._bgpHints = new Map();
@@ -87,7 +89,7 @@ export class QueryHints {
    * @param scope - Scope of the hint (Query, BGP, etc)
    * @param hint - Type of hint
    */
-  add(scope: QUERY_HINT_SCOPE, hint: QUERY_HINT): void {
+  add(scope: QueryHintScope, hint: QueryHint): void {
     if (scope === QUERY_HINT_SCOPE.BGP) {
       this._bgpHints.set(hint, true);
     }
@@ -99,7 +101,7 @@ export class QueryHints {
    * @param hint - Type of hint
    * @return True if the hint exists, False otherwise
    */
-  has(scope: QUERY_HINT_SCOPE, hint: QUERY_HINT): boolean {
+  has(scope: QueryHintScope, hint: QueryHint): boolean {
     if (scope === QUERY_HINT_SCOPE.BGP) {
       return this._bgpHints.has(hint);
     }
@@ -128,7 +130,7 @@ export class QueryHints {
 
 export function parseHints(
   bgp: Algebra.TripleObject[],
-  previous?: QueryHints,
+  previous?: QueryHints
 ): [Algebra.TripleObject[], QueryHints] {
   let res = new QueryHints();
   const regularTriples: Algebra.TripleObject[] = [];

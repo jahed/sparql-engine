@@ -24,16 +24,16 @@ SOFTWARE.
 
 "use strict";
 
-import { PipelineStage } from "../pipeline/pipeline-engine";
-import StageBuilder from "./stage-builder";
-import { CustomFunctions } from "../../operators/expressions/sparql-expression";
-import bind from "../../operators/bind";
-import filter from "../../operators/sparql-filter";
-import groupBy from "../../operators/sparql-groupby";
-import { isString } from "lodash";
-import { Algebra } from "sparqljs";
-import { Bindings } from "../../rdf/bindings";
-import ExecutionContext from "../context/execution-context";
+import { isString } from "lodash-es";
+import type { Algebra } from "sparqljs";
+import bind from "../../operators/bind.ts";
+import type { CustomFunctions } from "../../operators/expressions/sparql-expression.ts";
+import filter from "../../operators/sparql-filter.ts";
+import groupBy from "../../operators/sparql-groupby.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
+import ExecutionContext from "../context/execution-context.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import StageBuilder from "./stage-builder.ts";
 
 /**
  * An AggregateStageBuilder handles the evaluation of Aggregations operations,
@@ -53,7 +53,7 @@ export default class AggregateStageBuilder extends StageBuilder {
     source: PipelineStage<Bindings>,
     query: Algebra.RootNode,
     context: ExecutionContext,
-    customFunctions?: CustomFunctions,
+    customFunctions?: CustomFunctions
   ): PipelineStage<Bindings> {
     let iterator = source;
     // group bindings using the GROUP BY clause
@@ -62,7 +62,7 @@ export default class AggregateStageBuilder extends StageBuilder {
       source,
       query.group || [],
       context,
-      customFunctions,
+      customFunctions
     );
     // next, apply the optional HAVING clause to filter groups
     if ("having" in query) {
@@ -70,7 +70,7 @@ export default class AggregateStageBuilder extends StageBuilder {
         iterator,
         query.having || [],
         context,
-        customFunctions,
+        customFunctions
       );
     }
     return iterator;
@@ -87,7 +87,7 @@ export default class AggregateStageBuilder extends StageBuilder {
     source: PipelineStage<Bindings>,
     groupby: Algebra.Aggregation[],
     context: ExecutionContext,
-    customFunctions?: CustomFunctions,
+    customFunctions?: CustomFunctions
   ): PipelineStage<Bindings> {
     let iterator = source;
     // extract GROUP By variables & rewrite SPARQL expressions into BIND clauses
@@ -114,7 +114,7 @@ export default class AggregateStageBuilder extends StageBuilder {
     source: PipelineStage<Bindings>,
     having: Algebra.Expression[],
     context: ExecutionContext,
-    customFunctions?: CustomFunctions,
+    customFunctions?: CustomFunctions
   ): PipelineStage<Bindings> {
     // thanks to the flexibility of SPARQL expressions,
     // we can rewrite a HAVING clause in a set of FILTER clauses!

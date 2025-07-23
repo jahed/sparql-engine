@@ -24,14 +24,14 @@ SOFTWARE.
 
 "use strict";
 
-import StageBuilder from "./stage-builder";
-import { Pipeline } from "../pipeline/pipeline";
-import { PipelineStage } from "../pipeline/pipeline-engine";
-import { rdf } from "../../utils";
-import { Algebra } from "sparqljs";
-import { Bindings } from "../../rdf/bindings";
-import ExecutionContext from "../context/execution-context";
-import ContextSymbols from "../context/symbols";
+import StageBuilder from "./stage-builder.ts";
+import { Pipeline } from "../pipeline/pipeline.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import * as rdf from "../../utils/rdf.ts";
+import type { Algebra } from "sparqljs";
+import type { Bindings } from "../../rdf/bindings.ts";
+import ExecutionContext from "../context/execution-context.ts";
+import ContextSymbols from "../context/symbols.ts";
 
 /**
  * A GraphStageBuilder evaluates GRAPH clauses in a SPARQL query.
@@ -48,7 +48,7 @@ export default class GraphStageBuilder extends StageBuilder {
   execute(
     source: PipelineStage<Bindings>,
     node: Algebra.GraphNode,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     let subquery: Algebra.RootNode;
     if (node.patterns[0].type === "query") {
@@ -93,9 +93,9 @@ export default class GraphStageBuilder extends StageBuilder {
               return Pipeline.getInstance().map(stage, (bindings) => {
                 return bindings.extendMany([[node.name, iri]]);
               });
-            }),
+            })
           );
-        },
+        }
       );
     }
     // otherwise, execute the subquery using the Graph
@@ -114,7 +114,7 @@ export default class GraphStageBuilder extends StageBuilder {
     source: PipelineStage<Bindings>,
     iri: string,
     subquery: Algebra.RootNode,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     const opts = context.clone();
     opts.defaultGraphs = [iri];

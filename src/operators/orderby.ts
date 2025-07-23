@@ -24,10 +24,10 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../engine/pipeline/pipeline";
-import { PipelineStage } from "../engine/pipeline/pipeline-engine";
-import { Algebra } from "sparqljs";
-import { Bindings } from "../rdf/bindings";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
+import type { Algebra } from "sparqljs";
+import { Bindings } from "../rdf/bindings.ts";
 
 /**
  * Build a comparator function from an ORDER BY clause content
@@ -69,7 +69,7 @@ function _compileComparators(comparators: Algebra.OrderComparator[]) {
  */
 export default function orderby(
   source: PipelineStage<Bindings>,
-  comparators: Algebra.OrderComparator[],
+  comparators: Algebra.OrderComparator[]
 ) {
   const comparator = _compileComparators(
     comparators.map((c: Algebra.OrderComparator) => {
@@ -78,7 +78,7 @@ export default function orderby(
         c.ascending = true;
       }
       return c;
-    }),
+    })
   );
   const engine = Pipeline.getInstance();
   return engine.mergeMap(engine.collect(source), (values: Bindings[]) => {

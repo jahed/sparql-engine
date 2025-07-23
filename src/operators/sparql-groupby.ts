@@ -24,11 +24,11 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../engine/pipeline/pipeline";
-import { PipelineStage } from "../engine/pipeline/pipeline-engine";
-import { rdf } from "../utils";
-import { Bindings } from "../rdf/bindings";
-import { sortedIndexOf } from "lodash";
+import { sortedIndexOf } from "lodash-es";
+import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import { Bindings } from "../rdf/bindings.ts";
+import * as rdf from "../utils/rdf.ts";
 
 /**
  * Hash functions for set of bindings
@@ -63,7 +63,7 @@ function _hashBindings(variables: string[], bindings: Bindings): string {
  */
 export default function sparqlGroupBy(
   source: PipelineStage<Bindings>,
-  variables: string[],
+  variables: string[]
 ) {
   const groups: Map<string, any> = new Map();
   const keys: Map<string, Bindings> = new Map();
@@ -76,8 +76,8 @@ export default function sparqlGroupBy(
       keys.set(
         key,
         bindings.filter(
-          (variable) => sortedIndexOf(groupVariables, variable) > -1,
-        ),
+          (variable) => sortedIndexOf(groupVariables, variable) > -1
+        )
       );
       groups.set(key, {});
     }

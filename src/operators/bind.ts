@@ -24,17 +24,17 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../engine/pipeline/pipeline";
-import { PipelineStage } from "../engine/pipeline/pipeline-engine";
-import { Algebra } from "sparqljs";
-import { Bindings } from "../rdf/bindings";
+import { isArray } from "lodash-es";
+import type { Term } from "rdf-js";
+import type { Algebra } from "sparqljs";
+import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import { Bindings } from "../rdf/bindings.ts";
+import * as rdf from "../utils/rdf.ts";
 import {
   SPARQLExpression,
-  CustomFunctions,
-} from "./expressions/sparql-expression";
-import { rdf } from "../utils";
-import { Term } from "rdf-js";
-import { isArray } from "lodash";
+  type CustomFunctions,
+} from "./expressions/sparql-expression.ts";
 
 /**
  * Test if an object is an iterator that yields RDF Terms or null values
@@ -59,7 +59,7 @@ export default function bind(
   source: PipelineStage<Bindings>,
   variable: string,
   expression: Algebra.Expression | string,
-  customFunctions?: CustomFunctions,
+  customFunctions?: CustomFunctions
 ): PipelineStage<Bindings> {
   const expr = new SPARQLExpression(expression, customFunctions);
   return Pipeline.getInstance().mergeMap(source, (bindings) => {

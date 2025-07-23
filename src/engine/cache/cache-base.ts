@@ -24,15 +24,15 @@ SOFTWARE.
 
 "use strict";
 
-import LRUCache, * as LRU from "lru-cache";
-import { Cache, AsyncCache } from "./cache-interfaces";
+import LRUCache from "lru-cache";
+import type { Cache, AsyncCache } from "./cache-interfaces.ts";
 
 /**
  * An in-memory LRU cache
  * @author Thomas Minier
  */
 export class BaseLRUCache<K, T> implements Cache<K, T> {
-  private readonly _content: LRU<K, T>;
+  private readonly _content: LRUCache<K, T>;
 
   /**
    * Constructor
@@ -45,7 +45,7 @@ export class BaseLRUCache<K, T> implements Cache<K, T> {
     maxSize: number,
     maxAge: number,
     length?: (item: T) => number,
-    onDispose?: (key: K, item: T) => void,
+    onDispose?: (key: K, item: T) => void
   ) {
     const options: LRUCache.Options<K, T> = {
       max: maxSize,
@@ -59,7 +59,7 @@ export class BaseLRUCache<K, T> implements Cache<K, T> {
     if (onDispose !== undefined) {
       options["noDisposeOnSet"] = true;
     }
-    this._content = new LRU<K, T>(options);
+    this._content = new LRUCache<K, T>(options);
   }
 
   put(key: K, item: T): void {
@@ -107,10 +107,11 @@ export interface AsyncCacheEntry<T, I> {
  * @author Thomas Minier
  */
 export abstract class BaseAsyncCache<K, T, I> implements AsyncCache<K, T, I> {
-  /**
-   * Constructor
-   */
-  constructor(private readonly _cache: Cache<K, AsyncCacheEntry<T, I>>) {}
+  private readonly _cache: Cache<K, AsyncCacheEntry<T, I>>;
+
+  constructor(cache: Cache<K, AsyncCacheEntry<T, I>>) {
+    this._cache = cache;
+  }
 
   has(key: K): boolean {
     return this._cache.has(key);
@@ -197,15 +198,15 @@ export class AsyncLRUCache<K, T, I> extends BaseAsyncCache<K, T, I> {
     maxSize: number,
     maxAge: number,
     length?: (item: AsyncCacheEntry<T, I>) => number,
-    onDispose?: (key: K, item: AsyncCacheEntry<T, I>) => void,
+    onDispose?: (key: K, item: AsyncCacheEntry<T, I>) => void
   ) {
     super(
       new BaseLRUCache<K, AsyncCacheEntry<T, I>>(
         maxSize,
         maxAge,
         length,
-        onDispose,
-      ),
+        onDispose
+      )
     );
   }
 }

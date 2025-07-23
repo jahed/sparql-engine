@@ -24,18 +24,19 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../engine/pipeline/pipeline";
-import {
+import { isNull, mean, orderBy, round, sortBy } from "lodash-es";
+import type { Algebra } from "sparqljs";
+import ExecutionContext from "../engine/context/execution-context.ts";
+import type {
   PipelineInput,
   PipelineStage,
-} from "../engine/pipeline/pipeline-engine";
-import { Algebra } from "sparqljs";
-import indexJoin from "../operators/join/index-join";
-import { rdf, sparql } from "../utils";
-import { Bindings, BindingBase } from "./bindings";
-import { GRAPH_CAPABILITY } from "./graph_capability";
-import ExecutionContext from "../engine/context/execution-context";
-import { mean, orderBy, isNull, round, sortBy } from "lodash";
+} from "../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import indexJoin from "../operators/join/index-join.ts";
+import * as rdf from "../utils/rdf.ts";
+import * as sparql from "../utils/sparql.ts";
+import { BindingBase, Bindings } from "./bindings.ts";
+import { GRAPH_CAPABILITY, type GraphCapability } from "./graph_capability.ts";
 
 /**
  * Metadata used for query optimization
@@ -47,12 +48,12 @@ export interface PatternMetadata {
 }
 
 function parseCapabilities(
-  registry: Map<GRAPH_CAPABILITY, boolean>,
-  proto: any,
+  registry: Map<GraphCapability, boolean>,
+  proto: any
 ): void {
   registry.set(
     GRAPH_CAPABILITY.ESTIMATE_TRIPLE_CARD,
-    proto.estimateCardinality != null,
+    proto.estimateCardinality != null
   );
   registry.set(GRAPH_CAPABILITY.UNION, proto.evalUnion != null);
 }
@@ -64,7 +65,7 @@ function parseCapabilities(
  */
 export default abstract class Graph {
   private _iri: string;
-  private _capabilities: Map<GRAPH_CAPABILITY, boolean>;
+  private _capabilities: Map<GraphCapability, boolean>;
 
   constructor() {
     this._iri = "";
@@ -93,7 +94,7 @@ export default abstract class Graph {
    * @param  token - Capability tested
    * @return True if the graph has the reuqested capability, false otherwise
    */
-  _isCapable(token: GRAPH_CAPABILITY): boolean {
+  _isCapable(token: GraphCapability): boolean {
     return this._capabilities.has(token) && this._capabilities.get(token)!;
   }
 
@@ -119,7 +120,7 @@ export default abstract class Graph {
    */
   abstract find(
     pattern: Algebra.TripleObject,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineInput<Algebra.TripleObject>;
 
   /**
@@ -135,7 +136,7 @@ export default abstract class Graph {
    */
   estimateCardinality(triple: Algebra.TripleObject): Promise<number> {
     throw new SyntaxError(
-      "Error: this graph is not capable of estimating the cardinality of a triple pattern",
+      "Error: this graph is not capable of estimating the cardinality of a triple pattern"
     );
   }
 
@@ -182,7 +183,7 @@ export default abstract class Graph {
     maxRelevance: number | null,
     minRank: number | null,
     maxRank: number | null,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<[Algebra.TripleObject, number, number]> {
     if (isNull(minRelevance)) {
       minRelevance = 0;
@@ -253,7 +254,7 @@ export default abstract class Graph {
               // slice using the minRank and maxRank parameters
               .slice(minRank!, maxRank! + 1)
           );
-        },
+        }
       );
     }
     // finally, format results as tuples [RDF triple, triple's score, triple's rank]
@@ -272,10 +273,10 @@ export default abstract class Graph {
    */
   evalUnion(
     patterns: Algebra.TripleObject[][],
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     throw new SyntaxError(
-      "Error: this graph is not capable of evaluating UNION queries",
+      "Error: this graph is not capable of evaluating UNION queries"
     );
   }
 
@@ -287,7 +288,7 @@ export default abstract class Graph {
    */
   evalBGP(
     bgp: Algebra.TripleObject[],
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     const engine = Pipeline.getInstance();
     if (this._isCapable(GRAPH_CAPABILITY.ESTIMATE_TRIPLE_CARD)) {
@@ -301,19 +302,19 @@ export default abstract class Graph {
                 nbVars: rdf.countVariables(triple),
               };
             });
-          }),
-        ),
+          })
+        )
       );
       return engine.mergeMap(op, (results: PatternMetadata[]) => {
         const sortedPatterns = sparql.leftLinearJoinOrdering(
-          sortBy(results, "cardinality").map((t) => t.triple),
+          sortBy(results, "cardinality").map((t) => t.triple)
         );
         const start = engine.of(new BindingBase());
         return sortedPatterns.reduce(
           (iter: PipelineStage<Bindings>, t: Algebra.TripleObject) => {
             return indexJoin(iter, t, this, context);
           },
-          start,
+          start
         );
       });
     } else {

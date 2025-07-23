@@ -24,22 +24,22 @@ SOFTWARE.
 
 "use strict";
 
-import StageBuilder from "./stage-builder";
-import { Pipeline } from "../pipeline/pipeline";
-import { PipelineStage } from "../pipeline/pipeline-engine";
-// import { some } from 'lodash'
-import { Algebra } from "sparqljs";
-import Graph from "../../rdf/graph";
-import { Bindings, BindingBase } from "../../rdf/bindings";
-import { GRAPH_CAPABILITY } from "../../rdf/graph_capability";
-import { parseHints } from "../context/query-hints";
-import { fts } from "./rewritings";
-import ExecutionContext from "../context/execution-context";
-import ContextSymbols from "../context/symbols";
-import { rdf, evaluation } from "../../utils";
-import { isNaN, isNull, isInteger } from "lodash";
+import { isInteger, isNaN, isNull } from "lodash-es";
+import type { Algebra } from "sparqljs";
+import { BindingBase, Bindings } from "../../rdf/bindings.ts";
+import Graph from "../../rdf/graph.ts";
+import { GRAPH_CAPABILITY } from "../../rdf/graph_capability.ts";
+import * as evaluation from "../../utils/evaluation.ts";
+import * as rdf from "../../utils/rdf.ts";
+import ExecutionContext from "../context/execution-context.ts";
+import { parseHints } from "../context/query-hints.ts";
+import ContextSymbols from "../context/symbols.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import { Pipeline } from "../pipeline/pipeline.ts";
+import * as fts from "./rewritings/fts.ts";
+import StageBuilder from "./stage-builder.ts";
 
-import boundJoin from "../../operators/join/bound-join";
+import boundJoin from "../../operators/join/bound-join.ts";
 
 /**
  * Basic {@link PipelineStage} used to evaluate Basic graph patterns using the "evalBGP" method
@@ -51,7 +51,7 @@ function bgpEvaluation(
   bgp: Algebra.TripleObject[],
   graph: Graph,
   builder: BGPStageBuilder,
-  context: ExecutionContext,
+  context: ExecutionContext
 ) {
   const engine = Pipeline.getInstance();
   return engine.mergeMap(source, (bindings: Bindings) => {
@@ -64,7 +64,7 @@ function bgpEvaluation(
         graph,
         context.cache!,
         builder,
-        context,
+        context
       );
     } else {
       iterator = graph.evalBGP(boundedBGP, context);
@@ -111,7 +111,7 @@ export default class BGPStageBuilder extends StageBuilder {
   execute(
     source: PipelineStage<Bindings>,
     patterns: Algebra.TripleObject[],
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     // avoids sending a request with an empty array
     if (patterns.length === 0) return source;
@@ -126,7 +126,7 @@ export default class BGPStageBuilder extends StageBuilder {
 
     // rewrite the BGP to remove blank node addedd by the Turtle notation
     const [bgp, artificals] = this._replaceBlankNodes(
-      extractionResults.classicPatterns,
+      extractionResults.classicPatterns
     );
 
     // if the graph is a variable, go through each binding and look for its value
@@ -150,11 +150,11 @@ export default class BGPStageBuilder extends StageBuilder {
             engine.from([value]),
             graph,
             bgp,
-            context,
+            context
           );
           if (artificals.length > 0) {
             iterator = engine.map(iterator, (b: Bindings) =>
-              b.filter((variable) => artificals.indexOf(variable) < 0),
+              b.filter((variable) => artificals.indexOf(variable) < 0)
             );
           }
           return iterator;
@@ -179,7 +179,7 @@ export default class BGPStageBuilder extends StageBuilder {
           query.pattern,
           query.variable,
           query.magicTriples,
-          context,
+          context
         );
       }, iterator);
     }
@@ -187,7 +187,7 @@ export default class BGPStageBuilder extends StageBuilder {
     // remove artificials variables from bindings
     if (artificals.length > 0) {
       iterator = Pipeline.getInstance().map(iterator, (b: Bindings) =>
-        b.filter((variable) => artificals.indexOf(variable) < 0),
+        b.filter((variable) => artificals.indexOf(variable) < 0)
       );
     }
     return iterator;
@@ -199,7 +199,7 @@ export default class BGPStageBuilder extends StageBuilder {
    * @return A Tuple [Rewritten BGP, List of SPARQL variable added]
    */
   _replaceBlankNodes(
-    patterns: Algebra.TripleObject[],
+    patterns: Algebra.TripleObject[]
   ): [Algebra.TripleObject[], string[]] {
     const newVariables: string[] = [];
     function rewrite(term: string): string {
@@ -234,7 +234,7 @@ export default class BGPStageBuilder extends StageBuilder {
     source: PipelineStage<Bindings>,
     graph: Graph,
     patterns: Algebra.TripleObject[],
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     if (
       graph._isCapable(GRAPH_CAPABILITY.UNION) &&
@@ -261,7 +261,7 @@ export default class BGPStageBuilder extends StageBuilder {
     pattern: Algebra.TripleObject,
     queryVariable: string,
     magicTriples: Algebra.TripleObject[],
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     // full text search default parameters
     let keywords: string[] = [];
@@ -280,7 +280,7 @@ export default class BGPStageBuilder extends StageBuilder {
       // assert that the magic triple is correct
       if (triple.subject !== queryVariable) {
         throw new SyntaxError(
-          `Invalid Full Text Search query: the query variable ${queryVariable} is not the subject of the magic triple ${triple}`,
+          `Invalid Full Text Search query: the query variable ${queryVariable} is not the subject of the magic triple ${triple}`
         );
       }
       switch (triple.predicate) {
@@ -288,7 +288,7 @@ export default class BGPStageBuilder extends StageBuilder {
         case rdf.SES("search"): {
           if (!rdf.isLiteral(triple.object)) {
             throw new SyntaxError(
-              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`,
+              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
             );
           }
           keywords = rdf.getLiteralValue(triple.object).split(" ");
@@ -304,14 +304,14 @@ export default class BGPStageBuilder extends StageBuilder {
         case rdf.SES("minRelevance"): {
           if (!rdf.isLiteral(triple.object)) {
             throw new SyntaxError(
-              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`,
+              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
             );
           }
           minScore = Number(rdf.getLiteralValue(triple.object));
           // assert that the magic triple's object is a valid number
           if (isNaN(minScore)) {
             throw new SyntaxError(
-              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a valid number.`,
+              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a valid number.`
             );
           }
           break;
@@ -320,14 +320,14 @@ export default class BGPStageBuilder extends StageBuilder {
         case rdf.SES("maxRelevance"): {
           if (!rdf.isLiteral(triple.object)) {
             throw new SyntaxError(
-              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`,
+              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
             );
           }
           maxScore = Number(rdf.getLiteralValue(triple.object));
           // assert that the magic triple's object is a valid number
           if (isNaN(maxScore)) {
             throw new SyntaxError(
-              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a valid number.`,
+              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a valid number.`
             );
           }
           break;
@@ -336,14 +336,14 @@ export default class BGPStageBuilder extends StageBuilder {
         case rdf.SES("minRank"): {
           if (!rdf.isLiteral(triple.object)) {
             throw new SyntaxError(
-              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`,
+              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
             );
           }
           minRank = Number(rdf.getLiteralValue(triple.object));
           // assert that the magic triple's object is a valid positive integre
           if (isNaN(minRank) || !isInteger(minRank) || minRank < 0) {
             throw new SyntaxError(
-              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a valid positive integer.`,
+              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a valid positive integer.`
             );
           }
           break;
@@ -352,14 +352,14 @@ export default class BGPStageBuilder extends StageBuilder {
         case rdf.SES("maxRank"): {
           if (!rdf.isLiteral(triple.object)) {
             throw new SyntaxError(
-              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`,
+              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
             );
           }
           maxRank = Number(rdf.getLiteralValue(triple.object));
           // assert that the magic triple's object is a valid positive integer
           if (isNaN(maxRank) || !isInteger(maxRank) || maxRank < 0) {
             throw new SyntaxError(
-              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a valid positive integer.`,
+              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a valid positive integer.`
             );
           }
           break;
@@ -368,7 +368,7 @@ export default class BGPStageBuilder extends StageBuilder {
         case rdf.SES("relevance"): {
           if (!rdf.isVariable(triple.object)) {
             throw new SyntaxError(
-              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a SPARQL variable.`,
+              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a SPARQL variable.`
             );
           }
           addScore = true;
@@ -379,7 +379,7 @@ export default class BGPStageBuilder extends StageBuilder {
         case rdf.SES("rank"): {
           if (!rdf.isVariable(triple.object)) {
             throw new SyntaxError(
-              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a SPARQL variable.`,
+              `Invalid Full Text Search query: the object of the magic triple ${triple} must be a SPARQL variable.`
             );
           }
           addRank = true;
@@ -402,13 +402,13 @@ export default class BGPStageBuilder extends StageBuilder {
     // assert that minScore <= maxScore
     if (!isNull(minScore) && !isNull(maxScore) && minScore > maxScore) {
       throw new SyntaxError(
-        `Invalid Full Text Search query: the maximum relevance score should be greater than or equal to the minimum relevance score (for query on pattern ${pattern} with min_score=${minScore} and max_score=${maxScore})`,
+        `Invalid Full Text Search query: the maximum relevance score should be greater than or equal to the minimum relevance score (for query on pattern ${pattern} with min_score=${minScore} and max_score=${maxScore})`
       );
     }
     // assert than minRank <= maxRank
     if (!isNull(minRank) && !isNull(maxRank) && minRank > maxRank) {
       throw new SyntaxError(
-        `Invalid Full Text Search query: the maximum rank should be be greater than or equal to the minimum rank (for query on pattern ${pattern} with min_rank=${minRank} and max_rank=${maxRank})`,
+        `Invalid Full Text Search query: the maximum rank should be be greater than or equal to the minimum rank (for query on pattern ${pattern} with min_rank=${minRank} and max_rank=${maxRank})`
       );
     }
     // join the input bindings with the full text search operation
@@ -424,7 +424,7 @@ export default class BGPStageBuilder extends StageBuilder {
         maxScore,
         minRank,
         maxRank,
-        context,
+        context
       );
       return Pipeline.getInstance().map(iterator, (item) => {
         // unpack search results

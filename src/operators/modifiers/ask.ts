@@ -24,9 +24,9 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../../engine/pipeline/pipeline";
-import { PipelineStage } from "../../engine/pipeline/pipeline-engine";
-import { Bindings, BindingBase } from "../../rdf/bindings";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
+import { Bindings, BindingBase } from "../../rdf/bindings.ts";
 
 /**
  * A AskOperator output True if a source iterator has solutions, false otherwise.

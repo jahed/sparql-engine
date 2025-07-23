@@ -1,19 +1,14 @@
 {
+  "extends": [
+    "@tsconfig/node22/tsconfig.json",
+    "@tsconfig/node-ts/tsconfig.json"
+  ],
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "declaration": true,
+    "lib": ["es2024", "ESNext.Array", "ESNext.Collection", "ESNext.Iterator", "DOM", "DOM.Iterable"],
     "outDir": "./dist/",
-    "strict": true,
-    "lib": ["ES2015"],
-    "allowSyntheticDefaultImports": true,
-    "downlevelIteration": true,
-    "typeRoots": [
-      "./node_modules/@types/",
-      "./node_modules/sparqljs-legacy-type/",
-      "./types/"
-    ]
+    "declaration": true,
+    "sourceMap": true
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules/", "tests/"]
+  "include": ["src"],
+  "exclude": ["**/*.test.ts"]
 }

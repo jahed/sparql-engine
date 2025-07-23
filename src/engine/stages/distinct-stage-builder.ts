@@ -24,11 +24,11 @@ SOFTWARE.
 
 "use strict";
 
-import StageBuilder from "./stage-builder";
-import sparqlDistinct from "../../operators/sparql-distinct";
-import { PipelineStage } from "../pipeline/pipeline-engine";
-import { Bindings } from "../../rdf/bindings";
-import ExecutionContext from "../context/execution-context";
+import StageBuilder from "./stage-builder.ts";
+import sparqlDistinct from "../../operators/sparql-distinct.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
+import ExecutionContext from "../context/execution-context.ts";
 
 /**
  * A DistinctStageBuilder evaluates DISTINCT modifiers
@@ -37,7 +37,7 @@ import ExecutionContext from "../context/execution-context";
 export default class DistinctStageBuilder extends StageBuilder {
   execute(
     source: PipelineStage<Bindings>,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     return sparqlDistinct(source);
   }

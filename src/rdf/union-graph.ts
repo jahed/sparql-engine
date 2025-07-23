@@ -24,11 +24,11 @@ SOFTWARE.
 
 "use strict";
 
-import Graph from "./graph";
-import { PipelineInput } from "../engine/pipeline/pipeline-engine";
-import { Pipeline } from "../engine/pipeline/pipeline";
-import { Algebra } from "sparqljs";
-import ExecutionContext from "../engine/context/execution-context";
+import Graph from "./graph.ts";
+import type { PipelineInput } from "../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import type { Algebra } from "sparqljs";
+import ExecutionContext from "../engine/context/execution-context.ts";
 
 /**
  * An UnionGraph represents the dynamic union of several graphs.
@@ -58,29 +58,29 @@ export default class UnionGraph extends Graph {
   delete(triple: Algebra.TripleObject): Promise<void> {
     return this._graphs.reduce(
       (prev, g) => prev.then(() => g.delete(triple)),
-      Promise.resolve(),
+      Promise.resolve()
     );
   }
 
   find(
     triple: Algebra.TripleObject,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineInput<Algebra.TripleObject> {
     return Pipeline.getInstance().merge(
-      ...this._graphs.map((g) => g.find(triple, context)),
+      ...this._graphs.map((g) => g.find(triple, context))
     );
   }
 
   clear(): Promise<void> {
     return this._graphs.reduce(
       (prev, g) => prev.then(() => g.clear()),
-      Promise.resolve(),
+      Promise.resolve()
     );
   }
 
   estimateCardinality(triple: Algebra.TripleObject): Promise<number> {
     return Promise.all(
-      this._graphs.map((g) => g.estimateCardinality(triple)),
+      this._graphs.map((g) => g.estimateCardinality(triple))
     ).then((cardinalities: number[]) => {
       return Promise.resolve(cardinalities.reduce((acc, x) => acc + x, 0));
     });

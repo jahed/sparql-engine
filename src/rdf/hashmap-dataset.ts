@@ -24,8 +24,8 @@ SOFTWARE.
 
 "use strict";
 
-import Graph from "./graph";
-import Dataset from "./dataset";
+import Graph from "./graph.ts";
+import Dataset from "./dataset.ts";
 
 /**
  * A simple Dataset backed by a HashMap.

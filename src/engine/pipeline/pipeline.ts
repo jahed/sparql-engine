@@ -24,8 +24,8 @@ SOFTWARE.
 
 "use strict";
 
-import { PipelineEngine } from "./pipeline-engine";
-import RxjsPipeline from "./rxjs-pipeline";
+import { PipelineEngine } from "./pipeline-engine.ts";
+import RxjsPipeline from "./rxjs-pipeline.ts";
 
 // current pipeline engine used for processing bindings
 let _currentEngine: PipelineEngine = new RxjsPipeline();

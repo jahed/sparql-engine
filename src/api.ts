@@ -25,20 +25,20 @@ SOFTWARE.
 "use strict";
 
 // stages builders
-import { SPARQL_OPERATION } from "./engine/plan-builder";
-import AggregateStageBuilder from "./engine/stages/aggregate-stage-builder";
-import BGPStageBuilder from "./engine/stages/bgp-stage-builder";
-import BindStageBuilder from "./engine/stages/bind-stage-builder";
-import DistinctStageBuilder from "./engine/stages/distinct-stage-builder";
-import FilterStageBuilder from "./engine/stages/filter-stage-builder";
-import GlushkovStageBuilder from "./engine/stages/glushkov-executor/glushkov-stage-builder";
-import GraphStageBuilder from "./engine/stages/graph-stage-builder";
-import MinusStageBuilder from "./engine/stages/minus-stage-builder";
-import ServiceStageBuilder from "./engine/stages/service-stage-builder";
-import OptionalStageBuilder from "./engine/stages/optional-stage-builder";
-import OrderByStageBuilder from "./engine/stages/orderby-stage-builder";
-import UnionStageBuilder from "./engine/stages/union-stage-builder";
-import UpdateStageBuilder from "./engine/stages/update-stage-builder";
+import { SPARQL_OPERATION } from "./engine/plan-builder.ts";
+import AggregateStageBuilder from "./engine/stages/aggregate-stage-builder.ts";
+import BGPStageBuilder from "./engine/stages/bgp-stage-builder.ts";
+import BindStageBuilder from "./engine/stages/bind-stage-builder.ts";
+import DistinctStageBuilder from "./engine/stages/distinct-stage-builder.ts";
+import FilterStageBuilder from "./engine/stages/filter-stage-builder.ts";
+import GlushkovStageBuilder from "./engine/stages/glushkov-executor/glushkov-stage-builder.ts";
+import GraphStageBuilder from "./engine/stages/graph-stage-builder.ts";
+import MinusStageBuilder from "./engine/stages/minus-stage-builder.ts";
+import ServiceStageBuilder from "./engine/stages/service-stage-builder.ts";
+import OptionalStageBuilder from "./engine/stages/optional-stage-builder.ts";
+import OrderByStageBuilder from "./engine/stages/orderby-stage-builder.ts";
+import UnionStageBuilder from "./engine/stages/union-stage-builder.ts";
+import UpdateStageBuilder from "./engine/stages/update-stage-builder.ts";
 
 const stages = {
   SPARQL_OPERATION,
@@ -58,29 +58,29 @@ const stages = {
 };
 
 // base types
-export { default as Dataset } from "./rdf/dataset";
-export { Bindings, BindingBase } from "./rdf/bindings";
-export { default as HashMapDataset } from "./rdf/hashmap-dataset";
-export { default as Graph } from "./rdf/graph";
-export { default as ExecutionContext } from "./engine/context/execution-context";
-export { PlanBuilder } from "./engine/plan-builder";
+export { default as Dataset } from "./rdf/dataset.ts";
+export { Bindings, BindingBase } from "./rdf/bindings.ts";
+export { default as HashMapDataset } from "./rdf/hashmap-dataset.ts";
+export { default as Graph } from "./rdf/graph.ts";
+export { default as ExecutionContext } from "./engine/context/execution-context.ts";
+export { PlanBuilder } from "./engine/plan-builder.ts";
 // pipeline
-export { Pipeline } from "./engine/pipeline/pipeline";
+export { Pipeline } from "./engine/pipeline/pipeline.ts";
 export {
   PipelineEngine,
-  PipelineInput,
-  PipelineStage,
-  StreamPipelineInput,
-} from "./engine/pipeline/pipeline-engine";
-export { default as RxjsPipeline } from "./engine/pipeline/rxjs-pipeline";
-export { default as VectorPipeline } from "./engine/pipeline/vector-pipeline";
+  type PipelineInput,
+  type PipelineStage,
+  type StreamPipelineInput,
+} from "./engine/pipeline/pipeline-engine.ts";
+export { default as RxjsPipeline } from "./engine/pipeline/rxjs-pipeline.ts";
+export { default as VectorPipeline } from "./engine/pipeline/vector-pipeline.ts";
 // RDF terms Utilities
-export { rdf } from "./utils";
+export * as rdf from "./utils/rdf.ts";
 // Formatters
-export { default as JsonFormat } from "./formatters/json-formatter";
+export { default as JsonFormat } from "./formatters/json-formatter.ts";
 export {
   csvFormatter as CSVFormat,
   tsvFormatter as TSVFormat,
-} from "./formatters/csv-tsv-formatter";
+} from "./formatters/csv-tsv-formatter.ts";
 
 export { stages };

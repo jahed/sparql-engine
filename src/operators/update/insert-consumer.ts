@@ -24,10 +24,10 @@ SOFTWARE.
 
 "use strict";
 
-import { Consumer } from "./consumer";
-import Graph from "../../rdf/graph";
-import { PipelineStage } from "../../engine/pipeline/pipeline-engine";
-import { Algebra } from "sparqljs";
+import { Consumer } from "./consumer.ts";
+import Graph from "../../rdf/graph.ts";
+import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
+import type { Algebra } from "sparqljs";
 
 /**
  * An InsertConsumer evaluates a SPARQL INSERT clause
@@ -46,7 +46,7 @@ export default class InsertConsumer extends Consumer {
   constructor(
     source: PipelineStage<Algebra.TripleObject>,
     graph: Graph,
-    options: Object,
+    options: Object
   ) {
     super(source, options);
     this._graph = graph;
@@ -55,7 +55,7 @@ export default class InsertConsumer extends Consumer {
   _write(
     triple: Algebra.TripleObject,
     encoding: string | undefined,
-    done: (err?: Error) => void,
+    done: (err?: Error) => void
   ): void {
     this._graph
       .insert(triple)

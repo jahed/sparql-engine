@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { Bindings } from "../../rdf/bindings";
+import type { Bindings } from "../../rdf/bindings.ts";
 
 /**
  * A HashJoinTable is used by a Hash-based join to save set of bindings corresponding to a joinKey.

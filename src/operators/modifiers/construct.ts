@@ -24,12 +24,12 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../../engine/pipeline/pipeline";
-import { PipelineStage } from "../../engine/pipeline/pipeline-engine";
-import { Algebra } from "sparqljs";
-import { compact } from "lodash";
-import { rdf } from "../../utils";
-import { Bindings } from "../../rdf/bindings";
+import { compact } from "lodash-es";
+import type { Algebra } from "sparqljs";
+import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
+import * as rdf from "../../utils/rdf.ts";
 
 /**
  * A ConstructOperator transform solution mappings into RDF triples, according to a template
@@ -57,6 +57,6 @@ export default function construct(source: PipelineStage<Bindings>, query: any) {
     engine.flatMap(source, (bindings: Bindings) => {
       return compact(templates.map((t) => bindings.bound(t)));
     }),
-    rawTriples,
+    rawTriples
   );
 }

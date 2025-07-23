@@ -24,9 +24,9 @@ SOFTWARE.
 
 "use strict";
 
-import { Algebra } from "sparqljs";
-import PlanVisitor from "./plan-visitor";
-import UnionMerge from "./visitors/union-merge";
+import type { Algebra } from "sparqljs";
+import PlanVisitor from "./plan-visitor.ts";
+import UnionMerge from "./visitors/union-merge.ts";
 
 /**
  * An Optimizer applies a set of optimization rules, implemented using subclasses of {@link PlanVisitor}.

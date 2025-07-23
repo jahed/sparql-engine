@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { Automaton, State, Transition } from "./automaton";
+import { Automaton, State, Transition } from "./automaton.ts";
 
 /**
  * Interface of something that builds an automaton
@@ -159,7 +159,7 @@ export class GlushkovBuilder implements AutomatonBuilder<number, string> {
         do {
           suiv++;
           let firstNextChild = self.first.get(
-            node.items[suiv].id,
+            node.items[suiv].id
           ) as Set<number>;
           followChildLast = union(followChildLast, firstNextChild);
           nullableNextChild = self.nullable.get(node.items[suiv].id) as boolean;
@@ -304,7 +304,7 @@ export class GlushkovBuilder implements AutomatonBuilder<number, string> {
       let isReverseNodeToReverse = this.reverse.get(nodeToReverse) as boolean;
       this.reverse.set(nodeToReverse, !isReverseNodeToReverse);
       let followeesNodeToReverse = this.follow.get(
-        nodeToReverse,
+        nodeToReverse
       ) as Set<number>;
       followeesNodeToReverse.forEach((followee) => {
         if (childInverse.has(followee)) {
@@ -319,8 +319,8 @@ export class GlushkovBuilder implements AutomatonBuilder<number, string> {
         child,
         union(
           this.follow.get(child) as Set<number>,
-          followTemp.get(child) as Set<number>,
-        ),
+          followTemp.get(child) as Set<number>
+        )
       );
     });
   }
@@ -400,7 +400,7 @@ export class GlushkovBuilder implements AutomatonBuilder<number, string> {
         toState,
         reverse,
         negation,
-        predicates,
+        predicates
       );
       glushkov.addTransition(transition);
     });
@@ -419,7 +419,7 @@ export class GlushkovBuilder implements AutomatonBuilder<number, string> {
           toState,
           reverse,
           negation,
-          predicates,
+          predicates
         );
         glushkov.addTransition(transition);
       });

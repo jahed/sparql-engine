@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { Pipeline } from "../../engine/pipeline/pipeline";
-import { PipelineStage } from "../../engine/pipeline/pipeline-engine";
-import HashJoinTable from "./hash-join-table";
-import { Bindings } from "../../rdf/bindings";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
+import HashJoinTable from "./hash-join-table.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
 
 /**
  * Utility function used to perform one half of a symmetric hash join
@@ -39,7 +39,7 @@ function halfHashJoin(
   joinKey: string,
   source: PipelineStage<Bindings>,
   innerTable: HashJoinTable,
-  outerTable: HashJoinTable,
+  outerTable: HashJoinTable
 ): PipelineStage<Bindings> {
   const engine = Pipeline.getInstance();
   return engine.mergeMap(source, (bindings: Bindings) => {
@@ -66,7 +66,7 @@ function halfHashJoin(
 export default function symHashJoin(
   joinKey: string,
   left: PipelineStage<Bindings>,
-  right: PipelineStage<Bindings>,
+  right: PipelineStage<Bindings>
 ) {
   const leftTable = new HashJoinTable();
   const rightTable = new HashJoinTable();

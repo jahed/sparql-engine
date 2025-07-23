@@ -24,10 +24,10 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../engine/pipeline/pipeline";
-import { PipelineStage } from "../engine/pipeline/pipeline-engine";
-import { concat, intersection } from "lodash";
-import { Bindings } from "../rdf/bindings";
+import { concat, intersection } from "lodash-es";
+import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import { Bindings } from "../rdf/bindings.ts";
 
 /**
  * Evaluates a SPARQL MINUS clause
@@ -39,14 +39,14 @@ import { Bindings } from "../rdf/bindings";
  */
 export default function minus(
   leftSource: PipelineStage<Bindings>,
-  rightSource: PipelineStage<Bindings>,
+  rightSource: PipelineStage<Bindings>
 ) {
   // first materialize the right source in a buffer, then apply difference on the left source
   const engine = Pipeline.getInstance();
   let op = engine.reduce(
     rightSource,
     (acc: Bindings[], b: Bindings) => concat(acc, b),
-    [],
+    []
   );
   return engine.mergeMap(op, (buffer: Bindings[]) => {
     return engine.filter(leftSource, (bindings: Bindings) => {

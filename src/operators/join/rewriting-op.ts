@@ -24,14 +24,14 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../../engine/pipeline/pipeline";
-import ExecutionContext from "../../engine/context/execution-context";
-import Graph from "../../rdf/graph";
-import { Bindings } from "../../rdf/bindings";
-import { evaluation } from "../../utils";
-import { Algebra } from "sparqljs";
-import { PipelineStage } from "../../engine/pipeline/pipeline-engine";
-import BGPStageBuilder from "../../engine/stages/bgp-stage-builder";
+import type { Algebra } from "sparqljs";
+import ExecutionContext from "../../engine/context/execution-context.ts";
+import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import BGPStageBuilder from "../../engine/stages/bgp-stage-builder.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
+import Graph from "../../rdf/graph.ts";
+import * as evaluation from "../../utils/evaluation.ts";
 
 /**
  * Find a rewriting key in a list of variables
@@ -40,7 +40,7 @@ import BGPStageBuilder from "../../engine/stages/bgp-stage-builder";
  */
 function findKey(
   variables: IterableIterator<string>,
-  maxValue: number = 15,
+  maxValue: number = 15
 ): number {
   let key = -1;
   for (let v of variables) {
@@ -60,7 +60,7 @@ function findKey(
 function revertBinding(
   key: number,
   input: Bindings,
-  variables: IterableIterator<string>,
+  variables: IterableIterator<string>
 ): Bindings {
   const newBinding = input.empty();
   for (let vName of variables) {
@@ -81,7 +81,7 @@ function revertBinding(
  */
 function rewriteSolutions(
   bindings: Bindings,
-  rewritingMap: Map<number, Bindings>,
+  rewritingMap: Map<number, Bindings>
 ): Bindings {
   const key = findKey(bindings.variables());
   // rewrite binding, and then merge it with the corresponding one in the bucket
@@ -109,7 +109,7 @@ export default function rewritingOp(
   bgpBucket: Algebra.TripleObject[][],
   rewritingTable: Map<number, Bindings>,
   builder: BGPStageBuilder,
-  context: ExecutionContext,
+  context: ExecutionContext
 ) {
   let source;
   if (context.cachingEnabled()) {
@@ -124,8 +124,8 @@ export default function rewritingOp(
             graph,
             context.cache!,
             builder,
-            context,
-          ),
+            context
+          )
         );
       } else {
         others.push(patterns);
@@ -134,12 +134,12 @@ export default function rewritingOp(
     // merge all sources from the cache first, and then the evaluation of bgp that are not in the cache
     source = Pipeline.getInstance().merge(
       Pipeline.getInstance().merge(...stages),
-      graph.evalUnion(others, context),
+      graph.evalUnion(others, context)
     );
   } else {
     source = graph.evalUnion(bgpBucket, context);
   }
   return Pipeline.getInstance().map(source, (bindings) =>
-    rewriteSolutions(bindings, rewritingTable),
+    rewriteSolutions(bindings, rewritingTable)
   );
 }

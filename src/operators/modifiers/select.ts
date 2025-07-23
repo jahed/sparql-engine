@@ -24,11 +24,11 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../../engine/pipeline/pipeline";
-import { PipelineStage } from "../../engine/pipeline/pipeline-engine";
-import { Algebra } from "sparqljs";
-import { rdf } from "../../utils";
-import { Bindings } from "../../rdf/bindings";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
+import type { Algebra } from "sparqljs";
+import * as rdf from "../../utils/rdf.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
 
 /**
  * Evaluates a SPARQL SELECT operation, i.e., perform a selection over sets of solutions bindings
@@ -41,7 +41,7 @@ import { Bindings } from "../../rdf/bindings";
  */
 export default function select(
   source: PipelineStage<Bindings>,
-  query: Algebra.RootNode,
+  query: Algebra.RootNode
 ) {
   const variables = query.variables as string[];
   const selectAll = variables.length === 1 && variables[0] === "*";

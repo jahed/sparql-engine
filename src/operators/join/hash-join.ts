@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { Pipeline } from "../../engine/pipeline/pipeline";
-import { PipelineStage } from "../../engine/pipeline/pipeline-engine";
-import HashJoinTable from "./hash-join-table";
-import { Bindings } from "../../rdf/bindings";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
+import HashJoinTable from "./hash-join-table.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
 
 /**
  * Perform a traditional Hash join between two sources, i.e., materialize the right source in a hash table and then read from the left source while probing into the hash table.
@@ -37,7 +37,7 @@ import { Bindings } from "../../rdf/bindings";
 export default function hashJoin(
   left: PipelineStage<Bindings>,
   right: PipelineStage<Bindings>,
-  joinKey: string,
+  joinKey: string
 ) {
   const joinTable = new HashJoinTable();
   const engine = Pipeline.getInstance();

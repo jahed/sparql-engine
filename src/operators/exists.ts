@@ -24,11 +24,11 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../engine/pipeline/pipeline";
-import { PipelineStage } from "../engine/pipeline/pipeline-engine";
-import { Bindings, BindingBase } from "../rdf/bindings";
-import { PlanBuilder } from "../engine/plan-builder";
-import ExecutionContext from "../engine/context/execution-context";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
+import { Bindings, BindingBase } from "../rdf/bindings.ts";
+import { PlanBuilder } from "../engine/plan-builder.ts";
+import ExecutionContext from "../engine/context/execution-context.ts";
 
 interface ConditionalBindings {
   bindings: Bindings;
@@ -51,7 +51,7 @@ export default function exists(
   groups: any[],
   builder: PlanBuilder,
   notexists: boolean,
-  context: ExecutionContext,
+  context: ExecutionContext
 ) {
   const defaultValue: Bindings = new BindingBase();
   defaultValue.setProperty("exists", false);

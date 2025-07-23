@@ -24,21 +24,13 @@ SOFTWARE.
 
 "use strict";
 
+import { chunk, flatMap, flatten, slice } from "lodash-es";
 import {
-  PipelineInput,
-  StreamPipelineInput,
-  PipelineStage,
+  type PipelineInput,
+  type PipelineStage,
+  type StreamPipelineInput,
   PipelineEngine,
-} from "./pipeline-engine";
-import {
-  chunk,
-  flatMap,
-  flatten,
-  isUndefined,
-  slice,
-  uniq,
-  uniqBy,
-} from "lodash";
+} from "./pipeline-engine.ts";
 
 /**
  * A PipelineStage which materializes all intermediate results in main memory.
@@ -61,7 +53,7 @@ export class VectorStage<T> implements PipelineStage<T> {
   subscribe(
     onData: (value: T) => void,
     onError: (err: any) => void,
-    onEnd: () => void,
+    onEnd: () => void
   ): void {
     try {
       this._content
@@ -143,7 +135,7 @@ export default class VectorPipeline extends PipelineEngine {
     return new VectorStage<T>(
       new Promise<T[]>((resolve, reject) => {
         cb(new VectorStreamInput<T>(resolve, reject));
-      }),
+      })
     );
   }
 
@@ -153,7 +145,7 @@ export default class VectorPipeline extends PipelineEngine {
 
   catch<T, O>(
     input: VectorStage<T>,
-    handler?: (err: Error) => VectorStage<O>,
+    handler?: (err: Error) => VectorStage<O>
   ): VectorStage<T | O> {
     return new VectorStage<T | O>(
       new Promise((resolve, reject) => {
@@ -172,7 +164,7 @@ export default class VectorPipeline extends PipelineEngine {
                 });
             }
           });
-      }),
+      })
     );
   }
 
@@ -180,7 +172,7 @@ export default class VectorPipeline extends PipelineEngine {
     return new VectorStage<T>(
       Promise.all(inputs.map((i) => i.getContent())).then((contents: T[][]) => {
         return flatten(contents);
-      }),
+      })
     );
   }
 
@@ -190,16 +182,16 @@ export default class VectorPipeline extends PipelineEngine {
 
   flatMap<F, T>(
     input: VectorStage<F>,
-    mapper: (value: F) => T[],
+    mapper: (value: F) => T[]
   ): VectorStage<T> {
     return new VectorStage<T>(
-      input.getContent().then((c) => flatMap(c, mapper)),
+      input.getContent().then((c) => flatMap(c, mapper))
     );
   }
 
   mergeMap<F, T>(
     input: VectorStage<F>,
-    mapper: (value: F) => VectorStage<T>,
+    mapper: (value: F) => VectorStage<T>
   ): VectorStage<T> {
     return new VectorStage<T>(
       input.getContent().then((content) => {
@@ -207,18 +199,18 @@ export default class VectorPipeline extends PipelineEngine {
         return Promise.all(stages.map((s) => s.getContent())).then(
           (contents: T[][]) => {
             return flatten(contents);
-          },
+          }
         );
-      }),
+      })
     );
   }
 
   filter<T>(
     input: VectorStage<T>,
-    predicate: (value: T) => boolean,
+    predicate: (value: T) => boolean
   ): VectorStage<T> {
     return new VectorStage<T>(
-      input.getContent().then((c) => c.filter(predicate)),
+      input.getContent().then((c) => c.filter(predicate))
     );
   }
 
@@ -227,23 +219,23 @@ export default class VectorPipeline extends PipelineEngine {
       input.getContent().then((c) => {
         callback();
         return c;
-      }),
+      })
     );
   }
 
   reduce<F, T>(
     input: VectorStage<F>,
     reducer: (acc: T, value: F) => T,
-    initial: T,
+    initial: T
   ): VectorStage<T> {
     return new VectorStage<T>(
-      input.getContent().then((c) => [c.reduce(reducer, initial)]),
+      input.getContent().then((c) => [c.reduce(reducer, initial)])
     );
   }
 
   limit<T>(input: VectorStage<T>, stopAfter: number): VectorStage<T> {
     return new VectorStage<T>(
-      input.getContent().then((c) => slice(c, 0, stopAfter)),
+      input.getContent().then((c) => slice(c, 0, stopAfter))
     );
   }
 
@@ -258,13 +250,13 @@ export default class VectorPipeline extends PipelineEngine {
           return content.slice(0);
         }
         return values;
-      }),
+      })
     );
   }
 
   bufferCount<T>(input: VectorStage<T>, count: number): VectorStage<T[]> {
     return new VectorStage<T[]>(
-      input.getContent().then((c) => chunk(c, count)),
+      input.getContent().then((c) => chunk(c, count))
     );
   }
 
@@ -279,7 +271,7 @@ export default class VectorPipeline extends PipelineEngine {
           return [];
         }
         return [content[0]];
-      }),
+      })
     );
   }
 

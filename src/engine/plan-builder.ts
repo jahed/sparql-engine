@@ -25,45 +25,53 @@ SOFTWARE.
 "use strict";
 
 // General libraries
-import { Algebra, Parser } from "sparqljs";
-import { Consumable } from "../operators/update/consumer";
+import { type Algebra, Parser } from "sparqljs";
+import type { Consumable } from "../operators/update/consumer.ts";
 // pipelining engine
-import { Pipeline } from "../engine/pipeline/pipeline";
-import { PipelineStage } from "../engine/pipeline/pipeline-engine";
+import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
 // RDF core classes
-import { Bindings, BindingBase } from "../rdf/bindings";
-import Dataset from "../rdf/dataset";
+import { BindingBase, Bindings } from "../rdf/bindings.ts";
+import Dataset from "../rdf/dataset.ts";
 // Optimization
-import Optimizer from "../optimizer/optimizer";
+import Optimizer from "../optimizer/optimizer.ts";
 // Solution modifiers
-import ask from "../operators/modifiers/ask";
-import construct from "../operators/modifiers/construct";
-import select from "../operators/modifiers/select";
+import ask from "../operators/modifiers/ask.ts";
+import construct from "../operators/modifiers/construct.ts";
+import select from "../operators/modifiers/select.ts";
 // Stage builders
-import StageBuilder from "./stages/stage-builder";
-import AggregateStageBuilder from "./stages/aggregate-stage-builder";
-import BGPStageBuilder from "./stages/bgp-stage-builder";
-import BindStageBuilder from "./stages/bind-stage-builder";
-import DistinctStageBuilder from "./stages/distinct-stage-builder";
-import FilterStageBuilder from "./stages/filter-stage-builder";
-import GlushkovStageBuilder from "./stages/glushkov-executor/glushkov-stage-builder";
-import GraphStageBuilder from "./stages/graph-stage-builder";
-import MinusStageBuilder from "./stages/minus-stage-builder";
-import ServiceStageBuilder from "./stages/service-stage-builder";
-import OptionalStageBuilder from "./stages/optional-stage-builder";
-import OrderByStageBuilder from "./stages/orderby-stage-builder";
-import UnionStageBuilder from "./stages/union-stage-builder";
-import UpdateStageBuilder from "./stages/update-stage-builder";
+import AggregateStageBuilder from "./stages/aggregate-stage-builder.ts";
+import BGPStageBuilder from "./stages/bgp-stage-builder.ts";
+import BindStageBuilder from "./stages/bind-stage-builder.ts";
+import DistinctStageBuilder from "./stages/distinct-stage-builder.ts";
+import FilterStageBuilder from "./stages/filter-stage-builder.ts";
+import GlushkovStageBuilder from "./stages/glushkov-executor/glushkov-stage-builder.ts";
+import GraphStageBuilder from "./stages/graph-stage-builder.ts";
+import MinusStageBuilder from "./stages/minus-stage-builder.ts";
+import OptionalStageBuilder from "./stages/optional-stage-builder.ts";
+import OrderByStageBuilder from "./stages/orderby-stage-builder.ts";
+import ServiceStageBuilder from "./stages/service-stage-builder.ts";
+import StageBuilder from "./stages/stage-builder.ts";
+import UnionStageBuilder from "./stages/union-stage-builder.ts";
+import UpdateStageBuilder from "./stages/update-stage-builder.ts";
 // caching
-import { BGPCache, LRUBGPCache } from "./cache/bgp-cache";
+import { type BGPCache, LRUBGPCache } from "./cache/bgp-cache.ts";
 // utilities
-import { partition, isNull, isString, isUndefined, some, sortBy } from "lodash";
+import {
+  isNull,
+  isString,
+  isUndefined,
+  partition,
+  some,
+  sortBy,
+} from "lodash-es";
 
-import ExecutionContext from "./context/execution-context";
-import ContextSymbols from "./context/symbols";
-import { CustomFunctions } from "../operators/expressions/sparql-expression";
-import { extractPropertyPaths } from "./stages/rewritings";
-import { extendByBindings, deepApplyBindings, rdf } from "../utils";
+import type { CustomFunctions } from "../operators/expressions/sparql-expression.ts";
+import { deepApplyBindings, extendByBindings } from "../utils.ts";
+import * as rdf from "../utils/rdf.ts";
+import ExecutionContext from "./context/execution-context.ts";
+import ContextSymbols from "./context/symbols.ts";
+import { extractPropertyPaths } from "./stages/rewritings.ts";
 
 const QUERY_MODIFIERS = {
   SELECT: select,
@@ -79,21 +87,22 @@ export type QueryOutput = Bindings | Algebra.TripleObject | boolean;
 /*
  * Class of SPARQL operations that are evaluated by a Stage Builder
  */
-export enum SPARQL_OPERATION {
-  AGGREGATE,
-  BGP,
-  BIND,
-  DISTINCT,
-  FILTER,
-  GRAPH,
-  MINUS,
-  OPTIONAL,
-  ORDER_BY,
-  PROPERTY_PATH,
-  SERVICE,
-  UPDATE,
-  UNION,
-}
+export type SparqlOperation = number;
+export const SPARQL_OPERATION = {
+  AGGREGATE: 0,
+  BGP: 1,
+  BIND: 2,
+  DISTINCT: 3,
+  FILTER: 4,
+  GRAPH: 5,
+  MINUS: 6,
+  OPTIONAL: 7,
+  ORDER_BY: 8,
+  PROPERTY_PATH: 9,
+  SERVICE: 10,
+  UPDATE: 11,
+  UNION: 12,
+};
 
 /**
  * A PlanBuilder builds a physical query execution plan of a SPARQL query,
@@ -106,8 +115,10 @@ export enum SPARQL_OPERATION {
 export class PlanBuilder {
   private readonly _parser: Parser;
   private _optimizer: Optimizer;
-  private _stageBuilders: Map<SPARQL_OPERATION, StageBuilder>;
+  private _stageBuilders: Map<SparqlOperation, StageBuilder>;
   private _currentCache: BGPCache | null;
+  private _dataset: Dataset;
+  private _customFunctions?: CustomFunctions;
 
   /**
    * Constructor
@@ -115,11 +126,12 @@ export class PlanBuilder {
    * @param _prefixes - Optional prefixes to use during query processing
    */
   constructor(
-    private _dataset: Dataset,
+    dataset: Dataset,
     prefixes: any = {},
-    private _customFunctions?: CustomFunctions,
+    customFunctions?: CustomFunctions
   ) {
-    this._dataset = _dataset;
+    this._dataset = dataset;
+    this._customFunctions = customFunctions;
     this._parser = new Parser(prefixes);
     this._optimizer = Optimizer.getDefault();
     this._currentCache = null;
@@ -128,13 +140,13 @@ export class PlanBuilder {
     // add default stage builders
     this.use(
       SPARQL_OPERATION.AGGREGATE,
-      new AggregateStageBuilder(this._dataset),
+      new AggregateStageBuilder(this._dataset)
     );
     this.use(SPARQL_OPERATION.BGP, new BGPStageBuilder(this._dataset));
     this.use(SPARQL_OPERATION.BIND, new BindStageBuilder(this._dataset));
     this.use(
       SPARQL_OPERATION.DISTINCT,
-      new DistinctStageBuilder(this._dataset),
+      new DistinctStageBuilder(this._dataset)
     );
     this.use(SPARQL_OPERATION.FILTER, new FilterStageBuilder(this._dataset));
     this.use(SPARQL_OPERATION.GRAPH, new GraphStageBuilder(this._dataset));
@@ -142,12 +154,12 @@ export class PlanBuilder {
     this.use(SPARQL_OPERATION.SERVICE, new ServiceStageBuilder(this._dataset));
     this.use(
       SPARQL_OPERATION.OPTIONAL,
-      new OptionalStageBuilder(this._dataset),
+      new OptionalStageBuilder(this._dataset)
     );
     this.use(SPARQL_OPERATION.ORDER_BY, new OrderByStageBuilder(this._dataset));
     this.use(
       SPARQL_OPERATION.PROPERTY_PATH,
-      new GlushkovStageBuilder(this._dataset),
+      new GlushkovStageBuilder(this._dataset)
     );
     this.use(SPARQL_OPERATION.UNION, new UnionStageBuilder(this._dataset));
     this.use(SPARQL_OPERATION.UPDATE, new UpdateStageBuilder(this._dataset));
@@ -166,7 +178,7 @@ export class PlanBuilder {
    * @param  kind         - Class of SPARQL operations handled by the Stage Builder
    * @param  stageBuilder - New Stage Builder
    */
-  use(kind: SPARQL_OPERATION, stageBuilder: StageBuilder) {
+  use(kind: SparqlOperation, stageBuilder: StageBuilder) {
     // complete handshake
     stageBuilder.builder = null;
     stageBuilder.builder = this;
@@ -204,7 +216,7 @@ export class PlanBuilder {
    */
   build(
     query: any,
-    context?: ExecutionContext,
+    context?: ExecutionContext
   ): PipelineStage<QueryOutput> | Consumable {
     // If needed, parse the string query into a logical query execution plan
     if (typeof query === "string") {
@@ -223,7 +235,7 @@ export class PlanBuilder {
       case "update":
         if (!this._stageBuilders.has(SPARQL_OPERATION.UPDATE)) {
           throw new Error(
-            "A PlanBuilder cannot evaluate SPARQL UPDATE queries without a StageBuilder for it",
+            "A PlanBuilder cannot evaluate SPARQL UPDATE queries without a StageBuilder for it"
           );
         }
         return this._stageBuilders
@@ -244,7 +256,7 @@ export class PlanBuilder {
   _buildQueryPlan(
     query: Algebra.RootNode,
     context: ExecutionContext,
-    source?: PipelineStage<Bindings>,
+    source?: PipelineStage<Bindings>
   ): PipelineStage<Bindings> {
     const engine = Pipeline.getInstance();
     if (isNull(source) || isUndefined(source)) {
@@ -268,7 +280,7 @@ export class PlanBuilder {
         const triple = rdf.triple(
           v,
           `?pred__describe__${v}`,
-          `?obj__describe__${v}`,
+          `?obj__describe__${v}`
         );
         template.push(triple);
         where[0].triples.push(triple);
@@ -287,7 +299,7 @@ export class PlanBuilder {
     // from the begining, dectect any LIMIT/OFFSET modifiers, as they cimpact the caching strategy
     context.setProperty(
       ContextSymbols.HAS_LIMIT_OFFSET,
-      "limit" in query || "offset" in query,
+      "limit" in query || "offset" in query
     );
 
     // Handles FROM clauses
@@ -310,7 +322,7 @@ export class PlanBuilder {
       aggregates = parts[1];
       // add aggregates variables to projection variables
       query.variables = parts[0].concat(
-        aggregates.map((agg) => (agg as Algebra.Aggregation).variable),
+        aggregates.map((agg) => (agg as Algebra.Aggregation).variable)
       );
     }
 
@@ -323,7 +335,7 @@ export class PlanBuilder {
           graphIterator,
           query,
           context,
-          this._customFunctions,
+          this._customFunctions
         ) as PipelineStage<Bindings>;
     }
 
@@ -336,7 +348,7 @@ export class PlanBuilder {
             .execute(prev, agg, this._customFunctions, context);
           return op as PipelineStage<Bindings>;
         },
-        graphIterator,
+        graphIterator
       );
     }
 
@@ -344,7 +356,7 @@ export class PlanBuilder {
     if ("order" in query) {
       if (!this._stageBuilders.has(SPARQL_OPERATION.ORDER_BY)) {
         throw new Error(
-          "A PlanBuilder cannot evaluate SPARQL ORDER BY clauses without a StageBuilder for it",
+          "A PlanBuilder cannot evaluate SPARQL ORDER BY clauses without a StageBuilder for it"
         );
       }
       graphIterator = this._stageBuilders
@@ -363,7 +375,7 @@ export class PlanBuilder {
     if (query.distinct) {
       if (!this._stageBuilders.has(SPARQL_OPERATION.DISTINCT)) {
         throw new Error(
-          "A PlanBuilder cannot evaluate a DISTINCT clause without a StageBuilder for it",
+          "A PlanBuilder cannot evaluate a DISTINCT clause without a StageBuilder for it"
         );
       }
       graphIterator = this._stageBuilders
@@ -392,7 +404,7 @@ export class PlanBuilder {
   _buildWhere(
     source: PipelineStage<Bindings>,
     groups: Algebra.PlanNode[],
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     groups = sortBy(groups, (g) => {
       switch (g.type) {
@@ -425,7 +437,7 @@ export class PlanBuilder {
       if (group.type === "bgp" && prec !== null && prec.type === "bgp") {
         let lastGroup = newGroups[newGroups.length - 1] as Algebra.BGPNode;
         lastGroup.triples = lastGroup.triples.concat(
-          (group as Algebra.BGPNode).triples,
+          (group as Algebra.BGPNode).triples
         );
       } else {
         newGroups.push(group);
@@ -449,7 +461,7 @@ export class PlanBuilder {
   _buildGroup(
     source: PipelineStage<Bindings>,
     group: Algebra.PlanNode,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     const engine = Pipeline.getInstance();
     // Reset flags on the options for child iterators
@@ -459,17 +471,17 @@ export class PlanBuilder {
       case "bgp":
         if (!this._stageBuilders.has(SPARQL_OPERATION.BGP)) {
           throw new Error(
-            "A PlanBuilder cannot evaluate a Basic Graph Pattern without a Stage Builder for it",
+            "A PlanBuilder cannot evaluate a Basic Graph Pattern without a Stage Builder for it"
           );
         }
         // find possible Property paths
         let [classicTriples, pathTriples, tempVariables] = extractPropertyPaths(
-          group as Algebra.BGPNode,
+          group as Algebra.BGPNode
         );
         if (pathTriples.length > 0) {
           if (!this._stageBuilders.has(SPARQL_OPERATION.PROPERTY_PATH)) {
             throw new Error(
-              "A PlanBuilder cannot evaluate property paths without a Stage Builder for it",
+              "A PlanBuilder cannot evaluate property paths without a Stage Builder for it"
             );
           }
           source = this._stageBuilders
@@ -483,7 +495,7 @@ export class PlanBuilder {
           .execute(
             source,
             classicTriples,
-            childContext,
+            childContext
           ) as PipelineStage<Bindings>;
 
         // filter out variables added by the rewriting of property paths
@@ -497,12 +509,12 @@ export class PlanBuilder {
         return this._buildQueryPlan(
           group as Algebra.RootNode,
           childContext,
-          source,
+          source
         );
       case "graph":
         if (!this._stageBuilders.has(SPARQL_OPERATION.GRAPH)) {
           throw new Error(
-            "A PlanBuilder cannot evaluate a GRAPH clause without a Stage Builder for it",
+            "A PlanBuilder cannot evaluate a GRAPH clause without a Stage Builder for it"
           );
         }
         // delegate GRAPH evaluation to an executor
@@ -511,12 +523,12 @@ export class PlanBuilder {
           .execute(
             source,
             group as Algebra.GraphNode,
-            childContext,
+            childContext
           ) as PipelineStage<Bindings>;
       case "service":
         if (!this._stageBuilders.has(SPARQL_OPERATION.SERVICE)) {
           throw new Error(
-            "A PlanBuilder cannot evaluate a SERVICE clause without a Stage Builder for it",
+            "A PlanBuilder cannot evaluate a SERVICE clause without a Stage Builder for it"
           );
         }
         return this._stageBuilders
@@ -524,18 +536,18 @@ export class PlanBuilder {
           .execute(
             source,
             group as Algebra.ServiceNode,
-            childContext,
+            childContext
           ) as PipelineStage<Bindings>;
       case "group":
         return this._buildWhere(
           source,
           (group as Algebra.GroupNode).patterns,
-          childContext,
+          childContext
         );
       case "optional":
         if (!this._stageBuilders.has(SPARQL_OPERATION.OPTIONAL)) {
           throw new Error(
-            "A PlanBuilder cannot evaluate an OPTIONAL clause without a Stage Builder for it",
+            "A PlanBuilder cannot evaluate an OPTIONAL clause without a Stage Builder for it"
           );
         }
         return this._stageBuilders
@@ -544,7 +556,7 @@ export class PlanBuilder {
       case "union":
         if (!this._stageBuilders.has(SPARQL_OPERATION.UNION)) {
           throw new Error(
-            "A PlanBuilder cannot evaluate an UNION clause without a Stage Builder for it",
+            "A PlanBuilder cannot evaluate an UNION clause without a Stage Builder for it"
           );
         }
         return this._stageBuilders
@@ -553,7 +565,7 @@ export class PlanBuilder {
       case "minus":
         if (!this._stageBuilders.has(SPARQL_OPERATION.MINUS)) {
           throw new Error(
-            "A PlanBuilder cannot evaluate a MINUS clause without a Stage Builder for it",
+            "A PlanBuilder cannot evaluate a MINUS clause without a Stage Builder for it"
           );
         }
         return this._stageBuilders
@@ -562,7 +574,7 @@ export class PlanBuilder {
       case "filter":
         if (!this._stageBuilders.has(SPARQL_OPERATION.FILTER)) {
           throw new Error(
-            "A PlanBuilder cannot evaluate a FILTER clause without a Stage Builder for it",
+            "A PlanBuilder cannot evaluate a FILTER clause without a Stage Builder for it"
           );
         }
         return this._stageBuilders
@@ -571,12 +583,12 @@ export class PlanBuilder {
             source,
             group,
             this._customFunctions,
-            childContext,
+            childContext
           ) as PipelineStage<Bindings>;
       case "bind":
         if (!this._stageBuilders.has(SPARQL_OPERATION.BIND)) {
           throw new Error(
-            "A PlanBuilder cannot evaluate a BIND clause without a Stage Builder for it",
+            "A PlanBuilder cannot evaluate a BIND clause without a Stage Builder for it"
           );
         }
         return this._stageBuilders
@@ -585,11 +597,11 @@ export class PlanBuilder {
             source,
             group as Algebra.BindNode,
             this._customFunctions,
-            childContext,
+            childContext
           ) as PipelineStage<Bindings>;
       default:
         throw new Error(
-          `Unsupported SPARQL group pattern found in query: ${group.type}`,
+          `Unsupported SPARQL group pattern found in query: ${group.type}`
         );
     }
   }
@@ -606,7 +618,7 @@ export class PlanBuilder {
   _buildValues(
     source: PipelineStage<Bindings>,
     groups: Algebra.PlanNode[],
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     let [values, others] = partition(groups, (g) => g.type === "values");
     const bindingsLists = values.map((g) => (g as Algebra.ValuesNode).values);
@@ -619,7 +631,7 @@ export class PlanBuilder {
         const temp = others.map((g) => deepApplyBindings(g, bindings));
         return extendByBindings(
           this._buildWhere(source, temp, context),
-          bindings,
+          bindings
         );
       });
       return Pipeline.getInstance().merge(...unionBranches);

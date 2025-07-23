@@ -25,11 +25,11 @@ SOFTWARE.
 "use strict";
 
 import * as crypto from "crypto";
-import { isNull } from "lodash";
-import * as moment from "moment";
-import { Term } from "rdf-js";
-import * as uuid from "uuid/v4";
-import { rdf } from "../../utils";
+import { isNull } from "lodash-es";
+import moment from "moment";
+import type { Term } from "rdf-js";
+import uuid from "uuid";
+import * as rdf from "../../utils/rdf.ts";
 
 /**
  * Return a high-orderpply a Hash function  to a RDF
@@ -73,11 +73,11 @@ export default {
   if: function (
     booleanValue: Term | null,
     valueIfTrue: Term | null,
-    valueIfFalse: Term | null,
+    valueIfFalse: Term | null
   ): Term {
     if (isNull(booleanValue) || isNull(valueIfTrue) || isNull(valueIfFalse)) {
       throw new SyntaxError(
-        `SPARQL expression error: some arguments of an IF function are unbound. Got IF(${booleanValue}, ${valueIfTrue}, ${valueIfFalse})`,
+        `SPARQL expression error: some arguments of an IF function are unbound. Got IF(${booleanValue}, ${valueIfTrue}, ${valueIfFalse})`
       );
     }
     if (
@@ -89,7 +89,7 @@ export default {
         : valueIfFalse;
     }
     throw new SyntaxError(
-      `SPARQL expression error: you are using an IF function whose first argument is expected to be a boolean, but instead got ${booleanValue}`,
+      `SPARQL expression error: you are using an IF function whose first argument is expected to be a boolean, but instead got ${booleanValue}`
     );
   },
 
@@ -118,7 +118,7 @@ export default {
       return rdf.createTypedLiteral(valueA - valueB, a.datatype.value);
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot substract non-Literals ${a} and ${b}`,
+      `SPARQL expression error: cannot substract non-Literals ${a} and ${b}`
     );
   },
 
@@ -132,7 +132,7 @@ export default {
       return rdf.createTypedLiteral(valueA * valueB, a.datatype.value);
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot multiply non-Literals ${a} and ${b}`,
+      `SPARQL expression error: cannot multiply non-Literals ${a} and ${b}`
     );
   },
 
@@ -146,7 +146,7 @@ export default {
       return rdf.createTypedLiteral(valueA / valueB, a.datatype.value);
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot divide non-Literals ${a} and ${b}`,
+      `SPARQL expression error: cannot divide non-Literals ${a} and ${b}`
     );
   },
 
@@ -215,7 +215,7 @@ export default {
       return rdf.createBoolean(!rdf.asJS(a.value, a.datatype.value));
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot compute the negation of a non boolean literal ${a}`,
+      `SPARQL expression error: cannot compute the negation of a non boolean literal ${a}`
     );
   },
 
@@ -228,11 +228,11 @@ export default {
     ) {
       return rdf.createBoolean(
         rdf.asJS(a.value, a.datatype.value) &&
-          rdf.asJS(b.value, b.datatype.value),
+          rdf.asJS(b.value, b.datatype.value)
       );
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot compute the conjunction of non boolean literals ${a} and ${b}`,
+      `SPARQL expression error: cannot compute the conjunction of non boolean literals ${a} and ${b}`
     );
   },
 
@@ -245,11 +245,11 @@ export default {
     ) {
       return rdf.createBoolean(
         rdf.asJS(a.value, a.datatype.value) ||
-          rdf.asJS(b.value, b.datatype.value),
+          rdf.asJS(b.value, b.datatype.value)
       );
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot compute the disjunction of non boolean literals ${a} and ${b}`,
+      `SPARQL expression error: cannot compute the disjunction of non boolean literals ${a} and ${b}`
     );
   },
 
@@ -330,11 +330,11 @@ export default {
   },
 
   uuid: function (): Term {
-    return rdf.createIRI(`urn:uuid:${uuid()}`);
+    return rdf.createIRI(`urn:uuid:${uuid.v4()}`);
   },
 
   struuid: function (): Term {
-    return rdf.createLiteral(uuid());
+    return rdf.createLiteral(uuid.v4());
   },
 
   /*
@@ -349,7 +349,7 @@ export default {
     const indexValue = rdf.asJS(index.value, rdf.XSD("integer"));
     if (indexValue < 1) {
       throw new SyntaxError(
-        "SPARQL SUBSTR error: the index of the first character in a string is 1 (according to the SPARQL W3C specs)",
+        "SPARQL SUBSTR error: the index of the first character in a string is 1 (according to the SPARQL W3C specs)"
       );
     }
     let value = str.value.substring(indexValue - 1);
@@ -433,7 +433,7 @@ export default {
     arg: Term,
     pattern: Term,
     replacement: Term,
-    flags?: Term,
+    flags?: Term
   ) {
     const regexp =
       flags === undefined
@@ -457,7 +457,7 @@ export default {
       return rdf.createInteger(Math.abs(rdf.asJS(a.value, a.datatype.value)));
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot compute the absolute value of the non-numeric term ${a}`,
+      `SPARQL expression error: cannot compute the absolute value of the non-numeric term ${a}`
     );
   },
 
@@ -466,7 +466,7 @@ export default {
       return rdf.createInteger(Math.round(rdf.asJS(a.value, a.datatype.value)));
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot compute the rounded value of the non-numeric term ${a}`,
+      `SPARQL expression error: cannot compute the rounded value of the non-numeric term ${a}`
     );
   },
 
@@ -475,7 +475,7 @@ export default {
       return rdf.createInteger(Math.ceil(rdf.asJS(a.value, a.datatype.value)));
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot compute Math.ceil on the non-numeric term ${a}`,
+      `SPARQL expression error: cannot compute Math.ceil on the non-numeric term ${a}`
     );
   },
 
@@ -484,7 +484,7 @@ export default {
       return rdf.createInteger(Math.floor(rdf.asJS(a.value, a.datatype.value)));
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot compute Math.floor on the non-numeric term ${a}`,
+      `SPARQL expression error: cannot compute Math.floor on the non-numeric term ${a}`
     );
   },
 
@@ -502,7 +502,7 @@ export default {
       return rdf.createInteger(value.year());
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot compute the year of the RDF Term ${a}, as it is not a date`,
+      `SPARQL expression error: cannot compute the year of the RDF Term ${a}, as it is not a date`
     );
   },
 
@@ -513,7 +513,7 @@ export default {
       return rdf.createInteger(value.month() + 1);
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot compute the month of the RDF Term ${a}, as it is not a date`,
+      `SPARQL expression error: cannot compute the month of the RDF Term ${a}, as it is not a date`
     );
   },
 
@@ -523,7 +523,7 @@ export default {
       return rdf.createInteger(value.date());
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot compute the day of the RDF Term ${a}, as it is not a date`,
+      `SPARQL expression error: cannot compute the day of the RDF Term ${a}, as it is not a date`
     );
   },
 
@@ -533,7 +533,7 @@ export default {
       return rdf.createInteger(value.hours());
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot compute the hours of the RDF Term ${a}, as it is not a date`,
+      `SPARQL expression error: cannot compute the hours of the RDF Term ${a}, as it is not a date`
     );
   },
 
@@ -543,7 +543,7 @@ export default {
       return rdf.createInteger(value.minutes());
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot compute the minutes of the RDF Term ${a}, as it is not a date`,
+      `SPARQL expression error: cannot compute the minutes of the RDF Term ${a}, as it is not a date`
     );
   },
 
@@ -553,7 +553,7 @@ export default {
       return rdf.createInteger(value.seconds());
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot compute the seconds of the RDF Term ${a}, as it is not a date`,
+      `SPARQL expression error: cannot compute the seconds of the RDF Term ${a}, as it is not a date`
     );
   },
 
@@ -563,7 +563,7 @@ export default {
       return rdf.createLiteral(value.toString());
     }
     throw new SyntaxError(
-      `SPARQL expression error: cannot compute the timezone of the RDF Term ${a}, as it is not a date`,
+      `SPARQL expression error: cannot compute the timezone of the RDF Term ${a}, as it is not a date`
     );
   },
 

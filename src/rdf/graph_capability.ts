@@ -27,7 +27,8 @@ SOFTWARE.
 /**
  * Enum describing the query capabilities of a Graph
  */
-export enum GRAPH_CAPABILITY {
-  UNION,
-  ESTIMATE_TRIPLE_CARD,
-}
+export type GraphCapability = number;
+export const GRAPH_CAPABILITY = {
+  UNION: 0,
+  ESTIMATE_TRIPLE_CARD: 1,
+};

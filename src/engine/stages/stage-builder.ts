@@ -24,11 +24,11 @@ SOFTWARE.
 
 "use strict";
 
-import { PlanBuilder } from "../plan-builder";
-import { PipelineStage } from "../pipeline/pipeline-engine";
-import { Consumable } from "../../operators/update/consumer";
-import Dataset from "../../rdf/dataset";
-import { Bindings } from "../../rdf/bindings";
+import { PlanBuilder } from "../plan-builder.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import type { Consumable } from "../../operators/update/consumer.ts";
+import Dataset from "../../rdf/dataset.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
 
 /**
  * A StageBuilder encapsulate a strategy for executing a class of SPARQL operations
@@ -37,8 +37,11 @@ import { Bindings } from "../../rdf/bindings";
  */
 export default abstract class StageBuilder {
   protected _builder: PlanBuilder | null = null;
+  protected _dataset: Dataset;
 
-  constructor(protected _dataset: Dataset) {}
+  constructor(dataset: Dataset) {
+    this._dataset = dataset;
+  }
 
   get builder(): PlanBuilder | null {
     return this._builder;

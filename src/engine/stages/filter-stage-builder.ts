@@ -24,14 +24,14 @@ SOFTWARE.
 
 "use strict";
 
-import StageBuilder from "./stage-builder";
-import exists from "../../operators/exists";
-import sparqlFilter from "../../operators/sparql-filter";
-import { Algebra } from "sparqljs";
-import { PipelineStage } from "../pipeline/pipeline-engine";
-import { Bindings } from "../../rdf/bindings";
-import ExecutionContext from "../context/execution-context";
-import { CustomFunctions } from "../../operators/expressions/sparql-expression";
+import StageBuilder from "./stage-builder.ts";
+import exists from "../../operators/exists.ts";
+import sparqlFilter from "../../operators/sparql-filter.ts";
+import type { Algebra } from "sparqljs";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
+import ExecutionContext from "../context/execution-context.ts";
+import type { CustomFunctions } from "../../operators/expressions/sparql-expression.ts";
 
 /**
  * A FilterStageBuilder evaluates FILTER clauses
@@ -42,7 +42,7 @@ export default class FilterStageBuilder extends StageBuilder {
     source: PipelineStage<Bindings>,
     filterNode: Algebra.FilterNode,
     customFunctions: CustomFunctions,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     switch (filterNode.expression.operator) {
       case "exists":
@@ -51,7 +51,7 @@ export default class FilterStageBuilder extends StageBuilder {
           filterNode.expression.args,
           this.builder!,
           false,
-          context,
+          context
         );
       case "notexists":
         return exists(
@@ -59,7 +59,7 @@ export default class FilterStageBuilder extends StageBuilder {
           filterNode.expression.args,
           this.builder!,
           true,
-          context,
+          context
         );
       default:
         return sparqlFilter(source, filterNode.expression, customFunctions);

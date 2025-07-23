@@ -24,7 +24,7 @@ SOFTWARE.
 
 "use strict";
 
-import { Observable, Subscriber, from, of, concat, EMPTY } from "rxjs";
+import { concat, EMPTY, from, Observable, of, Subscriber } from "rxjs";
 import {
   bufferCount,
   catchError,
@@ -35,16 +35,16 @@ import {
   finalize,
   first,
   flatMap,
-  take,
-  skip,
   map,
   mergeMap,
+  reduce,
+  shareReplay,
+  skip,
+  take,
   tap,
   toArray,
-  shareReplay,
-  reduce,
-} from "rxjs/operators";
-import { StreamPipelineInput, PipelineEngine } from "./pipeline-engine";
+} from "rxjs/operators/index.js";
+import { type StreamPipelineInput, PipelineEngine } from "./pipeline-engine.ts";
 
 /**
  * A StreamPipelineInput implemented using Rxjs' subscribers.
@@ -89,7 +89,7 @@ export default class RxjsPipeline extends PipelineEngine {
 
   fromAsync<T>(cb: (input: StreamPipelineInput<T>) => void): Observable<T> {
     return new Observable<T>((subscriber) =>
-      cb(new RxjsStreamInput(subscriber)),
+      cb(new RxjsStreamInput(subscriber))
     );
   }
 
@@ -99,7 +99,7 @@ export default class RxjsPipeline extends PipelineEngine {
 
   catch<T, O>(
     input: Observable<T>,
-    handler?: (err: Error) => Observable<O>,
+    handler?: (err: Error) => Observable<O>
   ): Observable<T | O> {
     return input.pipe(
       catchError((err) => {
@@ -108,7 +108,7 @@ export default class RxjsPipeline extends PipelineEngine {
         } else {
           return handler(err);
         }
-      }),
+      })
     );
   }
 
@@ -122,21 +122,21 @@ export default class RxjsPipeline extends PipelineEngine {
 
   flatMap<F, T>(
     input: Observable<F>,
-    mapper: (value: F) => T[],
+    mapper: (value: F) => T[]
   ): Observable<T> {
     return input.pipe(flatMap(mapper));
   }
 
   mergeMap<F, T>(
     input: Observable<F>,
-    mapper: (value: F) => Observable<T>,
+    mapper: (value: F) => Observable<T>
   ): Observable<T> {
     return input.pipe(mergeMap(mapper));
   }
 
   filter<T>(
     input: Observable<T>,
-    predicate: (value: T) => boolean,
+    predicate: (value: T) => boolean
   ): Observable<T> {
     return input.pipe(filter(predicate));
   }
@@ -148,7 +148,7 @@ export default class RxjsPipeline extends PipelineEngine {
   reduce<F, T>(
     input: Observable<F>,
     reducer: (acc: T, value: F) => T,
-    initial: T,
+    initial: T
   ): Observable<T> {
     return input.pipe(reduce(reducer, initial));
   }
@@ -163,7 +163,7 @@ export default class RxjsPipeline extends PipelineEngine {
 
   distinct<T, K>(
     input: Observable<T>,
-    selector?: (value: T) => T | K,
+    selector?: (value: T) => T | K
   ): Observable<T> {
     return input.pipe(distinct(selector));
   }
@@ -187,7 +187,7 @@ export default class RxjsPipeline extends PipelineEngine {
               values.forEach((v: T) => subscriber.next(v));
             }
             subscriber.complete();
-          },
+          }
         );
       });
     }

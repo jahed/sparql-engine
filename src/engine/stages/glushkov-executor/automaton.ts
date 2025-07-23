@@ -29,17 +29,21 @@ SOFTWARE.
  * @author Julien Aimonier-Davat
  */
 export class State<T> {
+  private _name: T;
+  private _isInitial: boolean;
+  private _isFinal: boolean;
+
   /**
    * Constructor
    * @param name - Name of the State. Must be unique.
    * @param isInitial - True to construct an initial State, False otherwise
    * @param isFinal - True to construct a final State, False otherwise
    */
-  constructor(
-    private _name: T,
-    private _isInitial: boolean,
-    private _isFinal: boolean,
-  ) {}
+  constructor(name: T, isInitial: boolean, isFinal: boolean) {
+    this._name = name;
+    this._isInitial = isInitial;
+    this._isFinal = isFinal;
+  }
 
   /**
    * Get the name of the State
@@ -97,6 +101,12 @@ export class State<T> {
  * A transition of the automaton
  */
 export class Transition<T, P> {
+  private _from: State<T>;
+  private _to: State<T>;
+  private _reverse: boolean;
+  private _negation: boolean;
+  private _predicates: Array<P>;
+
   /**
    * Constructor
    * @param from - State from which the transition starts
@@ -108,12 +118,18 @@ export class Transition<T, P> {
    * @param predicates
    */
   constructor(
-    private _from: State<T>,
-    private _to: State<T>,
-    private _reverse: boolean,
-    private _negation: boolean,
-    private _predicates: Array<P>,
-  ) {}
+    from: State<T>,
+    to: State<T>,
+    reverse: boolean,
+    negation: boolean,
+    predicates: Array<P>
+  ) {
+    this._from = from;
+    this._to = to;
+    this._reverse = reverse;
+    this._negation = negation;
+    this._predicates = predicates;
+  }
 
   /**
    * Get the State from which the transition starts

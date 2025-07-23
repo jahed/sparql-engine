@@ -24,23 +24,26 @@ SOFTWARE.
 
 "use strict";
 
-import StageBuilder from "./stage-builder";
-import { Pipeline } from "../pipeline/pipeline";
-import { PipelineStage } from "../pipeline/pipeline-engine";
-import { Consumable, ErrorConsumable } from "../../operators/update/consumer";
-import InsertConsumer from "../../operators/update/insert-consumer";
-import DeleteConsumer from "../../operators/update/delete-consumer";
-import ClearConsumer from "../../operators/update/clear-consumer";
-import ManyConsumers from "../../operators/update/many-consumers";
-import construct from "../../operators/modifiers/construct";
+import type { Algebra } from "sparqljs";
+import construct from "../../operators/modifiers/construct.ts";
+import ActionConsumer from "../../operators/update/action-consumer.ts";
+import ClearConsumer from "../../operators/update/clear-consumer.ts";
+import {
+  type Consumable,
+  ErrorConsumable,
+} from "../../operators/update/consumer.ts";
+import DeleteConsumer from "../../operators/update/delete-consumer.ts";
+import InsertConsumer from "../../operators/update/insert-consumer.ts";
+import ManyConsumers from "../../operators/update/many-consumers.ts";
+import NoopConsumer from "../../operators/update/nop-consumer.ts";
+import { BindingBase, Bindings } from "../../rdf/bindings.ts";
+import Graph from "../../rdf/graph.ts";
+import ExecutionContext from "../context/execution-context.ts";
+import ContextSymbols from "../context/symbols.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import { Pipeline } from "../pipeline/pipeline.ts";
 import * as rewritings from "./rewritings.js";
-import Graph from "../../rdf/graph";
-import { Algebra } from "sparqljs";
-import { Bindings, BindingBase } from "../../rdf/bindings";
-import ExecutionContext from "../context/execution-context";
-import ContextSymbols from "../context/symbols";
-import NoopConsumer from "../../operators/update/nop-consumer";
-import ActionConsumer from "../../operators/update/action-consumer";
+import StageBuilder from "./stage-builder.ts";
 
 /**
  * An UpdateStageBuilder evaluates SPARQL UPDATE queries.
@@ -60,7 +63,7 @@ export default class UpdateStageBuilder extends StageBuilder {
       | Algebra.UpdateClearNode
       | Algebra.UpdateCopyMoveNode
     >,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): Consumable {
     let queries;
     return new ManyConsumers(
@@ -73,7 +76,7 @@ export default class UpdateStageBuilder extends StageBuilder {
               return this._handleInsertDelete(update, context);
             default:
               return new ErrorConsumable(
-                `Unsupported SPARQL UPDATE query: ${update.updateType}`,
+                `Unsupported SPARQL UPDATE query: ${update.updateType}`
               );
           }
         } else if ("type" in update) {
@@ -84,7 +87,7 @@ export default class UpdateStageBuilder extends StageBuilder {
               if (this._dataset.hasNamedGraph(iri)) {
                 if (!createNode.silent) {
                   return new ErrorConsumable(
-                    `Cannot create the Graph with iri ${iri} as it already exists in the RDF dataset`,
+                    `Cannot create the Graph with iri ${iri} as it already exists in the RDF dataset`
                   );
                 }
                 return new NoopConsumer();
@@ -92,7 +95,7 @@ export default class UpdateStageBuilder extends StageBuilder {
               return new ActionConsumer(() => {
                 this._dataset.addNamedGraph(
                   iri,
-                  this._dataset.createGraph(iri),
+                  this._dataset.createGraph(iri)
                 );
               });
             }
@@ -104,14 +107,14 @@ export default class UpdateStageBuilder extends StageBuilder {
                   const defaultGraphIRI = this._dataset.getDefaultGraph().iri;
                   if (this._dataset.iris.length < 1) {
                     return new ErrorConsumable(
-                      `Cannot drop the default Graph with iri ${iri} as it would leaves the RDF dataset empty without a default graph`,
+                      `Cannot drop the default Graph with iri ${iri} as it would leaves the RDF dataset empty without a default graph`
                     );
                   }
                   const newDefaultGraphIRI = this._dataset.iris.find(
-                    (iri) => iri !== defaultGraphIRI,
+                    (iri) => iri !== defaultGraphIRI
                   )!;
                   this._dataset.setDefaultGraph(
-                    this._dataset.getNamedGraph(newDefaultGraphIRI),
+                    this._dataset.getNamedGraph(newDefaultGraphIRI)
                   );
                 });
               }
@@ -119,7 +122,7 @@ export default class UpdateStageBuilder extends StageBuilder {
               if ("all" in dropNode.graph && dropNode.graph.all) {
                 return new ActionConsumer(() => {
                   this._dataset.iris.forEach((iri) =>
-                    this._dataset.deleteNamedGraph(iri),
+                    this._dataset.deleteNamedGraph(iri)
                   );
                 });
               }
@@ -128,7 +131,7 @@ export default class UpdateStageBuilder extends StageBuilder {
               if (!this._dataset.hasNamedGraph(iri)) {
                 if (!dropNode.silent) {
                   return new ErrorConsumable(
-                    `Cannot drop the Graph with iri ${iri} as it doesn't exists in the RDF dataset`,
+                    `Cannot drop the Graph with iri ${iri} as it doesn't exists in the RDF dataset`
                   );
                 }
                 return new NoopConsumer();
@@ -143,15 +146,15 @@ export default class UpdateStageBuilder extends StageBuilder {
               return this._handleInsertDelete(
                 rewritings.rewriteAdd(
                   update as Algebra.UpdateCopyMoveNode,
-                  this._dataset,
+                  this._dataset
                 ),
-                context,
+                context
               );
             case "copy":
               // A COPY query is rewritten into a sequence [CLEAR query, INSERT query]
               queries = rewritings.rewriteCopy(
                 update as Algebra.UpdateCopyMoveNode,
-                this._dataset,
+                this._dataset
               );
               return new ManyConsumers([
                 this._handleClearQuery(queries[0]),
@@ -161,7 +164,7 @@ export default class UpdateStageBuilder extends StageBuilder {
               // A MOVE query is rewritten into a sequence [CLEAR query, INSERT query, CLEAR query]
               queries = rewritings.rewriteMove(
                 update as Algebra.UpdateCopyMoveNode,
-                this._dataset,
+                this._dataset
               );
               return new ManyConsumers([
                 this._handleClearQuery(queries[0]),
@@ -170,14 +173,14 @@ export default class UpdateStageBuilder extends StageBuilder {
               ]);
             default:
               return new ErrorConsumable(
-                `Unsupported SPARQL UPDATE query: ${update.type}`,
+                `Unsupported SPARQL UPDATE query: ${update.type}`
               );
           }
         }
         return new ErrorConsumable(
-          `Unsupported SPARQL UPDATE query: ${update}`,
+          `Unsupported SPARQL UPDATE query: ${update}`
         );
-      }),
+      })
     );
   }
 
@@ -190,7 +193,7 @@ export default class UpdateStageBuilder extends StageBuilder {
    */
   _handleInsertDelete(
     update: Algebra.UpdateQueryNode,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): Consumable {
     const engine = Pipeline.getInstance();
     let source: PipelineStage<Bindings> = engine.of(new BindingBase());
@@ -221,7 +224,7 @@ export default class UpdateStageBuilder extends StageBuilder {
       consumables = consumables.concat(
         update.delete!.map((v) => {
           return this._buildDeleteConsumer(source, v, graph, context);
-        }),
+        })
       );
     }
 
@@ -230,7 +233,7 @@ export default class UpdateStageBuilder extends StageBuilder {
       consumables = consumables.concat(
         update.insert!.map((v) => {
           return this._buildInsertConsumer(source, v, graph, context);
-        }),
+        })
       );
     }
     return new ManyConsumers(consumables);
@@ -248,7 +251,7 @@ export default class UpdateStageBuilder extends StageBuilder {
     source: PipelineStage<Bindings>,
     group: Algebra.BGPNode | Algebra.UpdateGraphNode,
     graph: Graph | null,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): InsertConsumer {
     const tripleSource = construct(source, { template: group.triples });
     if (graph === null) {
@@ -272,7 +275,7 @@ export default class UpdateStageBuilder extends StageBuilder {
     source: PipelineStage<Bindings>,
     group: Algebra.BGPNode | Algebra.UpdateGraphNode,
     graph: Graph | null,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): DeleteConsumer {
     const tripleSource = construct(source, { template: group.triples });
     if (graph === null) {

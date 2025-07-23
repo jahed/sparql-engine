@@ -22,14 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import StageBuilder from "./stage-builder";
-import { Pipeline } from "../pipeline/pipeline";
-import { PipelineStage } from "../pipeline/pipeline-engine";
-import { Algebra } from "sparqljs";
-import { Bindings, BindingBase } from "../../rdf/bindings";
-import Graph from "../../rdf/graph";
-import ExecutionContext from "../context/execution-context";
-import { rdf } from "../../utils";
+import StageBuilder from "./stage-builder.ts";
+import { Pipeline } from "../pipeline/pipeline.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import type { Algebra } from "sparqljs";
+import { Bindings, BindingBase } from "../../rdf/bindings.ts";
+import Graph from "../../rdf/graph.ts";
+import ExecutionContext from "../context/execution-context.ts";
+import * as rdf from "../../utils/rdf.ts";
 
 /**
  * A fork of Bindings#bound specialized for triple patterns with property paths
@@ -40,7 +40,7 @@ import { rdf } from "../../utils";
  */
 function boundPathTriple(
   triple: Algebra.PathTripleObject,
-  bindings: Bindings,
+  bindings: Bindings
 ): Algebra.PathTripleObject {
   const t = {
     subject: triple.subject,
@@ -90,7 +90,7 @@ export default abstract class PathStageBuilder extends StageBuilder {
   execute(
     source: PipelineStage<Bindings>,
     triples: Algebra.PathTripleObject[],
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     // create a join pipeline between all property paths using an index join
     const engine = Pipeline.getInstance();
@@ -99,15 +99,15 @@ export default abstract class PathStageBuilder extends StageBuilder {
         return engine.mergeMap(iter, (bindings) => {
           const { subject, predicate, object } = boundPathTriple(
             triple,
-            bindings,
+            bindings
           );
           return engine.map(
             this._buildIterator(subject, predicate, object, context),
-            (b: Bindings) => bindings.union(b),
+            (b: Bindings) => bindings.union(b)
           );
         });
       },
-      source,
+      source
     );
   }
 
@@ -123,7 +123,7 @@ export default abstract class PathStageBuilder extends StageBuilder {
     subject: string,
     path: Algebra.PropertyPath,
     obj: string,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Bindings> {
     const graph =
       context.defaultGraphs.length > 0
@@ -134,7 +134,7 @@ export default abstract class PathStageBuilder extends StageBuilder {
       path,
       obj,
       graph,
-      context,
+      context
     );
     return Pipeline.getInstance().map(
       evaluator,
@@ -152,7 +152,7 @@ export default abstract class PathStageBuilder extends StageBuilder {
           temp.set("?ask_v", triple.object);
         }
         return temp;
-      },
+      }
     );
   }
 
@@ -170,6 +170,6 @@ export default abstract class PathStageBuilder extends StageBuilder {
     path: Algebra.PropertyPath,
     obj: string,
     graph: Graph,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): PipelineStage<Algebra.TripleObject>;
 }

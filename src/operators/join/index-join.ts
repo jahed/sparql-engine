@@ -24,14 +24,14 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../../engine/pipeline/pipeline";
-import { PipelineStage } from "../../engine/pipeline/pipeline-engine";
-import Graph from "../../rdf/graph";
-import { Bindings, BindingBase } from "../../rdf/bindings";
-import { Algebra } from "sparqljs";
-import { rdf } from "../../utils";
-import { mapKeys, pickBy } from "lodash";
-import ExecutionContext from "../../engine/context/execution-context";
+import { mapKeys, pickBy } from "lodash-es";
+import type { Algebra } from "sparqljs";
+import ExecutionContext from "../../engine/context/execution-context.ts";
+import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import { BindingBase, Bindings } from "../../rdf/bindings.ts";
+import Graph from "../../rdf/graph.ts";
+import * as rdf from "../../utils/rdf.ts";
 
 /**
  * Perform a join between a source of solution bindings (left relation)
@@ -49,7 +49,7 @@ export default function indexJoin(
   source: PipelineStage<Bindings>,
   pattern: Algebra.TripleObject,
   graph: Graph,
-  context: ExecutionContext,
+  context: ExecutionContext
 ) {
   const engine = Pipeline.getInstance();
   return engine.mergeMap(source, (bindings: Bindings) => {
@@ -60,7 +60,7 @@ export default function indexJoin(
       (item: Algebra.TripleObject) => {
         let temp = pickBy(item, (v, k) => {
           return rdf.isVariable(
-            boundedPattern[k as keyof Algebra.TripleObject],
+            boundedPattern[k as keyof Algebra.TripleObject]
           );
         });
         temp = mapKeys(temp, (v, k) => {
@@ -68,7 +68,7 @@ export default function indexJoin(
         });
         // if (size(temp) === 0 && hasVars) return null
         return BindingBase.fromObject(temp).union(bindings);
-      },
+      }
     );
   });
 }

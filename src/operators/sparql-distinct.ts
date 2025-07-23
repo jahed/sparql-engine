@@ -24,9 +24,9 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../engine/pipeline/pipeline";
-import { PipelineStage } from "../engine/pipeline/pipeline-engine";
-import { Bindings } from "../rdf/bindings";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
+import { Bindings } from "../rdf/bindings.ts";
 
 /**
  * Hash an set of mappings and produce an unique value
@@ -37,7 +37,7 @@ import { Bindings } from "../rdf/bindings";
 function _hash(bindings: Bindings): string {
   const items: string[] = [];
   bindings.forEach((k: string, v: string) =>
-    items.push(`${k}=${encodeURIComponent(v)}`),
+    items.push(`${k}=${encodeURIComponent(v)}`)
   );
   items.sort();
   return items.join("&");
@@ -52,6 +52,6 @@ function _hash(bindings: Bindings): string {
  */
 export default function sparqlDistinct(source: PipelineStage<Bindings>) {
   return Pipeline.getInstance().distinct(source, (bindings: Bindings) =>
-    _hash(bindings),
+    _hash(bindings)
   );
 }

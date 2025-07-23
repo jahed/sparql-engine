@@ -22,14 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { Consumable } from "./consumer";
+import type { Consumable } from "./consumer.ts";
 
 /**
  * A consumer that executes a simple action
  * @author Thomas Minier
  */
 export default class ActionConsumer implements Consumable {
-  constructor(private _action: () => void) {}
+  private _action: () => void;
+
+  constructor(action: () => void) {
+    this._action = action;
+  }
 
   execute(): Promise<void> {
     return new Promise((resolve) => {

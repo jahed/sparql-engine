@@ -24,13 +24,13 @@ SOFTWARE.
 
 "use strict";
 
-import {
+import { isBoolean } from "lodash-es";
+import type {
   PipelineStage,
   StreamPipelineInput,
-} from "../engine/pipeline/pipeline-engine";
-import { Pipeline } from "../engine/pipeline/pipeline";
-import { Bindings } from "../rdf/bindings";
-import { isBoolean } from "lodash";
+} from "../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import { Bindings } from "../rdf/bindings.ts";
 
 /**
  * Write the headers and generate an ordering
@@ -43,10 +43,10 @@ import { isBoolean } from "lodash";
 function writeHead(
   bindings: Bindings,
   separator: string,
-  input: StreamPipelineInput<string>,
+  input: StreamPipelineInput<string>
 ): string[] {
   const variables = Array.from(bindings.variables()).map((v) =>
-    v.startsWith("?") ? v.substring(1) : v,
+    v.startsWith("?") ? v.substring(1) : v
   );
   input.next(variables.join(separator));
   input.next("\n");
@@ -64,7 +64,7 @@ function writeBindings(
   bindings: Bindings,
   separator: string,
   order: string[],
-  input: StreamPipelineInput<string>,
+  input: StreamPipelineInput<string>
 ): void {
   let output: string[] = [];
   order.forEach((variable) => {
@@ -109,7 +109,7 @@ function genericFormatter(separator: string) {
         (err) => console.error(err),
         () => {
           input.complete();
-        },
+        }
       );
     });
   };

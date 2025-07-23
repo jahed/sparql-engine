@@ -24,22 +24,22 @@ SOFTWARE.
 
 "use strict";
 
-import { Term } from "rdf-js";
-import { rdf } from "../../utils";
-import { intersectionWith, isUndefined, sum, zip } from "lodash";
+import { intersectionWith, isUndefined, sum, zip } from "lodash-es";
+import type { Term } from "rdf-js";
+import * as rdf from "../../utils/rdf.ts";
 
 type TermRows = { [key: string]: Term[] };
 
 function precision(expected: Term[], predicted: Term[]): number {
   const intersection = intersectionWith(expected, predicted, (x, y) =>
-    rdf.termEquals(x, y),
+    rdf.termEquals(x, y)
   );
   return intersection.length / predicted.length;
 }
 
 function recall(expected: Term[], predicted: Term[]): number {
   const intersection = intersectionWith(expected, predicted, (x, y) =>
-    rdf.termEquals(x, y),
+    rdf.termEquals(x, y)
   );
   return intersection.length / expected.length;
 }
@@ -59,7 +59,7 @@ export default {
   "https://callidon.github.io/sparql-engine/aggregates#accuracy": function (
     a: string,
     b: string,
-    rows: TermRows,
+    rows: TermRows
   ): Term {
     const tests = zip(rows[a], rows[b]).map((v) => {
       if (isUndefined(v[0]) || isUndefined(v[1])) {
@@ -75,7 +75,7 @@ export default {
   // numbers by using the product of their values (as opposed to the arithmetic mean which uses their sum)."
   "https://callidon.github.io/sparql-engine/aggregates#gmean": function (
     variable: string,
-    rows: TermRows,
+    rows: TermRows
   ): Term {
     if (variable in rows) {
       const count = rows[variable].length;
@@ -90,7 +90,7 @@ export default {
       return rdf.createFloat(Math.pow(product, 1 / count));
     }
     throw new SyntaxError(
-      `SPARQL aggregation error: the variable ${variable} cannot be found in the groups ${rows}`,
+      `SPARQL aggregation error: the variable ${variable} cannot be found in the groups ${rows}`
     );
   },
 
@@ -100,7 +100,7 @@ export default {
   "https://callidon.github.io/sparql-engine/aggregates#mse": function (
     a: string,
     b: string,
-    rows: TermRows,
+    rows: TermRows
   ): Term {
     const values = zip(rows[a], rows[b]).map((v) => {
       const expected = v[0];
@@ -116,11 +116,11 @@ export default {
         return Math.pow(
           rdf.asJS(expected.value, expected.datatype.value) -
             rdf.asJS(predicted.value, predicted.datatype.value),
-          2,
+          2
         );
       }
       throw new SyntaxError(
-        `SPARQL aggregation error: cannot compute mean square error between RDF Terms ${expected} and ${predicted}, as they are not numbers`,
+        `SPARQL aggregation error: cannot compute mean square error between RDF Terms ${expected} and ${predicted}, as they are not numbers`
       );
     });
     return rdf.createFloat((1 / values.length) * sum(values));
@@ -131,7 +131,7 @@ export default {
   "https://callidon.github.io/sparql-engine/aggregates#rmse": function (
     a: string,
     b: string,
-    rows: TermRows,
+    rows: TermRows
   ): Term {
     const values = zip(rows[a], rows[b]).map((v) => {
       const expected = v[0];
@@ -147,11 +147,11 @@ export default {
         return Math.pow(
           rdf.asJS(expected.value, expected.datatype.value) -
             rdf.asJS(predicted.value, predicted.datatype.value),
-          2,
+          2
         );
       }
       throw new SyntaxError(
-        `SPARQL aggregation error: cannot compute mean square error between RDF Terms ${expected} and ${predicted}, as they are not numbers`,
+        `SPARQL aggregation error: cannot compute mean square error between RDF Terms ${expected} and ${predicted}, as they are not numbers`
       );
     });
     return rdf.createFloat(Math.sqrt((1 / values.length) * sum(values)));
@@ -161,7 +161,7 @@ export default {
   "https://callidon.github.io/sparql-engine/aggregates#precision": function (
     a: string,
     b: string,
-    rows: TermRows,
+    rows: TermRows
   ): Term {
     if (!(a in rows) || !(b in rows)) {
       return rdf.createFloat(0);
@@ -173,7 +173,7 @@ export default {
   "https://callidon.github.io/sparql-engine/aggregates#recall": function (
     a: string,
     b: string,
-    rows: TermRows,
+    rows: TermRows
   ): Term {
     if (!(a in rows) || !(b in rows)) {
       return rdf.createFloat(0);
@@ -185,7 +185,7 @@ export default {
   "https://callidon.github.io/sparql-engine/aggregates#f1": function (
     a: string,
     b: string,
-    rows: TermRows,
+    rows: TermRows
   ): Term {
     if (!(a in rows) || !(b in rows)) {
       return rdf.createFloat(0);

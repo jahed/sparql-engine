@@ -24,13 +24,13 @@ SOFTWARE.
 
 "use strict";
 
-import { PipelineStage } from "../engine/pipeline/pipeline-engine";
-import { Pipeline } from "../engine/pipeline/pipeline";
-import { Bindings } from "../rdf/bindings";
-import { rdf } from "../utils";
-import { Term } from "rdf-js";
-import { map, isBoolean, isNull, isUndefined } from "lodash";
-import * as xml from "xml";
+import { isBoolean, isNull, isUndefined, map } from "lodash-es";
+import type { Term } from "rdf-js";
+import xml from "xml";
+import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import { Bindings } from "../rdf/bindings.ts";
+import * as rdf from "../utils/rdf.ts";
 
 type RDFBindings = { [key: string]: Term };
 
@@ -87,7 +87,7 @@ function _writeBindings(input: Bindings, results: any) {
  * @return A pipeline s-that yields results in W3C SPARQL XML format
  */
 export default function xmlFormat(
-  source: PipelineStage<Bindings | boolean>,
+  source: PipelineStage<Bindings | boolean>
 ): PipelineStage<string> {
   const results = xml.element({});
   const root = xml.element({
@@ -96,7 +96,7 @@ export default function xmlFormat(
   });
   const stream: any = xml(
     { sparql: root },
-    { stream: true, indent: "\t", declaration: true },
+    { stream: true, indent: "\t", declaration: true }
   );
   return Pipeline.getInstance().fromAsync((input) => {
     // manually pipe the xml stream's results into the pipeline
@@ -129,7 +129,7 @@ export default function xmlFormat(
       () => {
         results.close();
         root.close();
-      },
+      }
     );
 
     // consume the xml stream
