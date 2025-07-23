@@ -1,5 +1,5 @@
 # sparql-engine
-[![build package](https://github.com/Callidon/sparql-engine/actions/workflows/test.yaml/badge.svg?branch=master)](https://github.com/Callidon/sparql-engine/actions/workflows/test.yaml)  [![codecov](https://codecov.io/gh/Callidon/sparql-engine/branch/master/graph/badge.svg)](https://codecov.io/gh/Callidon/sparql-engine) [![npm version](https://badge.fury.io/js/sparql-engine.svg)](https://badge.fury.io/js/sparql-engine) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![build package](https://github.com/Callidon/sparql-engine/actions/workflows/test.yaml/badge.svg?branch=master)](https://github.com/Callidon/sparql-engine/actions/workflows/test.yaml) [![npm version](https://badge.fury.io/js/sparql-engine.svg)](https://badge.fury.io/js/sparql-engine) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 An open-source framework for building SPARQL query engines in Javascript/Typescript.
 
@@ -452,7 +452,7 @@ To generate the documentation in the `docs` director:
 ```bash
 git clone https://github.com/Callidon/sparql-engine.git
 cd sparql-engine
-yarn install
+npm install
 npm run doc
 ```
 
