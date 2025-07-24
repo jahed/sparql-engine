@@ -32,7 +32,7 @@ const {
   PlanBuilder,
   Pipeline,
 } = require("../dist/api.js");
-const { pick, isArray } = require("lodash");
+const { pick, isArray } = require("lodash-es");
 
 function getGraph(filePaths, isUnion = false) {
   let graph;
@@ -96,7 +96,7 @@ class N3Graph extends Graph {
         this._store.removeTriple(
           triple.subject,
           triple.predicate,
-          triple.object,
+          triple.object
         );
         resolve();
       } catch (e) {
@@ -115,7 +115,7 @@ class N3Graph extends Graph {
   estimateCardinality(triple) {
     const { subject, predicate, object } = formatTriplePattern(triple);
     return Promise.resolve(
-      this._store.countTriples(subject, predicate, object),
+      this._store.countTriples(subject, predicate, object)
     );
   }
 
@@ -133,7 +133,7 @@ class UnionN3Graph extends N3Graph {
 
   evalUnion(patterns, context) {
     return Pipeline.getInstance().merge(
-      ...patterns.map((pattern) => this.evalBGP(pattern, context)),
+      ...patterns.map((pattern) => this.evalBGP(pattern, context))
     );
   }
 }

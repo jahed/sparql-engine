@@ -48,7 +48,6 @@
     "n3": "^0.11.3",
     "prettier": "^3.6.2",
     "rdf-js": "^4.0.2",
-    "standard": "^11.0.1",
     "typescript": "5.8.x"
   },
   "dependencies": {

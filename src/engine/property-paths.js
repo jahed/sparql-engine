@@ -24,7 +24,7 @@ SOFTWARE.
 
 "use strict";
 
-const _ = require("lodash");
+const { cloneDeep, isEqual } = require("lodash-es");
 
 // rewriting rules for property paths
 
@@ -155,8 +155,8 @@ function pathAlt(bgp, pathTP, ind, group, filter, options) {
   var union = { type: "union" };
   union.patterns = [];
   for (let i = 0; i < p.length; i++) {
-    var newBGP = _.cloneDeep(group);
-    if (_.isEqual(newBGP.triples[pathIndex].predicate, pathTP.predicate)) {
+    var newBGP = cloneDeep(group);
+    if (isEqual(newBGP.triples[pathIndex].predicate, pathTP.predicate)) {
       newBGP.triples[pathIndex].predicate = p[i];
     } else {
       replPath(newBGP.triples[pathIndex].predicate, pathTP, p[i]);
@@ -225,7 +225,7 @@ function containsPath(branch, path) {
 }
 
 function replPath(tp, path, pred) {
-  if (_.isEqual(tp, path.predicate)) {
+  if (isEqual(tp, path.predicate)) {
     return true;
   } else if (typeof tp !== "string") {
     for (let i = 0; i < tp.items.length; i++) {
