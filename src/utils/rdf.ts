@@ -1,6 +1,6 @@
 "use strict";
 
-import DataFactory from "@rdfjs/data-model";
+import dataFactory from "@rdfjs/data-model";
 import { formatISO, isEqual, parseISO } from "date-fns";
 import type { BlankNode, Literal, NamedNode, Term } from "rdf-js";
 import { stringToTerm, termToString } from "rdf-string";
@@ -94,9 +94,9 @@ export function asJS(value: string, type: string | null): any {
  */
 export function createIRI(value: string): NamedNode {
   if (value.startsWith("<") && value.endsWith(">")) {
-    return DataFactory.namedNode(value.slice(0, value.length - 1));
+    return dataFactory.namedNode(value.slice(0, value.length - 1));
   }
-  return DataFactory.namedNode(value);
+  return dataFactory.namedNode(value);
 }
 
 /**
@@ -105,7 +105,7 @@ export function createIRI(value: string): NamedNode {
  * @return A new Blank Node in RDFJS format
  */
 export function createBNode(value?: string): BlankNode {
-  return DataFactory.blankNode(value);
+  return dataFactory.blankNode(value);
 }
 
 /**
@@ -114,7 +114,7 @@ export function createBNode(value?: string): BlankNode {
  * @return A new literal in RDFJS format
  */
 export function createLiteral(value: string): Literal {
-  return DataFactory.literal(value);
+  return dataFactory.literal(value);
 }
 
 /**
@@ -124,7 +124,7 @@ export function createLiteral(value: string): Literal {
  * @return A new typed Literal in RDFJS format
  */
 export function createTypedLiteral(value: any, type: string): Literal {
-  return DataFactory.literal(`${value}`, createIRI(type));
+  return dataFactory.literal(`${value}`, createIRI(type));
 }
 
 /**
@@ -134,7 +134,7 @@ export function createTypedLiteral(value: any, type: string): Literal {
  * @return A new Literal with a language tag in RDFJS format
  */
 export function createLangLiteral(value: string, language: string): Literal {
-  return DataFactory.literal(value, language);
+  return dataFactory.literal(value, language);
 }
 
 /**
