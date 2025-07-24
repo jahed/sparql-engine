@@ -1,27 +1,11 @@
 "use strict";
 
-import * as crypto from "crypto";
 import { includes, union } from "lodash-es";
 import type { Algebra } from "sparqljs";
 import * as rdf from "./rdf.ts";
 
-/**
- * Hash Basic Graph pattern to assign them an unique ID
- * @param bgp - Basic Graph Pattern to hash
- * @param md5 - True if the ID should be hashed to md5, False to keep it as a plain text string
- * @return An unique ID to identify the BGP
- */
-export function hashBGP(
-  bgp: Algebra.TripleObject[],
-  md5: boolean = false
-): string {
-  const hashedBGP = bgp.map(rdf.hashTriple).join(";");
-  if (!md5) {
-    return hashedBGP;
-  }
-  const hash = crypto.createHash("md5");
-  hash.update(hashedBGP);
-  return hash.digest("hex");
+export function hashBGP(bgp: Algebra.TripleObject[]): string {
+  return bgp.map(rdf.hashTriple).join(";");
 }
 
 /**
