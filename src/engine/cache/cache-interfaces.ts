@@ -28,7 +28,7 @@ SOFTWARE.
  * A cache is a vue that materializes data for latter re-use
  * @author Thomas Minier
  */
-export interface Cache<K, T> {
+export interface Cache<K extends {}, T extends {}> {
   /**
    * Put an item into the cache
    * @param key - Item's key

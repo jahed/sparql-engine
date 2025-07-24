@@ -41,7 +41,7 @@ function formatBGP(patterns, graphIRI) {
 describe("LRUBGPCache", () => {
   let cache = null;
   beforeEach(() => {
-    cache = new LRUBGPCache(0, Infinity);
+    cache = new LRUBGPCache(10000, 10000);
   });
 
   describe("#update/commit", () => {
@@ -62,7 +62,7 @@ describe("LRUBGPCache", () => {
         .get(bgp)
         .then((content) => {
           expect(content.map((x) => x.toObject())).to.deep.equals(
-            bindings.map((x) => x.toObject()),
+            bindings.map((x) => x.toObject())
           );
           done();
         })
@@ -120,11 +120,11 @@ describe("LRUBGPCache", () => {
       ];
       const subsetBGP_a = formatBGP(
         subsetPatterns_a,
-        "http://example.org#graphA",
+        "http://example.org#graphA"
       );
       const subsetBGP_b = formatBGP(
         subsetPatterns_b,
-        "http://example.org#graphA",
+        "http://example.org#graphA"
       );
       cache.update(subsetBGP_a, BindingBase.fromObject({ "?s": ":s1" }), 1);
       cache.commit(subsetBGP_a, 1);

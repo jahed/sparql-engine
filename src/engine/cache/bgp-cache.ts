@@ -96,23 +96,18 @@ export class LRUBGPCache implements BGPCache {
   // AsyncCache used to store set of solution bindings
   private readonly _cache: AsyncLRUCache<string, Bindings, string>;
 
-  /**
-   * Constructor
-   * @param maxSize - The maximum size of the cache
-   * @param maxAge - Maximum age in ms
-   */
-  constructor(maxSize: number, maxAge: number) {
+  constructor(maxSize: number, ttl: number) {
     this._patternsPerBGP = new Map();
     this._allKeys = new BinarySearchTree({
       checkValueEquality: (a: SavedBGP, b: SavedBGP) => a.key === b.key,
     });
-    this._cache = new AsyncLRUCache(
+    this._cache = new AsyncLRUCache({
       maxSize,
-      maxAge,
-      (item: AsyncCacheEntry<Bindings, string>) => {
+      ttl,
+      sizeCalculation: (item: AsyncCacheEntry<Bindings, string>) => {
         return item.content.length;
       },
-      (key: string) => {
+      dispose: (v, key: string) => {
         // remove index entries when they slide out
         if (this._patternsPerBGP.has(key)) {
           const bgp = this._patternsPerBGP.get(key)!;
@@ -121,8 +116,8 @@ export class LRUBGPCache implements BGPCache {
           );
           this._patternsPerBGP.delete(key);
         }
-      }
-    );
+      },
+    });
   }
 
   has(bgp: BasicGraphPattern): boolean {

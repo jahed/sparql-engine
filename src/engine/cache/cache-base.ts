@@ -24,14 +24,14 @@ SOFTWARE.
 
 "use strict";
 
-import LRUCache from "lru-cache";
-import type { Cache, AsyncCache } from "./cache-interfaces.ts";
+import { LRUCache } from "lru-cache";
+import type { AsyncCache, Cache } from "./cache-interfaces.ts";
 
 /**
  * An in-memory LRU cache
  * @author Thomas Minier
  */
-export class BaseLRUCache<K, T> implements Cache<K, T> {
+export class BaseLRUCache<K extends {}, T extends {}> implements Cache<K, T> {
   private readonly _content: LRUCache<K, T>;
 
   /**
@@ -41,25 +41,14 @@ export class BaseLRUCache<K, T> implements Cache<K, T> {
    * @param length - Function that is used to calculate the length of stored items
    * @param onDispose - Function that is called on items when they are dropped from the cache
    */
-  constructor(
-    maxSize: number,
-    maxAge: number,
-    length?: (item: T) => number,
-    onDispose?: (key: K, item: T) => void
-  ) {
-    const options: LRUCache.Options<K, T> = {
-      max: maxSize,
-      maxAge,
-      length,
-      dispose: onDispose,
-    };
+  constructor(options: LRUCache.Options<K, T, unknown>) {
     // if we set a dispose function, we need to turn 'noDisposeOnSet' to True,
     // otherwise onDispose will be called each time an item is updated (instead of when it slide out),
     // which will break any class extending BaseAsyncCache
-    if (onDispose !== undefined) {
+    if (options.dispose !== undefined) {
       options["noDisposeOnSet"] = true;
     }
-    this._content = new LRUCache<K, T>(options);
+    this._content = new LRUCache<K, T, unknown>(options);
   }
 
   put(key: K, item: T): void {
@@ -78,11 +67,11 @@ export class BaseLRUCache<K, T> implements Cache<K, T> {
   }
 
   delete(key: K): void {
-    this._content.del(key);
+    this._content.delete(key);
   }
 
   count(): number {
-    return this._content.itemCount;
+    return this._content.size;
   }
 }
 
@@ -106,7 +95,9 @@ export interface AsyncCacheEntry<T, I> {
  * It simply needs to provides a data structure used to cache items
  * @author Thomas Minier
  */
-export abstract class BaseAsyncCache<K, T, I> implements AsyncCache<K, T, I> {
+export abstract class BaseAsyncCache<K extends {}, T extends {}, I>
+  implements AsyncCache<K, T, I>
+{
   private readonly _cache: Cache<K, AsyncCacheEntry<T, I>>;
 
   constructor(cache: Cache<K, AsyncCacheEntry<T, I>>) {
@@ -186,27 +177,12 @@ export abstract class BaseAsyncCache<K, T, I> implements AsyncCache<K, T, I> {
  * An in-memory LRU implementation of an asynchronous cache.
  * @author Thomas Minier
  */
-export class AsyncLRUCache<K, T, I> extends BaseAsyncCache<K, T, I> {
-  /**
-   * Constructor
-   * @param maxSize - The maximum size of the cache
-   * @param maxAge - Maximum age in ms
-   * @param length - Function that is used to calculate the length of stored items
-   * @param onDispose - Function that is called on items when they are dropped from the cache
-   */
-  constructor(
-    maxSize: number,
-    maxAge: number,
-    length?: (item: AsyncCacheEntry<T, I>) => number,
-    onDispose?: (key: K, item: AsyncCacheEntry<T, I>) => void
-  ) {
-    super(
-      new BaseLRUCache<K, AsyncCacheEntry<T, I>>(
-        maxSize,
-        maxAge,
-        length,
-        onDispose
-      )
-    );
+export class AsyncLRUCache<
+  K extends {},
+  T extends {},
+  I,
+> extends BaseAsyncCache<K, T, I> {
+  constructor(options: LRUCache.Options<K, AsyncCacheEntry<T, I>, unknown>) {
+    super(new BaseLRUCache<K, AsyncCacheEntry<T, I>>(options));
   }
 }

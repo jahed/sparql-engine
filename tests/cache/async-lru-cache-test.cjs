@@ -30,7 +30,7 @@ const { AsyncLRUCache } = require("../../dist/engine/cache/cache-base");
 describe("AsyncLRUCache", () => {
   let cache = null;
   beforeEach(() => {
-    cache = new AsyncLRUCache(Infinity, Infinity);
+    cache = new AsyncLRUCache({ ttl: Number.MAX_SAFE_INTEGER });
   });
 
   describe("#update/commit", () => {
