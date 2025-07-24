@@ -34,7 +34,6 @@ import {
 } from "date-fns";
 import { isNull } from "lodash-es";
 import type { Term } from "rdf-js";
-import uuid from "uuid";
 import { parseISO8601 } from "../../utils/date.ts";
 import * as rdf from "../../utils/rdf.ts";
 
@@ -337,11 +336,11 @@ export default {
   },
 
   uuid: function (): Term {
-    return rdf.createIRI(`urn:uuid:${uuid.v4()}`);
+    return rdf.createIRI(`urn:uuid:${crypto.randomUUID()}`);
   },
 
   struuid: function (): Term {
-    return rdf.createLiteral(uuid.v4());
+    return rdf.createLiteral(crypto.randomUUID());
   },
 
   /*

@@ -1,7 +1,6 @@
 "use strict";
 
 import type { Algebra } from "sparqljs";
-import uuid from "uuid";
 import type { BGPCache } from "../engine/cache/bgp-cache.ts";
 import ExecutionContext from "../engine/context/execution-context.ts";
 import ContextSymbols from "../engine/context/symbols.ts";
@@ -41,7 +40,7 @@ export function cacheEvalBGP(
       return graph.evalBGP(patterns, context);
     }
     // generate an unique writer ID
-    const writerID = uuid.v4();
+    const writerID = crypto.randomUUID();
     // evaluate the BGP while saving all solutions into the cache
     const iterator = Pipeline.getInstance().tap(
       graph.evalBGP(patterns, context),

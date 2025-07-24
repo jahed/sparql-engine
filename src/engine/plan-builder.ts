@@ -25,7 +25,8 @@ SOFTWARE.
 "use strict";
 
 // General libraries
-import { type Algebra, Parser } from "sparqljs";
+import type { Algebra } from "sparqljs";
+import { Parser } from "sparqljs";
 import type { Consumable } from "../operators/update/consumer.ts";
 // pipelining engine
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";

@@ -24,9 +24,9 @@ SOFTWARE.
 
 "use strict";
 
-import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
-import { Writable } from "stream";
 import type { Algebra } from "sparqljs";
+import { Writable } from "stream";
+import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 
 /**
  * Something whose execution can be resolved as a Promise
@@ -88,7 +88,7 @@ export abstract class Consumer extends Writable implements Consumable {
         },
         reject,
         () => {
-          this.end(null, "", resolve);
+          this.end(null, resolve);
         }
       );
     });
