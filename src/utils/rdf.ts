@@ -1,8 +1,7 @@
 "use strict";
 
 import DataFactory from "@rdfjs/data-model";
-import type { Moment } from "moment";
-import moment from "moment";
+import { formatISO, isEqual, parseISO } from "date-fns";
 import type { BlankNode, Literal, NamedNode, Term } from "rdf-js";
 import { stringToTerm, termToString } from "rdf-string";
 import type { Algebra } from "sparqljs";
@@ -78,7 +77,7 @@ export function asJS(value: string, type: string | null): any {
     case XSD("date"):
     case XSD("time"):
     case XSD("duration"):
-      return moment.parseZone(value, moment.ISO_8601);
+      return parseISO(value);
     case XSD("hexBinary"):
       return Buffer.from(value, "hex");
     case XSD("base64Binary"):
@@ -148,6 +147,15 @@ export function createInteger(value: number): Literal {
 }
 
 /**
+ * Creates an decimal Literal in RDFJS format
+ * @param value - Float
+ * @return A new float in RDFJS format
+ */
+export function createDecimal(value: number): Literal {
+  return createTypedLiteral(value, XSD("decimal"));
+}
+
+/**
  * Creates an float Literal in RDFJS format
  * @param value - Float
  * @return A new float in RDFJS format
@@ -182,12 +190,12 @@ export function createFalse(): Literal {
 }
 
 /**
- * Creates a Literal from a Moment.js date, in RDFJS format
- * @param date - Date, in Moment.js format
+ * Creates a Literal from a Date, in RDFJS format
+ * @param date - Date
  * @return A new date literal in RDFJS format
  */
-export function createDate(date: Moment): Literal {
-  return createTypedLiteral(date.toISOString(), XSD("dateTime"));
+export function createDate(date: Date): Literal {
+  return createTypedLiteral(formatISO(date), XSD("dateTime"));
 }
 
 /**
@@ -300,8 +308,7 @@ export function termEquals(a: Term, b: Term): boolean {
     if (literalIsDate(a) && literalIsDate(b)) {
       const valueA = asJS(a.value, a.datatype.value);
       const valueB = asJS(b.value, b.datatype.value);
-      // use Moment.js isSame function to compare two dates
-      return valueA.isSame(valueB);
+      return isEqual(valueA, valueB);
     }
     return (
       a.value === b.value &&

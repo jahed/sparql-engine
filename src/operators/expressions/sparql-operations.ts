@@ -25,10 +25,17 @@ SOFTWARE.
 "use strict";
 
 import * as crypto from "crypto";
+import {
+  addMilliseconds,
+  isAfter,
+  isBefore,
+  isEqual,
+  subMilliseconds,
+} from "date-fns";
 import { isNull } from "lodash-es";
-import moment from "moment";
 import type { Term } from "rdf-js";
 import uuid from "uuid";
+import { parseISO8601 } from "../../utils/date.ts";
 import * as rdf from "../../utils/rdf.ts";
 
 /**
@@ -101,7 +108,7 @@ export default {
       const valueA = rdf.asJS(a.value, a.datatype.value);
       const valueB = rdf.asJS(b.value, b.datatype.value);
       if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        return rdf.createDate(moment(valueA + valueB));
+        return rdf.createDate(addMilliseconds(valueA, valueB.getTime()));
       }
       return rdf.createTypedLiteral(valueA + valueB, a.datatype.value);
     }
@@ -113,7 +120,7 @@ export default {
       const valueA = rdf.asJS(a.value, a.datatype.value);
       const valueB = rdf.asJS(b.value, b.datatype.value);
       if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        return rdf.createDate(moment(valueA - valueB));
+        return rdf.createDate(subMilliseconds(valueA, valueB.getTime()));
       }
       return rdf.createTypedLiteral(valueA - valueB, a.datatype.value);
     }
@@ -127,7 +134,7 @@ export default {
       const valueA = rdf.asJS(a.value, a.datatype.value);
       const valueB = rdf.asJS(b.value, b.datatype.value);
       if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        return rdf.createDate(moment(valueA * valueB));
+        return rdf.createDate(new Date(valueA.getTime() * valueB.getTime()));
       }
       return rdf.createTypedLiteral(valueA * valueB, a.datatype.value);
     }
@@ -141,7 +148,7 @@ export default {
       const valueA = rdf.asJS(a.value, a.datatype.value);
       const valueB = rdf.asJS(b.value, b.datatype.value);
       if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        return rdf.createDate(moment(valueA / valueB));
+        return rdf.createDate(new Date(valueA.getTime() / valueB.getTime()));
       }
       return rdf.createTypedLiteral(valueA / valueB, a.datatype.value);
     }
@@ -163,8 +170,7 @@ export default {
       const valueA = rdf.asJS(a.value, a.datatype.value);
       const valueB = rdf.asJS(b.value, b.datatype.value);
       if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        // use Moment.js isBefore function to compare two dates
-        return rdf.createBoolean(valueA.isBefore(valueB));
+        return rdf.createBoolean(isBefore(valueA, valueB));
       }
       return rdf.createBoolean(valueA < valueB);
     }
@@ -176,8 +182,9 @@ export default {
       const valueA = rdf.asJS(a.value, a.datatype.value);
       const valueB = rdf.asJS(b.value, b.datatype.value);
       if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        // use Moment.js isSameOrBefore function to compare two dates
-        return rdf.createBoolean(valueA.isSameOrBefore(valueB));
+        return rdf.createBoolean(
+          isEqual(valueA, valueB) || isBefore(valueA, valueB)
+        );
       }
       return rdf.createBoolean(valueA <= valueB);
     }
@@ -189,8 +196,7 @@ export default {
       const valueA = rdf.asJS(a.value, a.datatype.value);
       const valueB = rdf.asJS(b.value, b.datatype.value);
       if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        // use Moment.js isAfter function to compare two dates
-        return rdf.createBoolean(valueA.isAfter(valueB));
+        return rdf.createBoolean(isAfter(valueA, valueB));
       }
       return rdf.createBoolean(valueA > valueB);
     }
@@ -202,8 +208,9 @@ export default {
       const valueA = rdf.asJS(a.value, a.datatype.value);
       const valueB = rdf.asJS(b.value, b.datatype.value);
       if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        // use Moment.js isSameOrAfter function to compare two dates
-        return rdf.createBoolean(valueA.isSameOrAfter(valueB));
+        return rdf.createBoolean(
+          isEqual(valueA, valueB) || isAfter(valueA, valueB)
+        );
       }
       return rdf.createBoolean(valueA >= valueB);
     }
@@ -493,13 +500,12 @@ export default {
   */
 
   now: function (): Term {
-    return rdf.createDate(moment());
+    return rdf.createDate(new Date());
   },
 
   year: function (a: Term): Term {
     if (rdf.termIsLiteral(a) && rdf.literalIsDate(a)) {
-      const value = rdf.asJS(a.value, a.datatype.value);
-      return rdf.createInteger(value.year());
+      return rdf.createInteger(Number(parseISO8601(a.value).year));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the year of the RDF Term ${a}, as it is not a date`
@@ -509,8 +515,7 @@ export default {
   month: function (a: Term): Term {
     if (rdf.termIsLiteral(a) && rdf.literalIsDate(a)) {
       const value = rdf.asJS(a.value, a.datatype.value);
-      // Warning: Months are zero indexed in Moment.js, so January is month 0.
-      return rdf.createInteger(value.month() + 1);
+      return rdf.createInteger(Number(parseISO8601(a.value).month));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the month of the RDF Term ${a}, as it is not a date`
@@ -519,8 +524,7 @@ export default {
 
   day: function (a: Term): Term {
     if (rdf.termIsLiteral(a) && rdf.literalIsDate(a)) {
-      const value = rdf.asJS(a.value, a.datatype.value);
-      return rdf.createInteger(value.date());
+      return rdf.createInteger(Number(parseISO8601(a.value).day));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the day of the RDF Term ${a}, as it is not a date`
@@ -529,8 +533,7 @@ export default {
 
   hours: function (a: Term): Term {
     if (rdf.termIsLiteral(a) && rdf.literalIsDate(a)) {
-      const value = rdf.asJS(a.value, a.datatype.value);
-      return rdf.createInteger(value.hours());
+      return rdf.createInteger(Number(parseISO8601(a.value).hour));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the hours of the RDF Term ${a}, as it is not a date`
@@ -539,8 +542,7 @@ export default {
 
   minutes: function (a: Term): Term {
     if (rdf.termIsLiteral(a) && rdf.literalIsDate(a)) {
-      const value = rdf.asJS(a.value, a.datatype.value);
-      return rdf.createInteger(value.minutes());
+      return rdf.createInteger(Number(parseISO8601(a.value).minute));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the minutes of the RDF Term ${a}, as it is not a date`
@@ -549,8 +551,7 @@ export default {
 
   seconds: function (a: Term): Term {
     if (rdf.termIsLiteral(a) && rdf.literalIsDate(a)) {
-      const value = rdf.asJS(a.value, a.datatype.value);
-      return rdf.createInteger(value.seconds());
+      return rdf.createDecimal(Number(parseISO8601(a.value).second));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the seconds of the RDF Term ${a}, as it is not a date`
@@ -559,8 +560,7 @@ export default {
 
   tz: function (a: Term): Term {
     if (rdf.termIsLiteral(a) && rdf.literalIsDate(a)) {
-      const value = rdf.asJS(a.value, a.datatype.value).utcOffset() / 60;
-      return rdf.createLiteral(value.toString());
+      return rdf.createLiteral(parseISO8601(a.value).timezone);
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the timezone of the RDF Term ${a}, as it is not a date`

@@ -798,7 +798,7 @@ describe("FILTER SPARQL queries", () => {
       PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
       SELECT * WHERE {
         ?s rdf:type dblp-rdf:Person .
-        FILTER(seconds("2011-01-10T14:45:13.815-05:00"^^xsd:dateTime) = 13)
+        FILTER(seconds("2011-01-10T14:45:13.815-05:00"^^xsd:dateTime) = 13.815)
       }`,
       expectedNb: 1,
     },
@@ -810,7 +810,7 @@ describe("FILTER SPARQL queries", () => {
       PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
       SELECT * WHERE {
         ?s rdf:type dblp-rdf:Person .
-        FILTER(tz("2011-01-10T14:45:13.815-05:00"^^xsd:dateTime) = "-5")
+        FILTER(tz("2011-01-10T14:45:13.815-05:00"^^xsd:dateTime) = "-05:00")
       }`,
       expectedNb: 1,
     },
