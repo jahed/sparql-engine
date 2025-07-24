@@ -24,26 +24,31 @@ SOFTWARE.
 
 "use strict";
 
-import { concat, EMPTY, from, Observable, of, Subscriber } from "rxjs";
 import {
   bufferCount,
   catchError,
+  concat,
   defaultIfEmpty,
   distinct,
+  EMPTY,
   endWith,
   filter,
   finalize,
   first,
   flatMap,
+  from,
   map,
   mergeMap,
+  Observable,
+  of,
   reduce,
   shareReplay,
   skip,
+  Subscriber,
   take,
   tap,
   toArray,
-} from "rxjs/operators/index.js";
+} from "rxjs";
 import { type StreamPipelineInput, PipelineEngine } from "./pipeline-engine.ts";
 
 /**
