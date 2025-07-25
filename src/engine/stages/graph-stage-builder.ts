@@ -29,9 +29,13 @@ import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import { Pipeline } from "../pipeline/pipeline.ts";
 import StageBuilder from "./stage-builder.ts";
 
-import { Wildcard, type GraphPattern, type Query } from "sparqljs";
+import {
+  Wildcard,
+  type GraphPattern,
+  type IriTerm,
+  type Query,
+} from "sparqljs";
 import type { Bindings } from "../../rdf/bindings.ts";
-import { toN3 } from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import ContextSymbols from "../context/symbols.ts";
 
@@ -68,7 +72,7 @@ export default class GraphStageBuilder extends StageBuilder {
     if (rdf.isVariable(node.name)) {
       // clone the source first
       source = Pipeline.getInstance().clone(source);
-      let namedGraphs: string[] = [];
+      let namedGraphs: IriTerm[] = [];
       // use named graphs is provided, otherwise use all named graphs
       if (context.namedGraphs.length > 0) {
         namedGraphs = context.namedGraphs;
@@ -80,20 +84,20 @@ export default class GraphStageBuilder extends StageBuilder {
         source,
         1,
         (values) => {
-          return values[0].has(toN3(node.name));
+          return values[0].has(node.name.value);
         },
         (values) => {
           // if the input bindings bound the graph's variable, use it as graph IRI
-          const graphIRI = values[0].get(toN3(node.name))!;
+          const graphIRI = values[0].get(node.name.value) as IriTerm;
           return this._buildIterator(source, graphIRI, subquery, context);
         },
         () => {
           // otherwise, execute the subquery using each graph, and bound the graph var to the graph iri
           return Pipeline.getInstance().merge(
-            ...namedGraphs.map((iri: string) => {
+            ...namedGraphs.map((iri) => {
               const stage = this._buildIterator(source, iri, subquery, context);
               return Pipeline.getInstance().map(stage, (bindings) => {
-                return bindings.extendMany([[toN3(node.name), iri]]);
+                return bindings.extendMany([[node.name.value, iri]]);
               });
             })
           );
@@ -101,7 +105,7 @@ export default class GraphStageBuilder extends StageBuilder {
       );
     }
     // otherwise, execute the subquery using the Graph
-    return this._buildIterator(source, toN3(node.name), subquery, context);
+    return this._buildIterator(source, node.name, subquery, context);
   }
 
   /**
@@ -114,7 +118,7 @@ export default class GraphStageBuilder extends StageBuilder {
    */
   _buildIterator(
     source: PipelineStage<Bindings>,
-    iri: string,
+    iri: IriTerm,
     subquery: Query,
     context: ExecutionContext
   ): PipelineStage<Bindings> {

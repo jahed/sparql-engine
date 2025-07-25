@@ -24,8 +24,9 @@ SOFTWARE.
 
 "use strict";
 
-import { QueryHints } from "./query-hints.ts";
+import type { IriTerm } from "sparqljs";
 import type { BGPCache } from "../cache/bgp-cache.ts";
+import { QueryHints } from "./query-hints.ts";
 
 /**
  * An execution context conatains control information for query execution.
@@ -33,8 +34,8 @@ import type { BGPCache } from "../cache/bgp-cache.ts";
 export default class ExecutionContext {
   protected _properties: Map<Symbol, any>;
   protected _hints: QueryHints;
-  protected _defaultGraphs: string[];
-  protected _namedGraphs: string[];
+  protected _defaultGraphs: IriTerm[];
+  protected _namedGraphs: IriTerm[];
   protected _cache: BGPCache | null;
 
   constructor() {
@@ -57,7 +58,7 @@ export default class ExecutionContext {
    * Update the set of graphs used as the default graph
    * @param  values - The set of graphs used as the default graph
    */
-  set defaultGraphs(values: string[]) {
+  set defaultGraphs(values: IriTerm[]) {
     this._defaultGraphs = values.slice(0);
   }
 
@@ -73,7 +74,7 @@ export default class ExecutionContext {
    * Update the set of graphs used as named graphs
    * @param  values - The set of graphs used as named graphs
    */
-  set namedGraphs(values: string[]) {
+  set namedGraphs(values: IriTerm[]) {
     this._namedGraphs = values.slice(0);
   }
 

@@ -29,8 +29,8 @@ import type { ConstructQuery } from "sparqljs";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../../engine/pipeline/pipeline.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
-import { isVariable, tripleToStringQuad } from "../../utils/rdf.ts";
-import type { StringTriple } from "../../types.ts";
+import type { EngineTriple } from "../../types.ts";
+import { isVariable, tripleToQuad } from "../../utils/rdf.ts";
 
 /**
  * A ConstructOperator transform solution mappings into RDF triples, according to a template
@@ -44,10 +44,10 @@ export default function construct(
   source: PipelineStage<Bindings>,
   query: Pick<ConstructQuery, "template">
 ) {
-  const rawTriples: StringTriple[] = [];
-  const templates: StringTriple[] = (query.template || [])
-    .map((t) => tripleToStringQuad(t))
-    .filter((t: any) => {
+  const rawTriples: EngineTriple[] = [];
+  const templates: EngineTriple[] = (query.template || [])
+    .map((t) => tripleToQuad(t))
+    .filter((t) => {
       if (
         isVariable(t.subject) ||
         isVariable(t.predicate) ||

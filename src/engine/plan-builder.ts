@@ -69,11 +69,11 @@ import { LRUBGPCache, type BGPCache } from "./cache/bgp-cache.ts";
 // utilities
 import { isNull, isUndefined, partition, some, sortBy } from "lodash-es";
 
-import { stringQuadToQuad } from "rdf-string";
 import type { CustomFunctions } from "../operators/expressions/sparql-expression.ts";
-import type { StringTriple } from "../types.ts";
+import type { EngineTriple } from "../types.ts";
 import { deepApplyBindings, extendByBindings } from "../utils.ts";
 import * as rdf from "../utils/rdf.ts";
+import { dataFactory } from "../utils/rdf.ts";
 import ExecutionContext from "./context/execution-context.ts";
 import ContextSymbols from "./context/symbols.ts";
 import { extractPropertyPaths } from "./stages/rewritings.ts";
@@ -81,7 +81,7 @@ import { extractPropertyPaths } from "./stages/rewritings.ts";
 /**
  * Output of a physical query execution plan
  */
-export type QueryOutput = Bindings | StringTriple | boolean;
+export type QueryOutput = Bindings | EngineTriple | boolean;
 
 /*
  * Class of SPARQL operations that are evaluated by a Stage Builder
@@ -273,9 +273,11 @@ export class PlanBuilder {
           triples: [],
         },
       ];
-      query.variables!.forEach((v: any) => {
-        const triple = stringQuadToQuad(
-          rdf.triple(v, `?pred__describe__${v}`, `?obj__describe__${v}`)
+      query.variables.forEach((v: any) => {
+        const triple = dataFactory.quad(
+          v,
+          dataFactory.variable(`pred__describe__${v}`),
+          dataFactory.variable(`obj__describe__${v}`)
         );
         template.push(triple);
         where[0].triples.push(triple);
@@ -299,8 +301,8 @@ export class PlanBuilder {
 
     // Handles FROM clauses
     if (query.from) {
-      context.defaultGraphs = query.from.default.map((t) => rdf.toN3(t));
-      context.namedGraphs = query.from.named.map((t) => rdf.toN3(t));
+      context.defaultGraphs = query.from.default;
+      context.namedGraphs = query.from.named;
     }
 
     // Handles WHERE clause

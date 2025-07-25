@@ -25,13 +25,15 @@ SOFTWARE.
 "use strict";
 
 import { isBoolean, isNull, isUndefined, map } from "lodash-es";
-import type { Term } from "rdf-js";
+
 import xml from "xml";
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import { Bindings } from "../rdf/bindings.ts";
+import type { EngineTripleValue } from "../types.ts";
 import * as rdf from "../utils/rdf.ts";
 
+type Term = EngineTripleValue;
 type RDFBindings = { [key: string]: Term };
 
 function _writeBoolean(input: boolean, root: any) {
@@ -43,7 +45,7 @@ function _writeBindings(input: Bindings, results: any) {
   let bindings = input
     .filter((value) => !isNull(value[1]) && !isUndefined(value[1]))
     .reduce<RDFBindings>((obj, variable, value) => {
-      obj[variable] = rdf.fromN3(value);
+      obj[variable] = value;
       return obj;
     }, {});
 

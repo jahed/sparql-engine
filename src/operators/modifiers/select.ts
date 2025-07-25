@@ -30,7 +30,6 @@ import { Pipeline } from "../../engine/pipeline/pipeline.ts";
 
 import type { Bindings } from "../../rdf/bindings.ts";
 import * as rdf from "../../utils/rdf.ts";
-import { toN3 } from "../../utils/rdf.ts";
 
 /**
  * Evaluates a SPARQL SELECT operation, i.e., perform a selection over sets of solutions bindings
@@ -47,21 +46,23 @@ export default function select(source: PipelineStage<Bindings>, query: Query) {
   }
   if (query.variables[0] instanceof Wildcard) {
     return Pipeline.getInstance().map(source, (bindings: Bindings) => {
-      return bindings.mapValues((k, v) => (rdf.isVariable(k) ? v : null));
+      // return bindings.mapValues((k, v) => (rdf.isVariable(k) ? v : null));
+      return bindings;
     });
   }
   const variables = (query.variables as Variable[]).map((v) =>
-    toN3("variable" in v ? v.variable : v)
+    "variable" in v ? v.variable : v
   );
   return Pipeline.getInstance().map(source, (bindings: Bindings) => {
     bindings = variables.reduce((obj, v) => {
-      if (bindings.has(v)) {
-        obj.set(v, bindings.get(v)!);
+      if (bindings.has(v.value)) {
+        obj.set(v.value, bindings.get(v.value)!);
       } else {
-        obj.set(v, "UNBOUND");
+        obj.set(v.value, rdf.createUnbound());
       }
       return obj;
     }, bindings.empty());
-    return bindings.mapValues((k, v) => (rdf.isVariable(k) ? v : null));
+    // return bindings.mapValues((k, v) => (rdf.isVariable(k) ? v : null));
+    return bindings;
   });
 }

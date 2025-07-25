@@ -8,7 +8,7 @@ import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import BGPStageBuilder from "../engine/stages/bgp-stage-builder.ts";
 import { Bindings } from "../rdf/bindings.ts";
 import Graph from "../rdf/graph.ts";
-import type { StringTriple } from "../types.ts";
+import type { EngineTriple } from "../types.ts";
 
 /**
  * Evaluate a Basic Graph pattern on a RDF graph using a cache
@@ -18,7 +18,7 @@ import type { StringTriple } from "../types.ts";
  * @return A pipeline stage that produces the evaluation results
  */
 export function cacheEvalBGP(
-  patterns: StringTriple[],
+  patterns: EngineTriple[],
   graph: Graph,
   cache: BGPCache,
   builder: BGPStageBuilder,

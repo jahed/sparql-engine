@@ -36,6 +36,7 @@
   ],
   "homepage": "https://github.com/Callidon/sparql-engine#readme",
   "devDependencies": {
+    "@rdfjs/types": "^2.0.1",
     "@tsconfig/node-ts": "^23.6.1",
     "@tsconfig/node22": "^22.0.2",
     "@types/lodash-es": "^4.17.12",
@@ -48,18 +49,22 @@
     "mocha": "^5.2.0",
     "n3": "^0.11.3",
     "prettier": "^3.6.2",
-    "rdf-js": "^4.0.2",
     "typescript": "5.8.x"
   },
   "dependencies": {
-    "@rdfjs/data-model": "^2.1.1",
     "binary-search-tree": "^0.2.6",
     "date-fns": "^4.1.0",
     "lodash-es": "^4.17.21",
     "lru-cache": "^11.1.0",
+    "rdf-data-factory": "^2.0.2",
     "rdf-string": "^2.0.1",
     "rxjs": "^7.8.2",
     "sparqljs": "^3.7.3",
     "xml": "^1.0.1"
+  },
+  "overrides": {
+    "sparqljs": {
+      "rdf-data-factory": "$rdf-data-factory"
+    }
   }
 }

@@ -30,7 +30,7 @@ import { Pipeline } from "../../engine/pipeline/pipeline.ts";
 import BGPStageBuilder from "../../engine/stages/bgp-stage-builder.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
-import type { StringTriple } from "../../types.ts";
+import type { EngineTriple } from "../../types.ts";
 import * as evaluation from "../../utils/evaluation.ts";
 
 /**
@@ -106,7 +106,7 @@ function rewriteSolutions(
  */
 export default function rewritingOp(
   graph: Graph,
-  bgpBucket: StringTriple[][],
+  bgpBucket: EngineTriple[][],
   rewritingTable: Map<number, Bindings>,
   builder: BGPStageBuilder,
   context: ExecutionContext
@@ -115,7 +115,7 @@ export default function rewritingOp(
   if (context.cachingEnabled()) {
     // partition the BGPs that can be evaluated using the cache from the others
     const stages: PipelineStage<Bindings>[] = [];
-    const others: StringTriple[][] = [];
+    const others: EngineTriple[][] = [];
     bgpBucket.forEach((patterns) => {
       if (context.cache!.has({ patterns, graphIRI: graph.iri })) {
         stages.push(

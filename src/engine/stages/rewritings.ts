@@ -35,13 +35,7 @@ import type {
   Triple,
 } from "sparqljs";
 import Dataset from "../../rdf/dataset.ts";
-import {
-  stringQuadToTriple,
-  toN3,
-  tripleToStringQuad,
-  type PathTripleObject,
-} from "../../utils/rdf.ts";
-import type { StringTriple } from "../../types.ts";
+import { dataFactory } from "../../utils/rdf.ts";
 
 /**
  * Create a triple pattern that matches all RDF triples in a graph
@@ -49,11 +43,11 @@ import type { StringTriple } from "../../types.ts";
  * @return A triple pattern that matches all RDF triples in a graph
  */
 function allPattern(): Triple {
-  return stringQuadToTriple({
-    subject: "?s",
-    predicate: "?p",
-    object: "?o",
-  });
+  return {
+    subject: dataFactory.variable("s"),
+    predicate: dataFactory.variable("p"),
+    object: dataFactory.variable("o"),
+  };
 }
 
 /**
@@ -86,10 +80,7 @@ function buildGroupClause(
     return allBGP();
   } else {
     // a SILENT modifier prevents errors when using an unknown graph
-    if (
-      !(source.name && dataset.hasNamedGraph(toN3(source.name))) &&
-      !isSilent
-    ) {
+    if (!(source.name && dataset.hasNamedGraph(source.name)) && !isSilent) {
       throw new Error(`Unknown Source Graph in ADD query ${source.name}`);
     }
     return {
@@ -118,10 +109,7 @@ function buildWhereClause(
     return allBGP();
   } else {
     // a SILENT modifier prevents errors when using an unknown graph
-    if (
-      !(source.name && dataset.hasNamedGraph(toN3(source.name))) &&
-      !isSilent
-    ) {
+    if (!(source.name && dataset.hasNamedGraph(source.name)) && !isSilent) {
       throw new Error(`Unknown Source Graph in ADD query ${source.name}`);
     }
     const bgp: BgpPattern = {
@@ -219,19 +207,14 @@ export function rewriteMove(
  */
 export function extractPropertyPaths(
   bgp: BgpPattern
-): [StringTriple[], PathTripleObject[], string[]] {
-  const classicTriples: StringTriple[] = [];
-  const pathTriples: PathTripleObject[] = [];
+): [Triple[], Triple[], string[]] {
+  const classicTriples: Triple[] = [];
+  const pathTriples: Triple[] = [];
   for (const triple of bgp.triples) {
-    const s = tripleToStringQuad(triple);
     if ("pathType" in triple.predicate) {
-      pathTriples.push({
-        subject: s.subject,
-        predicate: triple.predicate,
-        object: s.object,
-      });
+      pathTriples.push(triple);
     } else {
-      classicTriples.push(s);
+      classicTriples.push(triple);
     }
   }
   return [classicTriples, pathTriples, []];

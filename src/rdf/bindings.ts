@@ -24,10 +24,14 @@ SOFTWARE.
 
 "use strict";
 
+import type { Quad_Predicate, Quad_Subject } from "@rdfjs/types";
 import { isNull, isUndefined } from "lodash-es";
+import { termToString } from "rdf-string";
 import type { ValuePatternRow } from "sparqljs";
+import type { EngineTriple, EngineTripleValue } from "../types.ts";
 import * as rdf from "../utils/rdf.ts";
-import type { StringTriple } from "../types.ts";
+
+type Term = EngineTripleValue;
 
 /**
  * A set of mappings from a variable to a RDF Term.
@@ -63,14 +67,14 @@ export abstract class Bindings {
    * Get an iterator over the RDF terms in the set
    * @return An iterator over the RDF terms in the set
    */
-  abstract values(): IterableIterator<string>;
+  abstract values(): IterableIterator<Term>;
 
   /**
    * Get the RDF Term associated with a SPARQL variable
    * @param variable - SPARQL variable
    * @return The RDF Term associated with the given SPARQL variable
    */
-  abstract get(variable: string): string | null;
+  abstract get(variable: string): Term | null;
 
   /**
    * Test if mappings exists for a SPARQL variable
@@ -84,7 +88,7 @@ export abstract class Bindings {
    * @param variable - SPARQL variable
    * @param value - RDF Term
    */
-  abstract set(variable: string, value: string): void;
+  abstract set(variable: string, value: Term): void;
 
   /**
    * Get metadata attached to the set using a key
@@ -118,7 +122,7 @@ export abstract class Bindings {
    * @param callback - Callback to invoke
    * @return
    */
-  abstract forEach(callback: (variable: string, value: string) => void): void;
+  abstract forEach(callback: (variable: string, value: Term) => void): void;
 
   /**
    * Remove all mappings from the set
@@ -136,8 +140,8 @@ export abstract class Bindings {
    * Serialize the set of mappings as a plain JS Object
    * @return The set of mappings as a plain JS Object
    */
-  toObject(): Record<string, string> {
-    return this.reduce<Record<string, string>>((acc, variable, value) => {
+  toObject(): Record<string, Term> {
+    return this.reduce<Record<string, Term>>((acc, variable, value) => {
       acc[variable] = value;
       return acc;
     }, {});
@@ -149,10 +153,7 @@ export abstract class Bindings {
    */
   toString(): string {
     const value = this.reduce((acc, variable, value) => {
-      if (!value.startsWith('"')) {
-        value = `<${value}>`;
-      }
-      return `${acc} ${variable} -> ${value},`;
+      return `${acc} ${variable} -> ${termToString(value)},`;
     }, "{");
     return value.substring(0, value.length - 1) + " }";
   }
@@ -197,16 +198,16 @@ export abstract class Bindings {
    * @param triple  - Triple pattern
    * @return An new, bounded triple pattern
    */
-  bound(triple: StringTriple): StringTriple {
+  bound(triple: EngineTriple): EngineTriple {
     const newTriple = Object.assign({}, triple);
-    if (rdf.isVariable(triple.subject) && this.has(triple.subject)) {
-      newTriple.subject = this.get(triple.subject)!;
+    if (rdf.isVariable(triple.subject) && this.has(triple.subject.value)) {
+      newTriple.subject = this.get(triple.subject.value) as Quad_Subject;
     }
-    if (rdf.isVariable(triple.predicate) && this.has(triple.predicate)) {
-      newTriple.predicate = this.get(triple.predicate)!;
+    if (rdf.isVariable(triple.predicate) && this.has(triple.predicate.value)) {
+      newTriple.predicate = this.get(triple.predicate.value) as Quad_Predicate;
     }
-    if (rdf.isVariable(triple.object) && this.has(triple.object)) {
-      newTriple.object = this.get(triple.object)!;
+    if (rdf.isVariable(triple.object) && this.has(triple.object.value)) {
+      newTriple.object = this.get(triple.object.value)!;
     }
     return newTriple;
   }
@@ -216,7 +217,7 @@ export abstract class Bindings {
    * @param values - Pairs [variable, value] to add to the set
    * @return A new Bindings with the additionnal mappings
    */
-  extendMany(values: Array<[string, string]>): Bindings {
+  extendMany(values: Array<[string, Term]>): Bindings {
     const cloned = this.clone();
     values.forEach((v) => {
       cloned.set(v[0], v[1]);
@@ -258,7 +259,7 @@ export abstract class Bindings {
    * @return The results of the set difference
    */
   difference(other: Bindings): Bindings {
-    return this.filter((variable: string, value: string) => {
+    return this.filter((variable: string, value: Term) => {
       return !other.has(variable) || value !== other.get(variable);
     });
   }
@@ -280,7 +281,7 @@ export abstract class Bindings {
    * @return A new set of mappings
    */
   map(
-    mapper: (variable: string, value: string) => [string | null, string | null]
+    mapper: (variable: string, value: Term) => [string | null, Term | null]
   ): Bindings {
     const result = this.empty();
     this.forEach((variable, value) => {
@@ -305,7 +306,7 @@ export abstract class Bindings {
    * @return A new set of mappings
    */
   mapVariables(
-    mapper: (variable: string, value: string) => string | null
+    mapper: (variable: string, value: Term) => string | null
   ): Bindings {
     return this.map((variable, value) => [mapper(variable, value), value]);
   }
@@ -315,9 +316,7 @@ export abstract class Bindings {
    * @param mapper - Transformation function
    * @return A new set of mappings
    */
-  mapValues(
-    mapper: (variable: string, value: string) => string | null
-  ): Bindings {
+  mapValues(mapper: (variable: string, value: Term) => Term | null): Bindings {
     return this.map((variable, value) => [variable, mapper(variable, value)]);
   }
 
@@ -326,7 +325,7 @@ export abstract class Bindings {
    * @param predicate - Predicate function
    * @return A new set of mappings
    */
-  filter(predicate: (variable: string, value: string) => boolean): Bindings {
+  filter(predicate: (variable: string, value: Term) => boolean): Bindings {
     return this.map((variable, value) => {
       if (predicate(variable, value)) {
         return [variable, value];
@@ -342,7 +341,7 @@ export abstract class Bindings {
    * @return The accumulated value
    */
   reduce<T>(
-    reducer: (acc: T, variable: string, value: string) => T,
+    reducer: (acc: T, variable: string, value: Term) => T,
     start: T
   ): T {
     let acc: T = start;
@@ -357,7 +356,7 @@ export abstract class Bindings {
    * @param  predicate - Function to test for each mapping
    * @return True if some mappings in the set some the predicate function, False otheriwse
    */
-  some(predicate: (variable: string, value: string) => boolean): boolean {
+  some(predicate: (variable: string, value: Term) => boolean): boolean {
     let res = false;
     this.forEach((variable, value) => {
       res = res || predicate(variable, value);
@@ -370,7 +369,7 @@ export abstract class Bindings {
    * @param  predicate - Function to test for each mapping
    * @return True if every mappings in the set some the predicate function, False otheriwse
    */
-  every(predicate: (variable: string, value: string) => boolean): boolean {
+  every(predicate: (variable: string, value: Term) => boolean): boolean {
     let res = true;
     this.forEach((variable, value) => {
       res = res && predicate(variable, value);
@@ -384,7 +383,7 @@ export abstract class Bindings {
  * @author Thomas Minier
  */
 export class BindingBase extends Bindings {
-  private readonly _content: Map<string, string>;
+  private readonly _content: Map<string, Term>;
 
   constructor() {
     super();
@@ -404,10 +403,10 @@ export class BindingBase extends Bindings {
    * @param obj - Source object to turn into a set of mappings
    * @return A set of mappings
    */
-  static fromObject(obj: Record<string, string>): Bindings {
+  static fromObject(obj: Record<string, Term>): Bindings {
     const res = new BindingBase();
     for (let key in obj) {
-      res.set(!key.startsWith("?") ? `?${key}` : key, obj[key]);
+      res.set(key, obj[key]);
     }
     return res;
   }
@@ -417,7 +416,7 @@ export class BindingBase extends Bindings {
     for (let key in row) {
       const v = row[key];
       if (v) {
-        res.set(!key.startsWith("?") ? `?${key}` : key, rdf.toN3(v));
+        res.set(key, v);
       }
     }
     return res;
@@ -427,11 +426,11 @@ export class BindingBase extends Bindings {
     return this._content.keys();
   }
 
-  values(): IterableIterator<string> {
+  values(): IterableIterator<Term> {
     return this._content.values();
   }
 
-  get(variable: string): string | null {
+  get(variable: string): Term | null {
     if (this._content.has(variable)) {
       return this._content.get(variable)!;
     }
@@ -442,7 +441,7 @@ export class BindingBase extends Bindings {
     return this._content.has(variable);
   }
 
-  set(variable: string, value: string): void {
+  set(variable: string, value: Term): void {
     this._content.set(variable, value);
   }
 
@@ -454,7 +453,7 @@ export class BindingBase extends Bindings {
     return new BindingBase();
   }
 
-  forEach(callback: (variable: string, value: string) => void): void {
+  forEach(callback: (variable: string, value: Term) => void): void {
     this._content.forEach((value, variable) => callback(variable, value));
   }
 }

@@ -33,9 +33,12 @@ import {
   subMilliseconds,
 } from "date-fns";
 import { isNull } from "lodash-es";
-import type { Term } from "rdf-js";
+
+import type { EngineTripleValue } from "../../types.ts";
 import { parseISO8601 } from "../../utils/date.ts";
 import * as rdf from "../../utils/rdf.ts";
+
+type Term = EngineTripleValue;
 
 /**
  * Return a high-orderpply a Hash function  to a RDF
@@ -157,11 +160,11 @@ export default {
   },
 
   "=": function (a: Term, b: Term): Term {
-    return rdf.createBoolean(rdf.termEquals(a, b));
+    return rdf.createBoolean(a.equals(b));
   },
 
   "!=": function (a: Term, b: Term): Term {
-    return rdf.createBoolean(!rdf.termEquals(a, b));
+    return rdf.createBoolean(!a.equals(b));
   },
 
   "<": function (a: Term, b: Term): Term {
@@ -271,11 +274,11 @@ export default {
   },
 
   in: function (a: Term, b: Term[]): Term {
-    return rdf.createBoolean(b.some((elt) => rdf.termEquals(a, elt)));
+    return rdf.createBoolean(b.some((elt) => a.equals(elt)));
   },
 
   notin: function (a: Term, b: Term[]): Term {
-    return rdf.createBoolean(!b.some((elt) => rdf.termEquals(a, elt)));
+    return rdf.createBoolean(!b.some((elt) => a.equals(elt)));
   },
 
   /*
@@ -299,7 +302,7 @@ export default {
   },
 
   str: function (a: Term): Term {
-    return rdf.createLiteral(rdf.toN3(a));
+    return rdf.createLiteral(a.value);
   },
 
   lang: function (a: Term): Term {

@@ -31,7 +31,7 @@ import { Pipeline } from "../../engine/pipeline/pipeline.ts";
 import BGPStageBuilder from "../../engine/stages/bgp-stage-builder.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
-import type { StringTriple } from "../../types.ts";
+import type { EngineTriple } from "../../types.ts";
 import * as evaluation from "../../utils/evaluation.ts";
 import * as rdf from "../../utils/rdf.ts";
 import rewritingOp from "./rewriting-op.ts";
@@ -41,7 +41,7 @@ const BOUND_JOIN_BUFFER_SIZE = 15;
 
 // A Basic graph pattern, i.e., a set of triple patterns
 // This type alias is defined to make the algorithm more readable ;)
-type BasicGraphPattern = StringTriple[];
+type BasicGraphPattern = EngineTriple[];
 
 /**
  * Rewrite a triple pattern using a rewriting key,
@@ -51,16 +51,18 @@ type BasicGraphPattern = StringTriple[];
  * @param tp - Triple pattern to rewrite
  * @return The rewritten triple pattern
  */
-function rewriteTriple(triple: StringTriple, key: number): StringTriple {
+function rewriteTriple(triple: EngineTriple, key: number): EngineTriple {
   const res = Object.assign({}, triple);
   if (rdf.isVariable(triple.subject)) {
-    res.subject = `${triple.subject}_${key}`;
+    res.subject = rdf.dataFactory.variable(`${triple.subject.value}_${key}`);
   }
   if (rdf.isVariable(triple.predicate)) {
-    res.predicate = `${triple.predicate}_${key}`;
+    res.predicate = rdf.dataFactory.variable(
+      `${triple.predicate.value}_${key}`
+    );
   }
   if (rdf.isVariable(triple.object)) {
-    res.object = `${triple.object}_${key}`;
+    res.object = rdf.dataFactory.variable(`${triple.object.value}_${key}`);
   }
   return res;
 }
@@ -76,7 +78,7 @@ function rewriteTriple(triple: StringTriple, key: number): StringTriple {
  */
 export default function boundJoin(
   source: PipelineStage<Bindings>,
-  bgp: StringTriple[],
+  bgp: EngineTriple[],
   graph: Graph,
   builder: BGPStageBuilder,
   context: ExecutionContext
@@ -226,7 +228,7 @@ export default function boundJoin(
           bucket.map(binding => {
             const boundedBGP: BasicGraphPattern = []
             bgp.forEach(triple => {
-              let boundedTriple: StringTriple = binding.bound(triple)
+              let boundedTriple: EngineTriple = binding.bound(triple)
               // rewrite the triple pattern and save the rewriting into the table
               boundedTriple = rewriteTriple(boundedTriple, key)
               rewritingTable.set(key, binding)

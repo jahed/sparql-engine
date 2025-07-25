@@ -26,7 +26,7 @@ SOFTWARE.
 
 import { Writable } from "stream";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
-import type { StringTriple } from "../../types.ts";
+import type { EngineTriple } from "../../types.ts";
 
 /**
  * Something whose execution can be resolved as a Promise
@@ -65,7 +65,7 @@ export class ErrorConsumable implements Consumable {
  * @author Thomas Minier
  */
 export abstract class Consumer extends Writable implements Consumable {
-  private readonly _source: PipelineStage<StringTriple>;
+  private readonly _source: PipelineStage<EngineTriple>;
   private readonly _options: Object;
 
   /**
@@ -73,7 +73,7 @@ export abstract class Consumer extends Writable implements Consumable {
    * @param source - Input {@link PipelineStage}
    * @param options - Execution options
    */
-  constructor(source: PipelineStage<StringTriple>, options: Object) {
+  constructor(source: PipelineStage<EngineTriple>, options: Object) {
     super({ objectMode: true });
     this._source = source;
     this._options = options;

@@ -22,10 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import { termToString } from "rdf-string";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
-import HashJoinTable from "./hash-join-table.ts";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
+import HashJoinTable from "./hash-join-table.ts";
 
 /**
  * Perform a traditional Hash join between two sources, i.e., materialize the right source in a hash table and then read from the left source while probing into the hash table.
@@ -43,14 +44,16 @@ export default function hashJoin(
   const engine = Pipeline.getInstance();
   return engine.mergeMap(engine.collect(right), (values: Bindings[]) => {
     // materialize right relation into the hash table
-    values.forEach((v) => {
-      if (v.has(joinKey)) {
-        joinTable.put(v.get(joinKey)!, v);
+    values.forEach((bindings) => {
+      if (bindings.has(joinKey)) {
+        joinTable.put(termToString(bindings.get(joinKey)!), bindings);
       }
     });
     // read from left and probe each value into the hash table
     return engine.mergeMap(left, (bindings: Bindings) => {
-      return engine.from(joinTable.join(bindings.get(joinKey)!, bindings));
+      return engine.from(
+        joinTable.join(termToString(bindings.get(joinKey)!), bindings)
+      );
     });
   });
 }

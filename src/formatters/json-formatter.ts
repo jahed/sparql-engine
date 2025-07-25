@@ -61,10 +61,8 @@ function writeBindings(
     if (cpt >= 1) {
       input.next(",");
     }
-    input.next(
-      `"${variable.startsWith("?") ? variable.substring(1) : variable}":`
-    );
-    const term = rdf.fromN3(value);
+    input.next(`"${variable}":`);
+    const term = value;
     if (rdf.termIsIRI(term)) {
       input.next(`{"type":"uri","value":"${term.value}"}`);
     } else if (rdf.termIsBNode(term)) {

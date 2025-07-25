@@ -26,7 +26,7 @@ SOFTWARE.
 
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 import Graph from "../../rdf/graph.ts";
-import type { StringTriple } from "../../types.ts";
+import type { EngineTriple } from "../../types.ts";
 import { Consumer } from "./consumer.ts";
 
 /**
@@ -44,7 +44,7 @@ export default class DeleteConsumer extends Consumer {
    * @param options - Execution options
    */
   constructor(
-    source: PipelineStage<StringTriple>,
+    source: PipelineStage<EngineTriple>,
     graph: Graph,
     options: Object
   ) {
@@ -53,7 +53,7 @@ export default class DeleteConsumer extends Consumer {
   }
 
   _write(
-    triple: StringTriple,
+    triple: EngineTriple,
     encoding: string | undefined,
     done: (err?: Error) => void
   ): void {

@@ -26,9 +26,13 @@ SOFTWARE.
 
 import StageBuilder from "./stage-builder.ts";
 
-import { Wildcard, type Query, type ServicePattern } from "sparqljs";
+import {
+  Wildcard,
+  type IriTerm,
+  type Query,
+  type ServicePattern,
+} from "sparqljs";
 import type { Bindings } from "../../rdf/bindings.ts";
-import { toN3 } from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import ContextSymbols from "../context/symbols.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
@@ -64,7 +68,7 @@ export default class ServiceStageBuilder extends StageBuilder {
         where: node.patterns,
       };
     }
-    const iri = toN3(node.name);
+    const iri = node.name as IriTerm;
     // auto-add the graph used to evaluate the SERVICE close if it is missing from the dataset
     if (
       this.dataset.getDefaultGraph().iri !== iri &&
@@ -96,7 +100,7 @@ export default class ServiceStageBuilder extends StageBuilder {
    */
   _buildIterator(
     source: PipelineStage<Bindings>,
-    iri: string,
+    iri: IriTerm,
     subquery: Query,
     context: ExecutionContext
   ): PipelineStage<Bindings> {

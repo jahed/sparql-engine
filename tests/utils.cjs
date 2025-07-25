@@ -53,13 +53,13 @@ function formatTriplePattern(triple) {
   let subject = null;
   let predicate = null;
   let object = null;
-  if (!triple.subject.startsWith("?")) {
+  if (triple.subject.termType !== "Variable") {
     subject = triple.subject;
   }
-  if (!triple.predicate.startsWith("?")) {
+  if (triple.predicate.termType !== "Variable") {
     predicate = triple.predicate;
   }
-  if (!triple.object.startsWith("?")) {
+  if (triple.object.termType !== "Variable") {
     object = triple.object;
   }
   return { subject, predicate, object };

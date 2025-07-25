@@ -30,6 +30,7 @@ import {
   type ClearDropOperation,
   type GraphQuads,
   type InsertDeleteOperation,
+  type IriTerm,
   type Query,
   type UpdateOperation,
 } from "sparqljs";
@@ -46,7 +47,6 @@ import ManyConsumers from "../../operators/update/many-consumers.ts";
 import NoopConsumer from "../../operators/update/nop-consumer.ts";
 import { BindingBase, Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
-import { toN3 } from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import ContextSymbols from "../context/symbols.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
@@ -89,7 +89,7 @@ export default class UpdateStageBuilder extends StageBuilder {
             case "create": {
               const createNode = update;
               const iri = createNode.graph.name
-                ? toN3(createNode.graph.name)
+                ? createNode.graph.name
                 : undefined;
               if (!iri) {
                 return new NoopConsumer();
@@ -137,9 +137,7 @@ export default class UpdateStageBuilder extends StageBuilder {
                 });
               }
               // handle DROP GRAPH queries
-              const iri = dropNode.graph.name
-                ? toN3(dropNode.graph.name)
-                : undefined;
+              const iri = dropNode.graph.name;
               if (!iri) {
                 return new NoopConsumer();
               }
@@ -209,7 +207,7 @@ export default class UpdateStageBuilder extends StageBuilder {
     if (update.updateType === "insertdelete") {
       graph =
         "graph" in update && update.graph
-          ? this._dataset.getNamedGraph(toN3(update.graph))
+          ? this._dataset.getNamedGraph(update.graph)
           : null;
       // evaluate the WHERE clause as a classic SELECT query
       const node: Query = {
@@ -265,7 +263,7 @@ export default class UpdateStageBuilder extends StageBuilder {
     if (graph === null) {
       graph =
         group.type === "graph" && "name" in group
-          ? this._dataset.getNamedGraph(toN3(group.name))
+          ? this._dataset.getNamedGraph(group.name as IriTerm)
           : this._dataset.getDefaultGraph();
     }
     return new InsertConsumer(tripleSource, graph, context);
@@ -289,7 +287,7 @@ export default class UpdateStageBuilder extends StageBuilder {
     if (graph === null) {
       graph =
         group.type === "graph" && "name" in group
-          ? this._dataset.getNamedGraph(toN3(group.name))
+          ? this._dataset.getNamedGraph(group.name as IriTerm)
           : this._dataset.getDefaultGraph();
     }
     return new DeleteConsumer(tripleSource, graph, context);
@@ -311,7 +309,7 @@ export default class UpdateStageBuilder extends StageBuilder {
     } else if (query.graph.named) {
       graph = this._dataset.getUnionGraph(iris, false);
     } else {
-      graph = this._dataset.getNamedGraph(toN3(query.graph.name!));
+      graph = this._dataset.getNamedGraph(query.graph.name!);
     }
     return new ClearConsumer(graph);
   }

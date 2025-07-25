@@ -24,8 +24,10 @@ SOFTWARE.
 
 "use strict";
 
-import type { Term } from "rdf-js";
+import type { EngineTripleValue } from "../../types.ts";
 import * as rdf from "../../utils/rdf.ts";
+
+type Term = EngineTripleValue;
 
 /**
  * Implementation of NON standard SPARQL operations offered by the framework

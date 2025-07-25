@@ -28,7 +28,6 @@ import type { BindPattern } from "sparqljs";
 import bind from "../../operators/bind.ts";
 import type { CustomFunctions } from "../../operators/expressions/sparql-expression.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
-import { toN3 } from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import StageBuilder from "./stage-builder.ts";
@@ -46,7 +45,7 @@ export default class BindStageBuilder extends StageBuilder {
   ): PipelineStage<Bindings> {
     return bind(
       source,
-      toN3(bindNode.variable),
+      bindNode.variable,
       bindNode.expression,
       customFunctions
     );

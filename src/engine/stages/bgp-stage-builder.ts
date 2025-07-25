@@ -25,13 +25,15 @@ SOFTWARE.
 "use strict";
 
 import { isInteger, isNaN, isNull } from "lodash-es";
+import type { IriTerm, VariableTerm } from "sparqljs";
 import boundJoin from "../../operators/join/bound-join.ts";
 import { BindingBase, Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
 import { GRAPH_CAPABILITY } from "../../rdf/graph_capability.ts";
-import type { StringTriple } from "../../types.ts";
+import type { EngineTriple, EngineTripleValue } from "../../types.ts";
 import * as evaluation from "../../utils/evaluation.ts";
 import * as rdf from "../../utils/rdf.ts";
+import { isBlank } from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import { parseHints } from "../context/query-hints.ts";
 import ContextSymbols from "../context/symbols.ts";
@@ -47,7 +49,7 @@ import StageBuilder from "./stage-builder.ts";
  */
 function bgpEvaluation(
   source: PipelineStage<Bindings>,
-  bgp: StringTriple[],
+  bgp: EngineTriple[],
   graph: Graph,
   builder: BGPStageBuilder,
   context: ExecutionContext
@@ -91,7 +93,7 @@ export default class BGPStageBuilder extends StageBuilder {
    * @param  iris - List of Graph's iris
    * @return An RDF Graph
    */
-  _getGraph(iris: string[]): Graph {
+  _getGraph(iris: IriTerm[]): Graph {
     if (iris.length === 0) {
       return this.dataset.getDefaultGraph();
     } else if (iris.length === 1) {
@@ -109,7 +111,7 @@ export default class BGPStageBuilder extends StageBuilder {
    */
   execute(
     source: PipelineStage<Bindings>,
-    patterns: StringTriple[],
+    patterns: EngineTriple[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     // avoids sending a request with an empty array
@@ -135,13 +137,13 @@ export default class BGPStageBuilder extends StageBuilder {
     ) {
       const engine = Pipeline.getInstance();
       return engine.mergeMap(source, (value: Bindings) => {
-        const iri = value.get(context.defaultGraphs[0]);
+        const iri = value.get(context.defaultGraphs[0].value);
         // if the graph doesn't exist in the dataset, then create one with the createGraph factrory
         const graphs = this.dataset.getAllGraphs().filter((g) => g.iri === iri);
         const graph =
           graphs.length > 0
             ? graphs[0]
-            : iri !== null
+            : iri !== null && rdf.isIRI(iri)
               ? this.dataset.createGraph(iri)
               : null;
         if (graph) {
@@ -153,7 +155,9 @@ export default class BGPStageBuilder extends StageBuilder {
           );
           if (artificals.length > 0) {
             iterator = engine.map(iterator, (b: Bindings) =>
-              b.filter((variable) => artificals.indexOf(variable) < 0)
+              b.filter((variable) =>
+                artificals.some((a) => a.value === variable)
+              )
             );
           }
           return iterator;
@@ -186,7 +190,7 @@ export default class BGPStageBuilder extends StageBuilder {
     // remove artificials variables from bindings
     if (artificals.length > 0) {
       iterator = Pipeline.getInstance().map(iterator, (b: Bindings) =>
-        b.filter((variable) => artificals.indexOf(variable) < 0)
+        b.filter((variable) => artificals.some((a) => a.value === variable))
       );
     }
     return iterator;
@@ -197,24 +201,26 @@ export default class BGPStageBuilder extends StageBuilder {
    * @param patterns - BGP to rewrite, i.e., a set of triple patterns
    * @return A Tuple [Rewritten BGP, List of SPARQL variable added]
    */
-  _replaceBlankNodes(patterns: StringTriple[]): [StringTriple[], string[]] {
-    const newVariables: string[] = [];
-    function rewrite(term: string): string {
-      let res = term;
-      if (term.startsWith("_:")) {
-        res = "?" + term.slice(2);
-        if (newVariables.indexOf(res) < 0) {
+  _replaceBlankNodes(
+    patterns: EngineTriple[]
+  ): [EngineTriple[], EngineTripleValue[]] {
+    const newVariables: EngineTripleValue[] = [];
+    function rewrite<T extends EngineTripleValue>(term: T): T | VariableTerm {
+      let res: T | VariableTerm = term;
+      if (isBlank(term)) {
+        res = rdf.dataFactory.variable(term.value);
+        if (!newVariables.some((v) => v.equals(res))) {
           newVariables.push(res);
         }
       }
       return res;
     }
     const newBGP = patterns.map((p) => {
-      return {
-        subject: rewrite(p.subject),
-        predicate: rewrite(p.predicate),
-        object: rewrite(p.object),
-      };
+      return rdf.dataFactory.quad(
+        rewrite(p.subject),
+        rewrite(p.predicate),
+        rewrite(p.object)
+      );
     });
     return [newBGP, newVariables];
   }
@@ -230,7 +236,7 @@ export default class BGPStageBuilder extends StageBuilder {
   _buildIterator(
     source: PipelineStage<Bindings>,
     graph: Graph,
-    patterns: StringTriple[],
+    patterns: EngineTriple[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     if (
@@ -255,9 +261,9 @@ export default class BGPStageBuilder extends StageBuilder {
   _buildFullTextSearchIterator(
     source: PipelineStage<Bindings>,
     graph: Graph,
-    pattern: StringTriple,
-    queryVariable: string,
-    magicTriples: StringTriple[],
+    pattern: EngineTriple,
+    queryVariable: VariableTerm,
+    magicTriples: EngineTriple[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     // full text search default parameters
@@ -275,12 +281,12 @@ export default class BGPStageBuilder extends StageBuilder {
     // compute all other parameters from the set of magic triples
     magicTriples.forEach((triple) => {
       // assert that the magic triple is correct
-      if (triple.subject !== queryVariable) {
+      if (!triple.subject.equals(queryVariable)) {
         throw new SyntaxError(
           `Invalid Full Text Search query: the query variable ${queryVariable} is not the subject of the magic triple ${triple}`
         );
       }
-      switch (triple.predicate) {
+      switch (triple.predicate.value) {
         // keywords: ?o ses:search “neil gaiman”
         case rdf.SES("search"): {
           if (!rdf.isLiteral(triple.object)) {
@@ -288,12 +294,12 @@ export default class BGPStageBuilder extends StageBuilder {
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
             );
           }
-          keywords = rdf.getLiteralValue(triple.object).split(" ");
+          keywords = triple.object.value.split(" ");
           break;
         }
         // match all keywords: ?o ses:matchAllTerms "true"
         case rdf.SES("matchAllTerms"): {
-          const value = rdf.getLiteralValue(triple.object).toLowerCase();
+          const value = triple.object.value.toLowerCase();
           matchAll = value === "true" || value === "1";
           break;
         }
@@ -304,7 +310,7 @@ export default class BGPStageBuilder extends StageBuilder {
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
             );
           }
-          minScore = Number(rdf.getLiteralValue(triple.object));
+          minScore = Number(triple.object.value);
           // assert that the magic triple's object is a valid number
           if (isNaN(minScore)) {
             throw new SyntaxError(
@@ -320,7 +326,7 @@ export default class BGPStageBuilder extends StageBuilder {
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
             );
           }
-          maxScore = Number(rdf.getLiteralValue(triple.object));
+          maxScore = Number(triple.object.value);
           // assert that the magic triple's object is a valid number
           if (isNaN(maxScore)) {
             throw new SyntaxError(
@@ -336,7 +342,7 @@ export default class BGPStageBuilder extends StageBuilder {
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
             );
           }
-          minRank = Number(rdf.getLiteralValue(triple.object));
+          minRank = Number(triple.object.value);
           // assert that the magic triple's object is a valid positive integre
           if (isNaN(minRank) || !isInteger(minRank) || minRank < 0) {
             throw new SyntaxError(
@@ -352,7 +358,7 @@ export default class BGPStageBuilder extends StageBuilder {
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
             );
           }
-          maxRank = Number(rdf.getLiteralValue(triple.object));
+          maxRank = Number(triple.object.value);
           // assert that the magic triple's object is a valid positive integer
           if (isNaN(maxRank) || !isInteger(maxRank) || maxRank < 0) {
             throw new SyntaxError(
@@ -369,7 +375,7 @@ export default class BGPStageBuilder extends StageBuilder {
             );
           }
           addScore = true;
-          scoreVariable = triple.object;
+          scoreVariable = triple.object.value;
           break;
         }
         // include rank: ?o ses:rank ?rank .
@@ -380,7 +386,7 @@ export default class BGPStageBuilder extends StageBuilder {
             );
           }
           addRank = true;
-          rankVariable = triple.object;
+          rankVariable = triple.object.value;
           // Set minRank to its base value if needed, to force
           // the default Graph#fullTextSearch implementation to compute relevant ranks.
           // With no custom implementations, this will not be an issue
@@ -432,26 +438,26 @@ export default class BGPStageBuilder extends StageBuilder {
           rdf.isVariable(boundedPattern.subject) &&
           !rdf.isVariable(triple.subject)
         ) {
-          mu.set(boundedPattern.subject, triple.subject);
+          mu.set(boundedPattern.subject.value, triple.subject);
         }
         if (
           rdf.isVariable(boundedPattern.predicate) &&
           !rdf.isVariable(triple.predicate)
         ) {
-          mu.set(boundedPattern.predicate, triple.predicate);
+          mu.set(boundedPattern.predicate.value, triple.predicate);
         }
         if (
           rdf.isVariable(boundedPattern.object) &&
           !rdf.isVariable(triple.object)
         ) {
-          mu.set(boundedPattern.object, triple.object);
+          mu.set(boundedPattern.object.value, triple.object);
         }
         // add score and rank if required
         if (addScore) {
-          mu.set(scoreVariable, `"${score}"^^${rdf.XSD("float")}`);
+          mu.set(scoreVariable, rdf.createFloat(score));
         }
         if (addRank) {
-          mu.set(rankVariable, `"${rank}"^^${rdf.XSD("integer")}`);
+          mu.set(rankVariable, rdf.createInteger(rank));
         }
         // Merge with input bindings and then return the final results
         return bindings.union(mu);

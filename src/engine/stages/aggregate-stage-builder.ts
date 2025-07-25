@@ -24,14 +24,12 @@ SOFTWARE.
 
 "use strict";
 
-import { isString } from "lodash-es";
-import type { Expression, Grouping, Query } from "sparqljs";
+import type { Expression, Grouping, Query, VariableTerm } from "sparqljs";
 import bind from "../../operators/bind.ts";
 import type { CustomFunctions } from "../../operators/expressions/sparql-expression.ts";
 import filter from "../../operators/sparql-filter.ts";
 import groupBy from "../../operators/sparql-groupby.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
-import { toN3 } from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import StageBuilder from "./stage-builder.ts";
@@ -92,16 +90,13 @@ export default class AggregateStageBuilder extends StageBuilder {
   ): PipelineStage<Bindings> {
     let iterator = source;
     // extract GROUP By variables & rewrite SPARQL expressions into BIND clauses
-    const groupingVars: string[] = [];
+    const groupingVars: VariableTerm[] = [];
     groupby.forEach((g) => {
-      if (isString(g.expression)) {
-        groupingVars.push(g.expression);
-      } else if (g.variable) {
-        const variableString = toN3(g.variable);
-        groupingVars.push(variableString);
+      if (g.variable) {
+        groupingVars.push(g.variable);
         iterator = bind(
           iterator,
-          variableString,
+          g.variable,
           g.expression,
           customFunctions
         );
