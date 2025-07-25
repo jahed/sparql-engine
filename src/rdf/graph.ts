@@ -25,7 +25,6 @@ SOFTWARE.
 "use strict";
 
 import { isNull, mean, orderBy, round, sortBy } from "lodash-es";
-import type { IStringQuad } from "rdf-string";
 import ExecutionContext from "../engine/context/execution-context.ts";
 import type {
   PipelineInput,
@@ -37,12 +36,13 @@ import * as rdf from "../utils/rdf.ts";
 import * as sparql from "../utils/sparql.ts";
 import { BindingBase, Bindings } from "./bindings.ts";
 import { GRAPH_CAPABILITY, type GraphCapability } from "./graph_capability.ts";
+import type { StringTriple } from "../types.ts";
 
 /**
  * Metadata used for query optimization
  */
 export interface PatternMetadata {
-  triple: IStringQuad;
+  triple: StringTriple;
   cardinality: number;
   nbVars: number;
 }
@@ -103,14 +103,14 @@ export default abstract class Graph {
    * @param  triple - RDF Triple to insert
    * @return A Promise fulfilled when the insertion has been completed
    */
-  abstract insert(triple: IStringQuad): Promise<void>;
+  abstract insert(triple: StringTriple): Promise<void>;
 
   /**
    * Delete a RDF triple from the RDF Graph
    * @param  triple - RDF Triple to delete
    * @return A Promise fulfilled when the deletion has been completed
    */
-  abstract delete(triple: IStringQuad): Promise<void>;
+  abstract delete(triple: StringTriple): Promise<void>;
 
   /**
    * Get a {@link PipelineInput} which finds RDF triples matching a triple pattern in the graph.
@@ -119,9 +119,9 @@ export default abstract class Graph {
    * @return A {@link PipelineInput} which finds RDF triples matching a triple pattern
    */
   abstract find(
-    pattern: IStringQuad,
+    pattern: StringTriple,
     context: ExecutionContext
-  ): PipelineInput<IStringQuad>;
+  ): PipelineInput<StringTriple>;
 
   /**
    * Remove all RDF triples in the Graph
@@ -134,7 +134,7 @@ export default abstract class Graph {
    * @param  triple - Triple pattern to estimate cardinality
    * @return A Promise fulfilled with the pattern's estimated cardinality
    */
-  estimateCardinality(triple: IStringQuad): Promise<number> {
+  estimateCardinality(triple: StringTriple): Promise<number> {
     throw new SyntaxError(
       "Error: this graph is not capable of estimating the cardinality of a triple pattern"
     );
@@ -175,7 +175,7 @@ export default abstract class Graph {
    * }, console.error, () => console.log('Search completed!'))
    */
   fullTextSearch(
-    pattern: IStringQuad,
+    pattern: StringTriple,
     variable: string,
     keywords: string[],
     matchAll: boolean,
@@ -184,7 +184,7 @@ export default abstract class Graph {
     minRank: number | null,
     maxRank: number | null,
     context: ExecutionContext
-  ): PipelineStage<[IStringQuad, number, number]> {
+  ): PipelineStage<[StringTriple, number, number]> {
     if (isNull(minRelevance)) {
       minRelevance = 0;
     }
@@ -272,7 +272,7 @@ export default abstract class Graph {
    * @return A {@link PipelineStage} which evaluates the Basic Graph pattern on the Graph
    */
   evalUnion(
-    patterns: IStringQuad[][],
+    patterns: StringTriple[][],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     throw new SyntaxError(
@@ -287,7 +287,7 @@ export default abstract class Graph {
    * @return A {@link PipelineStage} which evaluates the Basic Graph pattern on the Graph
    */
   evalBGP(
-    bgp: IStringQuad[],
+    bgp: StringTriple[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     const engine = Pipeline.getInstance();
@@ -311,7 +311,7 @@ export default abstract class Graph {
         );
         const start = engine.of(new BindingBase());
         return sortedPatterns.reduce(
-          (iter: PipelineStage<Bindings>, t: IStringQuad) => {
+          (iter: PipelineStage<Bindings>, t: StringTriple) => {
             return indexJoin(iter, t, this, context);
           },
           start
@@ -323,7 +323,7 @@ export default abstract class Graph {
         const start = engine.of(new BindingBase());
         return sparql
           .leftLinearJoinOrdering(bgp)
-          .reduce((iter: PipelineStage<Bindings>, t: IStringQuad) => {
+          .reduce((iter: PipelineStage<Bindings>, t: StringTriple) => {
             return indexJoin(iter, t, this, context);
           }, start);
       });

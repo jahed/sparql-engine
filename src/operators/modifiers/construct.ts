@@ -25,12 +25,12 @@ SOFTWARE.
 "use strict";
 
 import { compact } from "lodash-es";
-import type { IStringQuad } from "rdf-string";
 import type { ConstructQuery } from "sparqljs";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../../engine/pipeline/pipeline.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
 import { isVariable, tripleToStringQuad } from "../../utils/rdf.ts";
+import type { StringTriple } from "../../types.ts";
 
 /**
  * A ConstructOperator transform solution mappings into RDF triples, according to a template
@@ -44,8 +44,8 @@ export default function construct(
   source: PipelineStage<Bindings>,
   query: Pick<ConstructQuery, "template">
 ) {
-  const rawTriples: IStringQuad[] = [];
-  const templates: IStringQuad[] = (query.template || [])
+  const rawTriples: StringTriple[] = [];
+  const templates: StringTriple[] = (query.template || [])
     .map((t) => tripleToStringQuad(t))
     .filter((t: any) => {
       if (

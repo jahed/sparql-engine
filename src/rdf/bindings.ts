@@ -25,9 +25,9 @@ SOFTWARE.
 "use strict";
 
 import { isNull, isUndefined } from "lodash-es";
-import type { IStringQuad } from "rdf-string";
 import type { ValuePatternRow } from "sparqljs";
 import * as rdf from "../utils/rdf.ts";
+import type { StringTriple } from "../types.ts";
 
 /**
  * A set of mappings from a variable to a RDF Term.
@@ -197,7 +197,7 @@ export abstract class Bindings {
    * @param triple  - Triple pattern
    * @return An new, bounded triple pattern
    */
-  bound(triple: IStringQuad): IStringQuad {
+  bound(triple: StringTriple): StringTriple {
     const newTriple = Object.assign({}, triple);
     if (rdf.isVariable(triple.subject) && this.has(triple.subject)) {
       newTriple.subject = this.get(triple.subject)!;

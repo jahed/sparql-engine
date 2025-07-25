@@ -24,9 +24,9 @@ SOFTWARE.
 
 "use strict";
 
-import type { IStringQuad } from "rdf-string";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 import Graph from "../../rdf/graph.ts";
+import type { StringTriple } from "../../types.ts";
 import { Consumer } from "./consumer.ts";
 
 /**
@@ -44,7 +44,7 @@ export default class DeleteConsumer extends Consumer {
    * @param options - Execution options
    */
   constructor(
-    source: PipelineStage<IStringQuad>,
+    source: PipelineStage<StringTriple>,
     graph: Graph,
     options: Object
   ) {
@@ -53,7 +53,7 @@ export default class DeleteConsumer extends Consumer {
   }
 
   _write(
-    triple: IStringQuad,
+    triple: StringTriple,
     encoding: string | undefined,
     done: (err?: Error) => void
   ): void {

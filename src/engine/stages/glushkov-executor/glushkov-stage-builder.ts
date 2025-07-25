@@ -22,12 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import type { IStringQuad } from "rdf-string";
 import type { PropertyPath } from "sparqljs";
 import type { PipelineStage } from "../../../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../../../engine/pipeline/pipeline.ts";
 import { Bindings } from "../../../rdf/bindings.ts";
 import Graph from "../../../rdf/graph.ts";
+import type { StringTriple } from "../../../types.ts";
 import * as rdf from "../../../utils/rdf.ts";
 import ExecutionContext from "../../context/execution-context.ts";
 import PathStageBuilder from "../path-stage-builder.ts";
@@ -179,11 +179,11 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
     context: ExecutionContext,
     automaton: Automaton<number, string>,
     forward: boolean
-  ): PipelineStage<IStringQuad> {
+  ): PipelineStage<StringTriple> {
     const engine = Pipeline.getInstance();
     let self = this;
     let lastStep: Step = rPath.lastStep();
-    let result: PipelineStage<IStringQuad> = engine.empty();
+    let result: PipelineStage<StringTriple> = engine.empty();
     if (forward) {
       if (
         automaton.isFinal(lastStep.state) &&
@@ -206,10 +206,10 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
     } else {
       transitions = automaton.getTransitionsTo(lastStep.state);
     }
-    let obs: PipelineStage<IStringQuad>[] = transitions.map((transition) => {
+    let obs: PipelineStage<StringTriple>[] = transitions.map((transition) => {
       let reverse =
         (forward && transition.reverse) || (!forward && !transition.reverse);
-      let bgp: Array<IStringQuad> = [
+      let bgp: Array<StringTriple> = [
         {
           subject: reverse ? "?o" : lastStep.node,
           predicate: transition.negation ? "?p" : transition.predicates[0],
@@ -261,24 +261,24 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
     obj: string,
     graph: Graph,
     context: ExecutionContext
-  ): PipelineStage<IStringQuad> {
+  ): PipelineStage<StringTriple> {
     const engine = Pipeline.getInstance();
     if (rdf.isVariable(subject) && !rdf.isVariable(obj)) {
-      let result: IStringQuad = {
+      let result: StringTriple = {
         subject: obj,
         predicate: "",
         object: obj,
       };
       return engine.of(result);
     } else if (!rdf.isVariable(subject) && rdf.isVariable(obj)) {
-      let result: IStringQuad = {
+      let result: StringTriple = {
         subject: subject,
         predicate: "",
         object: subject,
       };
       return engine.of(result);
     } else if (rdf.isVariable(subject) && rdf.isVariable(obj)) {
-      let bgp: Array<IStringQuad> = [
+      let bgp: Array<StringTriple> = [
         { subject: "?s", predicate: "?p", object: "?o" },
       ];
       return engine.distinct(
@@ -287,12 +287,12 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
           (binding: Bindings) => {
             let s = binding.get("?s") as string;
             let o = binding.get("?o") as string;
-            let t1: IStringQuad = {
+            let t1: StringTriple = {
               subject: s,
               predicate: "",
               object: s,
             };
-            let t2: IStringQuad = {
+            let t2: StringTriple = {
               subject: o,
               predicate: "",
               object: o,
@@ -300,11 +300,11 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
             return engine.of(t1, t2);
           }
         ),
-        (triple: IStringQuad) => triple.subject
+        (triple: StringTriple) => triple.subject
       );
     }
     if (subject === obj) {
-      let result: IStringQuad = {
+      let result: StringTriple = {
         subject: subject,
         predicate: "",
         object: obj,
@@ -333,24 +333,23 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
     context: ExecutionContext,
     automaton: Automaton<number, string>,
     forward: boolean
-  ): PipelineStage<IStringQuad> {
+  ): PipelineStage<StringTriple> {
     const engine = Pipeline.getInstance();
     let self = this;
-    let reflexiveClosureResults: PipelineStage<IStringQuad> = automaton.isFinal(
-      0
-    )
-      ? this.reflexiveClosure(subject, obj, graph, context)
-      : engine.empty();
+    let reflexiveClosureResults: PipelineStage<StringTriple> =
+      automaton.isFinal(0)
+        ? this.reflexiveClosure(subject, obj, graph, context)
+        : engine.empty();
     let transitions: Array<Transition<number, string>>;
     if (forward) {
       transitions = automaton.getTransitionsFrom(0);
     } else {
       transitions = automaton.getTransitionsToFinalStates();
     }
-    let obs: PipelineStage<IStringQuad>[] = transitions.map((transition) => {
+    let obs: PipelineStage<StringTriple>[] = transitions.map((transition) => {
       let reverse =
         (forward && transition.reverse) || (!forward && !transition.reverse);
-      let bgp: Array<IStringQuad> = [
+      let bgp: Array<StringTriple> = [
         {
           subject: reverse ? (rdf.isVariable(obj) ? "?o" : obj) : subject,
           predicate: transition.negation ? "?p" : transition.predicates[0],
@@ -407,7 +406,7 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
     obj: string,
     graph: Graph,
     context: ExecutionContext
-  ): PipelineStage<IStringQuad> {
+  ): PipelineStage<StringTriple> {
     let automaton: Automaton<number, string> = new GlushkovBuilder(
       path
     ).build();

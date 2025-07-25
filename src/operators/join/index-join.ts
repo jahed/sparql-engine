@@ -31,7 +31,7 @@ import { Pipeline } from "../../engine/pipeline/pipeline.ts";
 import { BindingBase, Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
 import * as rdf from "../../utils/rdf.ts";
-import type { IStringQuad } from "rdf-string";
+import type { StringTriple } from "../../types.ts";
 
 /**
  * Perform a join between a source of solution bindings (left relation)
@@ -47,7 +47,7 @@ import type { IStringQuad } from "rdf-string";
  */
 export default function indexJoin(
   source: PipelineStage<Bindings>,
-  pattern: IStringQuad,
+  pattern: StringTriple,
   graph: Graph,
   context: ExecutionContext
 ) {
@@ -57,12 +57,12 @@ export default function indexJoin(
     // const hasVars = some(boundedPattern, (v: any) => v.startsWith('?'))
     return engine.map(
       engine.from(graph.find(boundedPattern, context)),
-      (item: IStringQuad) => {
+      (item: StringTriple) => {
         let temp = pickBy(item, (v, k) => {
-          return rdf.isVariable(boundedPattern[k as keyof IStringQuad]);
+          return rdf.isVariable(boundedPattern[k as keyof StringTriple]);
         });
         temp = mapKeys(temp, (v, k) => {
-          return boundedPattern[k as keyof IStringQuad];
+          return boundedPattern[k as keyof StringTriple];
         });
         // if (size(temp) === 0 && hasVars) return null
         return BindingBase.fromObject(temp).union(bindings);

@@ -24,10 +24,10 @@ SOFTWARE.
 
 "use strict";
 
-import type { IStringQuad } from "rdf-string";
 import ExecutionContext from "../engine/context/execution-context.ts";
 import type { PipelineInput } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import type { StringTriple } from "../types.ts";
 import Graph from "./graph.ts";
 
 /**
@@ -51,11 +51,11 @@ export default class UnionGraph extends Graph {
     this._graphs = graphs;
   }
 
-  insert(triple: IStringQuad): Promise<void> {
+  insert(triple: StringTriple): Promise<void> {
     return this._graphs[0].insert(triple);
   }
 
-  delete(triple: IStringQuad): Promise<void> {
+  delete(triple: StringTriple): Promise<void> {
     return this._graphs.reduce(
       (prev, g) => prev.then(() => g.delete(triple)),
       Promise.resolve()
@@ -63,9 +63,9 @@ export default class UnionGraph extends Graph {
   }
 
   find(
-    triple: IStringQuad,
+    triple: StringTriple,
     context: ExecutionContext
-  ): PipelineInput<IStringQuad> {
+  ): PipelineInput<StringTriple> {
     return Pipeline.getInstance().merge(
       ...this._graphs.map((g) => g.find(triple, context))
     );
@@ -78,7 +78,7 @@ export default class UnionGraph extends Graph {
     );
   }
 
-  estimateCardinality(triple: IStringQuad): Promise<number> {
+  estimateCardinality(triple: StringTriple): Promise<number> {
     return Promise.all(
       this._graphs.map((g) => g.estimateCardinality(triple))
     ).then((cardinalities: number[]) => {

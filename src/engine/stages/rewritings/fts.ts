@@ -1,6 +1,6 @@
 "use strict";
 
-import type { IStringQuad } from "rdf-string";
+import type { StringTriple } from "../../../types.ts";
 import * as rdf from "../../../utils/rdf.ts";
 
 /**
@@ -8,11 +8,11 @@ import * as rdf from "../../../utils/rdf.ts";
  */
 export interface FullTextSearchQuery {
   /** The pattern queried by the full text search */
-  pattern: IStringQuad;
+  pattern: StringTriple;
   /** The SPARQL varibale on which the full text search is performed */
   variable: string;
   /** The magic triples sued to configured the full text search query */
-  magicTriples: IStringQuad[];
+  magicTriples: StringTriple[];
 }
 
 /**
@@ -22,7 +22,7 @@ export interface ExtractionResults {
   /** The set of full text search queries extracted from the BGP */
   queries: FullTextSearchQuery[];
   /** Regular triple patterns, i.e., those who should be evaluated as a regular BGP */
-  classicPatterns: IStringQuad[];
+  classicPatterns: StringTriple[];
 }
 
 /**
@@ -32,13 +32,13 @@ export interface ExtractionResults {
  * @return The extraction results
  */
 export function extractFullTextSearchQueries(
-  bgp: IStringQuad[]
+  bgp: StringTriple[]
 ): ExtractionResults {
   const queries: FullTextSearchQuery[] = [];
-  const classicPatterns: IStringQuad[] = [];
+  const classicPatterns: StringTriple[] = [];
   // find, validate and group all magic triples per query variable
-  const patterns: IStringQuad[] = [];
-  const magicGroups = new Map<string, IStringQuad[]>();
+  const patterns: StringTriple[] = [];
+  const magicGroups = new Map<string, StringTriple[]>();
   const prefix = rdf.SES("");
   bgp.forEach((triple) => {
     // A magic triple is an IRI prefixed by 'https://callidon.github.io/sparql-engine/search#'

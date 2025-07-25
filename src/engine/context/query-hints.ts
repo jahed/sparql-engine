@@ -24,7 +24,7 @@ SOFTWARE.
 
 "use strict";
 
-import type { IStringQuad } from "rdf-string";
+import type { StringTriple } from "../../types.ts";
 
 const HINT_PREFIX = "http://callidon.github.io/sparql-engine/hints#";
 
@@ -129,11 +129,11 @@ export class QueryHints {
 }
 
 export function parseHints(
-  bgp: IStringQuad[],
+  bgp: StringTriple[],
   previous?: QueryHints
-): [IStringQuad[], QueryHints] {
+): [StringTriple[], QueryHints] {
   let res = new QueryHints();
-  const regularTriples: IStringQuad[] = [];
+  const regularTriples: StringTriple[] = [];
   bgp.forEach((triple) => {
     if (triple.subject.startsWith(HINT_PREFIX)) {
       if (triple.subject === HINT("Group")) {

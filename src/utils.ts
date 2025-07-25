@@ -24,12 +24,12 @@ SOFTWARE.
 
 "use strict";
 
-import type { IStringQuad } from "rdf-string";
 import type { BgpPattern, BlockPattern, Pattern, Query } from "sparqljs";
 import type { PipelineStage } from "./engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "./engine/pipeline/pipeline.ts";
 import { Bindings } from "./rdf/bindings.ts";
 import { stringQuadToTriple, tripleToStringQuad } from "./utils/rdf.ts";
+import type { StringTriple } from "./types.ts";
 
 /**
  * Bound a triple pattern using a set of bindings, i.e., substitute variables in the triple pattern
@@ -39,9 +39,9 @@ import { stringQuadToTriple, tripleToStringQuad } from "./utils/rdf.ts";
  * @return An new, bounded triple pattern
  */
 export function applyBindings(
-  triple: IStringQuad,
+  triple: StringTriple,
   bindings: Bindings
-): IStringQuad {
+): StringTriple {
   const newTriple = Object.assign({}, triple);
   if (triple.subject.startsWith("?") && bindings.has(triple.subject)) {
     newTriple.subject = bindings.get(triple.subject)!;

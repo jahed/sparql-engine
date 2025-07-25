@@ -24,13 +24,13 @@ SOFTWARE.
 
 "use strict";
 
-import type { IStringQuad } from "rdf-string";
 import ExecutionContext from "../../engine/context/execution-context.ts";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../../engine/pipeline/pipeline.ts";
 import BGPStageBuilder from "../../engine/stages/bgp-stage-builder.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
+import type { StringTriple } from "../../types.ts";
 import * as evaluation from "../../utils/evaluation.ts";
 
 /**
@@ -106,7 +106,7 @@ function rewriteSolutions(
  */
 export default function rewritingOp(
   graph: Graph,
-  bgpBucket: IStringQuad[][],
+  bgpBucket: StringTriple[][],
   rewritingTable: Map<number, Bindings>,
   builder: BGPStageBuilder,
   context: ExecutionContext
@@ -115,7 +115,7 @@ export default function rewritingOp(
   if (context.cachingEnabled()) {
     // partition the BGPs that can be evaluated using the cache from the others
     const stages: PipelineStage<Bindings>[] = [];
-    const others: IStringQuad[][] = [];
+    const others: StringTriple[][] = [];
     bgpBucket.forEach((patterns) => {
       if (context.cache!.has({ patterns, graphIRI: graph.iri })) {
         stages.push(

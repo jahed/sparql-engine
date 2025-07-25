@@ -25,9 +25,11 @@ SOFTWARE.
 "use strict";
 
 import { isInteger, isNaN, isNull } from "lodash-es";
+import boundJoin from "../../operators/join/bound-join.ts";
 import { BindingBase, Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
 import { GRAPH_CAPABILITY } from "../../rdf/graph_capability.ts";
+import type { StringTriple } from "../../types.ts";
 import * as evaluation from "../../utils/evaluation.ts";
 import * as rdf from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
@@ -38,9 +40,6 @@ import { Pipeline } from "../pipeline/pipeline.ts";
 import * as fts from "./rewritings/fts.ts";
 import StageBuilder from "./stage-builder.ts";
 
-import type { IStringQuad } from "rdf-string";
-import boundJoin from "../../operators/join/bound-join.ts";
-
 /**
  * Basic {@link PipelineStage} used to evaluate Basic graph patterns using the "evalBGP" method
  * available
@@ -48,7 +47,7 @@ import boundJoin from "../../operators/join/bound-join.ts";
  */
 function bgpEvaluation(
   source: PipelineStage<Bindings>,
-  bgp: IStringQuad[],
+  bgp: StringTriple[],
   graph: Graph,
   builder: BGPStageBuilder,
   context: ExecutionContext
@@ -110,7 +109,7 @@ export default class BGPStageBuilder extends StageBuilder {
    */
   execute(
     source: PipelineStage<Bindings>,
-    patterns: IStringQuad[],
+    patterns: StringTriple[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     // avoids sending a request with an empty array
@@ -198,7 +197,7 @@ export default class BGPStageBuilder extends StageBuilder {
    * @param patterns - BGP to rewrite, i.e., a set of triple patterns
    * @return A Tuple [Rewritten BGP, List of SPARQL variable added]
    */
-  _replaceBlankNodes(patterns: IStringQuad[]): [IStringQuad[], string[]] {
+  _replaceBlankNodes(patterns: StringTriple[]): [StringTriple[], string[]] {
     const newVariables: string[] = [];
     function rewrite(term: string): string {
       let res = term;
@@ -231,7 +230,7 @@ export default class BGPStageBuilder extends StageBuilder {
   _buildIterator(
     source: PipelineStage<Bindings>,
     graph: Graph,
-    patterns: IStringQuad[],
+    patterns: StringTriple[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     if (
@@ -256,9 +255,9 @@ export default class BGPStageBuilder extends StageBuilder {
   _buildFullTextSearchIterator(
     source: PipelineStage<Bindings>,
     graph: Graph,
-    pattern: IStringQuad,
+    pattern: StringTriple,
     queryVariable: string,
-    magicTriples: IStringQuad[],
+    magicTriples: StringTriple[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     // full text search default parameters

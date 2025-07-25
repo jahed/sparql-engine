@@ -24,7 +24,6 @@ SOFTWARE.
 
 "use strict";
 
-import { type IStringQuad } from "rdf-string";
 import type {
   BgpPattern,
   ClearDropOperation,
@@ -42,6 +41,7 @@ import {
   tripleToStringQuad,
   type PathTripleObject,
 } from "../../utils/rdf.ts";
+import type { StringTriple } from "../../types.ts";
 
 /**
  * Create a triple pattern that matches all RDF triples in a graph
@@ -219,8 +219,8 @@ export function rewriteMove(
  */
 export function extractPropertyPaths(
   bgp: BgpPattern
-): [IStringQuad[], PathTripleObject[], string[]] {
-  const classicTriples: IStringQuad[] = [];
+): [StringTriple[], PathTripleObject[], string[]] {
+  const classicTriples: StringTriple[] = [];
   const pathTriples: PathTripleObject[] = [];
   for (const triple of bgp.triples) {
     const s = tripleToStringQuad(triple);

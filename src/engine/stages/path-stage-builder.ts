@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import type { IStringQuad } from "rdf-string";
 import type { PropertyPath } from "sparqljs";
 import { BindingBase, Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
+import type { StringTriple } from "../../types.ts";
 import type { PathTripleObject } from "../../utils/rdf.ts";
 import * as rdf from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
@@ -138,7 +138,7 @@ export default abstract class PathStageBuilder extends StageBuilder {
       graph,
       context
     );
-    return Pipeline.getInstance().map(evaluator, (triple: IStringQuad) => {
+    return Pipeline.getInstance().map(evaluator, (triple: StringTriple) => {
       const temp = new BindingBase();
       if (rdf.isVariable(subject)) {
         temp.set(subject, triple.subject);
@@ -170,5 +170,5 @@ export default abstract class PathStageBuilder extends StageBuilder {
     obj: string,
     graph: Graph,
     context: ExecutionContext
-  ): PipelineStage<IStringQuad>;
+  ): PipelineStage<StringTriple>;
 }

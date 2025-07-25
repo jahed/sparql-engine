@@ -1,6 +1,5 @@
 "use strict";
 
-import type { IStringQuad } from "rdf-string";
 import type { BGPCache } from "../engine/cache/bgp-cache.ts";
 import ExecutionContext from "../engine/context/execution-context.ts";
 import ContextSymbols from "../engine/context/symbols.ts";
@@ -9,6 +8,7 @@ import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import BGPStageBuilder from "../engine/stages/bgp-stage-builder.ts";
 import { Bindings } from "../rdf/bindings.ts";
 import Graph from "../rdf/graph.ts";
+import type { StringTriple } from "../types.ts";
 
 /**
  * Evaluate a Basic Graph pattern on a RDF graph using a cache
@@ -18,7 +18,7 @@ import Graph from "../rdf/graph.ts";
  * @return A pipeline stage that produces the evaluation results
  */
 export function cacheEvalBGP(
-  patterns: IStringQuad[],
+  patterns: StringTriple[],
   graph: Graph,
   cache: BGPCache,
   builder: BGPStageBuilder,
