@@ -116,7 +116,7 @@ describe("SPARQL property paths: Negated property sets", () => {
         const b = bindings.toObject();
         expect(b).to.have.property("?s");
         expect(b).to.have.property("?o");
-        switch (b["?s"]) {
+        switch (b["?s"].value) {
           case "http://example.org/Alice":
             expect(b["?o"]).to.be.oneOf([
               "http://example.org/Woman",
@@ -183,7 +183,7 @@ describe("SPARQL property paths: Negated property sets", () => {
         const b = bindings.toObject();
         expect(b).to.have.property("?s");
         expect(b).to.have.property("?o");
-        switch (b["?s"]) {
+        switch (b["?s"].value) {
           case "http://example.org/Alice":
             expect(b["?o"]).to.be.oneOf([
               "tel:0604651478",

@@ -24,14 +24,13 @@ SOFTWARE.
 
 "use strict";
 
-import { mapKeys, pickBy } from "lodash-es";
-import type { Algebra } from "sparqljs";
 import ExecutionContext from "../../engine/context/execution-context.ts";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../../engine/pipeline/pipeline.ts";
 import { BindingBase, Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
-import * as rdf from "../../utils/rdf.ts";
+import type { EngineTriple, EngineTripleValue } from "../../types.ts";
+import { isVariable } from "../../utils/rdf.ts";
 
 /**
  * Perform a join between a source of solution bindings (left relation)
@@ -47,27 +46,27 @@ import * as rdf from "../../utils/rdf.ts";
  */
 export default function indexJoin(
   source: PipelineStage<Bindings>,
-  pattern: Algebra.TripleObject,
+  pattern: EngineTriple,
   graph: Graph,
   context: ExecutionContext
 ) {
   const engine = Pipeline.getInstance();
   return engine.mergeMap(source, (bindings: Bindings) => {
     const boundedPattern = bindings.bound(pattern);
-    // const hasVars = some(boundedPattern, (v: any) => v.startsWith('?'))
     return engine.map(
       engine.from(graph.find(boundedPattern, context)),
-      (item: Algebra.TripleObject) => {
-        let temp = pickBy(item, (v, k) => {
-          return rdf.isVariable(
-            boundedPattern[k as keyof Algebra.TripleObject]
-          );
-        });
-        temp = mapKeys(temp, (v, k) => {
-          return boundedPattern[k as keyof Algebra.TripleObject];
-        });
-        // if (size(temp) === 0 && hasVars) return null
-        return BindingBase.fromObject(temp).union(bindings);
+      (item: EngineTriple) => {
+        const obj: Record<string, EngineTripleValue> = {};
+        if (isVariable(boundedPattern.subject)) {
+          obj[boundedPattern.subject.value] = item.subject;
+        }
+        if (isVariable(boundedPattern.predicate)) {
+          obj[boundedPattern.predicate.value] = item.predicate;
+        }
+        if (isVariable(boundedPattern.object)) {
+          obj[boundedPattern.object.value] = item.object;
+        }
+        return BindingBase.fromObject(obj).union(bindings);
       }
     );
   });

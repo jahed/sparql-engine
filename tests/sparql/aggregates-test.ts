@@ -53,8 +53,8 @@ describe("SPARQL aggregates", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?p", "?nbPreds");
-        switch (b["?p"]) {
+        expect(b).to.have.keys("p", "?nbPreds");
+        switch (b["p"].value) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
           case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
             expect(b["?nbPreds"]).to.equal(`"1"^^${XSD("integer")}`);
@@ -94,7 +94,7 @@ describe("SPARQL aggregates", () => {
         const b = bindings.toObject();
         expect(b).to.have.keys("?p", "?nbPreds", "?z");
         expect(b["?z"]).to.equal(`"10"^^${XSD("integer")}`);
-        switch (b["?p"]) {
+        switch (b["?p"].value) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
           case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
             expect(b["?nbPreds"]).to.equal(`"1"^^${XSD("integer")}`);
@@ -158,7 +158,7 @@ describe("SPARQL aggregates", () => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
         expect(b).to.have.keys("?p", "?nbPreds");
-        switch (b["?p"]) {
+        switch (b["?p"].value) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
           case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
             expect(b["?nbPreds"]).to.equal(`"2"^^${XSD("integer")}`);
@@ -199,7 +199,7 @@ describe("SPARQL aggregates", () => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
         expect(b).to.have.keys("?p", "?nbPreds");
-        switch (b["?p"]) {
+        switch (b["?p"].value) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
             expect(b["?nbPreds"]).to.equal(`"5"^^${XSD("integer")}`);
             break;
@@ -277,7 +277,7 @@ describe("SPARQL aggregates", () => {
       keys: ["?p", "?sum"],
       nbResults: 4,
       testFun: function (b) {
-        switch (b["?p"]) {
+        switch (b["?p"].value) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
           case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
             expect(b["?sum"]).to.equal(`"10"^^${XSD("integer")}`);
@@ -347,7 +347,7 @@ describe("SPARQL aggregates", () => {
       keys: ["?p", "?concat"],
       nbResults: 4,
       testFun: function (b) {
-        switch (b["?p"]) {
+        switch (b["?p"].value) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
           case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
             expect(b["?concat"]).to.equal('"10"');

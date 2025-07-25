@@ -24,10 +24,12 @@ SOFTWARE.
 
 "use strict";
 
-import type { Algebra } from "sparqljs";
+import { termToString } from "rdf-string";
 import ExecutionContext from "../engine/context/execution-context.ts";
 import type { PipelineInput } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import type { EngineTriple } from "../types.ts";
+import { dataFactory } from "../utils/rdf.ts";
 import Graph from "./graph.ts";
 
 /**
@@ -47,15 +49,17 @@ export default class UnionGraph extends Graph {
    */
   constructor(graphs: Graph[]) {
     super();
-    this.iri = graphs.map((g) => g.iri).join("+");
+    this.iri = dataFactory.namedNode(
+      graphs.map((g) => termToString(g.iri)).join("+")
+    );
     this._graphs = graphs;
   }
 
-  insert(triple: Algebra.TripleObject): Promise<void> {
+  insert(triple: EngineTriple): Promise<void> {
     return this._graphs[0].insert(triple);
   }
 
-  delete(triple: Algebra.TripleObject): Promise<void> {
+  delete(triple: EngineTriple): Promise<void> {
     return this._graphs.reduce(
       (prev, g) => prev.then(() => g.delete(triple)),
       Promise.resolve()
@@ -63,9 +67,9 @@ export default class UnionGraph extends Graph {
   }
 
   find(
-    triple: Algebra.TripleObject,
+    triple: EngineTriple,
     context: ExecutionContext
-  ): PipelineInput<Algebra.TripleObject> {
+  ): PipelineInput<EngineTriple> {
     return Pipeline.getInstance().merge(
       ...this._graphs.map((g) => g.find(triple, context))
     );
@@ -78,7 +82,7 @@ export default class UnionGraph extends Graph {
     );
   }
 
-  estimateCardinality(triple: Algebra.TripleObject): Promise<number> {
+  estimateCardinality(triple: EngineTriple): Promise<number> {
     return Promise.all(
       this._graphs.map((g) => g.estimateCardinality(triple))
     ).then((cardinalities: number[]) => {

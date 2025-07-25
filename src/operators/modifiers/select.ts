@@ -24,11 +24,12 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import { Wildcard, type Query, type Variable } from "sparqljs";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
-import type { Algebra } from "sparqljs";
-import * as rdf from "../../utils/rdf.ts";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+
 import type { Bindings } from "../../rdf/bindings.ts";
+import * as rdf from "../../utils/rdf.ts";
 
 /**
  * Evaluates a SPARQL SELECT operation, i.e., perform a selection over sets of solutions bindings
@@ -39,23 +40,29 @@ import type { Bindings } from "../../rdf/bindings.ts";
  * @param query - SELECT query
  * @return A {@link PipelineStage} which evaluate the SELECT modifier
  */
-export default function select(
-  source: PipelineStage<Bindings>,
-  query: Algebra.RootNode
-) {
-  const variables = query.variables as string[];
-  const selectAll = variables.length === 1 && variables[0] === "*";
+export default function select(source: PipelineStage<Bindings>, query: Query) {
+  if (!("variables" in query)) {
+    throw new Error("Not a select query.");
+  }
+  if (query.variables[0] instanceof Wildcard) {
+    return Pipeline.getInstance().map(source, (bindings: Bindings) => {
+      // return bindings.mapValues((k, v) => (rdf.isVariable(k) ? v : null));
+      return bindings;
+    });
+  }
+  const variables = (query.variables as Variable[]).map((v) =>
+    "variable" in v ? v.variable : v
+  );
   return Pipeline.getInstance().map(source, (bindings: Bindings) => {
-    if (!selectAll) {
-      bindings = variables.reduce((obj, v) => {
-        if (bindings.has(v)) {
-          obj.set(v, bindings.get(v)!);
-        } else {
-          obj.set(v, "UNBOUND");
-        }
-        return obj;
-      }, bindings.empty());
-    }
-    return bindings.mapValues((k, v) => (rdf.isVariable(k) ? v : null));
+    bindings = variables.reduce((obj, v) => {
+      if (bindings.has(v.value)) {
+        obj.set(v.value, bindings.get(v.value)!);
+      } else {
+        obj.set(v.value, rdf.createUnbound());
+      }
+      return obj;
+    }, bindings.empty());
+    // return bindings.mapValues((k, v) => (rdf.isVariable(k) ? v : null));
+    return bindings;
   });
 }

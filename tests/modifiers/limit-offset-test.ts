@@ -103,7 +103,7 @@ describe("SPARQL queries with LIMIT/OFFSET", () => {
           assert.ok(bindings instanceof Bindings);
           const b = bindings.toObject();
           expect(b["?article"]).to.be.oneOf(d.results);
-          d.results.splice(d.results.indexOf(b["?article"]), 1);
+          d.results.splice(d.results.indexOf(b["?article"].value), 1);
           nbResults++;
         },
         done,

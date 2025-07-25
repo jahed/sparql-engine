@@ -1,15 +1,15 @@
 "use strict";
 
-import type { Algebra } from "sparqljs";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
+import type { EngineTriple } from "../../types.ts";
 
 export abstract class Consumable<T> implements PipelineStage<T> {
   abstract execute(): Promise<void>;
 
   subscribe(
-    onData: (value: T) => void,
-    onError: (err: any) => void,
-    onEnd: () => void
+    onData?: (value: T) => void,
+    onError?: (err: any) => void,
+    onEnd?: () => void
   ): void {
     this.execute().then(onEnd, onError);
   }
@@ -39,9 +39,9 @@ export class ErrorConsumable<T> extends Consumable<T> {
 }
 
 export abstract class Consumer<T> extends Consumable<T> {
-  private readonly _source: PipelineStage<Algebra.TripleObject>;
+  private readonly _source: PipelineStage<EngineTriple>;
 
-  constructor(source: PipelineStage<Algebra.TripleObject>) {
+  constructor(source: PipelineStage<EngineTriple>) {
     super();
     this._source = source;
   }
@@ -61,5 +61,5 @@ export abstract class Consumer<T> extends Consumable<T> {
     });
   }
 
-  abstract onData(triple: Algebra.TripleObject): Promise<void>;
+  abstract onData(triple: EngineTriple): Promise<void>;
 }

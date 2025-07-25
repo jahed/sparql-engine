@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import type { Term } from "@rdfjs/types";
+
 /**
  * A state of the automaton
  * @author Arthur Trottier
@@ -100,7 +102,7 @@ export class State<T> {
 /**
  * A transition of the automaton
  */
-export class Transition<T, P> {
+export class Transition<T, P extends Term> {
   private _from: State<T>;
   private _to: State<T>;
   private _reverse: boolean;
@@ -171,8 +173,8 @@ export class Transition<T, P> {
     return this._negation;
   }
 
-  hasPredicate(predicate: P) {
-    return this.predicates.indexOf(predicate) > -1;
+  hasPredicate(predicate: Term) {
+    return this.predicates.some((p) => p.equals(predicate));
   }
 
   /**
@@ -218,7 +220,7 @@ export class Transition<T, P> {
  * equivalent Automaton which are used as a guide to navigate throught the Graph. When we reach a final state
  * then we have found a Path in the Graph that matches the Property Path.
  */
-export class Automaton<T, P> {
+export class Automaton<T, P extends Term> {
   private states: Array<State<T>>;
   private transitions: Array<Transition<T, P>>;
 

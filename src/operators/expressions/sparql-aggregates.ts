@@ -25,8 +25,12 @@ SOFTWARE.
 "use strict";
 
 import { maxBy, meanBy, minBy, sample } from "lodash-es";
-import type { Term } from "rdf-js";
+
+import type { VariableTerm } from "sparqljs";
+import type { EngineTripleValue } from "../../types.ts";
 import * as rdf from "../../utils/rdf.ts";
+
+type Term = EngineTripleValue;
 
 type TermRows = { [key: string]: Term[] };
 
@@ -39,17 +43,17 @@ type TermRows = { [key: string]: Term[] };
  * @author Thomas Minier
  */
 export default {
-  count: function (variable: string, rows: TermRows): Term {
+  count: function (variable: VariableTerm, rows: TermRows): Term {
     let count: number = 0;
-    if (variable in rows) {
-      count = rows[variable].map((v: Term) => v !== null).length;
+    if (variable.value in rows) {
+      count = rows[variable.value].map((v: Term) => v !== null).length;
     }
     return rdf.createInteger(count);
   },
-  sum: function (variable: string, rows: TermRows): Term {
+  sum: function (variable: VariableTerm, rows: TermRows): Term {
     let sum = 0;
-    if (variable in rows) {
-      sum = rows[variable].reduce((acc: number, b: Term) => {
+    if (variable.value in rows) {
+      sum = rows[variable.value].reduce((acc: number, b: Term) => {
         if (rdf.termIsLiteral(b) && rdf.literalIsNumeric(b)) {
           return acc + rdf.asJS(b.value, b.datatype.value);
         }
@@ -59,10 +63,10 @@ export default {
     return rdf.createInteger(sum);
   },
 
-  avg: function (variable: string, rows: TermRows): Term {
+  avg: function (variable: VariableTerm, rows: TermRows): Term {
     let avg = 0;
-    if (variable in rows) {
-      avg = meanBy(rows[variable], (term: Term) => {
+    if (variable.value in rows) {
+      avg = meanBy(rows[variable.value], (term: Term) => {
         if (rdf.termIsLiteral(term) && rdf.literalIsNumeric(term)) {
           return rdf.asJS(term.value, term.datatype.value);
         }
@@ -71,9 +75,9 @@ export default {
     return rdf.createInteger(avg);
   },
 
-  min: function (variable: string, rows: TermRows): Term {
+  min: function (variable: VariableTerm, rows: TermRows): Term {
     return (
-      minBy(rows[variable], (v: Term) => {
+      minBy(rows[variable.value], (v: Term) => {
         if (rdf.termIsLiteral(v)) {
           return rdf.asJS(v.value, v.datatype.value);
         }
@@ -82,9 +86,9 @@ export default {
     );
   },
 
-  max: function (variable: string, rows: TermRows): Term {
+  max: function (variable: VariableTerm, rows: TermRows): Term {
     return (
-      maxBy(rows[variable], (v: Term) => {
+      maxBy(rows[variable.value], (v: Term) => {
         if (rdf.termIsLiteral(v)) {
           return rdf.asJS(v.value, v.datatype.value);
         }
@@ -93,12 +97,16 @@ export default {
     );
   },
 
-  group_concat: function (variable: string, rows: TermRows, sep: string): Term {
-    const value = rows[variable].map((v: Term) => v.value).join(sep);
+  group_concat: function (
+    variable: VariableTerm,
+    rows: TermRows,
+    sep: string = ""
+  ): Term {
+    const value = rows[variable.value].map((v: Term) => v.value).join(sep);
     return rdf.createLiteral(value);
   },
 
-  sample: function (variable: string, rows: TermRows): Term {
-    return sample(rows[variable])!;
+  sample: function (variable: VariableTerm, rows: TermRows): Term {
+    return sample(rows[variable.value])!;
   },
 };

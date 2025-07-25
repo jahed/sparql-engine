@@ -52,7 +52,7 @@ describe("SPARQL property paths: One or More paths", () => {
         const b = bindings.toObject();
         expect(b).to.have.property("?s");
         expect(b).to.have.property("?name");
-        switch (b["?s"]) {
+        switch (b["?s"].value) {
           case "http://example.org/Alice":
             expect(b["?name"]).to.be.oneOf([
               "http://example.org/Bob",
@@ -106,7 +106,7 @@ describe("SPARQL property paths: One or More paths", () => {
         const b = bindings.toObject();
         expect(b).to.have.property("?s");
         expect(b).to.have.property("?name");
-        switch (b["?s"]) {
+        switch (b["?s"].value) {
           case "http://example.org/Alice":
             expect(b["?name"]).to.be.oneOf(["http://example.org/Carol"]);
             break;
@@ -145,7 +145,7 @@ describe("SPARQL property paths: One or More paths", () => {
         const b = bindings.toObject();
         expect(b).to.have.property("?s");
         expect(b).to.have.property("?name");
-        switch (b["?s"]) {
+        switch (b["?s"].value) {
           case "http://example.org/Alice":
             expect(b["?name"]).to.be.oneOf(["http://example.org/Didier"]);
             break;
@@ -192,7 +192,7 @@ describe("SPARQL property paths: One or More paths", () => {
         const b = bindings.toObject();
         expect(b).to.have.property("?s");
         expect(b).to.have.property("?name");
-        switch (b["?s"]) {
+        switch (b["?s"].value) {
           case "http://example.org/Alice":
             expect(b["?name"]).to.be.oneOf([
               "http://example.org/Carol",
@@ -238,7 +238,7 @@ describe("SPARQL property paths: One or More paths", () => {
         const b = bindings.toObject();
         expect(b).to.have.property("?s");
         expect(b).to.have.property("?o");
-        switch (b["?s"]) {
+        switch (b["?s"].value) {
           case "http://example.org/Alice":
             expect(b["?o"]).to.be.oneOf(["http://example.org/Didier"]);
             break;

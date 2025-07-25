@@ -24,12 +24,13 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
-import type { Algebra } from "sparqljs";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
+
+import type { Pattern } from "sparqljs";
+import ExecutionContext from "../engine/context/execution-context.ts";
 import { PlanBuilder } from "../engine/plan-builder.ts";
 import { Bindings } from "../rdf/bindings.ts";
-import ExecutionContext from "../engine/context/execution-context.ts";
 
 /**
  * Handles an SPARQL OPTIONAL clause
@@ -43,7 +44,7 @@ import ExecutionContext from "../engine/context/execution-context.ts";
  */
 export default function optional(
   source: PipelineStage<Bindings>,
-  patterns: Algebra.PlanNode[],
+  patterns: Pattern[],
   builder: PlanBuilder,
   context: ExecutionContext
 ): PipelineStage<Bindings> {

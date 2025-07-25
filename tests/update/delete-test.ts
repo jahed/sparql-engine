@@ -26,9 +26,10 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
+import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
-const GRAPH_IRI = "htpp://example.org#some-graph";
+const GRAPH_IRI = createIRI("htpp://example.org#some-graph");
 
 describe("SPARQL UPDATE: DELETE DATA queries", () => {
   let engine: TestEngine;

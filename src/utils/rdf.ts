@@ -1,55 +1,69 @@
 "use strict";
 
-import dataFactory from "@rdfjs/data-model";
-import { formatISO, isEqual, parseISO } from "date-fns";
-import type { BlankNode, Literal, NamedNode, Term } from "rdf-js";
-import { stringToTerm, termToString } from "rdf-string";
-import type { Algebra } from "sparqljs";
+import type {
+  BlankNode,
+  Literal,
+  NamedNode,
+  Quad,
+  Quad_Predicate,
+} from "@rdfjs/types";
+import { formatISO, parseISO } from "date-fns";
+import { DataFactory } from "rdf-data-factory";
+import type { Triple, Wildcard } from "sparqljs";
+import type {
+  EngineExpression,
+  EngineIRI,
+  EngineLiteral,
+  EngineTriple,
+  EngineTripleValue,
+  EngineVariable,
+} from "../types.ts";
 
-/**
- * Test if two triple (patterns) are equals
- * @param a - First triple (pattern)
- * @param b - Second triple (pattern)
- * @return True if the two triple (patterns) are equals, False otherwise
- */
-export function tripleEquals(
-  a: Algebra.TripleObject,
-  b: Algebra.TripleObject
-): boolean {
+export const dataFactory = new DataFactory();
+
+export function tripleEquals(a: EngineTriple, b: EngineTriple): boolean {
   return (
-    a.subject === b.subject &&
-    a.predicate === b.predicate &&
-    a.object === b.object
+    a.subject.equals(b.subject) &&
+    a.predicate.equals(b.predicate) &&
+    a.object.equals(b.object)
   );
 }
 
-/**
- * Convert an string RDF Term to a RDFJS representation
- * @see https://rdf.js.org/data-model-spec
- * @param term - A string-based term representation
- * @return A RDF.js term
- */
-export function fromN3(term: string): Term {
-  return stringToTerm(term);
-}
+// export function tripleToStringQuad(triple: Triple): StringTriple {
+//   // quadToStringQuad does support undefined "graph".
+//   return quadToStringQuad(triple as BaseQuad);
+// }
+
+// export function stringQuadToTriple(triple: StringTriple): Triple {
+//   return stringQuadToQuad(triple) as Triple;
+// }
+
+// export interface PathTripleObject {
+//   subject: string;
+//   predicate: PropertyPath;
+//   object: string;
+//   graph?: string;
+// }
+
+// export function fromN3(term: string): Term {
+//   return stringToTerm(term);
+// }
+
+// export function toN3(term: Term): string {
+//   return termToString(term);
+// }
 
 /**
- * Convert an RDFJS term to a string-based representation
- * @see https://rdf.js.org/data-model-spec
- * @param term A RDFJS term
- * @return A string-based term representation
+ * sparqljs predicates support paths syntax which are currently not supported.
  */
-export function toN3(term: Term): string {
-  return termToString(term);
+export function tripleToQuad(triple: Triple): Quad {
+  return dataFactory.quad(
+    triple.subject,
+    triple.predicate as Quad_Predicate,
+    triple.object
+  );
 }
 
-/**
- * Parse a RDF Literal to its Javascript representation
- * @see https://www.w3.org/TR/rdf11-concepts/#section-Datatypes
- * @param value - Literal value
- * @param type - Literal datatype
- * @return Javascript representation of the literal
- */
 export function asJS(value: string, type: string | null): any {
   switch (type) {
     case XSD("integer"):
@@ -87,132 +101,62 @@ export function asJS(value: string, type: string | null): any {
   }
 }
 
-/**
- * Creates an IRI in RDFJS format
- * @param value - IRI value
- * @return A new IRI in RDFJS format
- */
 export function createIRI(value: string): NamedNode {
-  if (value.startsWith("<") && value.endsWith(">")) {
-    return dataFactory.namedNode(value.slice(0, value.length - 1));
-  }
   return dataFactory.namedNode(value);
 }
 
-/**
- * Creates a Blank Node in RDFJS format
- * @param value - Blank node value
- * @return A new Blank Node in RDFJS format
- */
 export function createBNode(value?: string): BlankNode {
   return dataFactory.blankNode(value);
 }
 
-/**
- * Creates a Literal in RDFJS format, without any datatype or language tag
- * @param value - Literal value
- * @return A new literal in RDFJS format
- */
 export function createLiteral(value: string): Literal {
   return dataFactory.literal(value);
 }
 
-/**
- * Creates an typed Literal in RDFJS format
- * @param value - Literal value
- * @param type - Literal type (integer, float, dateTime, ...)
- * @return A new typed Literal in RDFJS format
- */
 export function createTypedLiteral(value: any, type: string): Literal {
   return dataFactory.literal(`${value}`, createIRI(type));
 }
 
-/**
- * Creates a Literal with a language tag in RDFJS format
- * @param value - Literal value
- * @param language - Language tag (en, fr, it, ...)
- * @return A new Literal with a language tag in RDFJS format
- */
 export function createLangLiteral(value: string, language: string): Literal {
   return dataFactory.literal(value, language);
 }
 
-/**
- * Creates an integer Literal in RDFJS format
- * @param value - Integer
- * @return A new integer in RDFJS format
- */
 export function createInteger(value: number): Literal {
   return createTypedLiteral(value, XSD("integer"));
 }
 
-/**
- * Creates an decimal Literal in RDFJS format
- * @param value - Float
- * @return A new float in RDFJS format
- */
 export function createDecimal(value: number): Literal {
   return createTypedLiteral(value, XSD("decimal"));
 }
 
-/**
- * Creates an float Literal in RDFJS format
- * @param value - Float
- * @return A new float in RDFJS format
- */
 export function createFloat(value: number): Literal {
   return createTypedLiteral(value, XSD("float"));
 }
 
-/**
- * Creates a Literal from a boolean, in RDFJS format
- * @param value - Boolean
- * @return A new boolean in RDFJS format
- */
 export function createBoolean(value: boolean): Literal {
   return value ? createTrue() : createFalse();
 }
 
-/**
- * Creates a True boolean, in RDFJS format
- * @return A new boolean in RDFJS format
- */
 export function createTrue(): Literal {
   return createTypedLiteral("true", XSD("boolean"));
 }
 
-/**
- * Creates a False boolean, in RDFJS format
- * @return A new boolean in RDFJS format
- */
 export function createFalse(): Literal {
   return createTypedLiteral("false", XSD("boolean"));
 }
 
-/**
- * Creates a Literal from a Date, in RDFJS format
- * @param date - Date
- * @return A new date literal in RDFJS format
- */
 export function createDate(date: Date): Literal {
   return createTypedLiteral(formatISO(date), XSD("dateTime"));
 }
 
-/**
- * Creates an unbounded literal, used when a variable is not bounded in a set of bindings
- * @return A new literal in RDFJS format
- */
 export function createUnbound(): Literal {
   return createLiteral("UNBOUND");
 }
 
-/**
- * Clone a literal and replace its value with another one
- * @param  base     - Literal to clone
- * @param  newValue - New literal value
- * @return The literal with its new value
- */
-export function shallowCloneTerm(term: Term, newValue: string): Term {
+export function shallowCloneTerm(
+  term: EngineTripleValue,
+  newValue: string
+): EngineTripleValue {
   if (termIsLiteral(term)) {
     if (term.language !== "") {
       return createLangLiteral(newValue, term.language);
@@ -222,38 +166,18 @@ export function shallowCloneTerm(term: Term, newValue: string): Term {
   return createLiteral(newValue);
 }
 
-/**
- * Test if a RDFJS Term is a Literal
- * @param term - RDFJS Term
- * @return True of the term is a Literal, False otherwise
- */
-export function termIsLiteral(term: Term): term is Literal {
+export function termIsLiteral(term: EngineTripleValue): term is Literal {
   return term.termType === "Literal";
 }
 
-/**
- * Test if a RDFJS Term is an IRI, i.e., a NamedNode
- * @param term - RDFJS Term
- * @return True of the term is an IRI, False otherwise
- */
-export function termIsIRI(term: Term): term is NamedNode {
+export function termIsIRI(term: EngineTripleValue): term is NamedNode {
   return term.termType === "NamedNode";
 }
 
-/**
- * Test if a RDFJS Term is a Blank Node
- * @param term - RDFJS Term
- * @return True of the term is a Blank Node, False otherwise
- */
-export function termIsBNode(term: Term): term is BlankNode {
+export function termIsBNode(term: EngineTripleValue): term is BlankNode {
   return term.termType === "BlankNode";
 }
 
-/**
- * Test if a RDFJS Literal is a number
- * @param literal - RDFJS Literal
- * @return True of the Literal is a number, False otherwise
- */
 export function literalIsNumeric(literal: Literal): boolean {
   switch (literal.datatype.value) {
     case XSD("integer"):
@@ -279,71 +203,31 @@ export function literalIsNumeric(literal: Literal): boolean {
   }
 }
 
-/**
- * Test if a RDFJS Literal is a date
- * @param literal - RDFJS Literal
- * @return True of the Literal is a date, False otherwise
- */
 export function literalIsDate(literal: Literal): boolean {
   return literal.datatype.value === XSD("dateTime");
 }
 
-/**
- * Test if a RDFJS Literal is a boolean
- * @param term - RDFJS Literal
- * @return True of the Literal is a boolean, False otherwise
- */
 export function literalIsBoolean(literal: Literal): boolean {
   return literal.datatype.value === XSD("boolean");
 }
 
-/**
- * Test if two RDFJS Terms are equals
- * @param a - First Term
- * @param b - Second Term
- * @return True if the two RDFJS Terms are equals, False
- */
-export function termEquals(a: Term, b: Term): boolean {
-  if (termIsLiteral(a) && termIsLiteral(b)) {
-    if (literalIsDate(a) && literalIsDate(b)) {
-      const valueA = asJS(a.value, a.datatype.value);
-      const valueB = asJS(b.value, b.datatype.value);
-      return isEqual(valueA, valueB);
-    }
-    return (
-      a.value === b.value &&
-      a.datatype.value === b.datatype.value &&
-      a.language === b.language
-    );
-  }
-  return a.value === b.value;
-}
+// export function termEquals(a: Term, b: Term): boolean {
+//   if (termIsLiteral(a) && termIsLiteral(b)) {
+//     if (literalIsDate(a) && literalIsDate(b)) {
+//       const valueA = asJS(a.value, a.datatype.value);
+//       const valueB = asJS(b.value, b.datatype.value);
+//       return isEqual(valueA, valueB);
+//     }
+//     return (
+//       a.value === b.value &&
+//       a.datatype.value === b.datatype.value &&
+//       a.language === b.language
+//     );
+//   }
+//   return a.value === b.value;
+// }
 
-/**
- * Create a RDF triple in Object representation
- * @param  {string} subj - Triple's subject
- * @param  {string} pred - Triple's predicate
- * @param  {string} obj  - Triple's object
- * @return A RDF triple in Object representation
- */
-export function triple(
-  subj: string,
-  pred: string,
-  obj: string
-): Algebra.TripleObject {
-  return {
-    subject: subj,
-    predicate: pred,
-    object: obj,
-  };
-}
-
-/**
- * Count the number of variables in a Triple Pattern
- * @param  {Object} triple - Triple Pattern to process
- * @return The number of variables in the Triple Pattern
- */
-export function countVariables(triple: Algebra.TripleObject): number {
+export function countVariables(triple: EngineTriple): number {
   let count = 0;
   if (isVariable(triple.subject)) {
     count++;
@@ -357,99 +241,53 @@ export function countVariables(triple: Algebra.TripleObject): number {
   return count;
 }
 
-/**
- * Return True if a string is a SPARQL variable
- * @param  str - String to test
- * @return True if the string is a SPARQL variable, False otherwise
- */
-export function isVariable(str: unknown): boolean {
-  if (typeof str !== "string") {
-    return false;
-  }
-  return str.startsWith("?");
+export function isVariable(
+  value: EngineTripleValue | EngineExpression | Wildcard
+): value is EngineVariable {
+  return "termType" in value && value.termType === "Variable";
 }
 
-/**
- * Return True if a string is a RDF Literal
- * @param  str - String to test
- * @return True if the string is a RDF Literal, False otherwise
- */
-export function isLiteral(str: string): boolean {
-  return str.startsWith('"');
+export function isLiteral(value: EngineTripleValue): value is EngineLiteral {
+  return "termType" in value && value.termType === "Literal";
 }
 
-/**
- * Return True if a string is a RDF IRI/URI
- * @param  str - String to test
- * @return True if the string is a RDF IRI/URI, False otherwise
- */
-export function isIRI(str: string): boolean {
-  return !isVariable(str) && !isLiteral(str);
+export function isIRI(value: EngineTripleValue): value is EngineIRI {
+  return "termType" in value && value.termType === "NamedNode";
 }
 
-/**
- * Get the value (excluding datatype & language tags) of a RDF literal
- * @param literal - RDF Literal
- * @return The literal's value
- */
-export function getLiteralValue(literal: string): string {
-  if (literal.startsWith('"')) {
-    let stopIndex = literal.length - 1;
-    if (literal.includes('"^^<') && literal.endsWith(">")) {
-      stopIndex = literal.lastIndexOf('"^^<');
-    } else if (literal.includes('"@') && !literal.endsWith('"')) {
-      stopIndex = literal.lastIndexOf('"@');
-    }
-    return literal.slice(1, stopIndex);
-  }
-  return literal;
+export function isBlank(value: EngineTripleValue): value is BlankNode {
+  return "termType" in value && value.termType === "BlankNode";
 }
 
-/**
- * Hash Triple (pattern) to assign it an unique ID
- * @param triple - Triple (pattern) to hash
- * @return An unique ID to identify the Triple (pattern)
- */
-export function hashTriple(triple: Algebra.TripleObject): string {
-  return `s=${triple.subject}&p=${triple.predicate}&o=${triple.object}`;
+// export function getLiteralValue(literal: string): string {
+//   if (literal.startsWith('"')) {
+//     let stopIndex = literal.length - 1;
+//     if (literal.includes('"^^<') && literal.endsWith(">")) {
+//       stopIndex = literal.lastIndexOf('"^^<');
+//     } else if (literal.includes('"@') && !literal.endsWith('"')) {
+//       stopIndex = literal.lastIndexOf('"@');
+//     }
+//     return literal.slice(1, stopIndex);
+//   }
+//   return literal;
+// }
+
+export function hashTriple(triple: EngineTriple): string {
+  return `s=${triple.subject.value}&p=${triple.predicate.value}&o=${triple.object.value}`;
 }
 
-/**
- * Create an IRI under the XSD namespace
- * (<http://www.w3.org/2001/XMLSchema#>)
- * @param suffix - Suffix appended to the XSD namespace to create an IRI
- * @return An new IRI, under the XSD namespac
- */
 export function XSD(suffix: string): string {
   return `http://www.w3.org/2001/XMLSchema#${suffix}`;
 }
 
-/**
- * Create an IRI under the RDF namespace
- * (<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
- * @param suffix - Suffix appended to the RDF namespace to create an IRI
- * @return An new IRI, under the RDF namespac
- */
 export function RDF(suffix: string): string {
   return `http://www.w3.org/1999/02/22-rdf-syntax-ns#${suffix}`;
 }
 
-/**
- * Create an IRI under the SEF namespace
- * (<https://callidon.github.io/sparql-engine/functions#>)
- * @param suffix - Suffix appended to the SES namespace to create an IRI
- * @return An new IRI, under the SES namespac
- */
 export function SEF(suffix: string): string {
   return `https://callidon.github.io/sparql-engine/functions#${suffix}`;
 }
 
-/**
- * Create an IRI under the SES namespace
- * (<https://callidon.github.io/sparql-engine/search#>)
- * @param suffix - Suffix appended to the SES namespace to create an IRI
- * @return An new IRI, under the SES namespac
- */
 export function SES(suffix: string): string {
   return `https://callidon.github.io/sparql-engine/search#${suffix}`;
 }

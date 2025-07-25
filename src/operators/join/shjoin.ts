@@ -22,10 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import { termToString } from "rdf-string";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
-import HashJoinTable from "./hash-join-table.ts";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
+import HashJoinTable from "./hash-join-table.ts";
 
 /**
  * Utility function used to perform one half of a symmetric hash join
@@ -46,7 +47,7 @@ function halfHashJoin(
     if (!bindings.has(joinKey)) {
       return engine.empty<Bindings>();
     }
-    const key = bindings.get(joinKey)!;
+    const key = termToString(bindings.get(joinKey)!);
 
     // insert into inner table
     innerTable.put(key, bindings);

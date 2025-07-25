@@ -25,21 +25,23 @@ SOFTWARE.
 "use strict";
 
 import { intersectionWith, isUndefined, sum, zip } from "lodash-es";
-import type { Term } from "rdf-js";
+
+import type { EngineTripleValue } from "../../types.ts";
 import * as rdf from "../../utils/rdf.ts";
 
+type Term = EngineTripleValue;
 type TermRows = { [key: string]: Term[] };
 
 function precision(expected: Term[], predicted: Term[]): number {
   const intersection = intersectionWith(expected, predicted, (x, y) =>
-    rdf.termEquals(x, y)
+    x.equals(y)
   );
   return intersection.length / predicted.length;
 }
 
 function recall(expected: Term[], predicted: Term[]): number {
   const intersection = intersectionWith(expected, predicted, (x, y) =>
-    rdf.termEquals(x, y)
+    x.equals(y)
   );
   return intersection.length / expected.length;
 }
@@ -65,7 +67,7 @@ export default {
       if (isUndefined(v[0]) || isUndefined(v[1])) {
         return 0;
       }
-      return rdf.termEquals(v[0], v[1]) ? 1 : 0;
+      return v[0].equals(v[1]) ? 1 : 0;
     });
     return rdf.createFloat(sum(tests) / tests.length);
   },

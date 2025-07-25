@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import type { Term } from "@rdfjs/types";
+import type { EnginePredicate } from "../../../types.ts";
 import { Automaton, State, Transition } from "./automaton.ts";
 
 /**
@@ -30,7 +32,7 @@ import { Automaton, State, Transition } from "./automaton.ts";
  * @author Charlotte Cogan
  * @author Julien Aimonier-Davat
  */
-interface AutomatonBuilder<T, P> {
+interface AutomatonBuilder<T, P extends Term> {
   build(): Automaton<T, P>;
 }
 
@@ -57,13 +59,15 @@ export function union(setA: Set<number>, setB: Set<number>): Set<number> {
  * @author Charlotte Cogan
  * @author Julien Aimonier-Davat
  */
-export class GlushkovBuilder implements AutomatonBuilder<number, string> {
+export class GlushkovBuilder
+  implements AutomatonBuilder<number, EnginePredicate>
+{
   private syntaxTree: any;
   private nullable: Map<number, boolean>;
   private first: Map<number, Set<number>>;
   private last: Map<number, Set<number>>;
   private follow: Map<number, Set<number>>;
-  private predicates: Map<number, Array<string>>;
+  private predicates: Map<number, Array<EnginePredicate>>;
   private reverse: Map<number, boolean>;
   private negation: Map<number, boolean>;
 
@@ -73,13 +77,13 @@ export class GlushkovBuilder implements AutomatonBuilder<number, string> {
    */
   constructor(path: any) {
     this.syntaxTree = path;
-    this.nullable = new Map<number, boolean>();
-    this.first = new Map<number, Set<number>>();
-    this.last = new Map<number, Set<number>>();
-    this.follow = new Map<number, Set<number>>();
-    this.predicates = new Map<number, Array<string>>();
-    this.reverse = new Map<number, boolean>();
-    this.negation = new Map<number, boolean>();
+    this.nullable = new Map();
+    this.first = new Map();
+    this.last = new Map();
+    this.follow = new Map();
+    this.predicates = new Map();
+    this.reverse = new Map();
+    this.negation = new Map();
   }
 
   /**
@@ -239,12 +243,12 @@ export class GlushkovBuilder implements AutomatonBuilder<number, string> {
   }
 
   negationProcessing(node: any) {
-    let negForward: Array<string> = new Array<string>();
-    let negBackward: Array<string> = new Array<string>();
+    let negForward: Array<EnginePredicate> = [];
+    let negBackward: Array<EnginePredicate> = [];
 
     this.searchChild(node).forEach((value: number) => {
-      let predicatesChild = this.predicates.get(value) as Array<string>;
-      let isReverseChild = this.reverse.get(value) as boolean;
+      let predicatesChild = this.predicates.get(value)!;
+      let isReverseChild = this.reverse.get(value)!;
       if (isReverseChild) {
         negBackward.push(...predicatesChild);
       } else {
@@ -367,34 +371,34 @@ export class GlushkovBuilder implements AutomatonBuilder<number, string> {
    * Build a Glushkov automaton to evaluate the SPARQL property path
    * @return The Glushkov automaton used to evaluate the SPARQL property path
    */
-  build(): Automaton<number, string> {
+  build(): Automaton<number, EnginePredicate> {
     // Assigns an id to each syntax tree's node. These ids will be used to build and name the automaton's states
     this.postfixNumbering(this.syntaxTree);
     // computation of first, last, follow, nullable, reverse and negation
     this.treeProcessing(this.syntaxTree);
 
-    let glushkov = new Automaton<number, string>();
+    let glushkov = new Automaton<number, EnginePredicate>();
     let root = this.syntaxTree.id; // root node identifier
 
     // Creates and adds the initial state
-    let nullableRoot = this.nullable.get(root) as boolean;
+    let nullableRoot = this.nullable.get(root)!;
     let initialState = new State(0, true, nullableRoot);
     glushkov.addState(initialState);
 
     // Creates and adds the other states
-    let lastRoot = this.last.get(root) as Set<number>;
+    let lastRoot = this.last.get(root)!;
     for (let id of Array.from(this.predicates.keys())) {
       let isFinal = lastRoot.has(id);
       glushkov.addState(new State(id, false, isFinal));
     }
 
     // Adds the transitions that start from the initial state
-    let firstRoot = this.first.get(root) as Set<number>;
+    let firstRoot = this.first.get(root)!;
     firstRoot.forEach((value: number) => {
-      let toState = glushkov.findState(value) as State<number>;
-      let reverse = this.reverse.get(value) as boolean;
-      let negation = this.negation.get(value) as boolean;
-      let predicates = this.predicates.get(value) as Array<string>;
+      let toState = glushkov.findState(value)!;
+      let reverse = this.reverse.get(value)!;
+      let negation = this.negation.get(value)!;
+      let predicates = this.predicates.get(value)!;
       let transition = new Transition(
         initialState,
         toState,
@@ -407,13 +411,13 @@ export class GlushkovBuilder implements AutomatonBuilder<number, string> {
 
     // Ads the transitions between states
     for (let from of Array.from(this.follow.keys())) {
-      let followFrom = this.follow.get(from) as Set<number>;
+      let followFrom = this.follow.get(from)!;
       followFrom.forEach((to: number) => {
-        let fromState = glushkov.findState(from) as State<number>;
-        let toState = glushkov.findState(to) as State<number>;
-        let reverse = this.reverse.get(to) as boolean;
-        let negation = this.negation.get(to) as boolean;
-        let predicates = this.predicates.get(to) as Array<string>;
+        let fromState = glushkov.findState(from)!;
+        let toState = glushkov.findState(to)!;
+        let reverse = this.reverse.get(to)!;
+        let negation = this.negation.get(to)!;
+        let predicates = this.predicates.get(to)!;
         let transition = new Transition(
           fromState,
           toState,

@@ -24,20 +24,29 @@ SOFTWARE.
 
 "use strict";
 
-import { partition } from "lodash-es";
-import type { Algebra } from "sparqljs";
+import type {
+  BgpPattern,
+  ClearDropOperation,
+  CopyMoveAddOperation,
+  GraphOrDefault,
+  GraphPattern,
+  GraphQuads,
+  InsertDeleteOperation,
+  Triple,
+} from "sparqljs";
 import Dataset from "../../rdf/dataset.ts";
+import { dataFactory } from "../../utils/rdf.ts";
 
 /**
  * Create a triple pattern that matches all RDF triples in a graph
  * @private
  * @return A triple pattern that matches all RDF triples in a graph
  */
-function allPattern(): Algebra.TripleObject {
+function allPattern(): Triple {
   return {
-    subject: "?s",
-    predicate: "?p",
-    object: "?o",
+    subject: dataFactory.variable("s"),
+    predicate: dataFactory.variable("p"),
+    object: dataFactory.variable("o"),
   };
 }
 
@@ -46,7 +55,7 @@ function allPattern(): Algebra.TripleObject {
  * @private
  * @return A BGP that matches all RDF triples in a graph
  */
-function allBGP(): Algebra.BGPNode {
+function allBGP(): BgpPattern {
   return {
     type: "bgp",
     triples: [allPattern()],
@@ -63,15 +72,15 @@ function allBGP(): Algebra.BGPNode {
  * @return The SPARQL GROUP clasue
  */
 function buildGroupClause(
-  source: Algebra.UpdateGraphTarget,
+  source: GraphOrDefault,
   dataset: Dataset,
   isSilent: boolean
-): Algebra.BGPNode | Algebra.UpdateGraphNode {
+): BgpPattern | GraphQuads {
   if (source.default) {
     return allBGP();
   } else {
     // a SILENT modifier prevents errors when using an unknown graph
-    if (!dataset.hasNamedGraph(source.name!) && !isSilent) {
+    if (!(source.name && dataset.hasNamedGraph(source.name)) && !isSilent) {
       throw new Error(`Unknown Source Graph in ADD query ${source.name}`);
     }
     return {
@@ -92,18 +101,18 @@ function buildGroupClause(
  * @return The SPARQL GROUP clasue
  */
 function buildWhereClause(
-  source: Algebra.UpdateGraphTarget,
+  source: GraphOrDefault,
   dataset: Dataset,
   isSilent: boolean
-): Algebra.BGPNode | Algebra.GraphNode {
+): BgpPattern | GraphPattern {
   if (source.default) {
     return allBGP();
   } else {
     // a SILENT modifier prevents errors when using an unknown graph
-    if (!dataset.hasNamedGraph(source.name!) && !isSilent) {
+    if (!(source.name && dataset.hasNamedGraph(source.name)) && !isSilent) {
       throw new Error(`Unknown Source Graph in ADD query ${source.name}`);
     }
-    const bgp: Algebra.BGPNode = {
+    const bgp: BgpPattern = {
       type: "bgp",
       triples: [allPattern()],
     };
@@ -123,14 +132,14 @@ function buildWhereClause(
  * @return Rewritten ADD query
  */
 export function rewriteAdd(
-  addQuery: Algebra.UpdateCopyMoveNode,
+  addQuery: CopyMoveAddOperation,
   dataset: Dataset
-): Algebra.UpdateQueryNode {
+): InsertDeleteOperation {
   return {
     updateType: "insertdelete",
-    silent: addQuery.silent,
     insert: [buildGroupClause(addQuery.destination, dataset, addQuery.silent)],
     where: [buildWhereClause(addQuery.source, dataset, addQuery.silent)],
+    delete: [],
   };
 }
 
@@ -142,11 +151,11 @@ export function rewriteAdd(
  * @return Rewritten COPY query, i.e., a sequence [CLEAR query, INSERT query]
  */
 export function rewriteCopy(
-  copyQuery: Algebra.UpdateCopyMoveNode,
+  copyQuery: CopyMoveAddOperation,
   dataset: Dataset
-): [Algebra.UpdateClearNode, Algebra.UpdateQueryNode] {
+): [ClearDropOperation, InsertDeleteOperation] {
   // first, build a CLEAR query to empty the destination
-  const clear: Algebra.UpdateClearNode = {
+  const clear: ClearDropOperation = {
     type: "clear",
     silent: copyQuery.silent,
     graph: { type: "graph" },
@@ -170,13 +179,13 @@ export function rewriteCopy(
  * @return Rewritten MOVE query, i.e., a sequence [CLEAR query, INSERT query, CLEAR query]
  */
 export function rewriteMove(
-  moveQuery: Algebra.UpdateCopyMoveNode,
+  moveQuery: CopyMoveAddOperation,
   dataset: Dataset
-): [Algebra.UpdateClearNode, Algebra.UpdateQueryNode, Algebra.UpdateClearNode] {
+): [ClearDropOperation, InsertDeleteOperation, ClearDropOperation] {
   // first, build a classic COPY query
   const [clearBefore, update] = rewriteCopy(moveQuery, dataset);
   // then, append a CLEAR query to clear the source graph
-  const clearAfter: Algebra.UpdateClearNode = {
+  const clearAfter: ClearDropOperation = {
     type: "clear",
     silent: moveQuery.silent,
     graph: { type: "graph" },
@@ -197,51 +206,16 @@ export function rewriteMove(
  * @return A tuple [classic triples, triples with property paths, set of variables added during rewriting]
  */
 export function extractPropertyPaths(
-  bgp: Algebra.BGPNode
-): [Algebra.TripleObject[], Algebra.PathTripleObject[], string[]] {
-  const parts = partition(
-    bgp.triples,
-    (triple) => typeof triple.predicate === "string"
-  );
-  let classicTriples: Algebra.TripleObject[] =
-    parts[0] as Algebra.TripleObject[];
-  let pathTriples: Algebra.PathTripleObject[] =
-    parts[1] as Algebra.PathTripleObject[];
-  let variables: string[] = [];
-
-  // TODO: change bgp evaluation's behavior for ask queries when subject and object are given
-  /*if (pathTriples.length > 0) {
-    // review property paths and rewrite those equivalent to a regular BGP
-    const paths: Algebra.PathTripleObject[] = []
-    // first rewriting phase
-    pathTriples.forEach((triple, tIndex) => {
-      const t = triple as Algebra.PathTripleObject
-      // 1) unpack sequence paths into a set of RDF triples
-      if (t.predicate.pathType === '/') {
-        t.predicate.items.forEach((pred, seqIndex) => {
-          const joinVar = `?seq_${tIndex}_join_${seqIndex}`
-          const nextJoinVar = `?seq_${tIndex}_join_${seqIndex + 1}`
-          variables.push(joinVar)
-          // non-property paths triples are fed to the BGP executor
-          if (typeof(pred) === 'string') {
-            classicTriples.push({
-              subject: (seqIndex == 0) ? triple.subject : joinVar,
-              predicate: pred,
-              object: (seqIndex == t.predicate.items.length - 1) ? triple.object : nextJoinVar
-            })
-          } else {
-            paths.push({
-              subject: (seqIndex == 0) ? triple.subject : joinVar,
-              predicate: pred,
-              object: (seqIndex == t.predicate.items.length - 1) ? triple.object : nextJoinVar
-            })
-          }
-        })
-      } else {
-        paths.push(t)
-      }
-    })
-    pathTriples = paths
-  }*/
-  return [classicTriples, pathTriples, variables];
+  bgp: BgpPattern
+): [Triple[], Triple[], string[]] {
+  const classicTriples: Triple[] = [];
+  const pathTriples: Triple[] = [];
+  for (const triple of bgp.triples) {
+    if ("pathType" in triple.predicate) {
+      pathTriples.push(triple);
+    } else {
+      classicTriples.push(triple);
+    }
+  }
+  return [classicTriples, pathTriples, []];
 }

@@ -28,10 +28,11 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { beforeEach, describe, it } from "node:test";
 import { BindingBase } from "../../src/api.ts";
+import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine, type TestGraph } from "../utils.ts";
 
-const GRAPH_A_IRI = "http://example.org#some-graph-a";
-const GRAPH_B_IRI = "http://example.org#some-graph-b";
+const GRAPH_A_IRI = createIRI("http://example.org#some-graph-a");
+const GRAPH_B_IRI = createIRI("http://example.org#some-graph-b");
 
 describe("SERVICE queries", () => {
   let engine: TestEngine;

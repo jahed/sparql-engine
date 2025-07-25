@@ -25,11 +25,12 @@ SOFTWARE.
 "use strict";
 
 import { isArray } from "lodash-es";
-import type { Term } from "rdf-js";
-import type { Algebra } from "sparqljs";
+
+import type { Expression, VariableTerm } from "sparqljs";
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import { Bindings } from "../rdf/bindings.ts";
+import type { EngineTripleValue } from "../types.ts";
 import * as rdf from "../utils/rdf.ts";
 import {
   SPARQLExpression,
@@ -41,7 +42,7 @@ import {
  * @param obj - Input object
  * @return True if the input obkect is an iterator, False otherwise
  */
-function isIterable(obj: Object): obj is Iterable<Term | null> {
+function isIterable(obj: Object): obj is Iterable<EngineTripleValue | null> {
   return Symbol.iterator in obj && typeof obj[Symbol.iterator] === "function";
 }
 
@@ -57,8 +58,8 @@ function isIterable(obj: Object): obj is Iterable<Term | null> {
  */
 export default function bind(
   source: PipelineStage<Bindings>,
-  variable: string,
-  expression: Algebra.Expression | string,
+  variable: VariableTerm,
+  expression: Expression,
   customFunctions?: CustomFunctions
 ): PipelineStage<Bindings> {
   const expr = new SPARQLExpression(expression, customFunctions);
@@ -72,9 +73,9 @@ export default function bind(
             for (let term of value) {
               const mu = bindings.clone();
               if (term === null) {
-                mu.set(variable, rdf.toN3(rdf.createUnbound()));
+                mu.set(variable.value, rdf.createUnbound());
               } else {
-                mu.set(variable, rdf.toN3(term));
+                mu.set(variable.value, term);
               }
               input.next(mu);
             }
@@ -89,9 +90,9 @@ export default function bind(
         // null values indicates that an error occurs during the expression's evaluation
         // in this case, the variable is bind to a special UNBOUND value
         if (value === null) {
-          res.set(variable, rdf.toN3(rdf.createUnbound()));
+          res.set(variable.value, rdf.createUnbound());
         } else {
-          res.set(variable, rdf.toN3(value));
+          res.set(variable.value, value);
         }
         return Pipeline.getInstance().of(res);
       }

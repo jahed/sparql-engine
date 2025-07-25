@@ -22,14 +22,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import StageBuilder from "./stage-builder.ts";
-import { Pipeline } from "../pipeline/pipeline.ts";
-import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
-import type { Algebra } from "sparqljs";
-import { Bindings, BindingBase } from "../../rdf/bindings.ts";
+import type { PropertyPath } from "sparqljs";
+import { BindingBase, Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
-import ExecutionContext from "../context/execution-context.ts";
+import type {
+  EngineIRI,
+  EngineObject,
+  EngineSubject,
+  EngineTriple,
+} from "../../types.ts";
 import * as rdf from "../../utils/rdf.ts";
+import { isVariable } from "../../utils/rdf.ts";
+import ExecutionContext from "../context/execution-context.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import { Pipeline } from "../pipeline/pipeline.ts";
+import StageBuilder from "./stage-builder.ts";
 
 /**
  * A fork of Bindings#bound specialized for triple patterns with property paths
@@ -39,21 +46,21 @@ import * as rdf from "../../utils/rdf.ts";
  * @return The bounded triple pattern
  */
 function boundPathTriple(
-  triple: Algebra.PathTripleObject,
+  triple: EngineTriple,
   bindings: Bindings
-): Algebra.PathTripleObject {
-  const t = {
+): EngineTriple {
+  const t: Pick<EngineTriple, "subject" | "predicate" | "object"> = {
     subject: triple.subject,
     predicate: triple.predicate,
     object: triple.object,
   };
-  if (triple.subject.startsWith("?") && bindings.has(triple.subject)) {
-    t.subject = bindings.get(triple.subject)!;
+  if (isVariable(triple.subject) && bindings.has(triple.subject.value)) {
+    t.subject = bindings.get(triple.subject.value) as EngineSubject;
   }
-  if (triple.object.startsWith("?") && bindings.has(triple.object)) {
-    t.object = bindings.get(triple.object)!;
+  if (isVariable(triple.object) && bindings.has(triple.object.value)) {
+    t.object = bindings.get(triple.object.value)!;
   }
-  return t;
+  return rdf.dataFactory.quad(t.subject, t.predicate, t.object);
 }
 
 /**
@@ -71,7 +78,7 @@ export default abstract class PathStageBuilder extends StageBuilder {
    * @param  iris - List of Graph's iris
    * @return An RDF Graph
    */
-  _getGraph(iris: string[]): Graph {
+  _getGraph(iris: EngineIRI[]): Graph {
     if (iris.length === 0) {
       return this._dataset.getDefaultGraph();
     } else if (iris.length === 1) {
@@ -89,20 +96,25 @@ export default abstract class PathStageBuilder extends StageBuilder {
    */
   execute(
     source: PipelineStage<Bindings>,
-    triples: Algebra.PathTripleObject[],
+    triples: EngineTriple[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     // create a join pipeline between all property paths using an index join
     const engine = Pipeline.getInstance();
     return triples.reduce(
-      (iter: PipelineStage<Bindings>, triple: Algebra.PathTripleObject) => {
+      (iter: PipelineStage<Bindings>, triple: EngineTriple) => {
         return engine.mergeMap(iter, (bindings) => {
           const { subject, predicate, object } = boundPathTriple(
             triple,
             bindings
           );
           return engine.map(
-            this._buildIterator(subject, predicate, object, context),
+            this._buildIterator(
+              subject,
+              predicate as unknown as PropertyPath,
+              object,
+              context
+            ),
             (b: Bindings) => bindings.union(b)
           );
         });
@@ -120,9 +132,9 @@ export default abstract class PathStageBuilder extends StageBuilder {
    * @return A {@link PipelineStage} which yield set of bindings
    */
   _buildIterator(
-    subject: string,
-    path: Algebra.PropertyPath,
-    obj: string,
+    subject: EngineSubject,
+    path: PropertyPath,
+    obj: EngineObject,
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     const graph =
@@ -136,24 +148,21 @@ export default abstract class PathStageBuilder extends StageBuilder {
       graph,
       context
     );
-    return Pipeline.getInstance().map(
-      evaluator,
-      (triple: Algebra.TripleObject) => {
-        const temp = new BindingBase();
-        if (rdf.isVariable(subject)) {
-          temp.set(subject, triple.subject);
-        }
-        if (rdf.isVariable(obj)) {
-          temp.set(obj, triple.object);
-        }
-        // TODO: change the function's behavior for ask queries when subject and object are given
-        if (!rdf.isVariable(subject) && !rdf.isVariable(obj)) {
-          temp.set("?ask_s", triple.subject);
-          temp.set("?ask_v", triple.object);
-        }
-        return temp;
+    return Pipeline.getInstance().map(evaluator, (triple: EngineTriple) => {
+      const temp = new BindingBase();
+      if (rdf.isVariable(subject)) {
+        temp.set(subject.value, triple.subject);
       }
-    );
+      if (rdf.isVariable(obj)) {
+        temp.set(obj.value, triple.object);
+      }
+      // TODO: change the function's behavior for ask queries when subject and object are given
+      if (!rdf.isVariable(subject) && !rdf.isVariable(obj)) {
+        temp.set("?ask_s", triple.subject);
+        temp.set("?ask_v", triple.object);
+      }
+      return temp;
+    });
   }
 
   /**
@@ -166,10 +175,10 @@ export default abstract class PathStageBuilder extends StageBuilder {
    * @return A {@link PipelineStage} which yield RDF triples matching the property path
    */
   abstract _executePropertyPath(
-    subject: string,
-    path: Algebra.PropertyPath,
-    obj: string,
+    subject: EngineSubject,
+    path: PropertyPath,
+    obj: EngineObject,
     graph: Graph,
     context: ExecutionContext
-  ): PipelineStage<Algebra.TripleObject>;
+  ): PipelineStage<EngineTriple>;
 }

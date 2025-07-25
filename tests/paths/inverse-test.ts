@@ -78,7 +78,7 @@ describe("SPARQL property paths: inverse paths", () => {
         const b = bindings.toObject();
         expect(b).to.have.property("?x");
         expect(b).to.have.property("?y");
-        switch (b["?x"]) {
+        switch (b["?x"].value) {
           case "http://example.org/Alice":
             expect(b["?y"]).to.be.oneOf([
               "http://example.org/Carol",

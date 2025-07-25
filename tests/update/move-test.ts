@@ -26,10 +26,11 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
+import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
-const GRAPH_A_IRI = "http://example.org#some-graph-a";
-const GRAPH_B_IRI = "http://example.org#some-graph-b";
+const GRAPH_A_IRI = createIRI("http://example.org#some-graph-a");
+const GRAPH_B_IRI = createIRI("http://example.org#some-graph-b");
 
 describe("SPARQL UPDATE: MOVE queries", () => {
   let engine: TestEngine;

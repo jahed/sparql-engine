@@ -85,12 +85,12 @@ describe("SPARQL queries with OPTIONAL", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?s", "?article");
-        expect(b["?s"]).to.be.oneOf([
+        expect(b).to.have.keys("s", "article");
+        expect(b["s"].value).to.be.oneOf([
           "https://dblp.org/pers/m/Minier:Thomas",
           "https://dblp.org/pers/m/Minier:Thomas_2",
         ]);
-        if (b["?s"] === "https://dblp.org/pers/m/Minier:Thomas_2") {
+        if (b["s"].value === "https://dblp.org/pers/m/Minier:Thomas_2") {
           expect(b["?article"]).to.equal("UNBOUND");
         } else {
           expect(b["?article"]).to.not.equal("UNBOUND");
@@ -155,14 +155,14 @@ describe("SPARQL queries with OPTIONAL", () => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
         expect(b).to.have.keys("?s", "?article");
-        expect(b["?s"]).to.be.oneOf([
+        expect(b["s"]).to.be.oneOf([
           "https://dblp.org/pers/m/Minier:Thomas",
           "https://dblp.org/pers/m/Minier:Thomas_2",
         ]);
-        if (b["?s"] === "https://dblp.org/pers/m/Minier:Thomas_2") {
-          expect(b["?article"]).to.equal("UNBOUND");
+        if (b["s"].value === "https://dblp.org/pers/m/Minier:Thomas_2") {
+          expect(b["article"].value).to.equal("UNBOUND");
         } else {
-          expect(b["?article"]).to.not.equal("UNBOUND");
+          expect(b["article"].value).to.not.equal("UNBOUND");
         }
         results.push(b);
       },

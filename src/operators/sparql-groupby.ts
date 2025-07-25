@@ -24,11 +24,12 @@ SOFTWARE.
 
 "use strict";
 
-import { sortedIndexOf } from "lodash-es";
+import { termToString } from "rdf-string";
+import type { VariableTerm } from "sparqljs";
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import { Bindings } from "../rdf/bindings.ts";
-import * as rdf from "../utils/rdf.ts";
+import type { EngineTripleValue } from "../types.ts";
 
 /**
  * Hash functions for set of bindings
@@ -37,21 +38,19 @@ import * as rdf from "../utils/rdf.ts";
  * @param  bindings  - Set of bindings to hash
  * @return Hashed set of bindings
  */
-function _hashBindings(variables: string[], bindings: Bindings): string {
+function _hashBindings(variables: VariableTerm[], bindings: Bindings): string {
   // if no GROUP BY variables are used (in the case of an empty GROUP BY)
   // then we use a default grouping key
   if (variables.length === 0) {
     return "http://callidon.github.io/sparql-engine#DefaultGroupKey";
   }
   return variables
-    .map((v) => {
-      if (bindings.has(v)) {
-        return bindings.get(v);
-      }
-      return "null";
-    })
+    .map((v) => bindings.get(v.value))
+    .map((t) => termToString(t))
     .join(";");
 }
+
+export type Group = Record<string, EngineTripleValue[]>;
 
 /**
  * Apply a SPARQL GROUP BY clause
@@ -63,20 +62,19 @@ function _hashBindings(variables: string[], bindings: Bindings): string {
  */
 export default function sparqlGroupBy(
   source: PipelineStage<Bindings>,
-  variables: string[]
-) {
-  const groups: Map<string, any> = new Map();
+  variables: VariableTerm[]
+): PipelineStage<Bindings> {
+  const groups: Map<string, Group> = new Map();
   const keys: Map<string, Bindings> = new Map();
   const engine = Pipeline.getInstance();
-  const groupVariables = variables.sort();
   let op = engine.map(source, (bindings: Bindings) => {
     const key = _hashBindings(variables, bindings);
     // create a new group is needed
     if (!groups.has(key)) {
       keys.set(
         key,
-        bindings.filter(
-          (variable) => sortedIndexOf(groupVariables, variable) > -1
+        bindings.filter((variable) =>
+          variables.some((v) => v.value === variable)
         )
       );
       groups.set(key, {});
@@ -84,16 +82,17 @@ export default function sparqlGroupBy(
     // parse each binding in the intermediate format used by SPARQL expressions
     // and insert it into the corresponding group
     bindings.forEach((variable, value) => {
-      if (!(variable in groups.get(key))) {
-        groups.get(key)[variable] = [rdf.fromN3(value)];
+      const group = groups.get(key)!;
+      if (variable in group) {
+        group[variable].push(value);
       } else {
-        groups.get(key)[variable].push(rdf.fromN3(value));
+        group[variable] = [value];
       }
     });
     return null;
   });
   return engine.mergeMap(engine.collect(op), () => {
-    const aggregates: any[] = [];
+    const aggregates: Bindings[] = [];
     // transform each group in a set of bindings
     groups.forEach((group, key) => {
       // also add the GROUP BY keys to the set of bindings

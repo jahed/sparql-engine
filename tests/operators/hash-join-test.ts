@@ -29,6 +29,7 @@ import { describe, it } from "node:test";
 import { from } from "rxjs";
 import { BindingBase } from "../../src/api.ts";
 import hashJoin from "../../src/operators/join/hash-join.ts";
+import { createIRI, createLiteral } from "../../src/utils/rdf.ts";
 
 describe("Hash Join operator", () => {
   it("should perform a join between two sources of bindings", (t, done) => {
@@ -38,22 +39,22 @@ describe("Hash Join operator", () => {
     nbEach.set("http://example.org#titi", 0);
     nbEach.set("http://example.org#tata", 0);
     const left = from([
-      BindingBase.fromObject({ "?x": "http://example.org#toto" }),
-      BindingBase.fromObject({ "?x": "http://example.org#titi" }),
+      BindingBase.fromObject({ "?x": createIRI("http://example.org#toto") }),
+      BindingBase.fromObject({ "?x": createIRI("http://example.org#titi") }),
     ]);
     const right = from([
-      BindingBase.fromObject({ "?x": "http://example.org#toto", "?y": '"1"' }),
-      BindingBase.fromObject({ "?x": "http://example.org#toto", "?y": '"2"' }),
-      BindingBase.fromObject({ "?x": "http://example.org#toto", "?y": '"3"' }),
-      BindingBase.fromObject({ "?x": "http://example.org#titi", "?y": '"4"' }),
-      BindingBase.fromObject({ "?x": "http://example.org#tata", "?y": '"5"' }),
+      BindingBase.fromObject({ "?x": createIRI("http://example.org#toto"), "?y": createLiteral("1") }),
+      BindingBase.fromObject({ "?x": createIRI("http://example.org#toto"), "?y": createLiteral("2") }),
+      BindingBase.fromObject({ "?x": createIRI("http://example.org#toto"), "?y": createLiteral("3") }),
+      BindingBase.fromObject({ "?x": createIRI("http://example.org#titi"), "?y": createLiteral("4") }),
+      BindingBase.fromObject({ "?x": createIRI("http://example.org#tata"), "?y": createLiteral("5") }),
     ]);
 
     const op = hashJoin(left, right, "?x");
     op.subscribe(
       (value) => {
         expect(value.toObject()).to.have.all.keys("?x", "?y");
-        switch (value.get("?x")) {
+        switch (value.get("?x")?.value) {
           case "http://example.org#toto":
             expect(value.get("?y")).to.be.oneOf(['"1"', '"2"', '"3"']);
             nbEach.set(

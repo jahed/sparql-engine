@@ -26,21 +26,22 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { describe, it } from "node:test";
-import type { Algebra } from "sparqljs";
 import { ExecutionContext, Graph, type PipelineInput } from "../../src/api.ts";
+import type { EngineTriple } from "../../src/types.ts";
+import { dataFactory } from "../../src/utils/rdf.ts";
 
 describe("Graph", () => {
   class TestGraph extends Graph {
-    insert(triple: Algebra.TripleObject): Promise<void> {
+    insert(triple: EngineTriple): Promise<void> {
       throw new Error("Method not implemented.");
     }
-    delete(triple: Algebra.TripleObject): Promise<void> {
+    delete(triple: EngineTriple): Promise<void> {
       throw new Error("Method not implemented.");
     }
     find(
-      pattern: Algebra.TripleObject,
+      pattern: EngineTriple,
       context: ExecutionContext
-    ): PipelineInput<Algebra.TripleObject> {
+    ): PipelineInput<EngineTriple> {
       throw new Error("Method not implemented.");
     }
     clear(): Promise<void> {
@@ -48,25 +49,27 @@ describe("Graph", () => {
     }
   }
 
+  function testQuad() {
+    return dataFactory.quad(
+      dataFactory.namedNode("s"),
+      dataFactory.namedNode("p"),
+      dataFactory.namedNode("o")
+    );
+  }
+
   it('should enforce subclasses to implement an "insert" method', () => {
     const g = new TestGraph();
-    expect(() => g.insert({ subject: "", predicate: "", object: "" })).to.throw(
-      Error
-    );
+    expect(() => g.insert(testQuad())).to.throw(Error);
   });
 
   it('should enforce subclasses to implement a "delete" method', () => {
     const g = new TestGraph();
-    expect(() => g.delete({ subject: "", predicate: "", object: "" })).to.throw(
-      Error
-    );
+    expect(() => g.delete(testQuad())).to.throw(Error);
   });
 
   it('should enforce subclasses to implement a "find" method', () => {
     const g = new TestGraph();
-    expect(() =>
-      g.find({ subject: "", predicate: "", object: "" }, new ExecutionContext())
-    ).to.throw(Error);
+    expect(() => g.find(testQuad(), new ExecutionContext())).to.throw(Error);
   });
 
   it('should enforce subclasses to implement a "clear" method', () => {

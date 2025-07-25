@@ -25,11 +25,12 @@ SOFTWARE.
 "use strict";
 
 import StageBuilder from "./stage-builder.ts";
-import type { Algebra } from "sparqljs";
-import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+
+import type { Ordering } from "sparqljs";
+import orderby from "../../operators/orderby.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
 import ExecutionContext from "../context/execution-context.ts";
-import orderby from "../../operators/orderby.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 
 /**
  * A OrderByStageBuilder evaluates ORDER BY clauses
@@ -38,7 +39,7 @@ import orderby from "../../operators/orderby.ts";
 export default class OrderByStageBuilder extends StageBuilder {
   execute(
     source: PipelineStage<Bindings>,
-    orders: Algebra.OrderComparator[],
+    orders: Ordering[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     return orderby(source, orders);

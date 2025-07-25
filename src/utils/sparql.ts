@@ -1,10 +1,10 @@
 "use strict";
 
 import { includes, union } from "lodash-es";
-import type { Algebra } from "sparqljs";
+import type { EngineTriple, EngineVariable } from "../types.ts";
 import * as rdf from "./rdf.ts";
 
-export function hashBGP(bgp: Algebra.TripleObject[]): string {
+export function hashBGP(bgp: EngineTriple[]): string {
   return bgp.map(rdf.hashTriple).join(";");
 }
 
@@ -13,8 +13,8 @@ export function hashBGP(bgp: Algebra.TripleObject[]): string {
  * @param  pattern - Triple Pattern
  * @return The set of SPARQL variables in the triple pattern
  */
-export function variablesFromPattern(pattern: Algebra.TripleObject): string[] {
-  const res: string[] = [];
+export function variablesFromPattern(pattern: EngineTriple): EngineVariable[] {
+  const res: EngineVariable[] = [];
   if (rdf.isVariable(pattern.subject)) {
     res.push(pattern.subject);
   }
@@ -34,9 +34,9 @@ export function variablesFromPattern(pattern: Algebra.TripleObject): string[] {
  * @return Order set of triple patterns
  */
 export function leftLinearJoinOrdering(
-  patterns: Algebra.TripleObject[]
-): Algebra.TripleObject[] {
-  const results: Algebra.TripleObject[] = [];
+  patterns: EngineTriple[]
+): EngineTriple[] {
+  const results: EngineTriple[] = [];
   const x = new Set();
   if (patterns.length > 0) {
     // sort pattern by join predicate

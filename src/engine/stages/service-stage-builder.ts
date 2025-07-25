@@ -25,12 +25,18 @@ SOFTWARE.
 "use strict";
 
 import StageBuilder from "./stage-builder.ts";
-import type { Algebra } from "sparqljs";
-import { Pipeline } from "../pipeline/pipeline.ts";
-import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+
+import {
+  Wildcard,
+  type IriTerm,
+  type Query,
+  type ServicePattern,
+} from "sparqljs";
 import type { Bindings } from "../../rdf/bindings.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import ContextSymbols from "../context/symbols.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import { Pipeline } from "../pipeline/pipeline.ts";
 
 /**
  * A ServiceStageBuilder is responsible for evaluation a SERVICE clause in a SPARQL query.
@@ -47,28 +53,29 @@ export default class ServiceStageBuilder extends StageBuilder {
    */
   execute(
     source: PipelineStage<Bindings>,
-    node: Algebra.ServiceNode,
+    node: ServicePattern,
     context: ExecutionContext
   ): PipelineStage<Bindings> {
-    let subquery: Algebra.RootNode;
+    let subquery: Query;
     if (node.patterns[0].type === "query") {
-      subquery = node.patterns[0] as Algebra.RootNode;
+      subquery = node.patterns[0] as Query;
     } else {
       subquery = {
         prefixes: context.getProperty(ContextSymbols.PREFIXES),
         queryType: "SELECT",
-        variables: ["*"],
+        variables: [new Wildcard()],
         type: "query",
         where: node.patterns,
       };
     }
+    const iri = node.name as IriTerm;
     // auto-add the graph used to evaluate the SERVICE close if it is missing from the dataset
     if (
-      this.dataset.getDefaultGraph().iri !== node.name &&
-      !this.dataset.hasNamedGraph(node.name)
+      this.dataset.getDefaultGraph().iri !== iri &&
+      !this.dataset.hasNamedGraph(iri)
     ) {
-      const graph = this.dataset.createGraph(node.name);
-      this.dataset.addNamedGraph(node.name, graph);
+      const graph = this.dataset.createGraph(iri);
+      this.dataset.addNamedGraph(iri, graph);
     }
     let handler = undefined;
     if (node.silent) {
@@ -77,7 +84,7 @@ export default class ServiceStageBuilder extends StageBuilder {
       };
     }
     return Pipeline.getInstance().catch<Bindings, Bindings>(
-      this._buildIterator(source, node.name, subquery, context),
+      this._buildIterator(source, iri, subquery, context),
       handler
     );
   }
@@ -93,8 +100,8 @@ export default class ServiceStageBuilder extends StageBuilder {
    */
   _buildIterator(
     source: PipelineStage<Bindings>,
-    iri: string,
-    subquery: Algebra.RootNode,
+    iri: IriTerm,
+    subquery: Query,
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     const opts = context.clone();

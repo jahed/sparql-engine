@@ -132,8 +132,10 @@ describe("SPARQL custom operators", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?length");
-        const length = parseInt(b["?length"].split("^^")[0].replace(/"/g, ""));
+        expect(b).to.have.keys("length");
+        const length = parseInt(
+          b["length"].value.split("^^")[0].replace(/"/g, "")
+        );
         expect(length % 2).to.equal(0);
 
         results.push(b);

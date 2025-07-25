@@ -22,11 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import type { Algebra } from "sparqljs";
+import type { PropertyPath } from "sparqljs";
 import type { PipelineStage } from "../../../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../../../engine/pipeline/pipeline.ts";
 import { Bindings } from "../../../rdf/bindings.ts";
 import Graph from "../../../rdf/graph.ts";
+import type {
+  EngineObject,
+  EnginePredicate,
+  EngineSubject,
+  EngineTriple,
+  EngineTripleValue,
+} from "../../../types.ts";
 import * as rdf from "../../../utils/rdf.ts";
 import ExecutionContext from "../../context/execution-context.ts";
 import PathStageBuilder from "../path-stage-builder.ts";
@@ -40,7 +47,7 @@ import { GlushkovBuilder } from "./automatonBuilder.ts";
  * @author Julien Aimonier-Davat
  */
 class Step {
-  private _node: string;
+  private _node: EngineTripleValue;
   private _state: number;
 
   /**
@@ -48,7 +55,7 @@ class Step {
    * @param node - The label of a node in the RDF Graph
    * @param state - The ID of a State in the Automaton
    */
-  constructor(node: string, state: number) {
+  constructor(node: EngineTripleValue, state: number) {
     this._node = node;
     this._state = state;
   }
@@ -65,7 +72,7 @@ class Step {
    * Get the RDF Graph's node associated with this Step of the ResultPath
    * @return The RDF Graph's node associated with this Step
    */
-  get node(): string {
+  get node(): EngineTripleValue {
     return this._node;
   }
 
@@ -173,79 +180,93 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
    */
   evaluatePropertyPath(
     rPath: ResultPath,
-    obj: string,
+    obj: EngineTripleValue,
     graph: Graph,
     context: ExecutionContext,
-    automaton: Automaton<number, string>,
+    automaton: Automaton<number, EnginePredicate>,
     forward: boolean
-  ): PipelineStage<Algebra.TripleObject> {
+  ): PipelineStage<EngineTriple> {
     const engine = Pipeline.getInstance();
     let self = this;
     let lastStep: Step = rPath.lastStep();
-    let result: PipelineStage<Algebra.TripleObject> = engine.empty();
+    let result: PipelineStage<EngineTriple> = engine.empty();
     if (forward) {
       if (
         automaton.isFinal(lastStep.state) &&
-        (rdf.isVariable(obj) ? true : lastStep.node === obj)
+        (rdf.isVariable(obj) ? true : lastStep.node.equals(obj))
       ) {
-        let subject: string = rPath.firstStep().node;
-        let object: string = rPath.lastStep().node;
-        result = engine.of({ subject, predicate: "", object });
+        let subject = rPath.firstStep().node;
+        let object = rPath.lastStep().node;
+        result = engine.of<EngineTriple>(
+          rdf.dataFactory.quad(
+            subject as EngineSubject,
+            rdf.dataFactory.namedNode(""),
+            object
+          )
+        );
       }
     } else {
       if (automaton.isInitial(lastStep.state)) {
-        let subject: string = rPath.lastStep().node;
-        let object: string = rPath.firstStep().node;
-        result = engine.of({ subject, predicate: "", object });
+        let subject = rPath.lastStep().node;
+        let object = rPath.firstStep().node;
+        result = engine.of<EngineTriple>(
+          rdf.dataFactory.quad(
+            subject as EngineSubject,
+            rdf.dataFactory.namedNode(""),
+            object
+          )
+        );
       }
     }
-    let transitions: Array<Transition<number, string>>;
+    let transitions: Array<Transition<number, EnginePredicate>>;
     if (forward) {
       transitions = automaton.getTransitionsFrom(lastStep.state);
     } else {
       transitions = automaton.getTransitionsTo(lastStep.state);
     }
-    let obs: PipelineStage<Algebra.TripleObject>[] = transitions.map(
-      (transition) => {
-        let reverse =
-          (forward && transition.reverse) || (!forward && !transition.reverse);
-        let bgp: Array<Algebra.TripleObject> = [
-          {
-            subject: reverse ? "?o" : lastStep.node,
-            predicate: transition.negation ? "?p" : transition.predicates[0],
-            object: reverse ? lastStep.node : "?o",
-          },
-        ];
-        return engine.mergeMap(
-          engine.from(graph.evalBGP(bgp, context)),
-          (binding: Bindings) => {
-            let p = binding.get("?p");
-            let o = binding.get("?o") as string;
-            if (p !== null ? !transition.hasPredicate(p) : true) {
-              let newStep;
-              if (forward) {
-                newStep = new Step(o, transition.to.name);
-              } else {
-                newStep = new Step(o, transition.from.name);
-              }
-              if (!rPath.contains(newStep)) {
-                let newPath = rPath.clone();
-                newPath.add(newStep);
-                return self.evaluatePropertyPath(
-                  newPath,
-                  obj,
-                  graph,
-                  context,
-                  automaton,
-                  forward
-                );
-              }
+    let obs: PipelineStage<EngineTriple>[] = transitions.map((transition) => {
+      let reverse =
+        (forward && transition.reverse) || (!forward && !transition.reverse);
+      let bgp: Array<EngineTriple> = [
+        rdf.dataFactory.quad(
+          reverse
+            ? rdf.dataFactory.variable("o")
+            : (lastStep.node as EngineSubject),
+          transition.negation
+            ? rdf.dataFactory.variable("p")
+            : transition.predicates[0],
+          reverse ? lastStep.node : rdf.dataFactory.variable("o")
+        ),
+      ];
+      return engine.mergeMap(
+        engine.from(graph.evalBGP(bgp, context)),
+        (binding: Bindings) => {
+          let p = binding.get("p");
+          let o = binding.get("o")!;
+          if (p !== null ? !transition.hasPredicate(p) : true) {
+            let newStep;
+            if (forward) {
+              newStep = new Step(o, transition.to.name);
+            } else {
+              newStep = new Step(o, transition.from.name);
             }
-            return engine.empty();
+            if (!rPath.contains(newStep)) {
+              let newPath = rPath.clone();
+              newPath.add(newStep);
+              return self.evaluatePropertyPath(
+                newPath,
+                obj,
+                graph,
+                context,
+                automaton,
+                forward
+              );
+            }
           }
-        );
-      }
-    );
+          return engine.empty();
+        }
+      );
+    });
     return engine.merge(...obs, result);
   }
 
@@ -258,58 +279,62 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
    * @return An Observable which yield RDF triples retrieved after the evaluation of the reflexive closure
    */
   reflexiveClosure(
-    subject: string,
-    obj: string,
+    subject: EngineSubject,
+    obj: EngineObject,
     graph: Graph,
     context: ExecutionContext
-  ): PipelineStage<Algebra.TripleObject> {
+  ): PipelineStage<EngineTriple> {
     const engine = Pipeline.getInstance();
     if (rdf.isVariable(subject) && !rdf.isVariable(obj)) {
-      let result: Algebra.TripleObject = {
-        subject: obj,
-        predicate: "",
-        object: obj,
-      };
+      let result: EngineTriple = rdf.dataFactory.quad(
+        obj as EngineSubject,
+        rdf.dataFactory.namedNode(""),
+        obj
+      );
       return engine.of(result);
     } else if (!rdf.isVariable(subject) && rdf.isVariable(obj)) {
-      let result: Algebra.TripleObject = {
-        subject: subject,
-        predicate: "",
-        object: subject,
-      };
+      let result: EngineTriple = rdf.dataFactory.quad(
+        subject,
+        rdf.dataFactory.namedNode(""),
+        subject
+      );
       return engine.of(result);
     } else if (rdf.isVariable(subject) && rdf.isVariable(obj)) {
-      let bgp: Array<Algebra.TripleObject> = [
-        { subject: "?s", predicate: "?p", object: "?o" },
+      let bgp: Array<EngineTriple> = [
+        rdf.dataFactory.quad(
+          rdf.dataFactory.variable("s"),
+          rdf.dataFactory.variable("p"),
+          rdf.dataFactory.variable("o")
+        ),
       ];
       return engine.distinct(
         engine.mergeMap(
           engine.from(graph.evalBGP(bgp, context)),
           (binding: Bindings) => {
-            let s = binding.get("?s") as string;
-            let o = binding.get("?o") as string;
-            let t1: Algebra.TripleObject = {
-              subject: s,
-              predicate: "",
-              object: s,
-            };
-            let t2: Algebra.TripleObject = {
-              subject: o,
-              predicate: "",
-              object: o,
-            };
+            let s = binding.get("s")!;
+            let o = binding.get("o")!;
+            let t1: EngineTriple = rdf.dataFactory.quad(
+              s as EngineSubject,
+              rdf.dataFactory.namedNode(""),
+              s
+            );
+            let t2: EngineTriple = rdf.dataFactory.quad(
+              o as EngineSubject,
+              rdf.dataFactory.namedNode(""),
+              o
+            );
             return engine.of(t1, t2);
           }
         ),
-        (triple: Algebra.TripleObject) => triple.subject
+        (triple: EngineTriple) => triple.subject
       );
     }
     if (subject === obj) {
-      let result: Algebra.TripleObject = {
-        subject: subject,
-        predicate: "",
-        object: obj,
-      };
+      let result = rdf.dataFactory.quad(
+        subject,
+        rdf.dataFactory.namedNode(""),
+        obj
+      );
       return engine.of(result);
     }
     return engine.empty();
@@ -328,69 +353,77 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
    * @return An Observable which yield RDF triples matching the property path
    */
   startPropertyPathEvaluation(
-    subject: string,
-    obj: string,
+    subject: EngineSubject,
+    obj: EngineObject,
     graph: Graph,
     context: ExecutionContext,
-    automaton: Automaton<number, string>,
+    automaton: Automaton<number, EnginePredicate>,
     forward: boolean
-  ): PipelineStage<Algebra.TripleObject> {
+  ): PipelineStage<EngineTriple> {
     const engine = Pipeline.getInstance();
     let self = this;
-    let reflexiveClosureResults: PipelineStage<Algebra.TripleObject> =
+    let reflexiveClosureResults: PipelineStage<EngineTriple> =
       automaton.isFinal(0)
         ? this.reflexiveClosure(subject, obj, graph, context)
         : engine.empty();
-    let transitions: Array<Transition<number, string>>;
+    let transitions: Array<Transition<number, EnginePredicate>>;
     if (forward) {
       transitions = automaton.getTransitionsFrom(0);
     } else {
       transitions = automaton.getTransitionsToFinalStates();
     }
-    let obs: PipelineStage<Algebra.TripleObject>[] = transitions.map(
-      (transition) => {
-        let reverse =
-          (forward && transition.reverse) || (!forward && !transition.reverse);
-        let bgp: Array<Algebra.TripleObject> = [
-          {
-            subject: reverse ? (rdf.isVariable(obj) ? "?o" : obj) : subject,
-            predicate: transition.negation ? "?p" : transition.predicates[0],
-            object: reverse ? subject : rdf.isVariable(obj) ? "?o" : obj,
-          },
-        ];
+    let obs: PipelineStage<EngineTriple>[] = transitions.map((transition) => {
+      let reverse =
+        (forward && transition.reverse) || (!forward && !transition.reverse);
+      let bgp: Array<EngineTriple> = [
+        rdf.dataFactory.quad(
+          reverse
+            ? rdf.isVariable(obj)
+              ? rdf.dataFactory.variable("o")
+              : (obj as EngineSubject)
+            : subject,
+          transition.negation
+            ? rdf.dataFactory.variable("p")
+            : transition.predicates[0],
+          reverse
+            ? subject
+            : rdf.isVariable(obj)
+              ? rdf.dataFactory.variable("o")
+              : obj
+        ),
+      ];
 
-        return engine.mergeMap(
-          engine.from(graph.evalBGP(bgp, context)),
-          (binding: Bindings) => {
-            let s = (
-              rdf.isVariable(subject) ? binding.get(subject) : subject
-            ) as string;
-            let p = binding.get("?p");
-            let o = rdf.isVariable(obj) ? (binding.get("?o") as string) : obj;
+      return engine.mergeMap(
+        engine.from(graph.evalBGP(bgp, context)),
+        (binding: Bindings) => {
+          let s = rdf.isVariable(subject)
+            ? binding.get(subject.value)!
+            : subject;
+          let p = binding.get("p");
+          let o = rdf.isVariable(obj) ? binding.get("o")! : obj;
 
-            if (p !== null ? !transition.hasPredicate(p) : true) {
-              let path = new ResultPath();
-              if (forward) {
-                path.add(new Step(s, transition.from.name));
-                path.add(new Step(o, transition.to.name));
-              } else {
-                path.add(new Step(s, transition.to.name));
-                path.add(new Step(o, transition.from.name));
-              }
-              return self.evaluatePropertyPath(
-                path,
-                obj,
-                graph,
-                context,
-                automaton,
-                forward
-              );
+          if (p !== null ? !transition.hasPredicate(p) : true) {
+            let path = new ResultPath();
+            if (forward) {
+              path.add(new Step(s, transition.from.name));
+              path.add(new Step(o, transition.to.name));
+            } else {
+              path.add(new Step(s, transition.to.name));
+              path.add(new Step(o, transition.from.name));
             }
-            return engine.empty();
+            return self.evaluatePropertyPath(
+              path,
+              obj,
+              graph,
+              context,
+              automaton,
+              forward
+            );
           }
-        );
-      }
-    );
+          return engine.empty();
+        }
+      );
+    });
     return engine.merge(...obs, reflexiveClosureResults);
   }
 
@@ -404,18 +437,18 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
    * @return An Observable which yield RDF triples matching the property path
    */
   _executePropertyPath(
-    subject: string,
-    path: Algebra.PropertyPath,
-    obj: string,
+    subject: EngineSubject,
+    path: PropertyPath,
+    obj: EngineObject,
     graph: Graph,
     context: ExecutionContext
-  ): PipelineStage<Algebra.TripleObject> {
-    let automaton: Automaton<number, string> = new GlushkovBuilder(
+  ): PipelineStage<EngineTriple> {
+    let automaton: Automaton<number, EnginePredicate> = new GlushkovBuilder(
       path
     ).build();
     if (rdf.isVariable(subject) && !rdf.isVariable(obj)) {
       return this.startPropertyPathEvaluation(
-        obj,
+        obj as EngineSubject,
         subject,
         graph,
         context,

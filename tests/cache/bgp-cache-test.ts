@@ -26,9 +26,10 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
-import type { Algebra } from "sparqljs";
 import { BindingBase } from "../../src/api.ts";
 import { LRUBGPCache } from "../../src/engine/cache/bgp-cache.ts";
+import type { EngineTriple } from "../../src/types.ts";
+import { createIRI, dataFactory } from "../../src/utils/rdf.ts";
 
 /**
  * Format a BGP to the format expected by a BGPCache: an object
@@ -36,8 +37,8 @@ import { LRUBGPCache } from "../../src/engine/cache/bgp-cache.ts";
  * @param {*} patterns - Set of triple patterns
  * @param {*} graphIRI - Graph's IRI
  */
-function formatBGP(patterns: Algebra.TripleObject[], graphIRI: string) {
-  return { patterns, graphIRI };
+function formatBGP(patterns: EngineTriple[], graphIRI: string) {
+  return { patterns, graphIRI: createIRI(graphIRI) };
 }
 
 describe("LRUBGPCache", () => {
@@ -50,12 +51,22 @@ describe("LRUBGPCache", () => {
     it("should supports insertion of items over time", (t, done) => {
       const writerID = "1";
       const patterns = [
-        { subject: "?s", predicate: "rdf:type", object: "?type" },
+        dataFactory.quad(
+          dataFactory.variable("s"),
+          createIRI("rdf:type"),
+          dataFactory.variable("type")
+        ),
       ];
       const bgp = formatBGP(patterns, "http://example.org#graphA");
       const bindings = [
-        BindingBase.fromObject({ "?s": ":s1", "?type": ":c1" }),
-        BindingBase.fromObject({ "?s": ":s2", "?type": ":c2" }),
+        BindingBase.fromObject({
+          "?s": createIRI(":s1"),
+          "?type": createIRI(":c1"),
+        }),
+        BindingBase.fromObject({
+          "?s": createIRI(":s2"),
+          "?type": createIRI(":c2"),
+        }),
       ];
       cache.update(bgp, bindings[0], writerID);
       cache.update(bgp, bindings[1], writerID);
@@ -76,15 +87,31 @@ describe("LRUBGPCache", () => {
     it("should find a subset for a Basic Graph Pattern which is partially in the cache", () => {
       // populate cache
       const subsetPatterns = [
-        { subject: "?s", predicate: "rdf:type", object: "?type" },
+        dataFactory.quad(
+          dataFactory.variable("s"),
+          createIRI("rdf:type"),
+          dataFactory.variable("type")
+        ),
       ];
       const subsetBGP = formatBGP(subsetPatterns, "http://example.org#graphA");
-      cache.update(subsetBGP, BindingBase.fromObject({ "?s": ":s1" }), "1");
+      cache.update(
+        subsetBGP,
+        BindingBase.fromObject({ s: createIRI(":s1") }),
+        "1"
+      );
       cache.commit(subsetBGP, "1");
       // search for subset
       const patterns = [
-        { subject: "?s", predicate: "rdf:type", object: "?type" },
-        { subject: "?s", predicate: "foaf:name", object: "?name" },
+        dataFactory.quad(
+          dataFactory.variable("s"),
+          createIRI("rdf:type"),
+          dataFactory.variable("type")
+        ),
+        dataFactory.quad(
+          dataFactory.variable("s"),
+          createIRI("foaf:name"),
+          dataFactory.variable("name")
+        ),
       ];
       const bgp = formatBGP(patterns, "http://example.org#graphA");
       const [computedSubset, computedMissing] = cache.findSubset(bgp);
@@ -95,15 +122,31 @@ describe("LRUBGPCache", () => {
     it("should find an empty subset for a Basic Graph Pattern with no valid subset in the cache", () => {
       // populate cache
       const subsetPatterns = [
-        { subject: "?s", predicate: "rdf:type", object: "?type" },
+        dataFactory.quad(
+          dataFactory.variable("s"),
+          createIRI("rdf:type"),
+          dataFactory.variable("type")
+        ),
       ];
       const subsetBGP = formatBGP(subsetPatterns, "http://example.org#graphA");
-      cache.update(subsetBGP, BindingBase.fromObject({ "?s": ":s1" }), "1");
+      cache.update(
+        subsetBGP,
+        BindingBase.fromObject({ s: createIRI(":s1") }),
+        "1"
+      );
       cache.commit(subsetBGP, "1");
       // search for subset
       const patterns = [
-        { subject: "?s", predicate: "foaf:knows", object: "?type" },
-        { subject: "?s", predicate: "foaf:name", object: "?name" },
+        dataFactory.quad(
+          dataFactory.variable("s"),
+          createIRI("foaf:knows"),
+          dataFactory.variable("type")
+        ),
+        dataFactory.quad(
+          dataFactory.variable("s"),
+          createIRI("foaf:name"),
+          dataFactory.variable("name")
+        ),
       ];
       const bgp = formatBGP(patterns, "http://example.org#graphA");
       const [computedSubset, computedMissing] = cache.findSubset(bgp);
@@ -114,11 +157,23 @@ describe("LRUBGPCache", () => {
     it("should find the largest subset from the cache entry", () => {
       // populate cache
       const subsetPatterns_a = [
-        { subject: "?s", predicate: "rdf:type", object: "?type" },
+        dataFactory.quad(
+          dataFactory.variable("s"),
+          createIRI("rdf:type"),
+          dataFactory.variable("type")
+        ),
       ];
       const subsetPatterns_b = [
-        { subject: "?s", predicate: "rdf:type", object: "?type" },
-        { subject: "?s", predicate: "foaf:name", object: "?name" },
+        dataFactory.quad(
+          dataFactory.variable("s"),
+          createIRI("rdf:type"),
+          dataFactory.variable("type")
+        ),
+        dataFactory.quad(
+          dataFactory.variable("s"),
+          createIRI("foaf:name"),
+          dataFactory.variable("name")
+        ),
       ];
       const subsetBGP_a = formatBGP(
         subsetPatterns_a,
@@ -128,15 +183,35 @@ describe("LRUBGPCache", () => {
         subsetPatterns_b,
         "http://example.org#graphA"
       );
-      cache.update(subsetBGP_a, BindingBase.fromObject({ "?s": ":s1" }), "1");
+      cache.update(
+        subsetBGP_a,
+        BindingBase.fromObject({ s: createIRI(":s1") }),
+        "1"
+      );
       cache.commit(subsetBGP_a, "1");
-      cache.update(subsetBGP_b, BindingBase.fromObject({ "?s": ":s2" }), "1");
+      cache.update(
+        subsetBGP_b,
+        BindingBase.fromObject({ s: createIRI(":s2") }),
+        "1"
+      );
       cache.commit(subsetBGP_b, "1");
       // search for subset
       const patterns = [
-        { subject: "?s", predicate: "rdf:type", object: "?type" },
-        { subject: "?s", predicate: "foaf:knows", object: "?type" },
-        { subject: "?s", predicate: "foaf:name", object: "?name" },
+        dataFactory.quad(
+          dataFactory.variable("s"),
+          createIRI("rdf:type"),
+          dataFactory.variable("type")
+        ),
+        dataFactory.quad(
+          dataFactory.variable("s"),
+          createIRI("foaf:knows"),
+          dataFactory.variable("type")
+        ),
+        dataFactory.quad(
+          dataFactory.variable("s"),
+          createIRI("foaf:name"),
+          dataFactory.variable("name")
+        ),
       ];
       const bgp = formatBGP(patterns, "http://example.org#graphA");
       const [computedSubset, computedMissing] = cache.findSubset(bgp);

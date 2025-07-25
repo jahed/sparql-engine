@@ -72,14 +72,14 @@ describe("CONSTRUCT SPARQL queries", () => {
           "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf",
         ]);
         if (
-          triple.predicate ===
+          triple.predicate.value ===
           "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName"
         ) {
           expect(triple.object).to.equal('"Thomas Minier"@en');
         } else {
           expect(triple.object).to.be.oneOf(expectedArticles);
           expectedArticles = expectedArticles.filter(
-            (a) => a !== triple.object
+            (a) => a !== triple.object.value
           );
         }
         results.push(triple);

@@ -28,10 +28,11 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { beforeEach, describe, it } from "node:test";
 import { BindingBase } from "../../src/rdf/bindings.ts";
+import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
-const GRAPH_A_IRI = "http://example.org#some-graph-a";
-const GRAPH_B_IRI = "http://example.org#some-graph-b";
+const GRAPH_A_IRI = createIRI("http://example.org#some-graph-a");
+const GRAPH_B_IRI = createIRI("http://example.org#some-graph-b");
 
 describe("GRAPH/FROM queries", () => {
   let engine: TestEngine;
@@ -89,7 +90,7 @@ describe("GRAPH/FROM queries", () => {
       nbResults: 7,
       testFun: function (b) {
         expect(b).to.have.all.keys(["?s", "?name", "?article"]);
-        switch (b["?s"]) {
+        switch (b["s"].value) {
           case "https://dblp.org/pers/g/Grall:Arnaud":
             expect(b["?s"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
             expect(b["?name"]).to.equal('"Arnaud Grall"');

@@ -25,6 +25,7 @@ SOFTWARE.
 "use strict";
 
 import { isBoolean } from "lodash-es";
+import { termToString } from "rdf-string";
 import type {
   PipelineStage,
   StreamPipelineInput,
@@ -69,9 +70,9 @@ function writeBindings(
 ): void {
   let output: string[] = [];
   order.forEach((variable) => {
-    if (bindings.has("?" + variable)) {
-      let value = bindings.get("?" + variable)!;
-      output.push(value);
+    if (bindings.has(variable)) {
+      let value = bindings.get(variable)!;
+      output.push(termToString(value));
     }
   });
   input.next(output.join(separator));

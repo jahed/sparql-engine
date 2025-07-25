@@ -24,15 +24,16 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import {
   type CustomFunctions,
   SPARQLExpression,
 } from "./expressions/sparql-expression.ts";
-import type { Algebra } from "sparqljs";
+
 import { Bindings } from "../rdf/bindings.ts";
 import * as rdf from "../utils/rdf.ts";
+import type { Expression } from "sparqljs";
 
 /**
  * Evaluate SPARQL Filter clauses
@@ -45,7 +46,7 @@ import * as rdf from "../utils/rdf.ts";
  */
 export default function sparqlFilter(
   source: PipelineStage<Bindings>,
-  expression: Algebra.Expression,
+  expression: Expression,
   customFunctions?: CustomFunctions
 ) {
   const expr = new SPARQLExpression(expression, customFunctions);

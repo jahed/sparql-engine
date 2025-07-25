@@ -24,6 +24,7 @@ SOFTWARE.
 
 "use strict";
 
+import type { IriTerm } from "sparqljs";
 import Graph from "./graph.ts";
 import UnionGraph from "./union-graph.ts";
 
@@ -33,7 +34,7 @@ import UnionGraph from "./union-graph.ts";
  * @author Thomas Minier
  */
 export default abstract class Dataset<G extends Graph = Graph> {
-  private _graphFactory: (iri: string) => G | null;
+  private _graphFactory: (iri: IriTerm) => G | null;
 
   /**
    * Constructor
@@ -42,7 +43,7 @@ export default abstract class Dataset<G extends Graph = Graph> {
     this._graphFactory = () => null;
   }
 
-  abstract get iris(): string[];
+  abstract get iris(): IriTerm[];
   /**
    * Set the Default Graph of the Dataset
    * @param g - Default Graph
@@ -60,27 +61,27 @@ export default abstract class Dataset<G extends Graph = Graph> {
    * @param iri - IRI of the Named Graph
    * @param g   - RDF Graph
    */
-  abstract addNamedGraph(iri: string, g: G): void;
+  abstract addNamedGraph(iri: IriTerm, g: G): void;
 
   /**
    * Get a Named Graph using its IRI
    * @param  iri - IRI of the Named Graph to retrieve
    * @return The corresponding Named Graph
    */
-  abstract getNamedGraph(iri: string): G;
+  abstract getNamedGraph(iri: IriTerm): G;
 
   /**
    * Delete a Named Graph using its IRI
    * @param  iri - IRI of the Named Graph to delete
    */
-  abstract deleteNamedGraph(iri: string): void;
+  abstract deleteNamedGraph(iri: IriTerm): void;
 
   /**
    * Return True if the Dataset contains a Named graph with the provided IRI
    * @param  iri - IRI of the Named Graph
    * @return True if the Dataset contains a Named graph with the provided IRI
    */
-  abstract hasNamedGraph(iri: string): boolean;
+  abstract hasNamedGraph(iri: IriTerm): boolean;
 
   /**
    * Get an UnionGraph, i.e., the dynamic union of several graphs,
@@ -89,7 +90,7 @@ export default abstract class Dataset<G extends Graph = Graph> {
    * @param  includeDefault - True if the default graph should be included
    * @return The dynamic union of several graphs in the Dataset
    */
-  getUnionGraph(iris: string[], includeDefault: boolean = false): UnionGraph {
+  getUnionGraph(iris: IriTerm[], includeDefault: boolean = false): UnionGraph {
     let graphs: G[] = [];
     if (includeDefault) {
       graphs.push(this.getDefaultGraph());
@@ -118,7 +119,7 @@ export default abstract class Dataset<G extends Graph = Graph> {
    * Set the Graph Factory used by te dataset to create new RDF graphs on-demand
    * @param  factory - Graph Factory
    */
-  setGraphFactory(factory: (iri: string) => G) {
+  setGraphFactory(factory: (iri: IriTerm) => G) {
     this._graphFactory = factory;
   }
 
@@ -128,7 +129,7 @@ export default abstract class Dataset<G extends Graph = Graph> {
    * @param  iri - IRI of the graph to create
    * @return A new RDF Graph
    */
-  createGraph(iri: string): G {
+  createGraph(iri: IriTerm): G {
     const graph = this._graphFactory(iri);
     if (graph === null) {
       throw new Error(

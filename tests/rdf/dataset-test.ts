@@ -26,7 +26,6 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { describe, it } from "node:test";
-import type { Algebra } from "sparqljs";
 import {
   Dataset,
   ExecutionContext,
@@ -34,10 +33,12 @@ import {
   HashMapDataset,
   type PipelineInput,
 } from "../../src/api.ts";
+import type { EngineIRI, EngineTriple } from "../../src/types.ts";
+import { createIRI } from "../../src/utils/rdf.ts";
 
 describe("Dataset", () => {
   class TestDataset extends Dataset {
-    get iris(): string[] {
+    get iris(): EngineIRI[] {
       throw new Error("Method not implemented.");
     }
     setDefaultGraph(g: Graph): void {
@@ -46,31 +47,31 @@ describe("Dataset", () => {
     getDefaultGraph(): Graph {
       throw new Error("Method not implemented.");
     }
-    addNamedGraph(iri: string, g: Graph): void {
+    addNamedGraph(iri: EngineIRI, g: Graph): void {
       throw new Error("Method not implemented.");
     }
-    getNamedGraph(iri: string): Graph {
+    getNamedGraph(iri: EngineIRI): Graph {
       throw new Error("Method not implemented.");
     }
-    deleteNamedGraph(iri: string): void {
+    deleteNamedGraph(iri: EngineIRI): void {
       throw new Error("Method not implemented.");
     }
-    hasNamedGraph(iri: string): boolean {
+    hasNamedGraph(iri: EngineIRI): boolean {
       throw new Error("Method not implemented.");
     }
   }
 
   class TestGraph extends Graph {
-    insert(triple: Algebra.TripleObject): Promise<void> {
+    insert(triple: EngineTriple): Promise<void> {
       throw new Error("Method not implemented.");
     }
-    delete(triple: Algebra.TripleObject): Promise<void> {
+    delete(triple: EngineTriple): Promise<void> {
       throw new Error("Method not implemented.");
     }
     find(
-      pattern: Algebra.TripleObject,
+      pattern: EngineTriple,
       context: ExecutionContext
-    ): PipelineInput<Algebra.TripleObject> {
+    ): PipelineInput<EngineTriple> {
       throw new Error("Method not implemented.");
     }
     clear(): Promise<void> {
@@ -90,19 +91,21 @@ describe("Dataset", () => {
 
   it('should enforce subclasses to implement a "addNamedGraph" method', () => {
     const d = new TestDataset();
-    expect(() => d.addNamedGraph("", new TestGraph())).to.throw(Error);
+    expect(() => d.addNamedGraph(createIRI(""), new TestGraph())).to.throw(
+      Error
+    );
   });
 
   it('should enforce subclasses to implement a "getNamedGraph" method', () => {
     const d = new TestDataset();
-    expect(() => d.getNamedGraph("")).to.throw(Error);
+    expect(() => d.getNamedGraph(createIRI(""))).to.throw(Error);
   });
 
   it('should provides a generic "getAllGraphs()" implementation', () => {
     const gA = new TestGraph();
     const gB = new TestGraph();
-    const GRAPH_A_IRI = "http://example.org#A";
-    const GRAPH_B_IRI = "http://example.org#B";
+    const GRAPH_A_IRI = createIRI("http://example.org#A");
+    const GRAPH_B_IRI = createIRI("http://example.org#B");
     const d = new HashMapDataset(GRAPH_A_IRI, gA);
     d.addNamedGraph(GRAPH_B_IRI, gB);
     const all = d.getAllGraphs();
@@ -115,8 +118,8 @@ describe("Dataset", () => {
   describe("#getUnionGraph", () => {
     const gA = new TestGraph();
     const gB = new TestGraph();
-    const GRAPH_A_IRI = "http://example.org#A";
-    const GRAPH_B_IRI = "http://example.org#B";
+    const GRAPH_A_IRI = createIRI("http://example.org#A");
+    const GRAPH_B_IRI = createIRI("http://example.org#B");
     const d = new HashMapDataset(GRAPH_A_IRI, gA);
     d.addNamedGraph(GRAPH_B_IRI, gB);
 
