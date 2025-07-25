@@ -25,12 +25,13 @@ SOFTWARE.
 "use strict";
 
 import StageBuilder from "./stage-builder.ts";
-import type { Algebra } from "sparqljs";
+
+import type { GroupPattern } from "sparqljs";
 import { Pipeline } from "../../engine/pipeline/pipeline.ts";
-import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
-import { Bindings, BindingBase } from "../../rdf/bindings.ts";
-import ExecutionContext from "../context/execution-context.ts";
 import minus from "../../operators/minus.ts";
+import { BindingBase, Bindings } from "../../rdf/bindings.ts";
+import ExecutionContext from "../context/execution-context.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 
 /**
  * A MinusStageBuilder evaluates MINUS clauses
@@ -39,7 +40,7 @@ import minus from "../../operators/minus.ts";
 export default class MinusStageBuilder extends StageBuilder {
   execute(
     source: PipelineStage<Bindings>,
-    node: Algebra.GroupNode,
+    node: GroupPattern,
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     const engine = Pipeline.getInstance();

@@ -24,16 +24,16 @@ SOFTWARE.
 
 "use strict";
 
-import type { Algebra } from "sparqljs";
-import type { Bindings } from "../../rdf/bindings.ts";
-import { Pipeline } from "../../engine/pipeline/pipeline.ts";
-import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
-import * as rdf from "../../utils/rdf.ts";
-import * as evaluation from "../../utils/evaluation.ts";
-import BGPStageBuilder from "../../engine/stages/bgp-stage-builder.ts";
+import type { IStringQuad } from "rdf-string";
 import ExecutionContext from "../../engine/context/execution-context.ts";
 import ContextSymbols from "../../engine/context/symbols.ts";
+import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import BGPStageBuilder from "../../engine/stages/bgp-stage-builder.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
+import * as evaluation from "../../utils/evaluation.ts";
+import * as rdf from "../../utils/rdf.ts";
 import rewritingOp from "./rewriting-op.ts";
 
 // The default size of the bucket of Basic Graph Patterns used by the Bound Join algorithm
@@ -41,7 +41,7 @@ const BOUND_JOIN_BUFFER_SIZE = 15;
 
 // A Basic graph pattern, i.e., a set of triple patterns
 // This type alias is defined to make the algorithm more readable ;)
-type BasicGraphPattern = Algebra.TripleObject[];
+type BasicGraphPattern = IStringQuad[];
 
 /**
  * Rewrite a triple pattern using a rewriting key,
@@ -51,10 +51,7 @@ type BasicGraphPattern = Algebra.TripleObject[];
  * @param tp - Triple pattern to rewrite
  * @return The rewritten triple pattern
  */
-function rewriteTriple(
-  triple: Algebra.TripleObject,
-  key: number
-): Algebra.TripleObject {
+function rewriteTriple(triple: IStringQuad, key: number): IStringQuad {
   const res = Object.assign({}, triple);
   if (rdf.isVariable(triple.subject)) {
     res.subject = `${triple.subject}_${key}`;
@@ -79,7 +76,7 @@ function rewriteTriple(
  */
 export default function boundJoin(
   source: PipelineStage<Bindings>,
-  bgp: Algebra.TripleObject[],
+  bgp: IStringQuad[],
   graph: Graph,
   builder: BGPStageBuilder,
   context: ExecutionContext
@@ -229,7 +226,7 @@ export default function boundJoin(
           bucket.map(binding => {
             const boundedBGP: BasicGraphPattern = []
             bgp.forEach(triple => {
-              let boundedTriple: Algebra.TripleObject = binding.bound(triple)
+              let boundedTriple: IStringQuad = binding.bound(triple)
               // rewrite the triple pattern and save the rewriting into the table
               boundedTriple = rewriteTriple(boundedTriple, key)
               rewritingTable.set(key, binding)

@@ -25,13 +25,13 @@ SOFTWARE.
 "use strict";
 
 import { mapKeys, pickBy } from "lodash-es";
-import type { Algebra } from "sparqljs";
 import ExecutionContext from "../../engine/context/execution-context.ts";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../../engine/pipeline/pipeline.ts";
 import { BindingBase, Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
 import * as rdf from "../../utils/rdf.ts";
+import type { IStringQuad } from "rdf-string";
 
 /**
  * Perform a join between a source of solution bindings (left relation)
@@ -47,7 +47,7 @@ import * as rdf from "../../utils/rdf.ts";
  */
 export default function indexJoin(
   source: PipelineStage<Bindings>,
-  pattern: Algebra.TripleObject,
+  pattern: IStringQuad,
   graph: Graph,
   context: ExecutionContext
 ) {
@@ -57,14 +57,12 @@ export default function indexJoin(
     // const hasVars = some(boundedPattern, (v: any) => v.startsWith('?'))
     return engine.map(
       engine.from(graph.find(boundedPattern, context)),
-      (item: Algebra.TripleObject) => {
+      (item: IStringQuad) => {
         let temp = pickBy(item, (v, k) => {
-          return rdf.isVariable(
-            boundedPattern[k as keyof Algebra.TripleObject]
-          );
+          return rdf.isVariable(boundedPattern[k as keyof IStringQuad]);
         });
         temp = mapKeys(temp, (v, k) => {
-          return boundedPattern[k as keyof Algebra.TripleObject];
+          return boundedPattern[k as keyof IStringQuad];
         });
         // if (size(temp) === 0 && hasVars) return null
         return BindingBase.fromObject(temp).union(bindings);

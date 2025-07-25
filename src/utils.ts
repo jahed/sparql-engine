@@ -24,10 +24,12 @@ SOFTWARE.
 
 "use strict";
 
-import type { Algebra } from "sparqljs";
+import type { IStringQuad } from "rdf-string";
+import type { BgpPattern, BlockPattern, Pattern, Query } from "sparqljs";
 import type { PipelineStage } from "./engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "./engine/pipeline/pipeline.ts";
 import { Bindings } from "./rdf/bindings.ts";
+import { stringQuadToTriple, tripleToStringQuad } from "./utils/rdf.ts";
 
 /**
  * Bound a triple pattern using a set of bindings, i.e., substitute variables in the triple pattern
@@ -37,9 +39,9 @@ import { Bindings } from "./rdf/bindings.ts";
  * @return An new, bounded triple pattern
  */
 export function applyBindings(
-  triple: Algebra.TripleObject,
+  triple: IStringQuad,
   bindings: Bindings
-): Algebra.TripleObject {
+): IStringQuad {
   const newTriple = Object.assign({}, triple);
   if (triple.subject.startsWith("?") && bindings.has(triple.subject)) {
     newTriple.subject = bindings.get(triple.subject)!;
@@ -59,34 +61,28 @@ export function applyBindings(
  * @param  bindings - Set of bindings to use
  * @return A new SPARQL group pattern with triples bounded
  */
-export function deepApplyBindings(
-  group: Algebra.PlanNode,
-  bindings: Bindings
-): Algebra.PlanNode {
+export function deepApplyBindings(group: Pattern, bindings: Bindings): Pattern {
   switch (group.type) {
     case "bgp":
       // WARNING property paths are not supported here
-      const triples = (group as Algebra.BGPNode)
-        .triples as Algebra.TripleObject[];
-      const bgp: Algebra.BGPNode = {
+      const bgp: BgpPattern = {
         type: "bgp",
-        triples: triples.map((t) => bindings.bound(t)),
+        triples: group.triples.map((t) =>
+          stringQuadToTriple(bindings.bound(tripleToStringQuad(t)))
+        ),
       };
       return bgp;
     case "group":
     case "optional":
     case "service":
     case "union":
-      const newGroup: Algebra.GroupNode = {
+      return {
         type: group.type,
-        patterns: (group as Algebra.GroupNode).patterns.map((g) =>
-          deepApplyBindings(g, bindings)
-        ),
-      };
-      return newGroup;
+        patterns: group.patterns.map((g) => deepApplyBindings(g, bindings)),
+      } as BlockPattern;
     case "query":
-      let subQuery: Algebra.RootNode = group as Algebra.RootNode;
-      subQuery.where = subQuery.where.map((g) =>
+      let subQuery: Query = group;
+      subQuery.where = subQuery.where?.map((g) =>
         deepApplyBindings(g, bindings)
       );
       return subQuery;

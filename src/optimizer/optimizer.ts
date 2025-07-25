@@ -24,7 +24,7 @@ SOFTWARE.
 
 "use strict";
 
-import type { Algebra } from "sparqljs";
+import type { Pattern } from "sparqljs";
 import PlanVisitor from "./plan-visitor.ts";
 import UnionMerge from "./visitors/union-merge.ts";
 
@@ -62,7 +62,7 @@ export default class Optimizer {
    * @param  plan - SPARQL query expression tree to iptimize
    * @return Optimized SPARQL query expression tree
    */
-  optimize(plan: Algebra.PlanNode): Algebra.PlanNode {
+  optimize(plan: Pattern): Pattern {
     return this._visitors.reduce((current, v) => v.visit(current), plan);
   }
 }

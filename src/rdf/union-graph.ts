@@ -24,11 +24,11 @@ SOFTWARE.
 
 "use strict";
 
-import Graph from "./graph.ts";
+import type { IStringQuad } from "rdf-string";
+import ExecutionContext from "../engine/context/execution-context.ts";
 import type { PipelineInput } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
-import type { Algebra } from "sparqljs";
-import ExecutionContext from "../engine/context/execution-context.ts";
+import Graph from "./graph.ts";
 
 /**
  * An UnionGraph represents the dynamic union of several graphs.
@@ -51,11 +51,11 @@ export default class UnionGraph extends Graph {
     this._graphs = graphs;
   }
 
-  insert(triple: Algebra.TripleObject): Promise<void> {
+  insert(triple: IStringQuad): Promise<void> {
     return this._graphs[0].insert(triple);
   }
 
-  delete(triple: Algebra.TripleObject): Promise<void> {
+  delete(triple: IStringQuad): Promise<void> {
     return this._graphs.reduce(
       (prev, g) => prev.then(() => g.delete(triple)),
       Promise.resolve()
@@ -63,9 +63,9 @@ export default class UnionGraph extends Graph {
   }
 
   find(
-    triple: Algebra.TripleObject,
+    triple: IStringQuad,
     context: ExecutionContext
-  ): PipelineInput<Algebra.TripleObject> {
+  ): PipelineInput<IStringQuad> {
     return Pipeline.getInstance().merge(
       ...this._graphs.map((g) => g.find(triple, context))
     );
@@ -78,7 +78,7 @@ export default class UnionGraph extends Graph {
     );
   }
 
-  estimateCardinality(triple: Algebra.TripleObject): Promise<number> {
+  estimateCardinality(triple: IStringQuad): Promise<number> {
     return Promise.all(
       this._graphs.map((g) => g.estimateCardinality(triple))
     ).then((cardinalities: number[]) => {

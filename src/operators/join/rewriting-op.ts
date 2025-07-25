@@ -24,7 +24,7 @@ SOFTWARE.
 
 "use strict";
 
-import type { Algebra } from "sparqljs";
+import type { IStringQuad } from "rdf-string";
 import ExecutionContext from "../../engine/context/execution-context.ts";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../../engine/pipeline/pipeline.ts";
@@ -106,7 +106,7 @@ function rewriteSolutions(
  */
 export default function rewritingOp(
   graph: Graph,
-  bgpBucket: Algebra.TripleObject[][],
+  bgpBucket: IStringQuad[][],
   rewritingTable: Map<number, Bindings>,
   builder: BGPStageBuilder,
   context: ExecutionContext
@@ -115,7 +115,7 @@ export default function rewritingOp(
   if (context.cachingEnabled()) {
     // partition the BGPs that can be evaluated using the cache from the others
     const stages: PipelineStage<Bindings>[] = [];
-    const others: Algebra.TripleObject[][] = [];
+    const others: IStringQuad[][] = [];
     bgpBucket.forEach((patterns) => {
       if (context.cache!.has({ patterns, graphIRI: graph.iri })) {
         stages.push(

@@ -26,7 +26,7 @@ SOFTWARE.
 
 import { BinarySearchTree } from "binary-search-tree";
 import { differenceWith, findIndex, maxBy } from "lodash-es";
-import type { Algebra } from "sparqljs";
+import type { IStringQuad } from "rdf-string";
 import { Bindings } from "../../rdf/bindings.ts";
 import * as rdf from "../../utils/rdf.ts";
 import * as sparql from "../../utils/sparql.ts";
@@ -36,7 +36,7 @@ import { type AsyncCacheEntry, AsyncLRUCache } from "./cache-base.ts";
 import type { AsyncCache } from "./cache-interfaces.ts";
 
 export interface BasicGraphPattern {
-  patterns: Algebra.TripleObject[];
+  patterns: IStringQuad[];
   graphIRI: string;
 }
 
@@ -66,9 +66,7 @@ export interface BGPCache
    * @param bgp - Basic Graph pattern
    * @return A pair [subset BGP, set of patterns not in cache]
    */
-  findSubset(
-    bgp: BasicGraphPattern
-  ): [Algebra.TripleObject[], Algebra.TripleObject[]];
+  findSubset(bgp: BasicGraphPattern): [IStringQuad[], IStringQuad[]];
 
   /**
    * Access the cache and returns a pipeline stage that returns the content of the cache for a given BGP
@@ -179,9 +177,7 @@ export class LRUBGPCache implements BGPCache {
     return this._cache.count();
   }
 
-  findSubset(
-    bgp: BasicGraphPattern
-  ): [Algebra.TripleObject[], Algebra.TripleObject[]] {
+  findSubset(bgp: BasicGraphPattern): [IStringQuad[], IStringQuad[]] {
     // if the bgp is in the cache, then the computation is simple
     if (this.has(bgp)) {
       return [bgp.patterns, []];
@@ -201,7 +197,7 @@ export class LRUBGPCache implements BGPCache {
       matches.push({ pattern, searchResults });
     }
     // compute the largest subset BGP and the missing patterns (missingPatterns = input_BGP - subset_BGP)
-    let foundPatterns: Algebra.TripleObject[] = [];
+    let foundPatterns: IStringQuad[] = [];
     let maxBGPLength = -1;
     for (let match of matches) {
       if (match.searchResults.length > 0) {

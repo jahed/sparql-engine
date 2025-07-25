@@ -25,7 +25,8 @@ SOFTWARE.
 "use strict";
 
 import { isNull, isUndefined } from "lodash-es";
-import type { Algebra } from "sparqljs";
+import type { IStringQuad } from "rdf-string";
+import type { ValuePatternRow } from "sparqljs";
 import * as rdf from "../utils/rdf.ts";
 
 /**
@@ -196,7 +197,7 @@ export abstract class Bindings {
    * @param triple  - Triple pattern
    * @return An new, bounded triple pattern
    */
-  bound(triple: Algebra.TripleObject): Algebra.TripleObject {
+  bound(triple: IStringQuad): IStringQuad {
     const newTriple = Object.assign({}, triple);
     if (rdf.isVariable(triple.subject) && this.has(triple.subject)) {
       newTriple.subject = this.get(triple.subject)!;
@@ -407,6 +408,17 @@ export class BindingBase extends Bindings {
     const res = new BindingBase();
     for (let key in obj) {
       res.set(!key.startsWith("?") ? `?${key}` : key, obj[key]);
+    }
+    return res;
+  }
+
+  static fromValuePatternRow(row: ValuePatternRow): Bindings {
+    const res = new BindingBase();
+    for (let key in row) {
+      const v = row[key];
+      if (v) {
+        res.set(!key.startsWith("?") ? `?${key}` : key, rdf.toN3(v));
+      }
     }
     return res;
   }

@@ -2,9 +2,15 @@
 
 import dataFactory from "@rdfjs/data-model";
 import { formatISO, isEqual, parseISO } from "date-fns";
-import type { BlankNode, Literal, NamedNode, Term } from "rdf-js";
-import { stringToTerm, termToString } from "rdf-string";
-import type { Algebra } from "sparqljs";
+import type { BaseQuad, BlankNode, Literal, NamedNode, Term } from "rdf-js";
+import {
+  quadToStringQuad,
+  stringQuadToQuad,
+  stringToTerm,
+  termToString,
+  type IStringQuad,
+} from "rdf-string";
+import type { PropertyPath, Triple } from "sparqljs";
 
 /**
  * Test if two triple (patterns) are equals
@@ -12,15 +18,28 @@ import type { Algebra } from "sparqljs";
  * @param b - Second triple (pattern)
  * @return True if the two triple (patterns) are equals, False otherwise
  */
-export function tripleEquals(
-  a: Algebra.TripleObject,
-  b: Algebra.TripleObject
-): boolean {
+export function tripleEquals(a: IStringQuad, b: IStringQuad): boolean {
   return (
     a.subject === b.subject &&
     a.predicate === b.predicate &&
     a.object === b.object
   );
+}
+
+export function tripleToStringQuad(triple: Triple): IStringQuad {
+  // quadToStringQuad does support undefined "graph".
+  return quadToStringQuad(triple as BaseQuad);
+}
+
+export function stringQuadToTriple(triple: IStringQuad): Triple {
+  return stringQuadToQuad(triple) as Triple;
+}
+
+export interface PathTripleObject {
+  subject: string;
+  predicate: PropertyPath;
+  object: string;
+  graph?: string;
 }
 
 /**
@@ -326,11 +345,7 @@ export function termEquals(a: Term, b: Term): boolean {
  * @param  {string} obj  - Triple's object
  * @return A RDF triple in Object representation
  */
-export function triple(
-  subj: string,
-  pred: string,
-  obj: string
-): Algebra.TripleObject {
+export function triple(subj: string, pred: string, obj: string): IStringQuad {
   return {
     subject: subj,
     predicate: pred,
@@ -343,7 +358,7 @@ export function triple(
  * @param  {Object} triple - Triple Pattern to process
  * @return The number of variables in the Triple Pattern
  */
-export function countVariables(triple: Algebra.TripleObject): number {
+export function countVariables(triple: IStringQuad): number {
   let count = 0;
   if (isVariable(triple.subject)) {
     count++;
@@ -410,7 +425,7 @@ export function getLiteralValue(literal: string): string {
  * @param triple - Triple (pattern) to hash
  * @return An unique ID to identify the Triple (pattern)
  */
-export function hashTriple(triple: Algebra.TripleObject): string {
+export function hashTriple(triple: IStringQuad): string {
   return `s=${triple.subject}&p=${triple.predicate}&o=${triple.object}`;
 }
 

@@ -24,10 +24,12 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import type { Ordering, Term } from "sparqljs";
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
-import type { Algebra } from "sparqljs";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
+
 import { Bindings } from "../rdf/bindings.ts";
+import { toN3 } from "../utils/rdf.ts";
 
 /**
  * Build a comparator function from an ORDER BY clause content
@@ -35,13 +37,14 @@ import { Bindings } from "../rdf/bindings.ts";
  * @param  comparators - ORDER BY comparators
  * @return A comparator function
  */
-function _compileComparators(comparators: Algebra.OrderComparator[]) {
-  const comparatorsFuncs = comparators.map((c: Algebra.OrderComparator) => {
+function _compileComparators(comparators: Ordering[]) {
+  const comparatorsFuncs = comparators.map((c: Ordering) => {
     return (left: Bindings, right: Bindings) => {
-      if (left.get(c.expression)! < right.get(c.expression)!) {
-        return c.ascending ? -1 : 1;
-      } else if (left.get(c.expression)! > right.get(c.expression)!) {
-        return c.ascending ? 1 : -1;
+      const expr = toN3(c.expression as Term);
+      if (left.get(expr)! < right.get(expr)!) {
+        return c.descending ? 1 : -1;
+      } else if (left.get(expr)! > right.get(expr)!) {
+        return c.descending ? -1 : 1;
       }
       return 0;
     };
@@ -69,13 +72,13 @@ function _compileComparators(comparators: Algebra.OrderComparator[]) {
  */
 export default function orderby(
   source: PipelineStage<Bindings>,
-  comparators: Algebra.OrderComparator[]
+  comparators: Ordering[]
 ) {
   const comparator = _compileComparators(
-    comparators.map((c: Algebra.OrderComparator) => {
+    comparators.map((c: Ordering) => {
       // explicity tag ascending comparators (sparqljs leaves them untagged)
       if (!("descending" in c)) {
-        c.ascending = true;
+        c.descending = false;
       }
       return c;
     })

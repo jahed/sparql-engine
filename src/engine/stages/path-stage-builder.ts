@@ -22,14 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import StageBuilder from "./stage-builder.ts";
-import { Pipeline } from "../pipeline/pipeline.ts";
-import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
-import type { Algebra } from "sparqljs";
-import { Bindings, BindingBase } from "../../rdf/bindings.ts";
+import type { IStringQuad } from "rdf-string";
+import type { PropertyPath } from "sparqljs";
+import { BindingBase, Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
-import ExecutionContext from "../context/execution-context.ts";
+import type { PathTripleObject } from "../../utils/rdf.ts";
 import * as rdf from "../../utils/rdf.ts";
+import ExecutionContext from "../context/execution-context.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import { Pipeline } from "../pipeline/pipeline.ts";
+import StageBuilder from "./stage-builder.ts";
 
 /**
  * A fork of Bindings#bound specialized for triple patterns with property paths
@@ -39,9 +41,9 @@ import * as rdf from "../../utils/rdf.ts";
  * @return The bounded triple pattern
  */
 function boundPathTriple(
-  triple: Algebra.PathTripleObject,
+  triple: PathTripleObject,
   bindings: Bindings
-): Algebra.PathTripleObject {
+): PathTripleObject {
   const t = {
     subject: triple.subject,
     predicate: triple.predicate,
@@ -89,13 +91,13 @@ export default abstract class PathStageBuilder extends StageBuilder {
    */
   execute(
     source: PipelineStage<Bindings>,
-    triples: Algebra.PathTripleObject[],
+    triples: PathTripleObject[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     // create a join pipeline between all property paths using an index join
     const engine = Pipeline.getInstance();
     return triples.reduce(
-      (iter: PipelineStage<Bindings>, triple: Algebra.PathTripleObject) => {
+      (iter: PipelineStage<Bindings>, triple: PathTripleObject) => {
         return engine.mergeMap(iter, (bindings) => {
           const { subject, predicate, object } = boundPathTriple(
             triple,
@@ -121,7 +123,7 @@ export default abstract class PathStageBuilder extends StageBuilder {
    */
   _buildIterator(
     subject: string,
-    path: Algebra.PropertyPath,
+    path: PropertyPath,
     obj: string,
     context: ExecutionContext
   ): PipelineStage<Bindings> {
@@ -136,24 +138,21 @@ export default abstract class PathStageBuilder extends StageBuilder {
       graph,
       context
     );
-    return Pipeline.getInstance().map(
-      evaluator,
-      (triple: Algebra.TripleObject) => {
-        const temp = new BindingBase();
-        if (rdf.isVariable(subject)) {
-          temp.set(subject, triple.subject);
-        }
-        if (rdf.isVariable(obj)) {
-          temp.set(obj, triple.object);
-        }
-        // TODO: change the function's behavior for ask queries when subject and object are given
-        if (!rdf.isVariable(subject) && !rdf.isVariable(obj)) {
-          temp.set("?ask_s", triple.subject);
-          temp.set("?ask_v", triple.object);
-        }
-        return temp;
+    return Pipeline.getInstance().map(evaluator, (triple: IStringQuad) => {
+      const temp = new BindingBase();
+      if (rdf.isVariable(subject)) {
+        temp.set(subject, triple.subject);
       }
-    );
+      if (rdf.isVariable(obj)) {
+        temp.set(obj, triple.object);
+      }
+      // TODO: change the function's behavior for ask queries when subject and object are given
+      if (!rdf.isVariable(subject) && !rdf.isVariable(obj)) {
+        temp.set("?ask_s", triple.subject);
+        temp.set("?ask_v", triple.object);
+      }
+      return temp;
+    });
   }
 
   /**
@@ -167,9 +166,9 @@ export default abstract class PathStageBuilder extends StageBuilder {
    */
   abstract _executePropertyPath(
     subject: string,
-    path: Algebra.PropertyPath,
+    path: PropertyPath,
     obj: string,
     graph: Graph,
     context: ExecutionContext
-  ): PipelineStage<Algebra.TripleObject>;
+  ): PipelineStage<IStringQuad>;
 }

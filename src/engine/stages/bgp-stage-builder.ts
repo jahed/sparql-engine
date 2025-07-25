@@ -25,7 +25,6 @@ SOFTWARE.
 "use strict";
 
 import { isInteger, isNaN, isNull } from "lodash-es";
-import type { Algebra } from "sparqljs";
 import { BindingBase, Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
 import { GRAPH_CAPABILITY } from "../../rdf/graph_capability.ts";
@@ -39,6 +38,7 @@ import { Pipeline } from "../pipeline/pipeline.ts";
 import * as fts from "./rewritings/fts.ts";
 import StageBuilder from "./stage-builder.ts";
 
+import type { IStringQuad } from "rdf-string";
 import boundJoin from "../../operators/join/bound-join.ts";
 
 /**
@@ -48,7 +48,7 @@ import boundJoin from "../../operators/join/bound-join.ts";
  */
 function bgpEvaluation(
   source: PipelineStage<Bindings>,
-  bgp: Algebra.TripleObject[],
+  bgp: IStringQuad[],
   graph: Graph,
   builder: BGPStageBuilder,
   context: ExecutionContext
@@ -110,7 +110,7 @@ export default class BGPStageBuilder extends StageBuilder {
    */
   execute(
     source: PipelineStage<Bindings>,
-    patterns: Algebra.TripleObject[],
+    patterns: IStringQuad[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     // avoids sending a request with an empty array
@@ -198,9 +198,7 @@ export default class BGPStageBuilder extends StageBuilder {
    * @param patterns - BGP to rewrite, i.e., a set of triple patterns
    * @return A Tuple [Rewritten BGP, List of SPARQL variable added]
    */
-  _replaceBlankNodes(
-    patterns: Algebra.TripleObject[]
-  ): [Algebra.TripleObject[], string[]] {
+  _replaceBlankNodes(patterns: IStringQuad[]): [IStringQuad[], string[]] {
     const newVariables: string[] = [];
     function rewrite(term: string): string {
       let res = term;
@@ -233,7 +231,7 @@ export default class BGPStageBuilder extends StageBuilder {
   _buildIterator(
     source: PipelineStage<Bindings>,
     graph: Graph,
-    patterns: Algebra.TripleObject[],
+    patterns: IStringQuad[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     if (
@@ -258,9 +256,9 @@ export default class BGPStageBuilder extends StageBuilder {
   _buildFullTextSearchIterator(
     source: PipelineStage<Bindings>,
     graph: Graph,
-    pattern: Algebra.TripleObject,
+    pattern: IStringQuad,
     queryVariable: string,
-    magicTriples: Algebra.TripleObject[],
+    magicTriples: IStringQuad[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     // full text search default parameters

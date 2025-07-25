@@ -24,9 +24,9 @@ SOFTWARE.
 
 "use strict";
 
-import type { Algebra } from "sparqljs";
 import { Writable } from "stream";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
+import type { IStringQuad } from "rdf-string";
 
 /**
  * Something whose execution can be resolved as a Promise
@@ -65,7 +65,7 @@ export class ErrorConsumable implements Consumable {
  * @author Thomas Minier
  */
 export abstract class Consumer extends Writable implements Consumable {
-  private readonly _source: PipelineStage<Algebra.TripleObject>;
+  private readonly _source: PipelineStage<IStringQuad>;
   private readonly _options: Object;
 
   /**
@@ -73,7 +73,7 @@ export abstract class Consumer extends Writable implements Consumable {
    * @param source - Input {@link PipelineStage}
    * @param options - Execution options
    */
-  constructor(source: PipelineStage<Algebra.TripleObject>, options: Object) {
+  constructor(source: PipelineStage<IStringQuad>, options: Object) {
     super({ objectMode: true });
     this._source = source;
     this._options = options;

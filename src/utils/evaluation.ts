@@ -1,6 +1,6 @@
 "use strict";
 
-import type { Algebra } from "sparqljs";
+import type { IStringQuad } from "rdf-string";
 import type { BGPCache } from "../engine/cache/bgp-cache.ts";
 import ExecutionContext from "../engine/context/execution-context.ts";
 import ContextSymbols from "../engine/context/symbols.ts";
@@ -18,7 +18,7 @@ import Graph from "../rdf/graph.ts";
  * @return A pipeline stage that produces the evaluation results
  */
 export function cacheEvalBGP(
-  patterns: Algebra.TripleObject[],
+  patterns: IStringQuad[],
   graph: Graph,
   cache: BGPCache,
   builder: BGPStageBuilder,

@@ -24,10 +24,10 @@ SOFTWARE.
 
 "use strict";
 
-import { Consumer } from "./consumer.ts";
-import Graph from "../../rdf/graph.ts";
+import type { IStringQuad } from "rdf-string";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
-import type { Algebra } from "sparqljs";
+import Graph from "../../rdf/graph.ts";
+import { Consumer } from "./consumer.ts";
 
 /**
  * A DeleteConsumer evaluates a SPARQL DELETE clause
@@ -44,7 +44,7 @@ export default class DeleteConsumer extends Consumer {
    * @param options - Execution options
    */
   constructor(
-    source: PipelineStage<Algebra.TripleObject>,
+    source: PipelineStage<IStringQuad>,
     graph: Graph,
     options: Object
   ) {
@@ -53,7 +53,7 @@ export default class DeleteConsumer extends Consumer {
   }
 
   _write(
-    triple: Algebra.TripleObject,
+    triple: IStringQuad,
     encoding: string | undefined,
     done: (err?: Error) => void
   ): void {

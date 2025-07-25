@@ -24,7 +24,7 @@ SOFTWARE.
 
 "use strict";
 
-import type { Algebra } from "sparqljs";
+import type { IStringQuad } from "rdf-string";
 
 const HINT_PREFIX = "http://callidon.github.io/sparql-engine/hints#";
 
@@ -129,11 +129,11 @@ export class QueryHints {
 }
 
 export function parseHints(
-  bgp: Algebra.TripleObject[],
+  bgp: IStringQuad[],
   previous?: QueryHints
-): [Algebra.TripleObject[], QueryHints] {
+): [IStringQuad[], QueryHints] {
   let res = new QueryHints();
-  const regularTriples: Algebra.TripleObject[] = [];
+  const regularTriples: IStringQuad[] = [];
   bgp.forEach((triple) => {
     if (triple.subject.startsWith(HINT_PREFIX)) {
       if (triple.subject === HINT("Group")) {

@@ -26,7 +26,7 @@ SOFTWARE.
 
 import { isArray } from "lodash-es";
 import type { Term } from "rdf-js";
-import type { Algebra } from "sparqljs";
+
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import { Bindings } from "../rdf/bindings.ts";
@@ -35,6 +35,7 @@ import {
   SPARQLExpression,
   type CustomFunctions,
 } from "./expressions/sparql-expression.ts";
+import type { Expression } from "sparqljs";
 
 /**
  * Test if an object is an iterator that yields RDF Terms or null values
@@ -58,7 +59,7 @@ function isIterable(obj: Object): obj is Iterable<Term | null> {
 export default function bind(
   source: PipelineStage<Bindings>,
   variable: string,
-  expression: Algebra.Expression | string,
+  expression: Expression | string,
   customFunctions?: CustomFunctions
 ): PipelineStage<Bindings> {
   const expr = new SPARQLExpression(expression, customFunctions);
