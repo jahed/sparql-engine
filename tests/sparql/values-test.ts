@@ -56,8 +56,8 @@ describe("SPARQL VALUES", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.all.keys("?name", "?article");
-        expect(b["?article"]).to.be.oneOf([
+        expect(b).to.have.all.keys("name", "article");
+        expect(b["article"]).to.be.oneOf([
           "https://dblp.org/rec/conf/esws/MinierMSM17",
           "https://dblp.org/rec/conf/esws/MinierSMV18a",
         ]);
@@ -87,11 +87,11 @@ describe("SPARQL VALUES", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.all.keys("?author", "?article");
-        expect(b["?author"]).to.equal(
+        expect(b).to.have.all.keys("author", "article");
+        expect(b["author"]).to.equal(
           "https://dblp.uni-trier.de/pers/m/Minier:Thomas"
         );
-        expect(b["?article"]).to.be.oneOf([
+        expect(b["article"]).to.be.oneOf([
           "https://dblp.org/rec/conf/esws/MinierMSM17",
           "https://dblp.org/rec/conf/esws/MinierSMV18a",
         ]);

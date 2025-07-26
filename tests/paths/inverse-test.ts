@@ -50,8 +50,8 @@ describe("SPARQL property paths: inverse paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b["?s"]).to.equal("http://example.org/Alice");
+        expect(b).to.have.property("s");
+        expect(b["s"]).to.equal("http://example.org/Alice");
         results.push(b);
       },
       done,
@@ -76,26 +76,26 @@ describe("SPARQL property paths: inverse paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?x");
-        expect(b).to.have.property("?y");
-        switch (b["?x"].value) {
+        expect(b).to.have.property("x");
+        expect(b).to.have.property("y");
+        switch (b["x"].value) {
           case "http://example.org/Alice":
-            expect(b["?y"]).to.be.oneOf([
+            expect(b["y"]).to.be.oneOf([
               "http://example.org/Carol",
               "http://example.org/Alice",
             ]);
             break;
           case "http://example.org/Carol":
-            expect(b["?y"]).to.be.oneOf([
+            expect(b["y"]).to.be.oneOf([
               "http://example.org/Alice",
               "http://example.org/Carol",
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?y"]).to.be.oneOf(["http://example.org/Bob"]);
+            expect(b["y"]).to.be.oneOf(["http://example.org/Bob"]);
             break;
           case "http://example.org/Mallory":
-            expect(b["?y"]).to.be.oneOf(["http://example.org/Mallory"]);
+            expect(b["y"]).to.be.oneOf(["http://example.org/Mallory"]);
             break;
           default:
             assert.fail();
@@ -124,10 +124,10 @@ describe("SPARQL property paths: inverse paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        expect(b["?s"]).to.be.oneOf(["tel:0645123549"]);
-        expect(b["?o"]).to.be.oneOf(["http://example.org/Bob"]);
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        expect(b["s"]).to.be.oneOf(["tel:0645123549"]);
+        expect(b["o"]).to.be.oneOf(["http://example.org/Bob"]);
         results.push(b);
       },
       done,
@@ -152,13 +152,13 @@ describe("SPARQL property paths: inverse paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        expect(b["?s"]).to.be.oneOf([
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        expect(b["s"]).to.be.oneOf([
           "http://example.org/Didier",
           "http://example.org/Carol",
         ]);
-        expect(b["?o"]).to.be.oneOf([
+        expect(b["o"]).to.be.oneOf([
           "http://example.org/Bob",
           "http://example.org/Didier",
           "http://example.org/Carol",

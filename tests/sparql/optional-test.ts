@@ -56,8 +56,8 @@ describe("SPARQL queries with OPTIONAL", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?name", "?article", "?label");
-        expect(b["?label"]).to.equal("UNBOUND");
+        expect(b).to.have.keys("name", "article", "label");
+        expect(b["label"]).to.equal("UNBOUND");
         results.push(b);
       },
       done,
@@ -91,9 +91,9 @@ describe("SPARQL queries with OPTIONAL", () => {
           "https://dblp.org/pers/m/Minier:Thomas_2",
         ]);
         if (b["s"].value === "https://dblp.org/pers/m/Minier:Thomas_2") {
-          expect(b["?article"]).to.equal("UNBOUND");
+          expect(b["article"]).to.equal("UNBOUND");
         } else {
-          expect(b["?article"]).to.not.equal("UNBOUND");
+          expect(b["article"]).to.not.equal("UNBOUND");
         }
         results.push(b);
       },
@@ -124,8 +124,8 @@ describe("SPARQL queries with OPTIONAL", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?name", "?article");
-        expect(b["?article"]).to.equal("UNBOUND");
+        expect(b).to.have.keys("name", "article");
+        expect(b["article"]).to.equal("UNBOUND");
         results.push(b);
       },
       done,
@@ -154,7 +154,7 @@ describe("SPARQL queries with OPTIONAL", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?s", "?article");
+        expect(b).to.have.keys("s", "article");
         expect(b["s"]).to.be.oneOf([
           "https://dblp.org/pers/m/Minier:Thomas",
           "https://dblp.org/pers/m/Minier:Thomas_2",
@@ -201,11 +201,11 @@ describe("SPARQL queries with OPTIONAL", () => {
       () => {
         expect(results.length).to.equal(2);
         results.forEach((b) => {
-          expect(b["?title"]).to.be.oneOf([
+          expect(b["title"]).to.be.oneOf([
             '"SPARQL Tutorial"',
             '"The Semantic Web"',
           ]);
-          expect(b["?price"]).to.be.oneOf([
+          expect(b["price"]).to.be.oneOf([
             '"42"^^http://www.w3.org/2001/XMLSchema#integer',
             '"23"^^http://www.w3.org/2001/XMLSchema#integer',
           ]);
@@ -245,11 +245,11 @@ describe("SPARQL queries with OPTIONAL", () => {
       () => {
         expect(results.length).to.equal(2);
         results.map((b) => {
-          expect(b["?title"]).to.be.oneOf([
+          expect(b["title"]).to.be.oneOf([
             '"SPARQL Tutorial"',
             '"The Semantic Web"',
           ]);
-          expect(b["?price"]).to.be.oneOf([
+          expect(b["price"]).to.be.oneOf([
             '"42"^^http://www.w3.org/2001/XMLSchema#integer',
             '"23"^^http://www.w3.org/2001/XMLSchema#integer',
           ]);
@@ -287,11 +287,11 @@ describe("SPARQL queries with OPTIONAL", () => {
       () => {
         expect(results.length).to.equal(2);
         results.map((b) => {
-          expect(b["?title"]).to.be.oneOf([
+          expect(b["title"]).to.be.oneOf([
             '"SPARQL Tutorial"',
             '"The Semantic Web"',
           ]);
-          expect(b["?price"]).to.be.oneOf([
+          expect(b["price"]).to.be.oneOf([
             '"42"^^http://www.w3.org/2001/XMLSchema#integer',
             "UNBOUND",
           ]);
@@ -331,11 +331,11 @@ describe("SPARQL queries with OPTIONAL", () => {
       () => {
         expect(results.length).to.equal(2);
         results.map((b) => {
-          expect(b["?title"]).to.be.oneOf([
+          expect(b["title"]).to.be.oneOf([
             '"SPARQL Tutorial"',
             '"The Semantic Web"',
           ]);
-          expect(b["?price"]).to.be.oneOf([
+          expect(b["price"]).to.be.oneOf([
             '"42"^^http://www.w3.org/2001/XMLSchema#integer',
             "UNBOUND",
           ]);

@@ -47,7 +47,7 @@ describe("Non standard SPARQL functions", () => {
       }`,
       results: [
         {
-          "?x": '"1.5430806348152437"^^http://www.w3.org/2001/XMLSchema#float',
+          x: '"1.5430806348152437"^^http://www.w3.org/2001/XMLSchema#float',
         },
       ],
     },
@@ -60,7 +60,7 @@ describe("Non standard SPARQL functions", () => {
       }`,
       results: [
         {
-          "?x": '"1.1752011936438014"^^http://www.w3.org/2001/XMLSchema#float',
+          x: '"1.1752011936438014"^^http://www.w3.org/2001/XMLSchema#float',
         },
       ],
     },
@@ -73,7 +73,7 @@ describe("Non standard SPARQL functions", () => {
       }`,
       results: [
         {
-          "?x": '"0.7615941559557649"^^http://www.w3.org/2001/XMLSchema#float',
+          x: '"0.7615941559557649"^^http://www.w3.org/2001/XMLSchema#float',
         },
       ],
     },
@@ -86,7 +86,7 @@ describe("Non standard SPARQL functions", () => {
       }`,
       results: [
         {
-          "?x": '"1.3130352854993312"^^http://www.w3.org/2001/XMLSchema#float',
+          x: '"1.3130352854993312"^^http://www.w3.org/2001/XMLSchema#float',
         },
       ],
     },
@@ -99,7 +99,7 @@ describe("Non standard SPARQL functions", () => {
       }`,
       results: [
         {
-          "?x": '"0.6480542736638853"^^http://www.w3.org/2001/XMLSchema#float',
+          x: '"0.6480542736638853"^^http://www.w3.org/2001/XMLSchema#float',
         },
       ],
     },
@@ -112,7 +112,7 @@ describe("Non standard SPARQL functions", () => {
       }`,
       results: [
         {
-          "?x": '"0.8509181282393214"^^http://www.w3.org/2001/XMLSchema#float',
+          x: '"0.8509181282393214"^^http://www.w3.org/2001/XMLSchema#float',
         },
       ],
     },
@@ -126,10 +126,10 @@ describe("Non standard SPARQL functions", () => {
       }`,
       results: [
         {
-          "?y": '"Thomas"',
+          y: '"Thomas"',
         },
         {
-          "?y": '"Minier"',
+          y: '"Minier"',
         },
       ],
     },

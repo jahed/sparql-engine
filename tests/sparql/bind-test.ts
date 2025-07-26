@@ -53,8 +53,8 @@ describe("SPARQL BIND", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.all.keys("?s", "?name");
-        expect(b["?name"]).to.equal('"Thomas Minier"@fr');
+        expect(b).to.have.all.keys("s", "name");
+        expect(b["name"]).to.equal('"Thomas Minier"@fr');
         results.push(b);
       },
       done,
@@ -81,8 +81,8 @@ describe("SPARQL BIND", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.all.keys("?s", "?foo");
-        expect(b["?foo"]).to.equal(
+        expect(b).to.have.all.keys("s", "foo");
+        expect(b["foo"]).to.equal(
           '"30"^^http://www.w3.org/2001/XMLSchema#integer'
         );
         results.push(b);
@@ -112,9 +112,9 @@ describe("SPARQL BIND", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.all.keys("?s", "?name", "?foo");
-        expect(b["?name"]).to.equal('"Thomas Minier"@fr');
-        expect(b["?foo"]).to.equal(
+        expect(b).to.have.all.keys("s", "name", "foo");
+        expect(b["name"]).to.equal('"Thomas Minier"@fr');
+        expect(b["foo"]).to.equal(
           '"30"^^http://www.w3.org/2001/XMLSchema#integer'
         );
         results.push(b);
@@ -145,10 +145,10 @@ describe("SPARQL BIND", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.all.keys("?s", "?s2", "?name", "?undefined");
-        expect(b["?s2"]).to.equal(b["?s"]);
-        expect(b["?name"]).to.equal('"Thomas Minier"');
-        expect(b["?undefined"]).to.equal('"UNBOUND"');
+        expect(b).to.have.all.keys("s", "s2", "name", "undefined");
+        expect(b["s2"]).to.equal(b["s"]);
+        expect(b["name"]).to.equal('"Thomas Minier"');
+        expect(b["undefined"]).to.equal('"UNBOUND"');
         results.push(b);
       },
       done,

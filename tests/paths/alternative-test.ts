@@ -52,20 +52,20 @@ describe("SPARQL property paths: alternative paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"].value) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "mailto:alice@example",
               "tel:0604651478",
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf(["mailto:bob@example"]);
+            expect(b["o"]).to.be.oneOf(["mailto:bob@example"]);
             break;
           case "http://example.org/Carol":
-            expect(b["?o"]).to.be.oneOf(["tel:0645123549"]);
+            expect(b["o"]).to.be.oneOf(["tel:0645123549"]);
             break;
         }
         results.push(b);
@@ -92,9 +92,9 @@ describe("SPARQL property paths: alternative paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.not.have.property("?s");
-        expect(b).to.have.property("?o");
-        expect(b["?o"]).to.be.oneOf(["mailto:alice@example", "tel:0604651478"]);
+        expect(b).to.not.have.property("s");
+        expect(b).to.have.property("o");
+        expect(b["o"]).to.be.oneOf(["mailto:alice@example", "tel:0604651478"]);
         results.push(b);
       },
       done,
@@ -119,9 +119,9 @@ describe("SPARQL property paths: alternative paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.not.have.property("?o");
-        expect(b["?s"]).to.equal("http://example.org/Carol");
+        expect(b).to.have.property("s");
+        expect(b).to.not.have.property("o");
+        expect(b["s"]).to.equal("http://example.org/Carol");
         results.push(b);
       },
       done,
@@ -146,21 +146,21 @@ describe("SPARQL property paths: alternative paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"].value) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "mailto:alice@example",
               "tel:0604651478",
               '"skypeAlice"',
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf(["mailto:bob@example", '"skypeBob"']);
+            expect(b["o"]).to.be.oneOf(["mailto:bob@example", '"skypeBob"']);
             break;
           case "http://example.org/Carol":
-            expect(b["?o"]).to.be.oneOf(["tel:0645123549"]);
+            expect(b["o"]).to.be.oneOf(["tel:0645123549"]);
             break;
         }
         results.push(b);
@@ -218,20 +218,20 @@ describe("SPARQL property paths: alternative paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"].value) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?o"]).to.be.oneOf(["http://example.org/Carol"]);
+            expect(b["o"]).to.be.oneOf(["http://example.org/Carol"]);
             break;
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf(["http://example.org/Didier"]);
+            expect(b["o"]).to.be.oneOf(["http://example.org/Didier"]);
             break;
           case "http://example.org/Carol":
-            expect(b["?o"]).to.be.oneOf(["http://example.org/Carol"]);
+            expect(b["o"]).to.be.oneOf(["http://example.org/Carol"]);
             break;
           case "http://example.org/Mallory":
-            expect(b["?o"]).to.be.oneOf(["http://example.org/Bob"]);
+            expect(b["o"]).to.be.oneOf(["http://example.org/Bob"]);
             break;
         }
         results.push(b);

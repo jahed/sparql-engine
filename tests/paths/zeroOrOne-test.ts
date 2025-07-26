@@ -51,17 +51,17 @@ describe("SPARQL property paths: Zero or One paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"].value) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "http://example.org/Alice",
               '"skypeAlice"',
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "http://example.org/Bob",
               '"skypeBob"',
             ]);
@@ -91,11 +91,11 @@ describe("SPARQL property paths: Zero or One paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"].value) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf(["http://example.org/Bob", '"Carol"']);
+            expect(b["o"]).to.be.oneOf(["http://example.org/Bob", '"Carol"']);
             break;
         }
         results.push(b);
@@ -122,24 +122,24 @@ describe("SPARQL property paths: Zero or One paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"].value) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "http://example.org/Alice",
               "http://example.org/Didier",
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "http://example.org/Bob",
               "http://example.org/Carol",
               '"Carol"',
             ]);
             break;
           case "http://example.org/Carol":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "http://example.org/Carol",
               "http://example.org/Didier",
             ]);
@@ -169,24 +169,24 @@ describe("SPARQL property paths: Zero or One paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"].value) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "http://example.org/Alice",
               "mailto:alice@example",
               "tel:0604651478",
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "http://example.org/Bob",
               "mailto:bob@example",
             ]);
             break;
           case "http://example.org/Carol":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "http://example.org/Carol",
               "tel:0645123549",
             ]);
@@ -217,29 +217,29 @@ describe("SPARQL property paths: Zero or One paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"].value) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "http://example.org/Alice",
               "http://example.org/Didier",
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "http://example.org/Bob",
               "http://example.org/Carol",
             ]);
             break;
           case "http://example.org/Carol":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "http://example.org/Carol",
               "http://example.org/Didier",
             ]);
             break;
           case "http://example.org/Eve":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "http://example.org/Eve",
               "http://example.org/Bob",
             ]);

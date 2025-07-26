@@ -71,9 +71,9 @@ describe("SERVICE queries", () => {
       }`,
       nbResults: 5,
       testFun: function (b) {
-        expect(b).to.have.all.keys(["?name", "?article"]);
-        expect(b["?name"]).to.equal('"Thomas Minier"@en');
-        expect(b["?article"]).to.be.oneOf([
+        expect(b).to.have.all.keys(["name", "article"]);
+        expect(b["name"]).to.equal('"Thomas Minier"@en');
+        expect(b["article"]).to.be.oneOf([
           "https://dblp.org/rec/conf/esws/MinierSMV18a",
           "https://dblp.org/rec/conf/esws/MinierSMV18",
           "https://dblp.org/rec/journals/corr/abs-1806-00227",
@@ -97,11 +97,11 @@ describe("SERVICE queries", () => {
       }`,
       nbResults: 3,
       testFun: function (b) {
-        expect(b).to.have.all.keys(["?s", "?s2", "?coCreator", "?name"]);
-        expect(b["?s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
-        expect(b["?s2"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
-        expect(b["?name"]).to.equal('"Arnaud Grall"');
-        expect(b["?coCreator"]).to.be.oneOf([
+        expect(b).to.have.all.keys(["s", "s2", "coCreator", "name"]);
+        expect(b["s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
+        expect(b["s2"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
+        expect(b["name"]).to.equal('"Arnaud Grall"');
+        expect(b["coCreator"]).to.be.oneOf([
           "https://dblp.org/pers/m/Molli:Pascal",
           "https://dblp.org/pers/m/Montoya:Gabriela",
           "https://dblp.org/pers/s/Skaf=Molli:Hala",

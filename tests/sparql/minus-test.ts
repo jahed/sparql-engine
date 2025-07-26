@@ -51,8 +51,8 @@ describe("SPARQL MINUS", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?s", "?p", "?o");
-        expect(b["?s"]).to.be.oneOf([
+        expect(b).to.have.keys("s", "p", "o");
+        expect(b["s"]).to.be.oneOf([
           "https://dblp.uni-trier.de/pers/m/Minier:Thomas",
           "https://dblp.org/pers/m/Minier:Thomas.nt",
         ]);

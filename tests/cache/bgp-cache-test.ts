@@ -60,12 +60,12 @@ describe("LRUBGPCache", () => {
       const bgp = formatBGP(patterns, "http://example.org#graphA");
       const bindings = [
         BindingBase.fromObject({
-          "?s": createIRI(":s1"),
-          "?type": createIRI(":c1"),
+          s: createIRI(":s1"),
+          type: createIRI(":c1"),
         }),
         BindingBase.fromObject({
-          "?s": createIRI(":s2"),
-          "?type": createIRI(":c2"),
+          s: createIRI(":s2"),
+          type: createIRI(":c2"),
         }),
       ];
       cache.update(bgp, bindings[0], writerID);

@@ -61,7 +61,7 @@ describe("ORDER BY queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b["?article"]).to.equal(results[0]);
+        expect(b["article"]).to.equal(results[0]);
         results.shift();
       },
       done,
@@ -96,7 +96,7 @@ describe("ORDER BY queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b["?article"]).to.equal(results[0]);
+        expect(b["article"]).to.equal(results[0]);
         results.shift();
       },
       done,
@@ -131,7 +131,7 @@ describe("ORDER BY queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b["?article"]).to.equal(results[0]);
+        expect(b["article"]).to.equal(results[0]);
         results.shift();
       },
       done,

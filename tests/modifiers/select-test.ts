@@ -53,7 +53,7 @@ describe("SELECT SPARQL queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?name", "?article");
+        expect(b).to.have.keys("name", "article");
         results.push(b);
       },
       done,
@@ -80,7 +80,7 @@ describe("SELECT SPARQL queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?name", "?article", "?s");
+        expect(b).to.have.keys("name", "article", "s");
         results.push(b);
       },
       done,
@@ -111,7 +111,7 @@ describe("SELECT SPARQL queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?name");
+        expect(b).to.have.keys("name");
         results.push(b);
       },
       done,

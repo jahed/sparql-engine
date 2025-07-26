@@ -55,7 +55,7 @@ describe("SELECT SPARQL queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof BindingBase);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?name", "?article");
+        expect(b).to.have.keys("name", "article");
         results.push(b);
       },
       done,

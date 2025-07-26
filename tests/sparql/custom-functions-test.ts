@@ -58,8 +58,8 @@ describe("SPARQL custom operators", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?reversed");
-        expect(b["?reversed"]).to.equal('"reiniM samohT"@en');
+        expect(b).to.have.keys("reversed");
+        expect(b["reversed"]).to.equal('"reiniM samohT"@en');
         results.push(b);
       },
       done,
@@ -93,7 +93,7 @@ describe("SPARQL custom operators", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?o");
+        expect(b).to.have.keys("o");
         results.push(b);
       },
       done,
@@ -175,8 +175,8 @@ describe("SPARQL custom operators", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?error");
-        expect(b["?error"]).to.equal('"UNBOUND"');
+        expect(b).to.have.keys("error");
+        expect(b["error"]).to.equal('"UNBOUND"');
         results.push(b);
       },
       done,

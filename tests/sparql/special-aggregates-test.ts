@@ -50,7 +50,7 @@ describe("Non standard SPARQL aggregates", () => {
       GROUP BY ?x`,
       results: [
         {
-          "?acc": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+          acc: '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
         },
       ],
     },
@@ -70,7 +70,7 @@ describe("Non standard SPARQL aggregates", () => {
       GROUP BY ?g`,
       results: [
         {
-          "?gmean": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+          gmean: '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
         },
       ],
     },
@@ -86,7 +86,7 @@ describe("Non standard SPARQL aggregates", () => {
       GROUP BY ?g`,
       results: [
         {
-          "?mse": '"4.123105625617661"^^http://www.w3.org/2001/XMLSchema#float',
+          mse: '"4.123105625617661"^^http://www.w3.org/2001/XMLSchema#float',
         },
       ],
     },

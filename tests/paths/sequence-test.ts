@@ -51,14 +51,14 @@ describe("SPARQL property paths: sequence paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        expect(b["?s"]).to.be.oneOf([
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        expect(b["s"]).to.be.oneOf([
           "http://example.org/Alice",
           "http://example.org/Bob",
           "http://example.org/Carol",
         ]);
-        expect(b["?o"]).to.be.oneOf([
+        expect(b["o"]).to.be.oneOf([
           "http://example.org/Man",
           "http://example.org/Woman",
         ]);
@@ -86,8 +86,8 @@ describe("SPARQL property paths: sequence paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?s");
-        expect(b["?s"]).to.be.oneOf([
+        expect(b).to.have.keys("s");
+        expect(b["s"]).to.be.oneOf([
           "http://example.org/Alice",
           "http://example.org/Carol",
         ]);
@@ -115,14 +115,14 @@ describe("SPARQL property paths: sequence paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"].value) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf(["tel:0645123549"]);
+            expect(b["o"]).to.be.oneOf(["tel:0645123549"]);
             break;
           case "http://example.org/Eve":
-            expect(b["?o"]).to.be.oneOf(["mailto:bob@example"]);
+            expect(b["o"]).to.be.oneOf(["mailto:bob@example"]);
             break;
         }
         results.push(b);

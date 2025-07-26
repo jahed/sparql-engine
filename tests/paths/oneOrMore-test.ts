@@ -50,32 +50,32 @@ describe("SPARQL property paths: One or More paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?name");
-        switch (b["?s"].value) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("name");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?name"]).to.be.oneOf([
+            expect(b["name"]).to.be.oneOf([
               "http://example.org/Bob",
               "http://example.org/Carol",
               "http://example.org/Didier",
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?name"]).to.be.oneOf([
+            expect(b["name"]).to.be.oneOf([
               "http://example.org/Bob",
               "http://example.org/Carol",
               "http://example.org/Didier",
             ]);
             break;
           case "http://example.org/Carol":
-            expect(b["?name"]).to.be.oneOf([
+            expect(b["name"]).to.be.oneOf([
               "http://example.org/Bob",
               "http://example.org/Carol",
               "http://example.org/Didier",
             ]);
             break;
           case "http://example.org/Mallory":
-            expect(b["?name"]).to.be.oneOf(["http://example.org/Eve"]);
+            expect(b["name"]).to.be.oneOf(["http://example.org/Eve"]);
             break;
           default:
             assert.fail();
@@ -104,17 +104,17 @@ describe("SPARQL property paths: One or More paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?name");
-        switch (b["?s"].value) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("name");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?name"]).to.be.oneOf(["http://example.org/Carol"]);
+            expect(b["name"]).to.be.oneOf(["http://example.org/Carol"]);
             break;
           case "http://example.org/Bob":
-            expect(b["?name"]).to.be.oneOf(["http://example.org/Didier"]);
+            expect(b["name"]).to.be.oneOf(["http://example.org/Didier"]);
             break;
           case "http://example.org/Carol":
-            expect(b["?name"]).to.be.oneOf(["http://example.org/Carol"]);
+            expect(b["name"]).to.be.oneOf(["http://example.org/Carol"]);
             break;
           default:
             assert.fail();
@@ -143,23 +143,23 @@ describe("SPARQL property paths: One or More paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?name");
-        switch (b["?s"].value) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("name");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?name"]).to.be.oneOf(["http://example.org/Didier"]);
+            expect(b["name"]).to.be.oneOf(["http://example.org/Didier"]);
             break;
           case "http://example.org/Bob":
-            expect(b["?name"]).to.be.oneOf([
+            expect(b["name"]).to.be.oneOf([
               "http://example.org/Carol",
               "http://example.org/Didier",
             ]);
             break;
           case "http://example.org/Carol":
-            expect(b["?name"]).to.be.oneOf(["http://example.org/Didier"]);
+            expect(b["name"]).to.be.oneOf(["http://example.org/Didier"]);
             break;
           case "http://example.org/Eve":
-            expect(b["?name"]).to.be.oneOf([
+            expect(b["name"]).to.be.oneOf([
               "http://example.org/Bob",
               "http://example.org/Carol",
               "http://example.org/Didier",
@@ -190,20 +190,20 @@ describe("SPARQL property paths: One or More paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?name");
-        switch (b["?s"].value) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("name");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?name"]).to.be.oneOf([
+            expect(b["name"]).to.be.oneOf([
               "http://example.org/Carol",
               "http://example.org/Didier",
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?name"]).to.be.oneOf(["http://example.org/Didier"]);
+            expect(b["name"]).to.be.oneOf(["http://example.org/Didier"]);
             break;
           case "http://example.org/Carol":
-            expect(b["?name"]).to.be.oneOf([
+            expect(b["name"]).to.be.oneOf([
               "http://example.org/Carol",
               "http://example.org/Didier",
             ]);
@@ -236,23 +236,23 @@ describe("SPARQL property paths: One or More paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"].value) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?o"]).to.be.oneOf(["http://example.org/Didier"]);
+            expect(b["o"]).to.be.oneOf(["http://example.org/Didier"]);
             break;
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "http://example.org/Carol",
               "http://example.org/Didier",
             ]);
             break;
           case "http://example.org/Carol":
-            expect(b["?o"]).to.be.oneOf(["http://example.org/Didier"]);
+            expect(b["o"]).to.be.oneOf(["http://example.org/Didier"]);
             break;
           case "http://example.org/Eve":
-            expect(b["?o"]).to.be.oneOf([
+            expect(b["o"]).to.be.oneOf([
               "http://example.org/Bob",
               "http://example.org/Carol",
               "http://example.org/Didier",

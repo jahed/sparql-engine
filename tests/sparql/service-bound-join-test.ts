@@ -71,9 +71,9 @@ describe("SERVICE queries (using bound joins)", () => {
       }`,
       nbResults: 5,
       testFun: function (b) {
-        expect(b).to.have.all.keys(["?name", "?article"]);
-        expect(b["?name"]).to.equal('"Thomas Minier"@en');
-        expect(b["?article"]).to.be.oneOf([
+        expect(b).to.have.all.keys(["name", "article"]);
+        expect(b["name"]).to.equal('"Thomas Minier"@en');
+        expect(b["article"]).to.be.oneOf([
           "https://dblp.org/rec/conf/esws/MinierSMV18a",
           "https://dblp.org/rec/conf/esws/MinierSMV18",
           "https://dblp.org/rec/journals/corr/abs-1806-00227",
@@ -96,8 +96,8 @@ describe("SERVICE queries (using bound joins)", () => {
       }`,
       nbResults: 1,
       testFun: function (b) {
-        expect(b).to.have.all.keys(["?s"]);
-        expect(b["?s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
+        expect(b).to.have.all.keys(["s"]);
+        expect(b["s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
       },
     },
     {
@@ -115,9 +115,9 @@ describe("SERVICE queries (using bound joins)", () => {
       }`,
       nbResults: 5,
       testFun: function (b) {
-        expect(b).to.have.all.keys(["?s", "?article"]);
-        expect(b["?s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
-        expect(b["?article"]).to.be.oneOf([
+        expect(b).to.have.all.keys(["s", "article"]);
+        expect(b["s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
+        expect(b["article"]).to.be.oneOf([
           "https://dblp.org/rec/conf/esws/MinierSMV18a",
           "https://dblp.org/rec/conf/esws/MinierSMV18",
           "https://dblp.org/rec/journals/corr/abs-1806-00227",

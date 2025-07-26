@@ -63,11 +63,11 @@ describe("Union merge optimization", () => {
 
     const rule = new UnionMerge();
     const plan = query(
-      union(union(placeholder("?s1")), union(placeholder("?s2")))
+      union(union(placeholder("s1")), union(placeholder("s2")))
     );
     const res = rule.visit(plan);
     expect(res).to.deep.equal(
-      query(union(placeholder("?s1"), placeholder("?s2")))
+      query(union(placeholder("s1"), placeholder("s2")))
     );
   });
 });

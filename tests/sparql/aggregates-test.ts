@@ -53,20 +53,20 @@ describe("SPARQL aggregates", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("p", "?nbPreds");
+        expect(b).to.have.keys("p", "nbPreds");
         switch (b["p"].value) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
           case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
-            expect(b["?nbPreds"]).to.equal(`"1"^^${XSD("integer")}`);
+            expect(b["nbPreds"]).to.equal(`"1"^^${XSD("integer")}`);
             break;
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
-            expect(b["?nbPreds"]).to.equal(`"5"^^${XSD("integer")}`);
+            expect(b["nbPreds"]).to.equal(`"5"^^${XSD("integer")}`);
             break;
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
-            expect(b["?nbPreds"]).to.equal(`"4"^^${XSD("integer")}`);
+            expect(b["nbPreds"]).to.equal(`"4"^^${XSD("integer")}`);
             break;
           default:
-            expect.fail(`Unexpected predicate found: ${b["?p"]}`);
+            expect.fail(`Unexpected predicate found: ${b["p"]}`);
         }
         results.push(b);
       },
@@ -92,21 +92,21 @@ describe("SPARQL aggregates", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?p", "?nbPreds", "?z");
-        expect(b["?z"]).to.equal(`"10"^^${XSD("integer")}`);
-        switch (b["?p"].value) {
+        expect(b).to.have.keys("p", "nbPreds", "z");
+        expect(b["z"]).to.equal(`"10"^^${XSD("integer")}`);
+        switch (b["p"].value) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
           case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
-            expect(b["?nbPreds"]).to.equal(`"1"^^${XSD("integer")}`);
+            expect(b["nbPreds"]).to.equal(`"1"^^${XSD("integer")}`);
             break;
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
-            expect(b["?nbPreds"]).to.equal(`"5"^^${XSD("integer")}`);
+            expect(b["nbPreds"]).to.equal(`"5"^^${XSD("integer")}`);
             break;
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
-            expect(b["?nbPreds"]).to.equal(`"4"^^${XSD("integer")}`);
+            expect(b["nbPreds"]).to.equal(`"4"^^${XSD("integer")}`);
             break;
           default:
-            expect.fail(`Unexpected predicate found: ${b["?p"]}`);
+            expect.fail(`Unexpected predicate found: ${b["p"]}`);
             break;
         }
         results.push(b);
@@ -131,8 +131,8 @@ describe("SPARQL aggregates", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?nbPreds");
-        expect(b["?nbPreds"]).to.equal(`"11"^^${XSD("integer")}`);
+        expect(b).to.have.keys("nbPreds");
+        expect(b["nbPreds"]).to.equal(`"11"^^${XSD("integer")}`);
         nbResults++;
       },
       done,
@@ -157,20 +157,20 @@ describe("SPARQL aggregates", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?p", "?nbPreds");
-        switch (b["?p"].value) {
+        expect(b).to.have.keys("p", "nbPreds");
+        switch (b["p"].value) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
           case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
-            expect(b["?nbPreds"]).to.equal(`"2"^^${XSD("integer")}`);
+            expect(b["nbPreds"]).to.equal(`"2"^^${XSD("integer")}`);
             break;
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
-            expect(b["?nbPreds"]).to.equal(`"10"^^${XSD("integer")}`);
+            expect(b["nbPreds"]).to.equal(`"10"^^${XSD("integer")}`);
             break;
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
-            expect(b["?nbPreds"]).to.equal(`"8"^^${XSD("integer")}`);
+            expect(b["nbPreds"]).to.equal(`"8"^^${XSD("integer")}`);
             break;
           default:
-            expect.fail(`Unexpected predicate found: ${b["?p"]}`);
+            expect.fail(`Unexpected predicate found: ${b["p"]}`);
             break;
         }
         results.push(b);
@@ -198,16 +198,16 @@ describe("SPARQL aggregates", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?p", "?nbPreds");
-        switch (b["?p"].value) {
+        expect(b).to.have.keys("p", "nbPreds");
+        switch (b["p"].value) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
-            expect(b["?nbPreds"]).to.equal(`"5"^^${XSD("integer")}`);
+            expect(b["nbPreds"]).to.equal(`"5"^^${XSD("integer")}`);
             break;
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
-            expect(b["?nbPreds"]).to.equal(`"4"^^${XSD("integer")}`);
+            expect(b["nbPreds"]).to.equal(`"4"^^${XSD("integer")}`);
             break;
           default:
-            throw new Error(`Unexpected predicate found: ${b["?p"]}`);
+            throw new Error(`Unexpected predicate found: ${b["p"]}`);
         }
         results.push(b);
       },
@@ -233,9 +233,9 @@ describe("SPARQL aggregates", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?s", "?nbSubjects");
-        expect(b["?s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
-        expect(b["?nbSubjects"]).to.equal(`"2"^^${XSD("integer")}`);
+        expect(b).to.have.keys("s", "nbSubjects");
+        expect(b["s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
+        expect(b["nbSubjects"]).to.equal(`"2"^^${XSD("integer")}`);
         results.push(b);
       },
       done,
@@ -260,10 +260,10 @@ describe("SPARQL aggregates", () => {
         ?s ?p ?o
       }
       `,
-      keys: ["?count"],
+      keys: ["count"],
       nbResults: 1,
       testFun: function (b) {
-        expect(b["?count"]).to.equal(`"10"^^${XSD("integer")}`);
+        expect(b["count"]).to.equal(`"10"^^${XSD("integer")}`);
       },
     },
     {
@@ -274,22 +274,22 @@ describe("SPARQL aggregates", () => {
         BIND(10 AS ?x)
       }
       GROUP BY ?p`,
-      keys: ["?p", "?sum"],
+      keys: ["p", "sum"],
       nbResults: 4,
       testFun: function (b) {
-        switch (b["?p"].value) {
+        switch (b["p"].value) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
           case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
-            expect(b["?sum"]).to.equal(`"10"^^${XSD("integer")}`);
+            expect(b["sum"]).to.equal(`"10"^^${XSD("integer")}`);
             break;
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
-            expect(b["?sum"]).to.equal(`"50"^^${XSD("integer")}`);
+            expect(b["sum"]).to.equal(`"50"^^${XSD("integer")}`);
             break;
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
-            expect(b["?sum"]).to.equal(`"40"^^${XSD("integer")}`);
+            expect(b["sum"]).to.equal(`"40"^^${XSD("integer")}`);
             break;
           default:
-            expect.fail(`Unexpected predicate found: ${b["?sum"]}`);
+            expect.fail(`Unexpected predicate found: ${b["sum"]}`);
             break;
         }
       },
@@ -302,10 +302,10 @@ describe("SPARQL aggregates", () => {
         BIND(10 AS ?x)
       }
       GROUP BY ?p`,
-      keys: ["?p", "?avg"],
+      keys: ["p", "avg"],
       nbResults: 4,
       testFun: function (b) {
-        expect(b["?avg"]).to.equal(`"10"^^${XSD("integer")}`);
+        expect(b["avg"]).to.equal(`"10"^^${XSD("integer")}`);
       },
     },
     {
@@ -316,10 +316,10 @@ describe("SPARQL aggregates", () => {
         BIND(10 AS ?x)
       }
       GROUP BY ?p`,
-      keys: ["?p", "?min"],
+      keys: ["p", "min"],
       nbResults: 4,
       testFun: function (b) {
-        expect(b["?min"]).to.equal(`"10"^^${XSD("integer")}`);
+        expect(b["min"]).to.equal(`"10"^^${XSD("integer")}`);
       },
     },
     {
@@ -330,10 +330,10 @@ describe("SPARQL aggregates", () => {
         BIND(10 AS ?x)
       }
       GROUP BY ?p`,
-      keys: ["?p", "?max"],
+      keys: ["p", "max"],
       nbResults: 4,
       testFun: function (b) {
-        expect(b["?max"]).to.equal(`"10"^^${XSD("integer")}`);
+        expect(b["max"]).to.equal(`"10"^^${XSD("integer")}`);
       },
     },
     {
@@ -344,22 +344,22 @@ describe("SPARQL aggregates", () => {
         BIND(10 AS ?x)
       }
       GROUP BY ?p`,
-      keys: ["?p", "?concat"],
+      keys: ["p", "concat"],
       nbResults: 4,
       testFun: function (b) {
-        switch (b["?p"].value) {
+        switch (b["p"].value) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
           case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
-            expect(b["?concat"]).to.equal('"10"');
+            expect(b["concat"]).to.equal('"10"');
             break;
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
-            expect(b["?concat"]).to.equal('"10.10.10.10.10"');
+            expect(b["concat"]).to.equal('"10.10.10.10.10"');
             break;
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
-            expect(b["?concat"]).to.equal('"10.10.10.10"');
+            expect(b["concat"]).to.equal('"10.10.10.10"');
             break;
           default:
-            expect.fail(`Unexpected predicate found: ${b["?concat"]}`);
+            expect.fail(`Unexpected predicate found: ${b["concat"]}`);
             break;
         }
       },
@@ -372,10 +372,10 @@ describe("SPARQL aggregates", () => {
         BIND(10 AS ?x)
       }
       GROUP BY ?p`,
-      keys: ["?p", "?sample"],
+      keys: ["p", "sample"],
       nbResults: 4,
       testFun: function (b) {
-        expect(b["?sample"]).to.equal(`"10"^^${XSD("integer")}`);
+        expect(b["sample"]).to.equal(`"10"^^${XSD("integer")}`);
       },
     },
   ];

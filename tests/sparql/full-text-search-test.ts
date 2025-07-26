@@ -51,8 +51,8 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          "?s": "https://dblp.org/pers/m/Minier:Thomas",
-          "?name": '"Thomas Minier"@en',
+          s: "https://dblp.org/pers/m/Minier:Thomas",
+          name: '"Thomas Minier"@en',
         },
       ],
     },
@@ -68,7 +68,7 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          "?s": "https://dblp.org/pers/m/Minier:Thomas.nt",
+          s: "https://dblp.org/pers/m/Minier:Thomas.nt",
         },
       ],
     },
@@ -87,10 +87,10 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          "?s": "https://dblp.org/pers/m/Minier:Thomas",
-          "?name": '"Thomas Minier"@en',
-          "?score": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
-          "?rank": '"0"^^http://www.w3.org/2001/XMLSchema#integer',
+          s: "https://dblp.org/pers/m/Minier:Thomas",
+          name: '"Thomas Minier"@en',
+          score: '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+          rank: '"0"^^http://www.w3.org/2001/XMLSchema#integer',
         },
       ],
     },
@@ -106,8 +106,8 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          "?o": "https://dblp.org/pers/m/Minier:Thomas",
-          "?score": '"1"^^http://www.w3.org/2001/XMLSchema#float',
+          o: "https://dblp.org/pers/m/Minier:Thomas",
+          score: '"1"^^http://www.w3.org/2001/XMLSchema#float',
         },
       ],
     },
@@ -124,8 +124,8 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          "?o": "\"provenance information for RDF data of dblp person 'm/Minier:Thomas'\"",
-          "?score": '"0.111"^^http://www.w3.org/2001/XMLSchema#float',
+          o: "\"provenance information for RDF data of dblp person 'm/Minier:Thomas'\"",
+          score: '"0.111"^^http://www.w3.org/2001/XMLSchema#float',
         },
       ],
     },
@@ -142,19 +142,19 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          "?o": "https://dblp.org/pers/m/Minier:Thomas",
-          "?score": '"1"^^http://www.w3.org/2001/XMLSchema#float',
-          "?rank": '"0"^^http://www.w3.org/2001/XMLSchema#integer',
+          o: "https://dblp.org/pers/m/Minier:Thomas",
+          score: '"1"^^http://www.w3.org/2001/XMLSchema#float',
+          rank: '"0"^^http://www.w3.org/2001/XMLSchema#integer',
         },
         {
-          "?o": '"Thomas Minier"@en',
-          "?score": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
-          "?rank": '"1"^^http://www.w3.org/2001/XMLSchema#integer',
+          o: '"Thomas Minier"@en',
+          score: '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+          rank: '"1"^^http://www.w3.org/2001/XMLSchema#integer',
         },
         {
-          "?o": "https://dblp.org/rec/conf/esws/MinierMSM17a",
-          "?score": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
-          "?rank": '"2"^^http://www.w3.org/2001/XMLSchema#integer',
+          o: "https://dblp.org/rec/conf/esws/MinierMSM17a",
+          score: '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+          rank: '"2"^^http://www.w3.org/2001/XMLSchema#integer',
         },
       ],
     },
@@ -172,14 +172,14 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          "?o": '"Thomas Minier"@en',
-          "?score": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
-          "?rank": '"1"^^http://www.w3.org/2001/XMLSchema#integer',
+          o: '"Thomas Minier"@en',
+          score: '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+          rank: '"1"^^http://www.w3.org/2001/XMLSchema#integer',
         },
         {
-          "?o": "https://dblp.org/rec/conf/esws/MinierMSM17a",
-          "?score": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
-          "?rank": '"2"^^http://www.w3.org/2001/XMLSchema#integer',
+          o: "https://dblp.org/rec/conf/esws/MinierMSM17a",
+          score: '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+          rank: '"2"^^http://www.w3.org/2001/XMLSchema#integer',
         },
       ],
     },

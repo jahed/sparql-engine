@@ -64,10 +64,10 @@ describe("GRAPH/FROM queries", () => {
       }`,
       nbResults: 2,
       testFun: function (b) {
-        expect(b).to.have.all.keys(["?s", "?name", "?article"]);
-        expect(b["?s"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
-        expect(b["?name"]).to.equal('"Arnaud Grall"');
-        expect(b["?article"]).to.be.oneOf([
+        expect(b).to.have.all.keys(["s", "name", "article"]);
+        expect(b["s"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
+        expect(b["name"]).to.equal('"Arnaud Grall"');
+        expect(b["article"]).to.be.oneOf([
           "https://dblp.org/rec/conf/semweb/GrallSM18",
           "https://dblp.org/rec/conf/esws/GrallFMSMSV17",
         ]);
@@ -89,20 +89,20 @@ describe("GRAPH/FROM queries", () => {
       }`,
       nbResults: 7,
       testFun: function (b) {
-        expect(b).to.have.all.keys(["?s", "?name", "?article"]);
+        expect(b).to.have.all.keys(["s", "name", "article"]);
         switch (b["s"].value) {
           case "https://dblp.org/pers/g/Grall:Arnaud":
-            expect(b["?s"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
-            expect(b["?name"]).to.equal('"Arnaud Grall"');
-            expect(b["?article"]).to.be.oneOf([
+            expect(b["s"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
+            expect(b["name"]).to.equal('"Arnaud Grall"');
+            expect(b["article"]).to.be.oneOf([
               "https://dblp.org/rec/conf/semweb/GrallSM18",
               "https://dblp.org/rec/conf/esws/GrallFMSMSV17",
             ]);
             break;
           case "https://dblp.org/pers/m/Minier:Thomas":
-            expect(b["?s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
-            expect(b["?name"]).to.equal('"Thomas Minier"@en');
-            expect(b["?article"]).to.be.oneOf([
+            expect(b["s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
+            expect(b["name"]).to.equal('"Thomas Minier"@en');
+            expect(b["article"]).to.be.oneOf([
               "https://dblp.org/rec/conf/esws/MinierSMV18a",
               "https://dblp.org/rec/conf/esws/MinierSMV18",
               "https://dblp.org/rec/journals/corr/abs-1806-00227",
@@ -111,7 +111,7 @@ describe("GRAPH/FROM queries", () => {
             ]);
             break;
           default:
-            throw new Error(`Unexpected ?s binding found ${b["?s"]}`);
+            throw new Error(`Unexpected ?s binding found ${b["s"]}`);
         }
       },
     },
@@ -130,11 +130,11 @@ describe("GRAPH/FROM queries", () => {
       }`,
       nbResults: 3,
       testFun: function (b) {
-        expect(b).to.have.all.keys(["?s", "?s2", "?coCreator", "?name"]);
-        expect(b["?s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
-        expect(b["?s2"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
-        expect(b["?name"]).to.equal('"Arnaud Grall"');
-        expect(b["?coCreator"]).to.be.oneOf([
+        expect(b).to.have.all.keys(["s", "s2", "coCreator", "name"]);
+        expect(b["s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
+        expect(b["s2"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
+        expect(b["name"]).to.equal('"Arnaud Grall"');
+        expect(b["coCreator"]).to.be.oneOf([
           "https://dblp.org/pers/m/Molli:Pascal",
           "https://dblp.org/pers/m/Montoya:Gabriela",
           "https://dblp.org/pers/s/Skaf=Molli:Hala",
@@ -158,12 +158,12 @@ describe("GRAPH/FROM queries", () => {
       }`,
       nbResults: 3,
       testFun: function (b) {
-        expect(b).to.have.all.keys(["?s", "?s2", "?coCreator", "?name", "?g"]);
-        expect(b["?s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
-        expect(b["?s2"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
-        expect(b["?g"]).to.be.oneOf([GRAPH_A_IRI, GRAPH_B_IRI]);
-        expect(b["?name"]).to.equal('"Arnaud Grall"');
-        expect(b["?coCreator"]).to.be.oneOf([
+        expect(b).to.have.all.keys(["s", "s2", "coCreator", "name", "g"]);
+        expect(b["s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
+        expect(b["s2"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
+        expect(b["g"]).to.be.oneOf([GRAPH_A_IRI, GRAPH_B_IRI]);
+        expect(b["name"]).to.equal('"Arnaud Grall"');
+        expect(b["coCreator"]).to.be.oneOf([
           "https://dblp.org/pers/m/Molli:Pascal",
           "https://dblp.org/pers/m/Montoya:Gabriela",
           "https://dblp.org/pers/s/Skaf=Molli:Hala",
@@ -186,22 +186,22 @@ describe("GRAPH/FROM queries", () => {
       }`,
       nbResults: 7,
       testFun: function (b) {
-        expect(b).to.have.all.keys(["?s", "?s2", "?coCreator", "?name", "?g"]);
-        expect(b["?s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
-        expect(b["?g"]).to.be.oneOf([GRAPH_A_IRI, GRAPH_B_IRI]);
-        if (b["?g"] === GRAPH_A_IRI) {
-          expect(b["?s2"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
-          expect(b["?name"]).to.equal('"Thomas Minier"@en');
-          expect(b["?coCreator"]).to.be.oneOf([
+        expect(b).to.have.all.keys(["s", "s2", "coCreator", "name", "g"]);
+        expect(b["s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
+        expect(b["g"]).to.be.oneOf([GRAPH_A_IRI, GRAPH_B_IRI]);
+        if (b["g"] === GRAPH_A_IRI) {
+          expect(b["s2"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
+          expect(b["name"]).to.equal('"Thomas Minier"@en');
+          expect(b["coCreator"]).to.be.oneOf([
             "https://dblp.org/pers/m/Molli:Pascal",
             "https://dblp.org/pers/m/Montoya:Gabriela",
             "https://dblp.org/pers/s/Skaf=Molli:Hala",
             "https://dblp.org/pers/v/Vidal:Maria=Esther",
           ]);
         } else {
-          expect(b["?s2"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
-          expect(b["?name"]).to.equal('"Arnaud Grall"');
-          expect(b["?coCreator"]).to.be.oneOf([
+          expect(b["s2"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
+          expect(b["name"]).to.equal('"Arnaud Grall"');
+          expect(b["coCreator"]).to.be.oneOf([
             "https://dblp.org/pers/m/Molli:Pascal",
             "https://dblp.org/pers/m/Montoya:Gabriela",
             "https://dblp.org/pers/s/Skaf=Molli:Hala",
@@ -225,12 +225,12 @@ describe("GRAPH/FROM queries", () => {
       }`,
       nbResults: 3,
       testFun: function (b) {
-        expect(b).to.have.all.keys(["?s", "?s2", "?g", "?coCreator", "?name"]);
-        expect(b["?s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
-        expect(b["?s2"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
-        expect(b["?g"]).to.equals(GRAPH_B_IRI);
-        expect(b["?name"]).to.equal('"Arnaud Grall"');
-        expect(b["?coCreator"]).to.be.oneOf([
+        expect(b).to.have.all.keys(["s", "s2", "g", "coCreator", "name"]);
+        expect(b["s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
+        expect(b["s2"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
+        expect(b["g"]).to.equals(GRAPH_B_IRI);
+        expect(b["name"]).to.equal('"Arnaud Grall"');
+        expect(b["coCreator"]).to.be.oneOf([
           "https://dblp.org/pers/m/Molli:Pascal",
           "https://dblp.org/pers/m/Montoya:Gabriela",
           "https://dblp.org/pers/s/Skaf=Molli:Hala",

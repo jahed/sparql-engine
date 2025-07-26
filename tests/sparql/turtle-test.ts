@@ -55,7 +55,7 @@ describe("Queries with Turtle notation", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?name", "?article");
+        expect(b).to.have.keys("name", "article");
         results.push(b);
       },
       done,

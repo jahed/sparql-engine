@@ -39,38 +39,53 @@ describe("Hash Join operator", () => {
     nbEach.set("http://example.org#titi", 0);
     nbEach.set("http://example.org#tata", 0);
     const left = from([
-      BindingBase.fromObject({ "?x": createIRI("http://example.org#toto") }),
-      BindingBase.fromObject({ "?x": createIRI("http://example.org#titi") }),
+      BindingBase.fromObject({ x: createIRI("http://example.org#toto") }),
+      BindingBase.fromObject({ x: createIRI("http://example.org#titi") }),
     ]);
     const right = from([
-      BindingBase.fromObject({ "?x": createIRI("http://example.org#toto"), "?y": createLiteral("1") }),
-      BindingBase.fromObject({ "?x": createIRI("http://example.org#toto"), "?y": createLiteral("2") }),
-      BindingBase.fromObject({ "?x": createIRI("http://example.org#toto"), "?y": createLiteral("3") }),
-      BindingBase.fromObject({ "?x": createIRI("http://example.org#titi"), "?y": createLiteral("4") }),
-      BindingBase.fromObject({ "?x": createIRI("http://example.org#tata"), "?y": createLiteral("5") }),
+      BindingBase.fromObject({
+        x: createIRI("http://example.org#toto"),
+        y: createLiteral("1"),
+      }),
+      BindingBase.fromObject({
+        x: createIRI("http://example.org#toto"),
+        y: createLiteral("2"),
+      }),
+      BindingBase.fromObject({
+        x: createIRI("http://example.org#toto"),
+        y: createLiteral("3"),
+      }),
+      BindingBase.fromObject({
+        x: createIRI("http://example.org#titi"),
+        y: createLiteral("4"),
+      }),
+      BindingBase.fromObject({
+        x: createIRI("http://example.org#tata"),
+        y: createLiteral("5"),
+      }),
     ]);
 
-    const op = hashJoin(left, right, "?x");
+    const op = hashJoin(left, right, "x");
     op.subscribe(
       (value) => {
-        expect(value.toObject()).to.have.all.keys("?x", "?y");
-        switch (value.get("?x")?.value) {
+        expect(value.toObject()).to.have.all.keys("x", "y");
+        switch (value.get("x")?.value) {
           case "http://example.org#toto":
-            expect(value.get("?y")).to.be.oneOf(['"1"', '"2"', '"3"']);
+            expect(value.get("y")).to.be.oneOf(['"1"', '"2"', '"3"']);
             nbEach.set(
               "http://example.org#toto",
               nbEach.get("http://example.org#toto") + 1
             );
             break;
           case "http://example.org#titi":
-            expect(value.get("?y")).to.be.oneOf(['"4"']);
+            expect(value.get("y")).to.be.oneOf(['"4"']);
             nbEach.set(
               "http://example.org#titi",
               nbEach.get("http://example.org#titi") + 1
             );
             break;
           default:
-            throw new Error(`Unexpected "?x" value: ${value.get("?x")}`);
+            throw new Error(`Unexpected "x" value: ${value.get("x")}`);
         }
         nbResults++;
       },

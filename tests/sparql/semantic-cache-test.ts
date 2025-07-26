@@ -50,7 +50,7 @@ describe("Semantic caching for SPARQL queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?s", "?p", "?o");
+        expect(b).to.have.keys("s", "p", "o");
         results.push(b);
       },
       done,
@@ -95,7 +95,7 @@ describe("Semantic caching for SPARQL queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?s", "?p", "?o");
+        expect(b).to.have.keys("s", "p", "o");
         results.push(b);
       },
       done,
@@ -134,7 +134,7 @@ describe("Semantic caching for SPARQL queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?s", "?p", "?o");
+        expect(b).to.have.keys("s", "p", "o");
         results.push(b);
       },
       done,
