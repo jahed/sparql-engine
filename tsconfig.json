@@ -4,7 +4,14 @@
     "@tsconfig/node-ts/tsconfig.json"
   ],
   "compilerOptions": {
-    "lib": ["es2024", "ESNext.Array", "ESNext.Collection", "ESNext.Iterator", "DOM", "DOM.Iterable"],
+    "lib": [
+      "es2024",
+      "ESNext.Array",
+      "ESNext.Collection",
+      "ESNext.Iterator",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "outDir": "./dist/",
     "declaration": true,
     "sourceMap": true

@@ -42,7 +42,7 @@ import ExecutionContext from "../context/execution-context.ts";
 import ContextSymbols from "../context/symbols.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import { Pipeline } from "../pipeline/pipeline.ts";
-import * as rewritings from "./rewritings.js";
+import * as rewritings from "./rewritings.ts";
 import StageBuilder from "./stage-builder.ts";
 
 /**

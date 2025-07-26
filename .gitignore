@@ -7,6 +7,7 @@ npm-debug.log*
 dist/
 docs/
 examples/testing_db/
+.tmp
 
 # W3C test suite
 sparql11-test-suite
