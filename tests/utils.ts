@@ -28,7 +28,6 @@ import fs from "fs";
 import { isArray, pick } from "lodash-es";
 import n3 from "n3";
 import type { Algebra } from "sparqljs";
-import type { CustomFunctions } from "../dist/operators/expressions/sparql-expression.js";
 import {
   ExecutionContext,
   Graph,
@@ -38,6 +37,7 @@ import {
   PlanBuilder,
 } from "../src/api.ts";
 import type { QueryOutput } from "../src/engine/plan-builder.ts";
+import type { CustomFunctions } from "../src/operators/expressions/sparql-expression.ts";
 
 const { Parser, Store } = n3;
 
