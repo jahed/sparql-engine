@@ -29,7 +29,7 @@ import { before, describe, it } from "node:test";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("FILTER SPARQL queries", () => {
-  let engine = null;
+  let engine: TestEngine;
   before(() => {
     const g = getGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);

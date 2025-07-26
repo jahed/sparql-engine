@@ -62,7 +62,7 @@ export interface StreamPipelineInput<T> {
    * Report an error that occurs during execution
    * @param err - The error to report
    */
-  error(err: any): void;
+  error(err?: any): void;
 }
 
 /**
@@ -77,9 +77,9 @@ export interface PipelineStage<T> {
    * @param  onEnd - Function invoked when the stage ends
    */
   subscribe(
-    onData: (value: T) => void,
-    onError: (err: any) => void,
-    onEnd: () => void
+    onData?: (value: T) => void,
+    onError?: (err: any) => void,
+    onEnd?: () => void
   ): void;
 
   /**

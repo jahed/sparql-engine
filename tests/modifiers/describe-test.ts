@@ -25,11 +25,12 @@ SOFTWARE.
 "use strict";
 
 import { expect } from "chai";
+import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("DESCRIBE SPARQL queries", () => {
-  let engine = null;
+  let engine: TestEngine;
   before(() => {
     const g = getGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);
@@ -48,6 +49,7 @@ describe("DESCRIBE SPARQL queries", () => {
     const iterator = engine.execute(query);
     iterator.subscribe(
       (triple) => {
+        assert.ok(typeof triple === "object" && "subject" in triple);
         expect(triple).to.have.all.keys("subject", "predicate", "object");
         expect(triple.subject).to.equal(
           "https://dblp.org/pers/m/Minier:Thomas"

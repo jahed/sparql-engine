@@ -26,6 +26,7 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
+import type { Algebra } from "sparqljs";
 import { BindingBase } from "../../src/api.ts";
 import { LRUBGPCache } from "../../src/engine/cache/bgp-cache.ts";
 
@@ -35,19 +36,19 @@ import { LRUBGPCache } from "../../src/engine/cache/bgp-cache.ts";
  * @param {*} patterns - Set of triple patterns
  * @param {*} graphIRI - Graph's IRI
  */
-function formatBGP(patterns, graphIRI) {
+function formatBGP(patterns: Algebra.TripleObject[], graphIRI: string) {
   return { patterns, graphIRI };
 }
 
 describe("LRUBGPCache", () => {
-  let cache = null;
+  let cache: LRUBGPCache;
   beforeEach(() => {
     cache = new LRUBGPCache(10000, 10000);
   });
 
   describe("#update/commit", () => {
     it("should supports insertion of items over time", (t, done) => {
-      const writerID = 1;
+      const writerID = "1";
       const patterns = [
         { subject: "?s", predicate: "rdf:type", object: "?type" },
       ];
@@ -60,7 +61,7 @@ describe("LRUBGPCache", () => {
       cache.update(bgp, bindings[1], writerID);
       cache.commit(bgp, writerID);
       cache
-        .get(bgp)
+        .get(bgp)!
         .then((content) => {
           expect(content.map((x) => x.toObject())).to.deep.equals(
             bindings.map((x) => x.toObject())
@@ -78,8 +79,8 @@ describe("LRUBGPCache", () => {
         { subject: "?s", predicate: "rdf:type", object: "?type" },
       ];
       const subsetBGP = formatBGP(subsetPatterns, "http://example.org#graphA");
-      cache.update(subsetBGP, BindingBase.fromObject({ "?s": ":s1" }), 1);
-      cache.commit(subsetBGP, 1);
+      cache.update(subsetBGP, BindingBase.fromObject({ "?s": ":s1" }), "1");
+      cache.commit(subsetBGP, "1");
       // search for subset
       const patterns = [
         { subject: "?s", predicate: "rdf:type", object: "?type" },
@@ -97,8 +98,8 @@ describe("LRUBGPCache", () => {
         { subject: "?s", predicate: "rdf:type", object: "?type" },
       ];
       const subsetBGP = formatBGP(subsetPatterns, "http://example.org#graphA");
-      cache.update(subsetBGP, BindingBase.fromObject({ "?s": ":s1" }), 1);
-      cache.commit(subsetBGP, 1);
+      cache.update(subsetBGP, BindingBase.fromObject({ "?s": ":s1" }), "1");
+      cache.commit(subsetBGP, "1");
       // search for subset
       const patterns = [
         { subject: "?s", predicate: "foaf:knows", object: "?type" },
@@ -127,10 +128,10 @@ describe("LRUBGPCache", () => {
         subsetPatterns_b,
         "http://example.org#graphA"
       );
-      cache.update(subsetBGP_a, BindingBase.fromObject({ "?s": ":s1" }), 1);
-      cache.commit(subsetBGP_a, 1);
-      cache.update(subsetBGP_b, BindingBase.fromObject({ "?s": ":s2" }), 1);
-      cache.commit(subsetBGP_b, 1);
+      cache.update(subsetBGP_a, BindingBase.fromObject({ "?s": ":s1" }), "1");
+      cache.commit(subsetBGP_a, "1");
+      cache.update(subsetBGP_b, BindingBase.fromObject({ "?s": ":s2" }), "1");
+      cache.commit(subsetBGP_b, "1");
       // search for subset
       const patterns = [
         { subject: "?s", predicate: "rdf:type", object: "?type" },

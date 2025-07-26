@@ -24,11 +24,11 @@ SOFTWARE.
 
 "use strict";
 
-import Graph from "./graph.ts";
-import type { PipelineInput } from "../engine/pipeline/pipeline-engine.ts";
-import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import type { Algebra } from "sparqljs";
 import ExecutionContext from "../engine/context/execution-context.ts";
+import type { PipelineInput } from "../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import Graph from "./graph.ts";
 
 /**
  * An UnionGraph represents the dynamic union of several graphs.
@@ -39,7 +39,7 @@ import ExecutionContext from "../engine/context/execution-context.ts";
  * @author Thomas Minier
  */
 export default class UnionGraph extends Graph {
-  private readonly _graphs: Graph[];
+  public readonly _graphs: Graph[]; // Public for tests.
 
   /**
    * Constructor

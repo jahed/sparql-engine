@@ -32,7 +32,7 @@ const GRAPH_A_IRI = "http://example.org#some-graph-a";
 const GRAPH_B_IRI = "http://example.org#some-graph-b";
 
 describe("SPARQL UPDATE: CREATE queries", () => {
-  let engine = null;
+  let engine: TestEngine;
   beforeEach(() => {
     const gA = getGraph("./tests/data/dblp.nt");
     engine = new TestEngine(gA, GRAPH_A_IRI);
@@ -51,14 +51,10 @@ describe("SPARQL UPDATE: CREATE queries", () => {
 
   data.forEach((d) => {
     it(`should evaluate "${d.name}" queries`, (t, done) => {
-      engine
-        .execute(d.query)
-        .execute()
-        .then(() => {
-          d.testFun();
-          done();
-        })
-        .catch(done);
+      engine.execute(d.query).subscribe(undefined, done, () => {
+        d.testFun();
+        done();
+      });
     });
   });
 });

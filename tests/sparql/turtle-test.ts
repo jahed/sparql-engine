@@ -25,11 +25,13 @@ SOFTWARE.
 "use strict";
 
 import { expect } from "chai";
+import assert from "node:assert";
 import { before, describe, it } from "node:test";
+import { Bindings } from "../../src/api.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("Queries with Turtle notation", () => {
-  let engine = null;
+  let engine: TestEngine;
   before(() => {
     const g = getGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);
@@ -50,8 +52,9 @@ describe("Queries with Turtle notation", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?name", "?article");
         results.push(b);
       },

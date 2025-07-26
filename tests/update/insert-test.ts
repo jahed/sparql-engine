@@ -31,7 +31,7 @@ import { getGraph, TestEngine } from "../utils.ts";
 const GRAPH_IRI = "htpp://example.org#some-graph";
 
 describe("SPARQL UPDATE: INSERT DATA queries", () => {
-  let engine = null;
+  let engine: TestEngine;
   beforeEach(() => {
     const gA = getGraph(null);
     const gB = getGraph(null);
@@ -44,24 +44,20 @@ describe("SPARQL UPDATE: INSERT DATA queries", () => {
     PREFIX dc: <http://purl.org/dc/elements/1.1/>
     INSERT DATA { <http://example/book1>  dc:title  "Fundamentals of Compiler Design" }`;
 
-    engine
-      .execute(query)
-      .execute()
-      .then(() => {
-        const triples = engine._graph._store.getTriples(
-          "http://example/book1",
-          null,
-          null
-        );
-        expect(triples.length).to.equal(1);
-        expect(triples[0].subject).to.equal("http://example/book1");
-        expect(triples[0].predicate).to.equal(
-          "http://purl.org/dc/elements/1.1/title"
-        );
-        expect(triples[0].object).to.equal('"Fundamentals of Compiler Design"');
-        done();
-      })
-      .catch(done);
+    engine.execute(query).subscribe(undefined, done, () => {
+      const triples = engine._graph._store.getTriples(
+        "http://example/book1",
+        null,
+        null
+      );
+      expect(triples.length).to.equal(1);
+      expect(triples[0].subject).to.equal("http://example/book1");
+      expect(triples[0].predicate).to.equal(
+        "http://purl.org/dc/elements/1.1/title"
+      );
+      expect(triples[0].object).to.equal('"Fundamentals of Compiler Design"');
+      done();
+    });
   });
 
   it("should evaluate INSERT DATA queries using a named Graph", (t, done) => {
@@ -73,21 +69,17 @@ describe("SPARQL UPDATE: INSERT DATA queries", () => {
       }
     }`;
 
-    engine
-      .execute(query)
-      .execute()
-      .then(() => {
-        const triples = engine
-          .getNamedGraph(GRAPH_IRI)
-          ._store.getTriples("http://example/book1", null, null);
-        expect(triples.length).to.equal(1);
-        expect(triples[0].subject).to.equal("http://example/book1");
-        expect(triples[0].predicate).to.equal(
-          "http://purl.org/dc/elements/1.1/title"
-        );
-        expect(triples[0].object).to.equal('"Fundamentals of Compiler Design"');
-        done();
-      })
-      .catch(done);
+    engine.execute(query).subscribe(undefined, done, () => {
+      const triples = engine
+        .getNamedGraph(GRAPH_IRI)
+        ._store.getTriples("http://example/book1", null, null);
+      expect(triples.length).to.equal(1);
+      expect(triples[0].subject).to.equal("http://example/book1");
+      expect(triples[0].predicate).to.equal(
+        "http://purl.org/dc/elements/1.1/title"
+      );
+      expect(triples[0].object).to.equal('"Fundamentals of Compiler Design"');
+      done();
+    });
   });
 });

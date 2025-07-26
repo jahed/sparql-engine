@@ -25,11 +25,14 @@ SOFTWARE.
 "use strict";
 
 import { expect } from "chai";
+import assert from "node:assert";
 import { before, describe, it } from "node:test";
+import { Bindings } from "../../src/api.ts";
+import type { QueryOutput } from "../../src/engine/plan-builder.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL property paths: alternative paths", () => {
-  let engine = null;
+  let engine: TestEngine;
   before(() => {
     const g = getGraph("./tests/data/paths.ttl");
     engine = new TestEngine(g);
@@ -46,8 +49,9 @@ describe("SPARQL property paths: alternative paths", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.property("?s");
         expect(b).to.have.property("?o");
         switch (b["?s"]) {
@@ -85,8 +89,9 @@ describe("SPARQL property paths: alternative paths", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.not.have.property("?s");
         expect(b).to.have.property("?o");
         expect(b["?o"]).to.be.oneOf(["mailto:alice@example", "tel:0604651478"]);
@@ -111,8 +116,9 @@ describe("SPARQL property paths: alternative paths", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.property("?s");
         expect(b).to.not.have.property("?o");
         expect(b["?s"]).to.equal("http://example.org/Carol");
@@ -137,8 +143,9 @@ describe("SPARQL property paths: alternative paths", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.property("?s");
         expect(b).to.have.property("?o");
         switch (b["?s"]) {
@@ -181,10 +188,11 @@ describe("SPARQL property paths: alternative paths", () => {
           }
         }`;
 
-    const results = [];
+    const results: boolean[] = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
       (b) => {
+        assert.ok(typeof b === "boolean");
         results.push(b);
       },
       done,
@@ -207,8 +215,9 @@ describe("SPARQL property paths: alternative paths", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.property("?s");
         expect(b).to.have.property("?o");
         switch (b["?s"]) {
@@ -247,7 +256,7 @@ describe("SPARQL property paths: alternative paths", () => {
           }
         }`;
 
-    const results = [];
+    const results: QueryOutput[] = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
       (b) => {

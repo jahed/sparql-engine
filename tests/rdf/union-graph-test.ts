@@ -26,6 +26,7 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
+import { ExecutionContext, RxjsPipeline } from "../../src/api.ts";
 import UnionGraph from "../../src/rdf/union-graph.ts";
 import { getGraph } from "../utils.ts";
 
@@ -33,8 +34,8 @@ const GRAPH_A_IRI = "http://example.org#some-graph-a";
 const GRAPH_B_IRI = "http://example.org#some-graph-b";
 
 describe("Union Graph", () => {
-  let gA = null;
-  let gB = null;
+  let gA: ReturnType<typeof getGraph>;
+  let gB: ReturnType<typeof getGraph>;
   beforeEach(() => {
     gA = getGraph("./tests/data/dblp.nt");
     gA.iri = GRAPH_A_IRI;
@@ -42,7 +43,7 @@ describe("Union Graph", () => {
     gB.iri = GRAPH_B_IRI;
   });
 
-  describe("#insert", (t, done) => {
+  describe("#insert", () => {
     it("should evaluates insertion of the left-most graphs of the Union", (t, done) => {
       const union = new UnionGraph([gA, gB]);
       const triple = {
@@ -72,7 +73,7 @@ describe("Union Graph", () => {
     });
   });
 
-  describe("#delete", (t, done) => {
+  describe("#delete", () => {
     it("should evaluates deletions on all graphs in the Union", (t, done) => {
       const union = new UnionGraph([gA, gB]);
       const triple = {
@@ -99,7 +100,7 @@ describe("Union Graph", () => {
     });
   });
 
-  describe("#find", (t, done) => {
+  describe("#find", () => {
     it("should searches for RDF triples in all graphs", (t, done) => {
       const union = new UnionGraph([gA, gB]);
       const triple = {
@@ -120,7 +121,9 @@ describe("Union Graph", () => {
         "https://dblp.org/rec/conf/esws/MinierMSM17a",
         "https://dblp.org/rec/conf/esws/MinierMSM17a",
       ];
-      const iterator = union.find(triple);
+      const iterator = new RxjsPipeline().from(
+        union.find(triple, new ExecutionContext())
+      );
 
       iterator.subscribe(
         (b) => {

@@ -25,20 +25,23 @@ SOFTWARE.
 "use strict";
 
 import { expect } from "chai";
+import assert from "node:assert";
 import { describe, it } from "node:test";
-import { rdf } from "../../src/api.ts";
+import { Bindings, rdf } from "../../src/api.ts";
+import type { CustomFunctions } from "../../src/operators/expressions/sparql-expression.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL custom operators", () => {
   it("should allow for custom functions in BIND", (t, done) => {
-    const customFunctions = {
+    const customFunctions: CustomFunctions = {
       "http://test.com#REVERSE": function (a) {
+        assert.ok(a && !Array.isArray(a));
         return rdf.shallowCloneTerm(a, a.value.split("").reverse().join(""));
       },
     };
 
     const g = getGraph("./tests/data/dblp.nt");
-    const engine = new TestEngine(g, null, customFunctions);
+    const engine = new TestEngine(g, undefined, customFunctions);
 
     const query = `
     PREFIX test: <http://test.com#>
@@ -52,8 +55,9 @@ describe("SPARQL custom operators", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?reversed");
         expect(b["?reversed"]).to.equal('"reiniM samohT"@en');
         results.push(b);
@@ -66,13 +70,14 @@ describe("SPARQL custom operators", () => {
   });
 
   it("should allow for custom functions in FILTER", (t, done) => {
-    const customFunctions = {
+    const customFunctions: CustomFunctions = {
       "http://test.com#CONTAINS_THOMAS": function (a) {
+        assert.ok(a && !Array.isArray(a));
         return rdf.createBoolean(a.value.toLowerCase().indexOf("thomas") >= 0);
       },
     };
     const g = getGraph("./tests/data/dblp.nt");
-    const engine = new TestEngine(g, null, customFunctions);
+    const engine = new TestEngine(g, undefined, customFunctions);
 
     const query = `
     PREFIX test: <http://test.com#>
@@ -85,8 +90,9 @@ describe("SPARQL custom operators", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?o");
         results.push(b);
       },
@@ -99,14 +105,15 @@ describe("SPARQL custom operators", () => {
   });
 
   it("should allow for custom functions in HAVING", (t, done) => {
-    const customFunctions = {
+    const customFunctions: CustomFunctions = {
       "http://test.com#IS_EVEN": function (a) {
+        assert.ok(a && "datatype" in a);
         const value = rdf.asJS(a.value, a.datatype.value);
         return rdf.createBoolean(value % 2 === 0);
       },
     };
     const g = getGraph("./tests/data/dblp.nt");
-    const engine = new TestEngine(g, null, customFunctions);
+    const engine = new TestEngine(g, undefined, customFunctions);
 
     const query = `
     PREFIX test: <http://test.com#>
@@ -122,8 +129,9 @@ describe("SPARQL custom operators", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?length");
         const length = parseInt(b["?length"].split("^^")[0].replace(/"/g, ""));
         expect(length % 2).to.equal(0);
@@ -139,7 +147,7 @@ describe("SPARQL custom operators", () => {
   });
 
   it('should consider the solution "unbound" on an error, but query should continue continue', (t, done) => {
-    const customFunctions = {
+    const customFunctions: CustomFunctions = {
       "http://test.com#ERROR": function (a) {
         throw new Error(
           "This should result in an unbould solution, but the query should still evaluate"
@@ -148,7 +156,7 @@ describe("SPARQL custom operators", () => {
     };
 
     const g = getGraph("./tests/data/dblp.nt");
-    const engine = new TestEngine(g, null, customFunctions);
+    const engine = new TestEngine(g, undefined, customFunctions);
 
     const query = `
     PREFIX test: <http://test.com#>
@@ -162,8 +170,9 @@ describe("SPARQL custom operators", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?error");
         expect(b["?error"]).to.equal('"UNBOUND"');
         results.push(b);

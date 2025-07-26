@@ -25,12 +25,15 @@ SOFTWARE.
 "use strict";
 
 import { expect } from "chai";
+import assert from "node:assert";
 import { before, describe, it } from "node:test";
+import { Bindings } from "../../src/api.ts";
 import { XSD } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL aggregates", () => {
-  let engine = null;
+  let engine: TestEngine;
+
   before(() => {
     const g = getGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);
@@ -47,8 +50,9 @@ describe("SPARQL aggregates", () => {
 
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?p", "?nbPreds");
         switch (b["?p"]) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
@@ -62,8 +66,7 @@ describe("SPARQL aggregates", () => {
             expect(b["?nbPreds"]).to.equal(`"4"^^${XSD("integer")}`);
             break;
           default:
-            expect().fail(`Unexpected predicate found: ${b["?p"]}`);
-            break;
+            expect.fail(`Unexpected predicate found: ${b["?p"]}`);
         }
         results.push(b);
       },
@@ -86,8 +89,9 @@ describe("SPARQL aggregates", () => {
 
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?p", "?nbPreds", "?z");
         expect(b["?z"]).to.equal(`"10"^^${XSD("integer")}`);
         switch (b["?p"]) {
@@ -102,7 +106,7 @@ describe("SPARQL aggregates", () => {
             expect(b["?nbPreds"]).to.equal(`"4"^^${XSD("integer")}`);
             break;
           default:
-            expect().fail(`Unexpected predicate found: ${b["?p"]}`);
+            expect.fail(`Unexpected predicate found: ${b["?p"]}`);
             break;
         }
         results.push(b);
@@ -124,8 +128,9 @@ describe("SPARQL aggregates", () => {
 
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?nbPreds");
         expect(b["?nbPreds"]).to.equal(`"11"^^${XSD("integer")}`);
         nbResults++;
@@ -149,8 +154,9 @@ describe("SPARQL aggregates", () => {
 
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?p", "?nbPreds");
         switch (b["?p"]) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
@@ -164,7 +170,7 @@ describe("SPARQL aggregates", () => {
             expect(b["?nbPreds"]).to.equal(`"8"^^${XSD("integer")}`);
             break;
           default:
-            expect().fail(`Unexpected predicate found: ${b["?p"]}`);
+            expect.fail(`Unexpected predicate found: ${b["?p"]}`);
             break;
         }
         results.push(b);
@@ -189,8 +195,9 @@ describe("SPARQL aggregates", () => {
 
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?p", "?nbPreds");
         switch (b["?p"]) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
@@ -223,8 +230,9 @@ describe("SPARQL aggregates", () => {
 
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?s", "?nbSubjects");
         expect(b["?s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
         expect(b["?nbSubjects"]).to.equal(`"2"^^${XSD("integer")}`);
@@ -238,7 +246,13 @@ describe("SPARQL aggregates", () => {
     );
   });
 
-  const data = [
+  const data: {
+    name: string;
+    query: string;
+    keys: string[];
+    nbResults: number;
+    testFun: (bindings: ReturnType<Bindings["toObject"]>) => void;
+  }[] = [
     {
       name: "COUNT-DISTINCT",
       query: `
@@ -275,7 +289,7 @@ describe("SPARQL aggregates", () => {
             expect(b["?sum"]).to.equal(`"40"^^${XSD("integer")}`);
             break;
           default:
-            expect().fail(`Unexpected predicate found: ${b["?sum"]}`);
+            expect.fail(`Unexpected predicate found: ${b["?sum"]}`);
             break;
         }
       },
@@ -345,7 +359,7 @@ describe("SPARQL aggregates", () => {
             expect(b["?concat"]).to.equal('"10.10.10.10"');
             break;
           default:
-            expect().fail(`Unexpected predicate found: ${b["?concat"]}`);
+            expect.fail(`Unexpected predicate found: ${b["?concat"]}`);
             break;
         }
       },
@@ -371,8 +385,9 @@ describe("SPARQL aggregates", () => {
       const results = [];
       const iterator = engine.execute(d.query);
       iterator.subscribe(
-        (b) => {
-          b = b.toObject();
+        (bindings) => {
+          assert.ok(bindings instanceof Bindings);
+          const b = bindings.toObject();
           expect(b).to.have.keys(...d.keys);
           d.testFun(b);
           results.push(b);

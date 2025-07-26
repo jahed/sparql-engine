@@ -25,9 +25,10 @@ SOFTWARE.
 "use strict";
 
 import { expect } from "chai";
+import assert from "node:assert";
 import { describe, it } from "node:test";
 import { from } from "rxjs";
-import { BindingBase } from "../../src/api.ts";
+import { BindingBase, Bindings } from "../../src/api.ts";
 import bind from "../../src/operators/bind.ts";
 
 describe("Bind operator", () => {
@@ -50,14 +51,16 @@ describe("Bind operator", () => {
     };
     const op = bind(source, "?z", expr);
     op.subscribe(
-      (value) => {
-        expect(value.toObject()).to.have.all.keys("?x", "?y", "?z");
-        if (value.get("?x").startsWith('"1"')) {
-          expect(value.get("?z")).to.equal(
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
+        expect(b).to.have.all.keys("?x", "?y", "?z");
+        if (b["?x"].startsWith('"1"')) {
+          expect(b["?z"]).to.equal(
             '"3"^^http://www.w3.org/2001/XMLSchema#integer'
           );
         } else {
-          expect(value.get("?z")).to.equal(
+          expect(b["?z"]).to.equal(
             '"5"^^http://www.w3.org/2001/XMLSchema#integer'
           );
         }

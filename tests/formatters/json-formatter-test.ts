@@ -31,7 +31,7 @@ import { getGraph, TestEngine } from "../utils.ts";
 import expected from "./select.json" with { type: "json" };
 
 describe("W3C JSON formatter", () => {
-  let engine = null;
+  let engine: TestEngine;
   before(() => {
     const g = getGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);

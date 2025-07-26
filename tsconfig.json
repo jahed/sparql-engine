@@ -12,10 +12,7 @@
       "DOM",
       "DOM.Iterable"
     ],
-    "outDir": "./dist/",
-    "declaration": true,
-    "sourceMap": true
+    "noEmit": true,
+    "resolveJsonModule": true
   },
-  "include": ["src"],
-  "exclude": ["**/*.test.ts"]
 }

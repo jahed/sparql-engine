@@ -25,11 +25,13 @@ SOFTWARE.
 "use strict";
 
 import { expect } from "chai";
+import assert from "node:assert";
 import { before, describe, it } from "node:test";
+import { Bindings } from "../../src/api.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("Semantic caching for SPARQL queries", () => {
-  let engine = null;
+  let engine: TestEngine;
   before(() => {
     const g = getGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);
@@ -44,8 +46,9 @@ describe("Semantic caching for SPARQL queries", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?s", "?p", "?o");
         results.push(b);
       },
@@ -58,12 +61,12 @@ describe("Semantic caching for SPARQL queries", () => {
           patterns: [{ subject: "?s", predicate: "?p", object: "?o" }],
           graphIRI: engine.defaultGraphIRI(),
         };
-        const cache = engine._builder._currentCache;
+        const cache = engine._builder._currentCache!;
         expect(cache.count()).to.equal(1);
         expect(cache.has(bgp)).to.equal(true);
         // check that the cache is accessible
         cache
-          .get(bgp)
+          .get(bgp)!
           .then((content) => {
             expect(content.length).to.equals(17);
             done();
@@ -82,8 +85,9 @@ describe("Semantic caching for SPARQL queries", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?s", "?p", "?o");
         results.push(b);
       },
@@ -96,7 +100,7 @@ describe("Semantic caching for SPARQL queries", () => {
           patterns: [{ subject: "?s", predicate: "?p", object: "?o" }],
           graphIRI: engine.defaultGraphIRI(),
         };
-        const cache = engine._builder._currentCache;
+        const cache = engine._builder._currentCache!;
         expect(cache.count()).to.equal(0);
         expect(cache.has(bgp)).to.equal(false);
         expect(cache.get(bgp)).to.be.null;
@@ -114,8 +118,9 @@ describe("Semantic caching for SPARQL queries", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?s", "?p", "?o");
         results.push(b);
       },
@@ -128,7 +133,7 @@ describe("Semantic caching for SPARQL queries", () => {
           patterns: [{ subject: "?s", predicate: "?p", object: "?o" }],
           graphIRI: engine.defaultGraphIRI(),
         };
-        const cache = engine._builder._currentCache;
+        const cache = engine._builder._currentCache!;
         expect(cache.count()).to.equal(0);
         expect(cache.has(bgp)).to.equal(false);
         expect(cache.get(bgp)).to.be.null;

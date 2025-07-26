@@ -25,11 +25,13 @@ SOFTWARE.
 "use strict";
 
 import { expect } from "chai";
+import assert from "node:assert";
 import { beforeEach, describe, it } from "node:test";
+import { BindingBase, Bindings } from "../../src/api.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL queries with OPTIONAL", () => {
-  let engine = null;
+  let engine: TestEngine;
   beforeEach(() => {
     const g = getGraph("./tests/data/dblp_opt.nt");
     engine = new TestEngine(g);
@@ -51,8 +53,9 @@ describe("SPARQL queries with OPTIONAL", () => {
 
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?name", "?article", "?label");
         expect(b["?label"]).to.equal("UNBOUND");
         results.push(b);
@@ -79,8 +82,9 @@ describe("SPARQL queries with OPTIONAL", () => {
 
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?s", "?article");
         expect(b["?s"]).to.be.oneOf([
           "https://dblp.org/pers/m/Minier:Thomas",
@@ -117,8 +121,9 @@ describe("SPARQL queries with OPTIONAL", () => {
 
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?name", "?article");
         expect(b["?article"]).to.equal("UNBOUND");
         results.push(b);
@@ -146,8 +151,9 @@ describe("SPARQL queries with OPTIONAL", () => {
 
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?s", "?article");
         expect(b["?s"]).to.be.oneOf([
           "https://dblp.org/pers/m/Minier:Thomas",
@@ -183,17 +189,18 @@ describe("SPARQL queries with OPTIONAL", () => {
       }
     }
     `;
-    const results = [];
+    const results: ReturnType<BindingBase["toObject"]>[] = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         results.push(b);
       },
       done,
       () => {
         expect(results.length).to.equal(2);
-        results.map((b) => {
+        results.forEach((b) => {
           expect(b["?title"]).to.be.oneOf([
             '"SPARQL Tutorial"',
             '"The Semantic Web"',
@@ -226,11 +233,12 @@ describe("SPARQL queries with OPTIONAL", () => {
       }
     }
     `;
-    const results = [];
+    const results: ReturnType<BindingBase["toObject"]>[] = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         results.push(b);
       },
       done,
@@ -267,11 +275,12 @@ describe("SPARQL queries with OPTIONAL", () => {
       }
     }
     `;
-    const results = [];
+    const results: ReturnType<BindingBase["toObject"]>[] = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         results.push(b);
       },
       done,
@@ -310,11 +319,12 @@ describe("SPARQL queries with OPTIONAL", () => {
       }
     }
     `;
-    const results = [];
+    const results: ReturnType<BindingBase["toObject"]>[] = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         results.push(b);
       },
       done,

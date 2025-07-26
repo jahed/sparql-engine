@@ -30,7 +30,7 @@ import { tsvFormatter } from "../../src/formatters/csv-tsv-formatter.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("W3C TSV formatter", () => {
-  let engine = null;
+  let engine: TestEngine;
   before(() => {
     const g = getGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);

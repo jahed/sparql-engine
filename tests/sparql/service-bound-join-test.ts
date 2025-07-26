@@ -25,16 +25,18 @@ SOFTWARE.
 "use strict";
 
 import { expect } from "chai";
+import assert from "node:assert";
 import { beforeEach, describe, it } from "node:test";
-import { getGraph, TestEngine } from "../utils.ts";
+import { BindingBase } from "../../src/api.ts";
+import { getGraph, TestEngine, type TestGraph } from "../utils.ts";
 
 const GRAPH_A_IRI = "http://example.org#some-graph-a";
 const GRAPH_B_IRI = "http://example.org#some-graph-b";
 
 describe("SERVICE queries (using bound joins)", () => {
-  let engine = null;
-  let gA = null;
-  let gB = null;
+  let engine: TestEngine;
+  let gA: TestGraph;
+  let gB: TestGraph;
   beforeEach(() => {
     gA = getGraph("./tests/data/dblp.nt", true);
     gB = getGraph("./tests/data/dblp2.nt", true);
@@ -43,11 +45,16 @@ describe("SERVICE queries (using bound joins)", () => {
       if (iri === GRAPH_B_IRI) {
         return gB;
       }
-      return null;
+      return gA;
     });
   });
 
-  const data = [
+  const data: {
+    text: string;
+    query: string;
+    nbResults: number;
+    testFun: (b: ReturnType<BindingBase["toObject"]>) => void;
+  }[] = [
     {
       text: "should evaluate simple SPARQL SERVICE queries using the bound join algorithm",
       query: `
@@ -125,8 +132,9 @@ describe("SERVICE queries (using bound joins)", () => {
       let nbResults = 0;
       const iterator = engine.execute(d.query);
       iterator.subscribe(
-        (b) => {
-          b = b.toObject();
+        (bindings) => {
+          assert(bindings instanceof BindingBase);
+          const b = bindings.toObject();
           d.testFun(b);
           nbResults++;
         },

@@ -26,26 +26,51 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { describe, it } from "node:test";
-import { Graph } from "../../src/api.ts";
+import type { Algebra } from "sparqljs";
+import { ExecutionContext, Graph, type PipelineInput } from "../../src/api.ts";
 
 describe("Graph", () => {
+  class TestGraph extends Graph {
+    insert(triple: Algebra.TripleObject): Promise<void> {
+      throw new Error("Method not implemented.");
+    }
+    delete(triple: Algebra.TripleObject): Promise<void> {
+      throw new Error("Method not implemented.");
+    }
+    find(
+      pattern: Algebra.TripleObject,
+      context: ExecutionContext
+    ): PipelineInput<Algebra.TripleObject> {
+      throw new Error("Method not implemented.");
+    }
+    clear(): Promise<void> {
+      throw new Error("Method not implemented.");
+    }
+  }
+
   it('should enforce subclasses to implement an "insert" method', () => {
-    const g = new Graph();
-    expect(() => g.insert()).to.throw(Error);
+    const g = new TestGraph();
+    expect(() => g.insert({ subject: "", predicate: "", object: "" })).to.throw(
+      Error
+    );
   });
 
   it('should enforce subclasses to implement a "delete" method', () => {
-    const g = new Graph();
-    expect(() => g.delete()).to.throw(Error);
+    const g = new TestGraph();
+    expect(() => g.delete({ subject: "", predicate: "", object: "" })).to.throw(
+      Error
+    );
   });
 
   it('should enforce subclasses to implement a "find" method', () => {
-    const g = new Graph();
-    expect(() => g.find()).to.throw(Error);
+    const g = new TestGraph();
+    expect(() =>
+      g.find({ subject: "", predicate: "", object: "" }, new ExecutionContext())
+    ).to.throw(Error);
   });
 
   it('should enforce subclasses to implement a "clear" method', () => {
-    const g = new Graph();
+    const g = new TestGraph();
     expect(() => g.clear()).to.throw(Error);
   });
 });

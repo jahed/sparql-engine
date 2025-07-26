@@ -24,23 +24,25 @@ SOFTWARE.
 
 "use strict";
 
-import Graph from "./graph.ts";
 import Dataset from "./dataset.ts";
+import Graph from "./graph.ts";
 
 /**
  * A simple Dataset backed by a HashMap.
  * @extends Dataset
  * @author Thomas Minier
  */
-export default class HashMapDataset extends Dataset {
-  private _defaultGraph: Graph;
-  private readonly _namedGraphs: Map<string, Graph>;
+export default class HashMapDataset<
+  G extends Graph = Graph,
+> extends Dataset<G> {
+  private _defaultGraph: G;
+  private readonly _namedGraphs: Map<string, G>;
   /**
    * Constructor
    * @param defaultGraphIRI - IRI of the Default Graph
    * @param defaultGraph     - Default Graph
    */
-  constructor(defaultGraphIRI: string, defaultGraph: Graph) {
+  constructor(defaultGraphIRI: string, defaultGraph: G) {
     super();
     defaultGraph.iri = defaultGraphIRI;
     this._defaultGraph = defaultGraph;
@@ -51,20 +53,20 @@ export default class HashMapDataset extends Dataset {
     return Array.from(this._namedGraphs.keys());
   }
 
-  setDefaultGraph(g: Graph): void {
+  setDefaultGraph(g: G): void {
     this._defaultGraph = g;
   }
 
-  getDefaultGraph(): Graph {
+  getDefaultGraph(): G {
     return this._defaultGraph;
   }
 
-  addNamedGraph(iri: string, g: Graph): void {
+  addNamedGraph(iri: string, g: G): void {
     g.iri = iri;
     this._namedGraphs.set(iri, g);
   }
 
-  getNamedGraph(iri: string): Graph {
+  getNamedGraph(iri: string): G {
     if (iri === this._defaultGraph.iri) {
       return this.getDefaultGraph();
     } else if (!this._namedGraphs.has(iri)) {

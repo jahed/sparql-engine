@@ -7,8 +7,9 @@
   "types": "dist/api.d.ts",
   "scripts": {
     "format": "prettier -w .",
-    "build": "rm -rf dist && tsc",
-    "test": "node --experimental-strip-types --experimental-test-isolation=none --test tests/**/*-test.ts"
+    "lint": "tsc --noEmit",
+    "test": "node --experimental-strip-types --experimental-test-isolation=none --test tests/**/*-test.ts",
+    "build": "rm -rf dist && tsc -p tsconfig.dist.json"
   },
   "repository": {
     "type": "git",
@@ -41,6 +42,7 @@
     "@types/chai": "^5.2.2",
     "@types/chai-xml": "^0.3.6",
     "@types/lodash-es": "^4.17.12",
+    "@types/n3": "^0.8.1",
     "@types/node": "^22.16.5",
     "@types/rdfjs__data-model": "^2.0.9",
     "@types/xml": "^1.0.2",

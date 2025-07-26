@@ -25,11 +25,13 @@ SOFTWARE.
 "use strict";
 
 import { expect } from "chai";
+import assert from "node:assert";
 import { before, describe, it } from "node:test";
+import { Bindings } from "../../src/rdf/bindings.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("Non standard SPARQL aggregates", () => {
-  let engine = null;
+  let engine: TestEngine;
   before(() => {
     const g = getGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);
@@ -92,10 +94,11 @@ describe("Non standard SPARQL aggregates", () => {
 
   data.forEach((d) => {
     it(`should evaluate the "${d.name}" SPARQL aggregate`, (t, done) => {
-      const results = [];
+      const results: ReturnType<Bindings["toObject"]>[] = [];
       const iterator = engine.execute(d.query);
       iterator.subscribe(
         (b) => {
+          assert.ok(b instanceof Bindings);
           results.push(b.toObject());
         },
         done,

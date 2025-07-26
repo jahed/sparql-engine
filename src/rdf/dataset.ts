@@ -32,8 +32,8 @@ import UnionGraph from "./union-graph.ts";
  * @abstract
  * @author Thomas Minier
  */
-export default abstract class Dataset {
-  private _graphFactory: (iri: string) => Graph | null;
+export default abstract class Dataset<G extends Graph = Graph> {
+  private _graphFactory: (iri: string) => G | null;
 
   /**
    * Constructor
@@ -47,27 +47,27 @@ export default abstract class Dataset {
    * Set the Default Graph of the Dataset
    * @param g - Default Graph
    */
-  abstract setDefaultGraph(g: Graph): void;
+  abstract setDefaultGraph(g: G): void;
 
   /**
    * Get the Default Graph of the Dataset
    * @return The Default Graph of the Dataset
    */
-  abstract getDefaultGraph(): Graph;
+  abstract getDefaultGraph(): G;
 
   /**
    * Add a Named Graph to the Dataset
    * @param iri - IRI of the Named Graph
    * @param g   - RDF Graph
    */
-  abstract addNamedGraph(iri: string, g: Graph): void;
+  abstract addNamedGraph(iri: string, g: G): void;
 
   /**
    * Get a Named Graph using its IRI
    * @param  iri - IRI of the Named Graph to retrieve
    * @return The corresponding Named Graph
    */
-  abstract getNamedGraph(iri: string): Graph;
+  abstract getNamedGraph(iri: string): G;
 
   /**
    * Delete a Named Graph using its IRI
@@ -90,7 +90,7 @@ export default abstract class Dataset {
    * @return The dynamic union of several graphs in the Dataset
    */
   getUnionGraph(iris: string[], includeDefault: boolean = false): UnionGraph {
-    let graphs: Graph[] = [];
+    let graphs: G[] = [];
     if (includeDefault) {
       graphs.push(this.getDefaultGraph());
     }
@@ -103,8 +103,8 @@ export default abstract class Dataset {
    * @param  includeDefault - True if the default graph should be included
    * @return The list of all graphs in the Dataset
    */
-  getAllGraphs(includeDefault: boolean = true): Graph[] {
-    const graphs: Graph[] = [];
+  getAllGraphs(includeDefault: boolean = true): G[] {
+    const graphs: G[] = [];
     if (includeDefault) {
       graphs.push(this.getDefaultGraph());
     }
@@ -118,7 +118,7 @@ export default abstract class Dataset {
    * Set the Graph Factory used by te dataset to create new RDF graphs on-demand
    * @param  factory - Graph Factory
    */
-  setGraphFactory(factory: (iri: string) => Graph) {
+  setGraphFactory(factory: (iri: string) => G) {
     this._graphFactory = factory;
   }
 
@@ -128,7 +128,7 @@ export default abstract class Dataset {
    * @param  iri - IRI of the graph to create
    * @return A new RDF Graph
    */
-  createGraph(iri: string): Graph {
+  createGraph(iri: string): G {
     const graph = this._graphFactory(iri);
     if (graph === null) {
       throw new Error(

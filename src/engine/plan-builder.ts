@@ -117,7 +117,7 @@ export class PlanBuilder {
   private readonly _parser: Parser;
   private _optimizer: Optimizer;
   private _stageBuilders: Map<SparqlOperation, StageBuilder>;
-  private _currentCache: BGPCache | null;
+  public _currentCache: BGPCache | null; // Public for tests.
   private _dataset: Dataset;
   private _customFunctions?: CustomFunctions;
 
@@ -215,10 +215,7 @@ export class PlanBuilder {
    * @param  options  - Execution options
    * @return A {@link PipelineStage} or a {@link Consumable} that can be consumed to evaluate the query.
    */
-  build(
-    query: any,
-    context?: ExecutionContext
-  ): PipelineStage<QueryOutput> {
+  build(query: any, context?: ExecutionContext): PipelineStage<QueryOutput> {
     // If needed, parse the string query into a logical query execution plan
     if (typeof query === "string") {
       query = this._parser.parse(query);

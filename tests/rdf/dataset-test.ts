@@ -26,32 +26,81 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { describe, it } from "node:test";
-import { Dataset, Graph, HashMapDataset } from "../../src/api.ts";
+import type { Algebra } from "sparqljs";
+import {
+  Dataset,
+  ExecutionContext,
+  Graph,
+  HashMapDataset,
+  type PipelineInput,
+} from "../../src/api.ts";
 
 describe("Dataset", () => {
+  class TestDataset extends Dataset {
+    get iris(): string[] {
+      throw new Error("Method not implemented.");
+    }
+    setDefaultGraph(g: Graph): void {
+      throw new Error("Method not implemented.");
+    }
+    getDefaultGraph(): Graph {
+      throw new Error("Method not implemented.");
+    }
+    addNamedGraph(iri: string, g: Graph): void {
+      throw new Error("Method not implemented.");
+    }
+    getNamedGraph(iri: string): Graph {
+      throw new Error("Method not implemented.");
+    }
+    deleteNamedGraph(iri: string): void {
+      throw new Error("Method not implemented.");
+    }
+    hasNamedGraph(iri: string): boolean {
+      throw new Error("Method not implemented.");
+    }
+  }
+
+  class TestGraph extends Graph {
+    insert(triple: Algebra.TripleObject): Promise<void> {
+      throw new Error("Method not implemented.");
+    }
+    delete(triple: Algebra.TripleObject): Promise<void> {
+      throw new Error("Method not implemented.");
+    }
+    find(
+      pattern: Algebra.TripleObject,
+      context: ExecutionContext
+    ): PipelineInput<Algebra.TripleObject> {
+      throw new Error("Method not implemented.");
+    }
+    clear(): Promise<void> {
+      throw new Error("Method not implemented.");
+    }
+  }
+
   it('should enforce subclasses to implement a "setDefaultGraph" method', () => {
-    const d = new Dataset();
-    expect(() => d.setDefaultGraph()).to.throw(Error);
+    const d = new TestDataset();
+    expect(() => d.setDefaultGraph(new TestGraph())).to.throw(Error);
   });
 
   it('should enforce subclasses to implement a "getDefaultGraph" method', () => {
-    const d = new Dataset();
+    const d = new TestDataset();
     expect(() => d.getDefaultGraph()).to.throw(Error);
   });
 
   it('should enforce subclasses to implement a "addNamedGraph" method', () => {
-    const d = new Dataset();
-    expect(() => d.addNamedGraph()).to.throw(Error);
+    const d = new TestDataset();
+    expect(() => d.addNamedGraph("", new TestGraph())).to.throw(Error);
   });
 
   it('should enforce subclasses to implement a "getNamedGraph" method', () => {
-    const d = new Dataset();
-    expect(() => d.getNamedGraph()).to.throw(Error);
+    const d = new TestDataset();
+    expect(() => d.getNamedGraph("")).to.throw(Error);
   });
 
   it('should provides a generic "getAllGraphs()" implementation', () => {
-    const gA = new Graph();
-    const gB = new Graph();
+    const gA = new TestGraph();
+    const gB = new TestGraph();
     const GRAPH_A_IRI = "http://example.org#A";
     const GRAPH_B_IRI = "http://example.org#B";
     const d = new HashMapDataset(GRAPH_A_IRI, gA);
@@ -64,8 +113,8 @@ describe("Dataset", () => {
   });
 
   describe("#getUnionGraph", () => {
-    const gA = new Graph();
-    const gB = new Graph();
+    const gA = new TestGraph();
+    const gB = new TestGraph();
     const GRAPH_A_IRI = "http://example.org#A";
     const GRAPH_B_IRI = "http://example.org#B";
     const d = new HashMapDataset(GRAPH_A_IRI, gA);

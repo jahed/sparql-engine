@@ -25,14 +25,16 @@ SOFTWARE.
 "use strict";
 
 import { expect } from "chai";
+import assert from "node:assert";
 import { beforeEach, describe, it } from "node:test";
+import { BindingBase } from "../../src/rdf/bindings.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 const GRAPH_A_IRI = "http://example.org#some-graph-a";
 const GRAPH_B_IRI = "http://example.org#some-graph-b";
 
 describe("GRAPH/FROM queries", () => {
-  let engine = null;
+  let engine: TestEngine;
   beforeEach(() => {
     const gA = getGraph("./tests/data/dblp.nt");
     const gB = getGraph("./tests/data/dblp2.nt");
@@ -40,7 +42,12 @@ describe("GRAPH/FROM queries", () => {
     engine.addNamedGraph(GRAPH_B_IRI, gB);
   });
 
-  const data = [
+  const data: {
+    text: string;
+    query: string;
+    nbResults: number;
+    testFun: (b: ReturnType<BindingBase["toObject"]>) => void;
+  }[] = [
     {
       text: "should evaluate a query with one FROM clause",
       query: `
@@ -237,8 +244,8 @@ describe("GRAPH/FROM queries", () => {
       const iterator = engine.execute(d.query);
       iterator.subscribe(
         (b) => {
-          b = b.toObject();
-          d.testFun(b);
+          assert.ok(b instanceof BindingBase);
+          d.testFun(b.toObject());
           nbResults++;
         },
         done,

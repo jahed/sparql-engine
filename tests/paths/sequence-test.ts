@@ -25,11 +25,13 @@ SOFTWARE.
 "use strict";
 
 import { expect } from "chai";
+import assert from "node:assert";
 import { before, describe, it } from "node:test";
+import { Bindings } from "../../src/api.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL property paths: sequence paths", () => {
-  let engine = null;
+  let engine: TestEngine;
   before(() => {
     const g = getGraph("./tests/data/paths.ttl");
     engine = new TestEngine(g);
@@ -46,8 +48,9 @@ describe("SPARQL property paths: sequence paths", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.property("?s");
         expect(b).to.have.property("?o");
         expect(b["?s"]).to.be.oneOf([
@@ -80,8 +83,9 @@ describe("SPARQL property paths: sequence paths", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.keys("?s");
         expect(b["?s"]).to.be.oneOf([
           "http://example.org/Alice",
@@ -108,8 +112,9 @@ describe("SPARQL property paths: sequence paths", () => {
     const results = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.property("?s");
         expect(b).to.have.property("?o");
         switch (b["?s"]) {

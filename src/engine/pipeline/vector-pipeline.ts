@@ -51,19 +51,19 @@ export class VectorStage<T> implements PipelineStage<T> {
   }
 
   subscribe(
-    onData: (value: T) => void,
-    onError: (err: any) => void,
-    onEnd: () => void
+    onData?: (value: T) => void,
+    onError?: (err: any) => void,
+    onEnd?: () => void
   ): void {
     try {
       this._content
         .then((c) => {
-          c.forEach(onData);
-          onEnd();
+          if (onData) c.forEach(onData);
+          if (onEnd) onEnd();
         })
         .catch(onError);
     } catch (e) {
-      onError(e);
+      if (onError) onError(e);
     }
   }
 

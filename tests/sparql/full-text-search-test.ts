@@ -25,11 +25,13 @@ SOFTWARE.
 "use strict";
 
 import { expect } from "chai";
+import assert from "node:assert";
 import { before, describe, it } from "node:test";
+import { BindingBase } from "../../src/rdf/bindings.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("Full Text Search SPARQL queries", () => {
-  let engine = null;
+  let engine: TestEngine;
   before(() => {
     const g = getGraph(["./tests/data/dblp.nt", "./tests/data/dblp2.nt"]);
     engine = new TestEngine(g);
@@ -185,10 +187,11 @@ describe("Full Text Search SPARQL queries", () => {
 
   data.forEach((d) => {
     it(`should evaluate ${d.description}`, (t, done) => {
-      const results = [];
+      const results: ReturnType<BindingBase["toObject"]>[] = [];
       const iterator = engine.execute(d.query);
       iterator.subscribe(
         (b) => {
+          assert.ok(b instanceof BindingBase);
           results.push(b.toObject());
         },
         done,

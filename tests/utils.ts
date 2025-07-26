@@ -27,12 +27,27 @@ SOFTWARE.
 import fs from "fs";
 import { isArray, pick } from "lodash-es";
 import n3 from "n3";
-import { Graph, HashMapDataset, Pipeline, PlanBuilder } from "../src/api.ts";
+import type { Algebra } from "sparqljs";
+import type { CustomFunctions } from "../dist/operators/expressions/sparql-expression.js";
+import {
+  ExecutionContext,
+  Graph,
+  HashMapDataset,
+  Pipeline,
+  type PipelineStage,
+  PlanBuilder,
+} from "../src/api.ts";
+import type { QueryOutput } from "../src/engine/plan-builder.ts";
 
 const { Parser, Store } = n3;
 
-export function getGraph(filePaths, isUnion = false) {
-  let graph;
+export type TestGraph = N3Graph | UnionN3Graph;
+
+export function getGraph(
+  filePaths?: string | string[] | null,
+  isUnion = false
+) {
+  let graph: TestGraph;
   if (isUnion) {
     graph = new UnionN3Graph();
   } else {
@@ -46,7 +61,7 @@ export function getGraph(filePaths, isUnion = false) {
   return graph;
 }
 
-function formatTriplePattern(triple) {
+function formatTriplePattern(triple: Algebra.TripleObject) {
   let subject = null;
   let predicate = null;
   let object = null;
@@ -63,21 +78,24 @@ function formatTriplePattern(triple) {
 }
 
 export class N3Graph extends Graph {
+  public readonly _store: n3.N3StoreWriter;
+  public readonly _parser: n3.N3Parser;
+
   constructor() {
     super();
-    this._store = Store();
-    this._parser = Parser();
+    this._store = Store()!;
+    this._parser = Parser()!;
   }
 
-  parse(file) {
+  parse(file: string) {
     const content = fs.readFileSync(file).toString("utf-8");
-    this._parser.parse(content).forEach((t) => {
+    this._parser.parse(content)?.forEach((t) => {
       this._store.addTriple(t);
     });
   }
 
-  insert(triple) {
-    return new Promise((resolve, reject) => {
+  insert(triple: Algebra.TripleObject) {
+    return new Promise<void>((resolve, reject) => {
       try {
         this._store.addTriple(triple.subject, triple.predicate, triple.object);
         resolve();
@@ -87,8 +105,8 @@ export class N3Graph extends Graph {
     });
   }
 
-  delete(triple) {
-    return new Promise((resolve, reject) => {
+  delete(triple: Algebra.TripleObject) {
+    return new Promise<void>((resolve, reject) => {
       try {
         this._store.removeTriple(
           triple.subject,
@@ -102,14 +120,14 @@ export class N3Graph extends Graph {
     });
   }
 
-  find(triple) {
+  find(triple: Algebra.TripleObject) {
     const { subject, predicate, object } = formatTriplePattern(triple);
     return this._store.getTriples(subject, predicate, object).map((t) => {
       return pick(t, ["subject", "predicate", "object"]);
     });
   }
 
-  estimateCardinality(triple) {
+  estimateCardinality(triple: Algebra.TripleObject) {
     const { subject, predicate, object } = formatTriplePattern(triple);
     return Promise.resolve(
       this._store.countTriples(subject, predicate, object)
@@ -128,18 +146,26 @@ class UnionN3Graph extends N3Graph {
     super();
   }
 
-  evalUnion(patterns, context) {
+  evalUnion(patterns: Algebra.TripleObject[][], context: ExecutionContext) {
     return Pipeline.getInstance().merge(
       ...patterns.map((pattern) => this.evalBGP(pattern, context))
     );
   }
 }
 
-export class TestEngine {
-  constructor(graph, defaultGraphIRI = null, customOperations = {}) {
+export class TestEngine<G extends Graph = TestGraph> {
+  public readonly _graph: G;
+  public readonly _defaultGraphIRI: string;
+  public readonly _dataset: HashMapDataset<G>;
+  public readonly _builder: PlanBuilder;
+
+  constructor(
+    graph: G,
+    defaultGraphIRI?: string,
+    customOperations: CustomFunctions = {}
+  ) {
     this._graph = graph;
-    this._defaultGraphIRI =
-      defaultGraphIRI === null ? this._graph.iri : defaultGraphIRI;
+    this._defaultGraphIRI = defaultGraphIRI || this._graph.iri;
     this._dataset = new HashMapDataset(this._defaultGraphIRI, this._graph);
     this._builder = new PlanBuilder(this._dataset, {}, customOperations);
   }
@@ -148,20 +174,19 @@ export class TestEngine {
     return this._dataset.getDefaultGraph().iri;
   }
 
-  addNamedGraph(iri, db) {
+  addNamedGraph(iri: string, db: G) {
     this._dataset.addNamedGraph(iri, db);
   }
 
-  getNamedGraph(iri) {
+  getNamedGraph(iri: string): G {
     return this._dataset.getNamedGraph(iri);
   }
 
-  hasNamedGraph(iri) {
+  hasNamedGraph(iri: string) {
     return this._dataset.hasNamedGraph(iri);
   }
 
-  execute(query, format = "raw") {
-    let iterator = this._builder.build(query);
-    return iterator;
+  execute(query: string | Algebra.RootNode): PipelineStage<QueryOutput> {
+    return this._builder.build(query);
   }
 }

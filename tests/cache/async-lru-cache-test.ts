@@ -29,9 +29,12 @@ import { beforeEach, describe, it } from "node:test";
 import { AsyncLRUCache } from "../../src/engine/cache/cache-base.ts";
 
 describe("AsyncLRUCache", () => {
-  let cache = null;
+  let cache: AsyncLRUCache<number, number | string, unknown>;
   beforeEach(() => {
-    cache = new AsyncLRUCache({ ttl: Number.MAX_SAFE_INTEGER });
+    cache = new AsyncLRUCache({
+      ttl: Number.MAX_SAFE_INTEGER,
+      ttlAutopurge: false,
+    });
   });
 
   describe("#update/commit", () => {
@@ -42,7 +45,7 @@ describe("AsyncLRUCache", () => {
       cache.update(1, 3, writerID);
       cache.commit(1, writerID);
       cache
-        .get(1)
+        .get(1)!
         .then((content) => {
           expect(content).to.deep.equals([1, 2, 3]);
           done();
@@ -63,7 +66,7 @@ describe("AsyncLRUCache", () => {
       cache.commit(1, secondID);
       cache.commit(1, firstID);
       cache
-        .get(1)
+        .get(firstID)!
         .then((content) => {
           expect(content).to.deep.equals([1, 2, 3]);
           done();
@@ -100,7 +103,7 @@ describe("AsyncLRUCache", () => {
       const writerID = 1;
       cache.update(1, 1, writerID);
       cache
-        .get(1)
+        .get(1)!
         .then((content) => {
           expect(content).to.deep.equals([1, 2]);
           done();
@@ -124,7 +127,7 @@ describe("AsyncLRUCache", () => {
       const writerID = 1;
       cache.update(1, 1, writerID);
       cache
-        .get(1)
+        .get(1)!
         .then((content) => {
           expect(content.length).to.deep.equals(0);
           done();

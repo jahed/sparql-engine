@@ -25,11 +25,13 @@ SOFTWARE.
 "use strict";
 
 import { expect } from "chai";
+import assert from "node:assert";
 import { before, describe, it } from "node:test";
+import { Bindings } from "../../src/api.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL BIND", () => {
-  let engine = null;
+  let engine: TestEngine;
   before(() => {
     const g = getGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);
@@ -48,8 +50,9 @@ describe("SPARQL BIND", () => {
 
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.all.keys("?s", "?name");
         expect(b["?name"]).to.equal('"Thomas Minier"@fr');
         results.push(b);
@@ -75,8 +78,9 @@ describe("SPARQL BIND", () => {
 
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.all.keys("?s", "?foo");
         expect(b["?foo"]).to.equal(
           '"30"^^http://www.w3.org/2001/XMLSchema#integer'
@@ -105,8 +109,9 @@ describe("SPARQL BIND", () => {
 
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.all.keys("?s", "?name", "?foo");
         expect(b["?name"]).to.equal('"Thomas Minier"@fr');
         expect(b["?foo"]).to.equal(
@@ -137,8 +142,9 @@ describe("SPARQL BIND", () => {
 
     const iterator = engine.execute(query);
     iterator.subscribe(
-      (b) => {
-        b = b.toObject();
+      (bindings) => {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
         expect(b).to.have.all.keys("?s", "?s2", "?name", "?undefined");
         expect(b["?s2"]).to.equal(b["?s"]);
         expect(b["?name"]).to.equal('"Thomas Minier"');
