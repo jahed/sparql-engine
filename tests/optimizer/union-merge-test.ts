@@ -26,13 +26,30 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { describe, it } from "node:test";
+import type { Algebra } from "sparqljs";
 import UnionMerge from "../../src/optimizer/visitors/union-merge.ts";
-import utils from "./utils.ts";
-
-const { placeholder, query, union } = utils;
 
 describe("Union merge optimization", () => {
   it("should merge several unions into a single top-level union", () => {
+    const query = (...where: Algebra.PlanNode[]): Algebra.RootNode => {
+      return { type: "query", prefixes: {}, queryType: "", where };
+    };
+    const union = (...patterns: Algebra.PlanNode[]): Algebra.GroupNode => {
+      return { type: "union", patterns };
+    };
+    const placeholder = (s: string): Algebra.BGPNode => {
+      return {
+        type: "bgp",
+        triples: [
+          {
+            subject: s,
+            predicate: "http://example.org#foo",
+            object: '"foo"@en',
+          },
+        ],
+      };
+    };
+
     const rule = new UnionMerge();
     const plan = query(
       union(union(placeholder("?s1")), union(placeholder("?s2")))

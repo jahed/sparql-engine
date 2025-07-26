@@ -87,6 +87,8 @@ export interface PipelineStage<T> {
    * @param  cb - Function invoked on each item produced by the stage
    */
   forEach(cb: (value: T) => void): void;
+
+  pipe<N>(fn: (source: PipelineStage<T>) => PipelineStage<N>): PipelineStage<N>;
 }
 
 /**

@@ -76,6 +76,12 @@ export class VectorStage<T> implements PipelineStage<T> {
         throw err;
       });
   }
+
+  pipe<N>(
+    fn: (source: PipelineStage<T>) => PipelineStage<N>
+  ): PipelineStage<N> {
+    return fn(this);
+  }
 }
 
 export class VectorStreamInput<T> implements StreamPipelineInput<T> {

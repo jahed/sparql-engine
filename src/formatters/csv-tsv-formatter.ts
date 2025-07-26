@@ -30,7 +30,8 @@ import type {
   StreamPipelineInput,
 } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
-import { Bindings } from "../rdf/bindings.ts";
+import type { QueryOutput } from "../engine/plan-builder.ts";
+import { BindingBase, Bindings } from "../rdf/bindings.ts";
 
 /**
  * Write the headers and generate an ordering
@@ -83,15 +84,15 @@ function writeBindings(
  * @return A function that formats query results in a pipeline fashion
  */
 function genericFormatter(separator: string) {
-  return (source: PipelineStage<Bindings | boolean>): PipelineStage<string> => {
+  return (source: PipelineStage<QueryOutput>): PipelineStage<string> => {
     return Pipeline.getInstance().fromAsync((input) => {
       let warmup = true;
       let isAsk = false;
       let ordering: string[] = [];
       source.subscribe(
-        (b: Bindings | boolean) => {
+        (b: QueryOutput) => {
           // Build the head attribute from the first set of bindings
-          if (warmup && !isBoolean(b)) {
+          if (warmup && b instanceof BindingBase) {
             ordering = writeHead(b, separator, input);
           } else if (warmup && isBoolean(b)) {
             isAsk = true;
@@ -101,7 +102,7 @@ function genericFormatter(separator: string) {
           // handle results (boolean for ASK queries, bindings for SELECT queries)
           if (isBoolean(b)) {
             input.next(b ? "true\n" : "false\n");
-          } else {
+          } else if (b instanceof BindingBase) {
             writeBindings(b, separator, ordering, input);
             input.next("\n");
           }

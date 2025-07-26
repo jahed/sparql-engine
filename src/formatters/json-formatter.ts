@@ -30,7 +30,8 @@ import type {
   StreamPipelineInput,
 } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
-import { Bindings } from "../rdf/bindings.ts";
+import type { QueryOutput } from "../engine/plan-builder.ts";
+import { BindingBase, Bindings } from "../rdf/bindings.ts";
 import * as rdf from "../utils/rdf.ts";
 
 /**
@@ -98,16 +99,16 @@ function writeBindings(
  * @return A pipeline that yields results in W3C SPARQL JSON format
  */
 export default function jsonFormat(
-  source: PipelineStage<Bindings | boolean>
+  source: PipelineStage<QueryOutput>
 ): PipelineStage<string> {
   return Pipeline.getInstance().fromAsync((input) => {
     input.next("{");
     let cpt = 0;
     let isAsk = false;
     source.subscribe(
-      (b: Bindings | boolean) => {
+      (b: QueryOutput) => {
         // Build the head attribute from the first set of bindings
-        if (cpt === 0 && !isBoolean(b)) {
+        if (cpt === 0 && b instanceof BindingBase) {
           writeHead(b, input);
           input.next(',"results": {"bindings": [');
         } else if (cpt === 0 && isBoolean(b)) {
@@ -119,7 +120,7 @@ export default function jsonFormat(
         // handle results (boolean for ASK queries, bindings for SELECT queries)
         if (isBoolean(b)) {
           input.next(b ? "true" : "false");
-        } else {
+        } else if (b instanceof BindingBase) {
           input.next("{");
           writeBindings(b, input);
           input.next("}");

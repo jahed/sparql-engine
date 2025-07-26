@@ -1,44 +1,9 @@
-/* file : consumer.ts
-MIT License
-
-Copyright (c) 2018-2020 Thomas Minier
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
 "use strict";
 
 import type { Algebra } from "sparqljs";
-import { Writable } from "stream";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 
-/**
- * Something whose execution can be resolved as a Promise
- */
-export abstract class Consumable<T>
-  extends Writable
-  implements PipelineStage<T>
-{
-  /**
-   * Execute the consumable
-   * @return A Promise fulfilled when the execution has been completed
-   */
+export abstract class Consumable<T> implements PipelineStage<T> {
   abstract execute(): Promise<void>;
 
   subscribe(
@@ -52,18 +17,17 @@ export abstract class Consumable<T>
   forEach(cb: (value: T) => void): void {
     this.execute();
   }
+
+  pipe<N>(
+    fn: (source: PipelineStage<T>) => PipelineStage<N>
+  ): PipelineStage<N> {
+    throw new Error("Method not implemented.");
+  }
 }
 
-/**
- * A Consumable that always fails to execute
- */
 export class ErrorConsumable<T> extends Consumable<T> {
   private readonly _reason: Error;
 
-  /**
-   * Constructor
-   * @param reason - Cause of the failure
-   */
   constructor(reason: string) {
     super();
     this._reason = new Error(reason);
@@ -74,39 +38,28 @@ export class ErrorConsumable<T> extends Consumable<T> {
   }
 }
 
-/**
- * A Consumer consumes bindings from an iterator to evaluate a SPARQL UPDATE query
- * @abstract
- * @extends Writable
- * @author Thomas Minier
- */
 export abstract class Consumer<T> extends Consumable<T> {
   private readonly _source: PipelineStage<Algebra.TripleObject>;
-  private readonly _options: Object;
 
-  /**
-   * Constructor
-   * @param source - Input {@link PipelineStage}
-   * @param options - Execution options
-   */
-  constructor(source: PipelineStage<Algebra.TripleObject>, options: Object) {
-    super({ objectMode: true });
+  constructor(source: PipelineStage<Algebra.TripleObject>) {
+    super();
     this._source = source;
-    this._options = options;
   }
 
   execute(): Promise<void> {
-    // if the source has already ended, no need to drain it
     return new Promise((resolve, reject) => {
+      const promises: Promise<void>[] = [];
       this._source.subscribe(
         (triple) => {
-          this.write(triple);
+          promises.push(this.onData(triple));
         },
         reject,
         () => {
-          this.end(null, resolve);
+          Promise.all(promises).then(() => resolve(), reject);
         }
       );
     });
   }
+
+  abstract onData(triple: Algebra.TripleObject): Promise<void>;
 }

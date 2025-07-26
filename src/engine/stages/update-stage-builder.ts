@@ -223,7 +223,7 @@ export default class UpdateStageBuilder extends StageBuilder {
     if ("delete" in update && update.delete!.length > 0) {
       consumables = consumables.concat(
         update.delete!.map((v) => {
-          return this._buildDeleteConsumer(source, v, graph, context);
+          return this._buildDeleteConsumer(source, v, graph);
         })
       );
     }
@@ -232,7 +232,7 @@ export default class UpdateStageBuilder extends StageBuilder {
     if ("insert" in update && update.insert!.length > 0) {
       consumables = consumables.concat(
         update.insert!.map((v) => {
-          return this._buildInsertConsumer(source, v, graph, context);
+          return this._buildInsertConsumer(source, v, graph);
         })
       );
     }
@@ -250,8 +250,7 @@ export default class UpdateStageBuilder extends StageBuilder {
   _buildInsertConsumer(
     source: PipelineStage<Bindings>,
     group: Algebra.BGPNode | Algebra.UpdateGraphNode,
-    graph: Graph | null,
-    context: ExecutionContext
+    graph: Graph | null
   ): InsertConsumer<Bindings> {
     const tripleSource = construct(source, { template: group.triples });
     if (graph === null) {
@@ -260,7 +259,7 @@ export default class UpdateStageBuilder extends StageBuilder {
           ? this._dataset.getNamedGraph(group.name)
           : this._dataset.getDefaultGraph();
     }
-    return new InsertConsumer(tripleSource, graph, context);
+    return new InsertConsumer(tripleSource, graph);
   }
 
   /**
@@ -274,8 +273,7 @@ export default class UpdateStageBuilder extends StageBuilder {
   _buildDeleteConsumer(
     source: PipelineStage<Bindings>,
     group: Algebra.BGPNode | Algebra.UpdateGraphNode,
-    graph: Graph | null,
-    context: ExecutionContext
+    graph: Graph | null
   ): DeleteConsumer<Bindings> {
     const tripleSource = construct(source, { template: group.triples });
     if (graph === null) {
@@ -284,7 +282,7 @@ export default class UpdateStageBuilder extends StageBuilder {
           ? this._dataset.getNamedGraph(group.name)
           : this._dataset.getDefaultGraph();
     }
-    return new DeleteConsumer(tripleSource, graph, context);
+    return new DeleteConsumer(tripleSource, graph);
   }
 
   /**
