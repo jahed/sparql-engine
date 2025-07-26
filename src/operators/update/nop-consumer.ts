@@ -22,13 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import type { Consumable } from "./consumer.ts";
+import { Consumable } from "./consumer.ts";
 
 /**
  * A Consumer that does nothing
  * @author Thomas Minier
  */
-export default class NoopConsumer implements Consumable {
+export default class NoopConsumer<T> extends Consumable<T> {
   execute(): Promise<void> {
     return Promise.resolve();
   }

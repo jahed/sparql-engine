@@ -34,7 +34,7 @@ import type { Algebra } from "sparqljs";
  * @extends Consumer
  * @author Thomas Minier
  */
-export default class DeleteConsumer extends Consumer {
+export default class DeleteConsumer<T> extends Consumer<T> {
   private readonly _graph: Graph;
 
   /**

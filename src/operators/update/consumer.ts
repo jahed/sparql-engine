@@ -31,18 +31,33 @@ import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 /**
  * Something whose execution can be resolved as a Promise
  */
-export interface Consumable {
+export abstract class Consumable<T>
+  extends Writable
+  implements PipelineStage<T>
+{
   /**
    * Execute the consumable
    * @return A Promise fulfilled when the execution has been completed
    */
-  execute(): Promise<void>;
+  abstract execute(): Promise<void>;
+
+  subscribe(
+    onData: (value: T) => void,
+    onError: (err: any) => void,
+    onEnd: () => void
+  ): void {
+    this.execute().then(onEnd, onError);
+  }
+
+  forEach(cb: (value: T) => void): void {
+    this.execute();
+  }
 }
 
 /**
  * A Consumable that always fails to execute
  */
-export class ErrorConsumable implements Consumable {
+export class ErrorConsumable<T> extends Consumable<T> {
   private readonly _reason: Error;
 
   /**
@@ -50,6 +65,7 @@ export class ErrorConsumable implements Consumable {
    * @param reason - Cause of the failure
    */
   constructor(reason: string) {
+    super();
     this._reason = new Error(reason);
   }
 
@@ -64,7 +80,7 @@ export class ErrorConsumable implements Consumable {
  * @extends Writable
  * @author Thomas Minier
  */
-export abstract class Consumer extends Writable implements Consumable {
+export abstract class Consumer<T> extends Consumable<T> {
   private readonly _source: PipelineStage<Algebra.TripleObject>;
   private readonly _options: Object;
 

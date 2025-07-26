@@ -64,7 +64,7 @@ export default class UpdateStageBuilder extends StageBuilder {
       | Algebra.UpdateCopyMoveNode
     >,
     context: ExecutionContext
-  ): Consumable {
+  ): Consumable<Bindings> {
     let queries;
     return new ManyConsumers(
       updates.map((update) => {
@@ -194,11 +194,11 @@ export default class UpdateStageBuilder extends StageBuilder {
   _handleInsertDelete(
     update: Algebra.UpdateQueryNode,
     context: ExecutionContext
-  ): Consumable {
+  ): Consumable<Bindings> {
     const engine = Pipeline.getInstance();
     let source: PipelineStage<Bindings> = engine.of(new BindingBase());
     let graph: Graph | null = null;
-    let consumables: Consumable[] = [];
+    let consumables: Consumable<Bindings>[] = [];
 
     if (update.updateType === "insertdelete") {
       graph =
@@ -252,7 +252,7 @@ export default class UpdateStageBuilder extends StageBuilder {
     group: Algebra.BGPNode | Algebra.UpdateGraphNode,
     graph: Graph | null,
     context: ExecutionContext
-  ): InsertConsumer {
+  ): InsertConsumer<Bindings> {
     const tripleSource = construct(source, { template: group.triples });
     if (graph === null) {
       graph =
@@ -276,7 +276,7 @@ export default class UpdateStageBuilder extends StageBuilder {
     group: Algebra.BGPNode | Algebra.UpdateGraphNode,
     graph: Graph | null,
     context: ExecutionContext
-  ): DeleteConsumer {
+  ): DeleteConsumer<Bindings> {
     const tripleSource = construct(source, { template: group.triples });
     if (graph === null) {
       graph =
@@ -293,7 +293,7 @@ export default class UpdateStageBuilder extends StageBuilder {
    * @param query - Parsed query
    * @return A Consumer used to evaluate CLEAR queries
    */
-  _handleClearQuery(query: Algebra.UpdateClearNode): ClearConsumer {
+  _handleClearQuery(query: Algebra.UpdateClearNode): ClearConsumer<Bindings> {
     let graph = null;
     const iris = this._dataset.iris;
     if (query.graph.default) {

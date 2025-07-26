@@ -22,16 +22,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import type { Consumable } from "./consumer.ts";
+import { Consumable } from "./consumer.ts";
 
 /**
  * A consumer that executes a simple action
  * @author Thomas Minier
  */
-export default class ActionConsumer implements Consumable {
+export default class ActionConsumer<T> extends Consumable<T> {
   private _action: () => void;
 
   constructor(action: () => void) {
+    super();
     this._action = action;
   }
 

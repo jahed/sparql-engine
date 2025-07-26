@@ -24,14 +24,14 @@ SOFTWARE.
 
 "use strict";
 
-import type { Consumable } from "./consumer.ts";
+import { Consumable } from "./consumer.ts";
 import Graph from "../../rdf/graph.ts";
 
 /**
  * Clear all RDF triples in a RDF Graph
  * @author Thomas Minier
  */
-export default class ClearConsumer implements Consumable {
+export default class ClearConsumer<T> extends Consumable<T> {
   private readonly _graph: Graph;
 
   /**
@@ -39,6 +39,7 @@ export default class ClearConsumer implements Consumable {
    * @param graph - Input RDF Graph
    */
   constructor(graph: Graph) {
+    super()
     this._graph = graph;
   }
 

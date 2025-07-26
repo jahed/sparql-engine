@@ -24,20 +24,21 @@ SOFTWARE.
 
 "use strict";
 
-import type { Consumable } from "./consumer.ts";
+import { Consumable } from "./consumer.ts";
 
 /**
  * ManyConsumers group multiple {@link Consumable} to be evaluated in sequence
  * @author Thomas Minier
  */
-export default class ManyConsumers implements Consumable {
-  private readonly _consumers: Consumable[];
+export default class ManyConsumers<T> extends Consumable<T> {
+  private readonly _consumers: Consumable<T>[];
 
   /**
    * Constructor
    * @param consumers - Set of consumables
    */
-  constructor(consumers: Consumable[]) {
+  constructor(consumers: Consumable<T>[]) {
+    super();
     this._consumers = consumers;
   }
 

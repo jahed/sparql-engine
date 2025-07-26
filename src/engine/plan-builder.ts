@@ -218,7 +218,7 @@ export class PlanBuilder {
   build(
     query: any,
     context?: ExecutionContext
-  ): PipelineStage<QueryOutput> | Consumable {
+  ): PipelineStage<QueryOutput> {
     // If needed, parse the string query into a logical query execution plan
     if (typeof query === "string") {
       query = this._parser.parse(query);

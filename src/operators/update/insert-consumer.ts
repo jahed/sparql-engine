@@ -24,17 +24,17 @@ SOFTWARE.
 
 "use strict";
 
-import { Consumer } from "./consumer.ts";
-import Graph from "../../rdf/graph.ts";
-import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 import type { Algebra } from "sparqljs";
+import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
+import Graph from "../../rdf/graph.ts";
+import { Consumer } from "./consumer.ts";
 
 /**
  * An InsertConsumer evaluates a SPARQL INSERT clause
  * @extends Consumer
  * @author Thomas Minier
  */
-export default class InsertConsumer extends Consumer {
+export default class InsertConsumer<T> extends Consumer<T> {
   private readonly _graph: Graph;
 
   /**
