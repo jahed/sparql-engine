@@ -28,7 +28,7 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/api.ts";
-import { createIRI } from "../../src/utils/rdf.ts";
+import { createIRI, termToValue } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("ORDER BY queries", () => {
@@ -38,7 +38,7 @@ describe("ORDER BY queries", () => {
     engine = new TestEngine(g);
   });
 
-  it("should evaluate queries with a simple ORDER BY", (t, done) => {
+  it("should evaluate queries with a simple ORDER BY", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -57,23 +57,16 @@ describe("ORDER BY queries", () => {
       createIRI("https://dblp.org/rec/journals/corr/abs-1806-00227"),
     ];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b["article"]).to.deep.equal(results[0]);
-        results.shift();
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(0);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b["article"]).to.deep.equal(results[0]);
+      results.shift();
+    }
+    expect(results.length).to.equal(0);
   });
 
-  it("should evaluate queries with a simple descending ORDER BY", (t, done) => {
+  it("should evaluate queries with a simple descending ORDER BY", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -92,23 +85,16 @@ describe("ORDER BY queries", () => {
       createIRI("https://dblp.org/rec/conf/esws/MinierMSM17"),
     ];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b["article"]).to.deep.equal(results[0]);
-        results.shift();
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(0);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b["article"]).to.deep.equal(results[0]);
+      results.shift();
+    }
+    expect(results.length).to.equal(0);
   });
 
-  it("should evaluate queries with multiples comparators", (t, done) => {
+  it("should evaluate queries with multiples comparators", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -127,19 +113,38 @@ describe("ORDER BY queries", () => {
       createIRI("https://dblp.org/rec/conf/esws/MinierMSM17"),
     ];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b["article"]).to.deep.equal(results[0]);
-        results.shift();
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(0);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b["article"]).to.deep.equal(results[0]);
+      results.shift();
+    }
+
+    expect(results.length).to.equal(0);
+  });
+
+  it("should order by integers", async () => {
+    for await (const _ of engine.execute(`
+      PREFIX : <http://example.org/ns#>
+      INSERT DATA { :n100 :length 100 } ;
+      INSERT DATA { :n1 :length 1 } ;
+      INSERT DATA { :n10 :length 10 } ;
+      INSERT DATA { :n9 :length 9 } ;
+      INSERT DATA { :n5 :length 5 } ;
+    `));
+
+    const results: number[] = [];
+    for await (const bindings of engine.execute(`
+      PREFIX : <http://example.org/ns#>
+      SELECT ?o
+      WHERE { ?s :length ?o . }
+      ORDER BY ?o
+    `)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      const o = termToValue<number>(b["o"]);
+      results.push(o);
+    }
+    expect(results).to.deep.equal([1, 5, 9, 10, 100]);
   });
 });

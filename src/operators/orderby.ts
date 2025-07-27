@@ -29,6 +29,8 @@ import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
 
 import { Bindings } from "../rdf/bindings.ts";
+import type { Primitive } from "../types.ts";
+import { termToValue, UNBOUND } from "../utils/rdf.ts";
 
 /**
  * Build a comparator function from an ORDER BY clause content
@@ -40,8 +42,8 @@ function _compileComparators(comparators: Ordering[]) {
   const comparatorsFuncs = comparators.map((c: Ordering) => {
     return (left: Bindings, right: Bindings) => {
       const expr = (c.expression as Term).value;
-      const a = left.get(expr)?.value || "";
-      const b = right.get(expr)?.value || "";
+      const a = termToValue<Primitive>(left.get(expr) || UNBOUND);
+      const b = termToValue<Primitive>(right.get(expr) || UNBOUND);
       if (a < b) {
         return c.descending ? 1 : -1;
       } else if (a > b) {
