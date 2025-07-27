@@ -12,7 +12,6 @@
       "DOM",
       "DOM.Iterable"
     ],
-    "noEmit": true,
-    "resolveJsonModule": true
-  },
+    "noEmit": true
+  }
 }
