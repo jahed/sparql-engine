@@ -29,7 +29,11 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 import { Bindings, rdf } from "../../src/api.ts";
 import type { CustomFunctions } from "../../src/operators/expressions/sparql-expression.ts";
-import { termToValue } from "../../src/utils/rdf.ts";
+import {
+  createLangLiteral,
+  termToValue,
+  UNBOUND,
+} from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL custom operators", () => {
@@ -60,11 +64,14 @@ describe("SPARQL custom operators", () => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
         expect(b).to.have.keys("reversed");
-        expect(b["reversed"]).to.equal('"reiniM samohT"@en');
+        expect(b["reversed"]).to.deep.equal(
+          createLangLiteral("reiniM samohT", "en")
+        );
         results.push(b);
       },
       done,
       () => {
+        expect(results.length).to.equal(1);
         done();
       }
     );
@@ -174,11 +181,12 @@ describe("SPARQL custom operators", () => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
         expect(b).to.have.keys("error");
-        expect(b["error"]).to.equal('"UNBOUND"');
+        expect(b["error"]).to.deep.equal(UNBOUND);
         results.push(b);
       },
       done,
       () => {
+        expect(results.length).to.equal(1);
         done();
       }
     );
