@@ -27,11 +27,18 @@ SOFTWARE.
 import { expect } from "chai";
 import assert from "node:assert";
 import { beforeEach, describe, it } from "node:test";
+import { termToString } from "rdf-string";
 import { BindingBase } from "../../src/api.ts";
+import type { BindingsRecord } from "../../src/rdf/bindings.ts";
+import {
+  createIRI,
+  createLangLiteral,
+  createLiteral,
+} from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine, type TestGraph } from "../utils.ts";
 
-const GRAPH_A_IRI = "http://example.org#some-graph-a";
-const GRAPH_B_IRI = "http://example.org#some-graph-b";
+const GRAPH_A_IRI = createIRI("http://example.org#some-graph-a");
+const GRAPH_B_IRI = createIRI("http://example.org#some-graph-b");
 
 describe("SERVICE queries", () => {
   let engine: TestEngine;
@@ -42,7 +49,7 @@ describe("SERVICE queries", () => {
     gB = getGraph("./tests/data/dblp2.nt");
     engine = new TestEngine(gA, GRAPH_A_IRI);
     engine._dataset.setGraphFactory((iri) => {
-      if (iri === GRAPH_B_IRI) {
+      if (iri.equals(GRAPH_B_IRI)) {
         return gB;
       }
       return gA;
@@ -53,7 +60,7 @@ describe("SERVICE queries", () => {
     text: string;
     query: string;
     nbResults: number;
-    testFun: (bindings: ReturnType<BindingBase["toObject"]>) => void;
+    testFun: (bindings: BindingsRecord) => void;
   }[] = [
     {
       text: "should evaluate simple SPARQL SERVICE queries",
@@ -63,21 +70,22 @@ describe("SERVICE queries", () => {
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
       SELECT ?name ?article WHERE {
         ?s rdf:type dblp-rdf:Person .
-        SERVICE <${GRAPH_A_IRI}> {
+        SERVICE <${termToString(GRAPH_A_IRI)}> {
           ?s dblp-rdf:primaryFullPersonName ?name .
           ?s dblp-rdf:authorOf ?article .
         }
       }`,
       nbResults: 5,
       testFun: function (b) {
-        expect(b).to.have.all.keys(["?name", "?article"]);
-        expect(b["?name"]).to.equal('"Thomas Minier"@en');
-        expect(b["?article"]).to.be.oneOf([
-          "https://dblp.org/rec/conf/esws/MinierSMV18a",
-          "https://dblp.org/rec/conf/esws/MinierSMV18",
-          "https://dblp.org/rec/journals/corr/abs-1806-00227",
-          "https://dblp.org/rec/conf/esws/MinierMSM17",
-          "https://dblp.org/rec/conf/esws/MinierMSM17a",
+        expect(b["name"]).to.deep.equal(
+          createLangLiteral("Thomas Minier", "en")
+        );
+        expect(b["article"]).to.be.deep.oneOf([
+          createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+          createIRI("https://dblp.org/rec/conf/esws/MinierSMV18"),
+          createIRI("https://dblp.org/rec/journals/corr/abs-1806-00227"),
+          createIRI("https://dblp.org/rec/conf/esws/MinierMSM17"),
+          createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
         ]);
       },
     },
@@ -89,21 +97,24 @@ describe("SERVICE queries", () => {
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
       SELECT * WHERE {
         ?s dblp-rdf:coCreatorWith ?coCreator .
-        SERVICE <${GRAPH_B_IRI}> {
+        SERVICE <${termToString(GRAPH_B_IRI)}> {
           ?s2 dblp-rdf:coCreatorWith ?coCreator .
           ?s2 dblp-rdf:primaryFullPersonName ?name .
         }
       }`,
       nbResults: 3,
       testFun: function (b) {
-        expect(b).to.have.all.keys(["?s", "?s2", "?coCreator", "?name"]);
-        expect(b["?s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
-        expect(b["?s2"]).to.equal("https://dblp.org/pers/g/Grall:Arnaud");
-        expect(b["?name"]).to.equal('"Arnaud Grall"');
-        expect(b["?coCreator"]).to.be.oneOf([
-          "https://dblp.org/pers/m/Molli:Pascal",
-          "https://dblp.org/pers/m/Montoya:Gabriela",
-          "https://dblp.org/pers/s/Skaf=Molli:Hala",
+        expect(b["s"]).to.deep.equal(
+          createIRI("https://dblp.org/pers/m/Minier:Thomas")
+        );
+        expect(b["s2"]).to.deep.equal(
+          createIRI("https://dblp.org/pers/g/Grall:Arnaud")
+        );
+        expect(b["name"]).to.deep.equal(createLiteral("Arnaud Grall"));
+        expect(b["coCreator"]).to.be.deep.oneOf([
+          createIRI("https://dblp.org/pers/m/Molli:Pascal"),
+          createIRI("https://dblp.org/pers/m/Montoya:Gabriela"),
+          createIRI("https://dblp.org/pers/s/Skaf=Molli:Hala"),
         ]);
       },
     },

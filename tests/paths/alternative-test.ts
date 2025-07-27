@@ -29,6 +29,7 @@ import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/api.ts";
 import type { QueryOutput } from "../../src/engine/plan-builder.ts";
+import { createIRI, createLiteral } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL property paths: alternative paths", () => {
@@ -52,20 +53,20 @@ describe("SPARQL property paths: alternative paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"]) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?o"]).to.be.oneOf([
-              "mailto:alice@example",
-              "tel:0604651478",
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("mailto:alice@example"),
+              createIRI("tel:0604651478"),
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf(["mailto:bob@example"]);
+            expect(b["o"]).to.be.deep.oneOf([createIRI("mailto:bob@example")]);
             break;
           case "http://example.org/Carol":
-            expect(b["?o"]).to.be.oneOf(["tel:0645123549"]);
+            expect(b["o"]).to.be.deep.oneOf([createIRI("tel:0645123549")]);
             break;
         }
         results.push(b);
@@ -92,9 +93,12 @@ describe("SPARQL property paths: alternative paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.not.have.property("?s");
-        expect(b).to.have.property("?o");
-        expect(b["?o"]).to.be.oneOf(["mailto:alice@example", "tel:0604651478"]);
+        expect(b).to.not.have.property("s");
+        expect(b).to.have.property("o");
+        expect(b["o"]).to.be.deep.oneOf([
+          createIRI("mailto:alice@example"),
+          createIRI("tel:0604651478"),
+        ]);
         results.push(b);
       },
       done,
@@ -119,9 +123,9 @@ describe("SPARQL property paths: alternative paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.not.have.property("?o");
-        expect(b["?s"]).to.equal("http://example.org/Carol");
+        expect(b).to.have.property("s");
+        expect(b).to.not.have.property("o");
+        expect(b["s"]).to.deep.equal(createIRI("http://example.org/Carol"));
         results.push(b);
       },
       done,
@@ -146,21 +150,24 @@ describe("SPARQL property paths: alternative paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"]) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?o"]).to.be.oneOf([
-              "mailto:alice@example",
-              "tel:0604651478",
-              '"skypeAlice"',
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("mailto:alice@example"),
+              createIRI("tel:0604651478"),
+              createLiteral("skypeAlice"),
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf(["mailto:bob@example", '"skypeBob"']);
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("mailto:bob@example"),
+              createLiteral("skypeBob"),
+            ]);
             break;
           case "http://example.org/Carol":
-            expect(b["?o"]).to.be.oneOf(["tel:0645123549"]);
+            expect(b["o"]).to.be.deep.oneOf([createIRI("tel:0645123549")]);
             break;
         }
         results.push(b);
@@ -218,20 +225,28 @@ describe("SPARQL property paths: alternative paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"]) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?o"]).to.be.oneOf(["http://example.org/Carol"]);
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Carol"),
+            ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf(["http://example.org/Didier"]);
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Didier"),
+            ]);
             break;
           case "http://example.org/Carol":
-            expect(b["?o"]).to.be.oneOf(["http://example.org/Carol"]);
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Carol"),
+            ]);
             break;
           case "http://example.org/Mallory":
-            expect(b["?o"]).to.be.oneOf(["http://example.org/Bob"]);
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Bob"),
+            ]);
             break;
         }
         results.push(b);

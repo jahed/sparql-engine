@@ -22,13 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import type { Term } from "@rdfjs/types";
+import { termToString } from "rdf-string";
+
+export type Primitive = number | string | boolean;
+
 /**
  * A state of the automaton
  * @author Arthur Trottier
  * @author Charlotte Cogan
  * @author Julien Aimonier-Davat
  */
-export class State<T> {
+export class State<T extends Primitive> {
   private _name: T;
   private _isInitial: boolean;
   private _isFinal: boolean;
@@ -100,7 +105,7 @@ export class State<T> {
 /**
  * A transition of the automaton
  */
-export class Transition<T, P> {
+export class Transition<T extends Primitive, P extends Term> {
   private _from: State<T>;
   private _to: State<T>;
   private _reverse: boolean;
@@ -171,24 +176,8 @@ export class Transition<T, P> {
     return this._negation;
   }
 
-  hasPredicate(predicate: P) {
-    return this.predicates.indexOf(predicate) > -1;
-  }
-
-  /**
-   * Test if a Transition is equal to this Transition
-   * i.e. All the fields of the Transition are equal to those of this Transition
-   * @param transition - Transition tested
-   * @return True if the Transitions are equal, False otherwise
-   */
-  equals(transition: Transition<T, P>): boolean {
-    return (
-      this.from === transition.from &&
-      this.to === transition.to &&
-      this.reverse === transition.reverse &&
-      this.negation === transition.negation &&
-      this.predicates === transition.predicates
-    );
+  hasPredicate(predicate: Term) {
+    return this.predicates.some((p) => p.equals(predicate));
   }
 
   toString(): string {
@@ -203,9 +192,9 @@ export class Transition<T, P> {
         result += ",\n\t\tpredicates: [\n";
       }
       if (index < self.predicates.length - 1) {
-        result += `\t\t\t${pred},\n`;
+        result += `\t\t\t${termToString(pred)},\n`;
       } else {
-        result += `\t\t\t${pred}\n\t\t]`;
+        result += `\t\t\t${termToString(pred)}\n\t\t]`;
       }
     });
     result += "\n\t}";
@@ -218,7 +207,7 @@ export class Transition<T, P> {
  * equivalent Automaton which are used as a guide to navigate throught the Graph. When we reach a final state
  * then we have found a Path in the Graph that matches the Property Path.
  */
-export class Automaton<T, P> {
+export class Automaton<T extends Primitive, P extends Term> {
   private states: Array<State<T>>;
   private transitions: Array<Transition<T, P>>;
 

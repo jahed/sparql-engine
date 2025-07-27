@@ -25,8 +25,17 @@ SOFTWARE.
 "use strict";
 
 // General libraries
-import type { Algebra } from "sparqljs";
-import { Parser } from "sparqljs";
+import {
+  Parser,
+  type BgpPattern,
+  type ConstructQuery,
+  type Pattern,
+  type Query,
+  type SparqlParser,
+  type Triple,
+  type Variable,
+  type VariableExpression,
+} from "sparqljs";
 import type { Consumable } from "../operators/update/consumer.ts";
 // pipelining engine
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
@@ -56,34 +65,22 @@ import StageBuilder from "./stages/stage-builder.ts";
 import UnionStageBuilder from "./stages/union-stage-builder.ts";
 import UpdateStageBuilder from "./stages/update-stage-builder.ts";
 // caching
-import { type BGPCache, LRUBGPCache } from "./cache/bgp-cache.ts";
+import { LRUBGPCache, type BGPCache } from "./cache/bgp-cache.ts";
 // utilities
-import {
-  isNull,
-  isString,
-  isUndefined,
-  partition,
-  some,
-  sortBy,
-} from "lodash-es";
+import { isNull, isUndefined, partition, some, sortBy } from "lodash-es";
 
 import type { CustomFunctions } from "../operators/expressions/sparql-expression.ts";
+import type { EngineTriple } from "../types.ts";
 import { deepApplyBindings, extendByBindings } from "../utils.ts";
-import * as rdf from "../utils/rdf.ts";
+import { dataFactory, isVariable } from "../utils/rdf.ts";
 import ExecutionContext from "./context/execution-context.ts";
 import ContextSymbols from "./context/symbols.ts";
 import { extractPropertyPaths } from "./stages/rewritings.ts";
 
-const QUERY_MODIFIERS = {
-  SELECT: select,
-  CONSTRUCT: construct,
-  ASK: ask,
-};
-
 /**
  * Output of a physical query execution plan
  */
-export type QueryOutput = Bindings | Algebra.TripleObject | boolean;
+export type QueryOutput = Bindings | EngineTriple | boolean;
 
 /*
  * Class of SPARQL operations that are evaluated by a Stage Builder
@@ -114,7 +111,7 @@ export const SPARQL_OPERATION = {
  * @author Corentin Marionneau
  */
 export class PlanBuilder {
-  private readonly _parser: Parser;
+  private readonly _parser: SparqlParser;
   private _optimizer: Optimizer;
   private _stageBuilders: Map<SparqlOperation, StageBuilder>;
   public _currentCache: BGPCache | null; // Public for tests.
@@ -252,7 +249,7 @@ export class PlanBuilder {
    * @return A {@link PipelineStage} that can be consumed to evaluate the query.
    */
   _buildQueryPlan(
-    query: Algebra.RootNode,
+    query: Query,
     context: ExecutionContext,
     source?: PipelineStage<Bindings>
   ): PipelineStage<Bindings> {
@@ -263,33 +260,31 @@ export class PlanBuilder {
     }
     context.setProperty(ContextSymbols.PREFIXES, query.prefixes);
 
-    let aggregates: any[] = [];
-
     // rewrite a DESCRIBE query into a CONSTRUCT query
     if (query.queryType === "DESCRIBE") {
-      const template: Algebra.TripleObject[] = [];
+      const template: Triple[] = [];
       const where: any = [
         {
           type: "bgp",
           triples: [],
         },
       ];
-      query.variables!.forEach((v: any) => {
-        const triple = rdf.triple(
+      query.variables.forEach((v: any) => {
+        const triple = dataFactory.quad(
           v,
-          `?pred__describe__${v}`,
-          `?obj__describe__${v}`
+          dataFactory.variable(`pred__describe__${v}`),
+          dataFactory.variable(`obj__describe__${v}`)
         );
         template.push(triple);
         where[0].triples.push(triple);
       });
-      const construct = {
+      const construct: ConstructQuery = {
         prefixes: query.prefixes,
         from: query.from,
         queryType: "CONSTRUCT",
         template,
         type: "query",
-        where: query.where.concat(where),
+        where: query.where?.concat(where),
       };
       return this._buildQueryPlan(construct, context, source);
     }
@@ -308,20 +303,26 @@ export class PlanBuilder {
 
     // Handles WHERE clause
     let graphIterator: PipelineStage<Bindings>;
-    if (query.where.length > 0) {
+    if (query.where?.length) {
       graphIterator = this._buildWhere(source, query.where, context);
     } else {
       graphIterator = engine.of(new BindingBase());
     }
 
+    let aggregates: VariableExpression[] = [];
+
     // Parse query variable to separate projection & aggregate variables
     if ("variables" in query) {
-      const parts = partition(query.variables, (v) => isString(v));
-      aggregates = parts[1];
-      // add aggregates variables to projection variables
-      query.variables = parts[0].concat(
-        aggregates.map((agg) => (agg as Algebra.Aggregation).variable)
-      );
+      const next: Variable[] = [];
+      for (const v of query.variables as Variable[]) {
+        if ("variable" in v) {
+          aggregates.push(v);
+          next.push(v.variable);
+        } else {
+          next.push(v);
+        }
+      }
+      query.variables = next;
     }
 
     // Handles SPARQL aggregations
@@ -340,7 +341,7 @@ export class PlanBuilder {
     if (aggregates.length > 0) {
       // Handles SPARQL aggregation functions
       graphIterator = aggregates.reduce(
-        (prev: PipelineStage<Bindings>, agg: Algebra.Aggregation) => {
+        (prev: PipelineStage<Bindings>, agg) => {
           const op = this._stageBuilders
             .get(SPARQL_OPERATION.BIND)!
             .execute(prev, agg, this._customFunctions, context);
@@ -362,15 +363,31 @@ export class PlanBuilder {
         .execute(graphIterator, query.order!) as PipelineStage<Bindings>;
     }
 
-    if (!(query.queryType in QUERY_MODIFIERS)) {
-      throw new Error(`Unsupported SPARQL query type: ${query.queryType}`);
+    switch (query.queryType) {
+      case "SELECT": {
+        graphIterator = select(graphIterator, query);
+        break;
+      }
+      case "CONSTRUCT": {
+        graphIterator = construct(
+          graphIterator,
+          query
+        ) as unknown as PipelineStage<Bindings>;
+        break;
+      }
+      case "ASK": {
+        graphIterator = ask(
+          graphIterator
+        ) as unknown as PipelineStage<Bindings>;
+        break;
+      }
+      default: {
+        throw new Error("Unsupported SPARQL query type.");
+      }
     }
-    graphIterator = QUERY_MODIFIERS[
-      query.queryType as keyof typeof QUERY_MODIFIERS
-    ](graphIterator, query) as PipelineStage<Bindings>;
 
     // Create iterators for modifiers
-    if (query.distinct) {
+    if ("distinct" in query && query.distinct) {
       if (!this._stageBuilders.has(SPARQL_OPERATION.DISTINCT)) {
         throw new Error(
           "A PlanBuilder cannot evaluate a DISTINCT clause without a StageBuilder for it"
@@ -401,13 +418,13 @@ export class PlanBuilder {
    */
   _buildWhere(
     source: PipelineStage<Bindings>,
-    groups: Algebra.PlanNode[],
+    groups: Pattern[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     groups = sortBy(groups, (g) => {
       switch (g.type) {
         case "graph":
-          if (rdf.isVariable((g as Algebra.GraphNode).name)) {
+          if (isVariable(g.name)) {
             return 5;
           }
           return 0;
@@ -433,10 +450,8 @@ export class PlanBuilder {
     for (let i = 0; i < groups.length; i++) {
       let group = groups[i];
       if (group.type === "bgp" && prec !== null && prec.type === "bgp") {
-        let lastGroup = newGroups[newGroups.length - 1] as Algebra.BGPNode;
-        lastGroup.triples = lastGroup.triples.concat(
-          (group as Algebra.BGPNode).triples
-        );
+        let lastGroup = newGroups[newGroups.length - 1] as BgpPattern;
+        lastGroup.triples = lastGroup.triples.concat(group.triples);
       } else {
         newGroups.push(group);
       }
@@ -458,7 +473,7 @@ export class PlanBuilder {
    */
   _buildGroup(
     source: PipelineStage<Bindings>,
-    group: Algebra.PlanNode,
+    group: Pattern,
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     const engine = Pipeline.getInstance();
@@ -473,9 +488,7 @@ export class PlanBuilder {
           );
         }
         // find possible Property paths
-        let [classicTriples, pathTriples, tempVariables] = extractPropertyPaths(
-          group as Algebra.BGPNode
-        );
+        let [classicTriples, pathTriples] = extractPropertyPaths(group);
         if (pathTriples.length > 0) {
           if (!this._stageBuilders.has(SPARQL_OPERATION.PROPERTY_PATH)) {
             throw new Error(
@@ -496,19 +509,9 @@ export class PlanBuilder {
             childContext
           ) as PipelineStage<Bindings>;
 
-        // filter out variables added by the rewriting of property paths
-        if (tempVariables.length > 0) {
-          iter = engine.map(iter, (bindings) => {
-            return bindings.filter((v) => tempVariables.indexOf(v) === -1);
-          });
-        }
         return iter;
       case "query":
-        return this._buildQueryPlan(
-          group as Algebra.RootNode,
-          childContext,
-          source
-        );
+        return this._buildQueryPlan(group, childContext, source);
       case "graph":
         if (!this._stageBuilders.has(SPARQL_OPERATION.GRAPH)) {
           throw new Error(
@@ -518,11 +521,7 @@ export class PlanBuilder {
         // delegate GRAPH evaluation to an executor
         return this._stageBuilders
           .get(SPARQL_OPERATION.GRAPH)!
-          .execute(
-            source,
-            group as Algebra.GraphNode,
-            childContext
-          ) as PipelineStage<Bindings>;
+          .execute(source, group, childContext) as PipelineStage<Bindings>;
       case "service":
         if (!this._stageBuilders.has(SPARQL_OPERATION.SERVICE)) {
           throw new Error(
@@ -531,17 +530,9 @@ export class PlanBuilder {
         }
         return this._stageBuilders
           .get(SPARQL_OPERATION.SERVICE)!
-          .execute(
-            source,
-            group as Algebra.ServiceNode,
-            childContext
-          ) as PipelineStage<Bindings>;
+          .execute(source, group, childContext) as PipelineStage<Bindings>;
       case "group":
-        return this._buildWhere(
-          source,
-          (group as Algebra.GroupNode).patterns,
-          childContext
-        );
+        return this._buildWhere(source, group.patterns, childContext);
       case "optional":
         if (!this._stageBuilders.has(SPARQL_OPERATION.OPTIONAL)) {
           throw new Error(
@@ -593,7 +584,7 @@ export class PlanBuilder {
           .get(SPARQL_OPERATION.BIND)!
           .execute(
             source,
-            group as Algebra.BindNode,
+            group,
             this._customFunctions,
             childContext
           ) as PipelineStage<Bindings>;
@@ -615,16 +606,16 @@ export class PlanBuilder {
    */
   _buildValues(
     source: PipelineStage<Bindings>,
-    groups: Algebra.PlanNode[],
+    groups: Pattern[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     let [values, others] = partition(groups, (g) => g.type === "values");
-    const bindingsLists = values.map((g) => (g as Algebra.ValuesNode).values);
+    const bindingsLists = values.map((g) => g.values);
     // for each VALUES clause
     const iterators = bindingsLists.map((bList) => {
       // for each value to bind in the VALUES clause
       const unionBranches = bList.map((b) => {
-        const bindings = BindingBase.fromObject(b);
+        const bindings = BindingBase.fromValuePatternRow(b);
         // BIND each group with the set of bindings and then evaluates it
         const temp = others.map((g) => deepApplyBindings(g, bindings));
         return extendByBindings(

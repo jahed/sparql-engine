@@ -26,10 +26,12 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
+import { termToString } from "rdf-string";
+import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
-const GRAPH_A_IRI = "http://example.org#some-graph-a";
-const GRAPH_B_IRI = "http://example.org#some-graph-b";
+const GRAPH_A_IRI = createIRI("http://example.org#some-graph-a");
+const GRAPH_B_IRI = createIRI("http://example.org#some-graph-b");
 
 describe("SPARQL UPDATE: COPY queries", () => {
   let engine: TestEngine;
@@ -43,7 +45,7 @@ describe("SPARQL UPDATE: COPY queries", () => {
   const data = [
     {
       name: "COPY DEFAULT to NAMED",
-      query: `COPY DEFAULT TO <${GRAPH_B_IRI}>`,
+      query: `COPY DEFAULT TO <${termToString(GRAPH_B_IRI)}>`,
       testFun: () => {
         // destination graph should only contains data from the source
         let triples = engine
@@ -61,7 +63,7 @@ describe("SPARQL UPDATE: COPY queries", () => {
     },
     {
       name: "COPY NAMED to DEFAULT",
-      query: `COPY <${GRAPH_B_IRI}> TO DEFAULT`,
+      query: `COPY <${termToString(GRAPH_B_IRI)}> TO DEFAULT`,
       testFun: () => {
         // destination graph should only contains data from the source
         let triples = engine._graph._store.getTriples(

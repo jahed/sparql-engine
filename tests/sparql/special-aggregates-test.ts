@@ -27,7 +27,8 @@ SOFTWARE.
 import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
-import { Bindings } from "../../src/rdf/bindings.ts";
+import { Bindings, type BindingsRecord } from "../../src/rdf/bindings.ts";
+import { createFloat } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("Non standard SPARQL aggregates", () => {
@@ -50,7 +51,7 @@ describe("Non standard SPARQL aggregates", () => {
       GROUP BY ?x`,
       results: [
         {
-          "?acc": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+          acc: createFloat(0.5),
         },
       ],
     },
@@ -59,7 +60,7 @@ describe("Non standard SPARQL aggregates", () => {
       query: `
       PREFIX sea: <https://callidon.github.io/sparql-engine/aggregates#>
       SELECT (sea:gmean(?x) AS ?gmean) WHERE {
-        { 
+        {
           { BIND(1 as ?g) BIND(4 AS ?x) }
           UNION
           { BIND(1 as ?g) BIND(1 AS ?x) }
@@ -70,7 +71,7 @@ describe("Non standard SPARQL aggregates", () => {
       GROUP BY ?g`,
       results: [
         {
-          "?gmean": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
+          gmean: createFloat(0.5),
         },
       ],
     },
@@ -78,7 +79,7 @@ describe("Non standard SPARQL aggregates", () => {
       name: "sea:rmse",
       query: `
       PREFIX sea: <https://callidon.github.io/sparql-engine/aggregates#>
-      SELECT (sea:rmse(?x, ?y) AS ?mse) WHERE { 
+      SELECT (sea:rmse(?x, ?y) AS ?mse) WHERE {
         { BIND(1 as ?g) BIND(10 AS ?x) BIND(5 AS ?y) }
         UNION
         { BIND(1 as ?g) BIND(5 AS ?x) BIND(8 AS ?y) }
@@ -86,7 +87,7 @@ describe("Non standard SPARQL aggregates", () => {
       GROUP BY ?g`,
       results: [
         {
-          "?mse": '"4.123105625617661"^^http://www.w3.org/2001/XMLSchema#float',
+          mse: createFloat(4.123105625617661),
         },
       ],
     },
@@ -94,7 +95,7 @@ describe("Non standard SPARQL aggregates", () => {
 
   data.forEach((d) => {
     it(`should evaluate the "${d.name}" SPARQL aggregate`, (t, done) => {
-      const results: ReturnType<Bindings["toObject"]>[] = [];
+      const results: BindingsRecord[] = [];
       const iterator = engine.execute(d.query);
       iterator.subscribe(
         (b) => {

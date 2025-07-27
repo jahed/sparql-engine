@@ -24,14 +24,19 @@ SOFTWARE.
 
 "use strict";
 
-import StageBuilder from "./stage-builder.ts";
-import { Pipeline } from "../pipeline/pipeline.ts";
-import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
-import * as rdf from "../../utils/rdf.ts";
-import type { Algebra } from "sparqljs";
+import {
+  Wildcard,
+  type GraphPattern,
+  type IriTerm,
+  type Query,
+} from "sparqljs";
 import type { Bindings } from "../../rdf/bindings.ts";
+import { isVariable } from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import ContextSymbols from "../context/symbols.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import { Pipeline } from "../pipeline/pipeline.ts";
+import StageBuilder from "./stage-builder.ts";
 
 /**
  * A GraphStageBuilder evaluates GRAPH clauses in a SPARQL query.
@@ -47,26 +52,26 @@ export default class GraphStageBuilder extends StageBuilder {
    */
   execute(
     source: PipelineStage<Bindings>,
-    node: Algebra.GraphNode,
+    node: GraphPattern,
     context: ExecutionContext
   ): PipelineStage<Bindings> {
-    let subquery: Algebra.RootNode;
+    let subquery: Query;
     if (node.patterns[0].type === "query") {
-      subquery = node.patterns[0] as Algebra.RootNode;
+      subquery = node.patterns[0] as Query;
     } else {
       subquery = {
         prefixes: context.getProperty(ContextSymbols.PREFIXES),
         queryType: "SELECT",
-        variables: ["*"],
+        variables: [new Wildcard()],
         type: "query",
         where: node.patterns,
       };
     }
     // handle the case where the GRAPh IRI is a SPARQL variable
-    if (rdf.isVariable(node.name)) {
+    if (isVariable(node.name)) {
       // clone the source first
       source = Pipeline.getInstance().clone(source);
-      let namedGraphs: string[] = [];
+      let namedGraphs: IriTerm[] = [];
       // use named graphs is provided, otherwise use all named graphs
       if (context.namedGraphs.length > 0) {
         namedGraphs = context.namedGraphs;
@@ -78,20 +83,20 @@ export default class GraphStageBuilder extends StageBuilder {
         source,
         1,
         (values) => {
-          return values[0].has(node.name);
+          return values[0].has(node.name.value);
         },
         (values) => {
           // if the input bindings bound the graph's variable, use it as graph IRI
-          const graphIRI = values[0].get(node.name)!;
+          const graphIRI = values[0].get(node.name.value) as IriTerm;
           return this._buildIterator(source, graphIRI, subquery, context);
         },
         () => {
           // otherwise, execute the subquery using each graph, and bound the graph var to the graph iri
           return Pipeline.getInstance().merge(
-            ...namedGraphs.map((iri: string) => {
+            ...namedGraphs.map((iri) => {
               const stage = this._buildIterator(source, iri, subquery, context);
               return Pipeline.getInstance().map(stage, (bindings) => {
-                return bindings.extendMany([[node.name, iri]]);
+                return bindings.extendMany([[node.name.value, iri]]);
               });
             })
           );
@@ -112,8 +117,8 @@ export default class GraphStageBuilder extends StageBuilder {
    */
   _buildIterator(
     source: PipelineStage<Bindings>,
-    iri: string,
-    subquery: Algebra.RootNode,
+    iri: IriTerm,
+    subquery: Query,
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     const opts = context.clone();

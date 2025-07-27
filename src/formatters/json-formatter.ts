@@ -32,7 +32,7 @@ import type {
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import type { QueryOutput } from "../engine/plan-builder.ts";
 import { BindingBase, Bindings } from "../rdf/bindings.ts";
-import * as rdf from "../utils/rdf.ts";
+import { termIsBNode, termIsIRI, termIsLiteral } from "../utils/rdf.ts";
 
 /**
  * Write the JSON headers
@@ -62,15 +62,13 @@ function writeBindings(
     if (cpt >= 1) {
       input.next(",");
     }
-    input.next(
-      `"${variable.startsWith("?") ? variable.substring(1) : variable}":`
-    );
-    const term = rdf.fromN3(value);
-    if (rdf.termIsIRI(term)) {
+    input.next(`"${variable}":`);
+    const term = value;
+    if (termIsIRI(term)) {
       input.next(`{"type":"uri","value":"${term.value}"}`);
-    } else if (rdf.termIsBNode(term)) {
+    } else if (termIsBNode(term)) {
       input.next(`{"type":"bnode","value":"${term.value}"}`);
-    } else if (rdf.termIsLiteral(term)) {
+    } else if (termIsLiteral(term)) {
       if (term.language.length > 0) {
         input.next(
           `{"type":"literal","value":"${term.value}","xml:lang":"${term.language}"}`

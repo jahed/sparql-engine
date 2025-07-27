@@ -28,41 +28,39 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { describe, it } from "node:test";
 import { from } from "rxjs";
+import type { OperationExpression } from "sparqljs";
 import { BindingBase, Bindings } from "../../src/api.ts";
 import bind from "../../src/operators/bind.ts";
+import { createInteger, dataFactory } from "../../src/utils/rdf.ts";
 
 describe("Bind operator", () => {
   it("should bind results of valid SPARQL expression to a variable", (t, done) => {
     let nbResults = 0;
     const source = from([
       BindingBase.fromObject({
-        "?x": '"1"^^http://www.w3.org/2001/XMLSchema#integer',
-        "?y": '"2"^^http://www.w3.org/2001/XMLSchema#integer',
+        x: createInteger(1),
+        y: createInteger(2),
       }),
       BindingBase.fromObject({
-        "?x": '"2"^^http://www.w3.org/2001/XMLSchema#integer',
-        "?y": '"3"^^http://www.w3.org/2001/XMLSchema#integer',
+        x: createInteger(2),
+        y: createInteger(3),
       }),
     ]);
-    const expr = {
+    const expr: OperationExpression = {
       type: "operation",
       operator: "+",
-      args: ["?x", "?y"],
+      args: [dataFactory.variable("x"), dataFactory.variable("y")],
     };
-    const op = bind(source, "?z", expr);
+    const op = bind(source, dataFactory.variable("z"), expr);
     op.subscribe(
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.all.keys("?x", "?y", "?z");
-        if (b["?x"].startsWith('"1"')) {
-          expect(b["?z"]).to.equal(
-            '"3"^^http://www.w3.org/2001/XMLSchema#integer'
-          );
+        expect(b).to.have.all.keys("x", "y", "z");
+        if (b["x"].value === "1") {
+          expect(b["z"]).to.deep.equal(createInteger(3));
         } else {
-          expect(b["?z"]).to.equal(
-            '"5"^^http://www.w3.org/2001/XMLSchema#integer'
-          );
+          expect(b["z"]).to.deep.equal(createInteger(5));
         }
         nbResults++;
       },

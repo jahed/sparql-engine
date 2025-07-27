@@ -24,9 +24,10 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import type { Ordering, Term } from "sparqljs";
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
-import type { Algebra } from "sparqljs";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
+
 import { Bindings } from "../rdf/bindings.ts";
 
 /**
@@ -35,13 +36,16 @@ import { Bindings } from "../rdf/bindings.ts";
  * @param  comparators - ORDER BY comparators
  * @return A comparator function
  */
-function _compileComparators(comparators: Algebra.OrderComparator[]) {
-  const comparatorsFuncs = comparators.map((c: Algebra.OrderComparator) => {
+function _compileComparators(comparators: Ordering[]) {
+  const comparatorsFuncs = comparators.map((c: Ordering) => {
     return (left: Bindings, right: Bindings) => {
-      if (left.get(c.expression)! < right.get(c.expression)!) {
-        return c.ascending ? -1 : 1;
-      } else if (left.get(c.expression)! > right.get(c.expression)!) {
-        return c.ascending ? 1 : -1;
+      const expr = (c.expression as Term).value;
+      const a = left.get(expr)?.value || "";
+      const b = right.get(expr)?.value || "";
+      if (a < b) {
+        return c.descending ? 1 : -1;
+      } else if (a > b) {
+        return c.descending ? -1 : 1;
       }
       return 0;
     };
@@ -69,17 +73,9 @@ function _compileComparators(comparators: Algebra.OrderComparator[]) {
  */
 export default function orderby(
   source: PipelineStage<Bindings>,
-  comparators: Algebra.OrderComparator[]
+  comparators: Ordering[]
 ) {
-  const comparator = _compileComparators(
-    comparators.map((c: Algebra.OrderComparator) => {
-      // explicity tag ascending comparators (sparqljs leaves them untagged)
-      if (!("descending" in c)) {
-        c.ascending = true;
-      }
-      return c;
-    })
-  );
+  const comparator = _compileComparators(comparators);
   const engine = Pipeline.getInstance();
   return engine.mergeMap(engine.collect(source), (values: Bindings[]) => {
     values.sort((a, b) => comparator(a, b));

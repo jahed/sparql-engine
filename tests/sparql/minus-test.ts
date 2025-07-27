@@ -27,7 +27,9 @@ SOFTWARE.
 import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
-import { Bindings } from "../../src/api.ts";
+import { BindingBase, Bindings } from "../../src/api.ts";
+import type { BindingsRecord } from "../../src/rdf/bindings.ts";
+import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL MINUS", () => {
@@ -51,10 +53,10 @@ describe("SPARQL MINUS", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?s", "?p", "?o");
-        expect(b["?s"]).to.be.oneOf([
-          "https://dblp.uni-trier.de/pers/m/Minier:Thomas",
-          "https://dblp.org/pers/m/Minier:Thomas.nt",
+        expect(b).to.have.keys("s", "p", "o");
+        expect(b["s"]).to.be.deep.oneOf([
+          createIRI("https://dblp.uni-trier.de/pers/m/Minier:Thomas"),
+          createIRI("https://dblp.org/pers/m/Minier:Thomas.nt"),
         ]);
         nbResults++;
       },
@@ -74,15 +76,16 @@ describe("SPARQL MINUS", () => {
       ?s rdf:type dblp-rdf:Person .
       MINUS { ?s dblp-rdf:primaryFullPersonName ?name }
     }`;
-    let nbResults = 0;
+    const results: BindingsRecord[] = [];
     const iterator = engine.execute(query);
     iterator.subscribe(
-      () => {
-        nbResults++;
+      (b) => {
+        assert.ok(b instanceof BindingBase);
+        results.push(b.toObject());
       },
       done,
       () => {
-        expect(nbResults).to.equal(0);
+        expect(results).to.deep.equal([]);
         done();
       }
     );

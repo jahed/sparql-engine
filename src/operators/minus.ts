@@ -56,7 +56,9 @@ export default function minus(
       const isCompatible = buffer.some((b: Bindings) => {
         const rightKeys = Array.from(b.variables());
         const commonKeys = intersection(leftKeys, rightKeys);
-        return commonKeys.every((k: string) => b.get(k) === bindings.get(k));
+        return commonKeys.every((k: string) => {
+          return b.get(k)?.equals(bindings.get(k));
+        });
       });
       // only output non-compatible bindings
       return !isCompatible;

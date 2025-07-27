@@ -27,6 +27,7 @@ SOFTWARE.
 import { assert, expect } from "chai";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/api.ts";
+import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL property paths: inverse paths", () => {
@@ -50,8 +51,8 @@ describe("SPARQL property paths: inverse paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b["?s"]).to.equal("http://example.org/Alice");
+        expect(b).to.have.property("s");
+        expect(b["s"]).to.deep.equal(createIRI("http://example.org/Alice"));
         results.push(b);
       },
       done,
@@ -76,26 +77,30 @@ describe("SPARQL property paths: inverse paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?x");
-        expect(b).to.have.property("?y");
-        switch (b["?x"]) {
+        expect(b).to.have.property("x");
+        expect(b).to.have.property("y");
+        switch (b["x"].value) {
           case "http://example.org/Alice":
-            expect(b["?y"]).to.be.oneOf([
-              "http://example.org/Carol",
-              "http://example.org/Alice",
+            expect(b["y"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Carol"),
+              createIRI("http://example.org/Alice"),
             ]);
             break;
           case "http://example.org/Carol":
-            expect(b["?y"]).to.be.oneOf([
-              "http://example.org/Alice",
-              "http://example.org/Carol",
+            expect(b["y"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Alice"),
+              createIRI("http://example.org/Carol"),
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?y"]).to.be.oneOf(["http://example.org/Bob"]);
+            expect(b["y"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Bob"),
+            ]);
             break;
           case "http://example.org/Mallory":
-            expect(b["?y"]).to.be.oneOf(["http://example.org/Mallory"]);
+            expect(b["y"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Mallory"),
+            ]);
             break;
           default:
             assert.fail();
@@ -124,10 +129,10 @@ describe("SPARQL property paths: inverse paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        expect(b["?s"]).to.be.oneOf(["tel:0645123549"]);
-        expect(b["?o"]).to.be.oneOf(["http://example.org/Bob"]);
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        expect(b["s"]).to.be.deep.oneOf([createIRI("tel:0645123549")]);
+        expect(b["o"]).to.be.deep.oneOf([createIRI("http://example.org/Bob")]);
         results.push(b);
       },
       done,
@@ -152,16 +157,16 @@ describe("SPARQL property paths: inverse paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        expect(b["?s"]).to.be.oneOf([
-          "http://example.org/Didier",
-          "http://example.org/Carol",
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        expect(b["s"]).to.be.deep.oneOf([
+          createIRI("http://example.org/Didier"),
+          createIRI("http://example.org/Carol"),
         ]);
-        expect(b["?o"]).to.be.oneOf([
-          "http://example.org/Bob",
-          "http://example.org/Didier",
-          "http://example.org/Carol",
+        expect(b["o"]).to.be.deep.oneOf([
+          createIRI("http://example.org/Bob"),
+          createIRI("http://example.org/Didier"),
+          createIRI("http://example.org/Carol"),
         ]);
         results.push(b);
       },

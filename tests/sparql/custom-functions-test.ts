@@ -29,6 +29,11 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 import { Bindings, rdf } from "../../src/api.ts";
 import type { CustomFunctions } from "../../src/operators/expressions/sparql-expression.ts";
+import {
+  createLangLiteral,
+  termToValue,
+  UNBOUND,
+} from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL custom operators", () => {
@@ -58,12 +63,15 @@ describe("SPARQL custom operators", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?reversed");
-        expect(b["?reversed"]).to.equal('"reiniM samohT"@en');
+        expect(b).to.have.keys("reversed");
+        expect(b["reversed"]).to.deep.equal(
+          createLangLiteral("reiniM samohT", "en")
+        );
         results.push(b);
       },
       done,
       () => {
+        expect(results.length).to.equal(1);
         done();
       }
     );
@@ -93,7 +101,7 @@ describe("SPARQL custom operators", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?o");
+        expect(b).to.have.keys("o");
         results.push(b);
       },
       done,
@@ -108,7 +116,7 @@ describe("SPARQL custom operators", () => {
     const customFunctions: CustomFunctions = {
       "http://test.com#IS_EVEN": function (a) {
         assert.ok(a && "datatype" in a);
-        const value = rdf.asJS(a.value, a.datatype.value);
+        const value = rdf.termToValue<number>(a);
         return rdf.createBoolean(value % 2 === 0);
       },
     };
@@ -132,10 +140,9 @@ describe("SPARQL custom operators", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?length");
-        const length = parseInt(b["?length"].split("^^")[0].replace(/"/g, ""));
+        expect(b).to.have.keys("length");
+        const length = termToValue<number>(b["length"]);
         expect(length % 2).to.equal(0);
-
         results.push(b);
       },
       done,
@@ -173,12 +180,13 @@ describe("SPARQL custom operators", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?error");
-        expect(b["?error"]).to.equal('"UNBOUND"');
+        expect(b).to.have.keys("error");
+        expect(b["error"]).to.deep.equal(UNBOUND);
         results.push(b);
       },
       done,
       () => {
+        expect(results.length).to.equal(1);
         done();
       }
     );

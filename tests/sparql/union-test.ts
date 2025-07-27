@@ -57,7 +57,7 @@ describe("SPARQL UNION", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?name");
+        expect(b).to.have.keys("name");
         results.push(b);
       },
       done,

@@ -32,8 +32,8 @@ describe("AsyncLRUCache", () => {
   let cache: AsyncLRUCache<number, number | string, unknown>;
   beforeEach(() => {
     cache = new AsyncLRUCache({
-      ttl: Number.MAX_SAFE_INTEGER,
-      ttlAutopurge: false,
+      ttl: 10000,
+      ttlAutopurge: true,
     });
   });
 

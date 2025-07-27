@@ -1,12 +1,25 @@
 {
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "javascript.preferences.importModuleSpecifierEnding": "js",
+  "editor.rulers": [{ "column": 80 }, { "column": 120 }],
   "editor.formatOnSave": true,
-  "typescript.preferences.importModuleSpecifierEnding": "js",
   "editor.codeActionsOnSave": {
     "source.organizeImports": "always"
   },
   "files.readonlyInclude": {
     "package-lock.json": true
-  }
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "javascript.preferences.importModuleSpecifierEnding": "js",
+  "typescript.preferences.importModuleSpecifierEnding": "js",
+  "nodejs-testing.include": ["./tests/"],
+  "nodejs-testing.extensions": [
+    {
+      "extensions": ["ts"],
+      "parameters": [
+        "--disable-warning=ExperimentalWarning",
+        "--experimental-strip-types",
+        "--experimental-test-isolation=none",
+        "--test-timeout=5000"
+      ]
+    }
+  ]
 }

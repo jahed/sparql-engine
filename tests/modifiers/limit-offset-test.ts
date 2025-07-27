@@ -28,6 +28,7 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/api.ts";
+import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL queries with LIMIT/OFFSET", () => {
@@ -51,9 +52,9 @@ describe("SPARQL queries with LIMIT/OFFSET", () => {
       }
       OFFSET 2`,
       results: [
-        "https://dblp.org/rec/conf/esws/MinierSMV18",
-        "https://dblp.org/rec/conf/esws/MinierSMV18a",
-        "https://dblp.org/rec/journals/corr/abs-1806-00227",
+        createIRI("https://dblp.org/rec/conf/esws/MinierSMV18"),
+        createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+        createIRI("https://dblp.org/rec/journals/corr/abs-1806-00227"),
       ],
     },
     {
@@ -69,8 +70,8 @@ describe("SPARQL queries with LIMIT/OFFSET", () => {
       }
       LIMIT 2`,
       results: [
-        "https://dblp.org/rec/conf/esws/MinierMSM17",
-        "https://dblp.org/rec/conf/esws/MinierMSM17a",
+        createIRI("https://dblp.org/rec/conf/esws/MinierMSM17"),
+        createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
       ],
     },
     {
@@ -87,8 +88,8 @@ describe("SPARQL queries with LIMIT/OFFSET", () => {
       OFFSET 3
       LIMIT 2`,
       results: [
-        "https://dblp.org/rec/conf/esws/MinierSMV18",
-        "https://dblp.org/rec/conf/esws/MinierSMV18a",
+        createIRI("https://dblp.org/rec/conf/esws/MinierSMV18"),
+        createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a"),
       ],
     },
   ];
@@ -102,8 +103,11 @@ describe("SPARQL queries with LIMIT/OFFSET", () => {
         (bindings) => {
           assert.ok(bindings instanceof Bindings);
           const b = bindings.toObject();
-          expect(b["?article"]).to.be.oneOf(d.results);
-          d.results.splice(d.results.indexOf(b["?article"]), 1);
+          expect(b["article"]).to.be.deep.oneOf(d.results);
+          d.results.splice(
+            d.results.findIndex((r) => r.equals(b["article"])),
+            1
+          );
           nbResults++;
         },
         done,

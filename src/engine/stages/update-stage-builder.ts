@@ -24,13 +24,22 @@ SOFTWARE.
 
 "use strict";
 
-import type { Algebra } from "sparqljs";
+import {
+  Wildcard,
+  type BgpPattern,
+  type ClearDropOperation,
+  type GraphQuads,
+  type InsertDeleteOperation,
+  type IriTerm,
+  type Query,
+  type UpdateOperation,
+} from "sparqljs";
 import construct from "../../operators/modifiers/construct.ts";
 import ActionConsumer from "../../operators/update/action-consumer.ts";
 import ClearConsumer from "../../operators/update/clear-consumer.ts";
 import {
-  type Consumable,
   ErrorConsumable,
+  type Consumable,
 } from "../../operators/update/consumer.ts";
 import DeleteConsumer from "../../operators/update/delete-consumer.ts";
 import InsertConsumer from "../../operators/update/insert-consumer.ts";
@@ -42,7 +51,7 @@ import ExecutionContext from "../context/execution-context.ts";
 import ContextSymbols from "../context/symbols.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import { Pipeline } from "../pipeline/pipeline.ts";
-import * as rewritings from "./rewritings.ts";
+import { rewriteAdd, rewriteCopy, rewriteMove } from "./rewritings.ts";
 import StageBuilder from "./stage-builder.ts";
 
 /**
@@ -58,11 +67,7 @@ export default class UpdateStageBuilder extends StageBuilder {
    * @return A Consumable used to evaluatethe set of update queries
    */
   execute(
-    updates: Array<
-      | Algebra.UpdateQueryNode
-      | Algebra.UpdateClearNode
-      | Algebra.UpdateCopyMoveNode
-    >,
+    updates: Array<UpdateOperation>,
     context: ExecutionContext
   ): Consumable<Bindings> {
     let queries;
@@ -82,8 +87,13 @@ export default class UpdateStageBuilder extends StageBuilder {
         } else if ("type" in update) {
           switch (update.type) {
             case "create": {
-              const createNode = update as Algebra.UpdateCreateDropNode;
-              const iri = createNode.graph.name;
+              const createNode = update;
+              const iri = createNode.graph.name
+                ? createNode.graph.name
+                : undefined;
+              if (!iri) {
+                return new NoopConsumer();
+              }
               if (this._dataset.hasNamedGraph(iri)) {
                 if (!createNode.silent) {
                   return new ErrorConsumable(
@@ -100,7 +110,7 @@ export default class UpdateStageBuilder extends StageBuilder {
               });
             }
             case "drop": {
-              const dropNode = update as Algebra.UpdateCreateDropNode;
+              const dropNode = update;
               // handle DROP DEFAULT queries
               if ("default" in dropNode.graph && dropNode.graph.default) {
                 return new ActionConsumer(() => {
@@ -128,6 +138,9 @@ export default class UpdateStageBuilder extends StageBuilder {
               }
               // handle DROP GRAPH queries
               const iri = dropNode.graph.name;
+              if (!iri) {
+                return new NoopConsumer();
+              }
               if (!this._dataset.hasNamedGraph(iri)) {
                 if (!dropNode.silent) {
                   return new ErrorConsumable(
@@ -141,31 +154,22 @@ export default class UpdateStageBuilder extends StageBuilder {
               });
             }
             case "clear":
-              return this._handleClearQuery(update as Algebra.UpdateClearNode);
+              return this._handleClearQuery(update);
             case "add":
               return this._handleInsertDelete(
-                rewritings.rewriteAdd(
-                  update as Algebra.UpdateCopyMoveNode,
-                  this._dataset
-                ),
+                rewriteAdd(update, this._dataset),
                 context
               );
             case "copy":
               // A COPY query is rewritten into a sequence [CLEAR query, INSERT query]
-              queries = rewritings.rewriteCopy(
-                update as Algebra.UpdateCopyMoveNode,
-                this._dataset
-              );
+              queries = rewriteCopy(update, this._dataset);
               return new ManyConsumers([
                 this._handleClearQuery(queries[0]),
                 this._handleInsertDelete(queries[1], context),
               ]);
             case "move":
               // A MOVE query is rewritten into a sequence [CLEAR query, INSERT query, CLEAR query]
-              queries = rewritings.rewriteMove(
-                update as Algebra.UpdateCopyMoveNode,
-                this._dataset
-              );
+              queries = rewriteMove(update, this._dataset);
               return new ManyConsumers([
                 this._handleClearQuery(queries[0]),
                 this._handleInsertDelete(queries[1], context),
@@ -192,7 +196,7 @@ export default class UpdateStageBuilder extends StageBuilder {
    * @return A Consumer used to evaluate SPARQL UPDATE queries
    */
   _handleInsertDelete(
-    update: Algebra.UpdateQueryNode,
+    update: InsertDeleteOperation,
     context: ExecutionContext
   ): Consumable<Bindings> {
     const engine = Pipeline.getInstance();
@@ -202,16 +206,18 @@ export default class UpdateStageBuilder extends StageBuilder {
 
     if (update.updateType === "insertdelete") {
       graph =
-        "graph" in update ? this._dataset.getNamedGraph(update.graph!) : null;
+        "graph" in update && update.graph
+          ? this._dataset.getNamedGraph(update.graph)
+          : null;
       // evaluate the WHERE clause as a classic SELECT query
-      const node: Algebra.RootNode = {
+      const node: Query = {
         prefixes: context.getProperty(ContextSymbols.PREFIXES),
         type: "query",
         where: update.where!,
         queryType: "SELECT",
-        variables: ["*"],
+        variables: [new Wildcard()],
         // copy the FROM clause from the original UPDATE query
-        from: "from" in update ? update.from : undefined,
+        from: update.using,
       };
       source = this._builder!._buildQueryPlan(node, context);
     }
@@ -249,14 +255,14 @@ export default class UpdateStageBuilder extends StageBuilder {
    */
   _buildInsertConsumer(
     source: PipelineStage<Bindings>,
-    group: Algebra.BGPNode | Algebra.UpdateGraphNode,
+    group: BgpPattern | GraphQuads,
     graph: Graph | null
   ): InsertConsumer<Bindings> {
     const tripleSource = construct(source, { template: group.triples });
     if (graph === null) {
       graph =
         group.type === "graph" && "name" in group
-          ? this._dataset.getNamedGraph(group.name)
+          ? this._dataset.getNamedGraph(group.name as IriTerm)
           : this._dataset.getDefaultGraph();
     }
     return new InsertConsumer(tripleSource, graph);
@@ -272,14 +278,14 @@ export default class UpdateStageBuilder extends StageBuilder {
    */
   _buildDeleteConsumer(
     source: PipelineStage<Bindings>,
-    group: Algebra.BGPNode | Algebra.UpdateGraphNode,
+    group: BgpPattern | GraphQuads,
     graph: Graph | null
   ): DeleteConsumer<Bindings> {
     const tripleSource = construct(source, { template: group.triples });
     if (graph === null) {
       graph =
         group.type === "graph" && "name" in group
-          ? this._dataset.getNamedGraph(group.name)
+          ? this._dataset.getNamedGraph(group.name as IriTerm)
           : this._dataset.getDefaultGraph();
     }
     return new DeleteConsumer(tripleSource, graph);
@@ -291,7 +297,7 @@ export default class UpdateStageBuilder extends StageBuilder {
    * @param query - Parsed query
    * @return A Consumer used to evaluate CLEAR queries
    */
-  _handleClearQuery(query: Algebra.UpdateClearNode): ClearConsumer<Bindings> {
+  _handleClearQuery(query: ClearDropOperation): ClearConsumer<Bindings> {
     let graph = null;
     const iris = this._dataset.iris;
     if (query.graph.default) {

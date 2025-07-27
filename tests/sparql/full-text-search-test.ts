@@ -27,7 +27,14 @@ SOFTWARE.
 import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
-import { BindingBase } from "../../src/rdf/bindings.ts";
+import { BindingBase, type BindingsRecord } from "../../src/rdf/bindings.ts";
+import {
+  createFloat,
+  createInteger,
+  createIRI,
+  createLangLiteral,
+  createLiteral,
+} from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("Full Text Search SPARQL queries", () => {
@@ -51,8 +58,8 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          "?s": "https://dblp.org/pers/m/Minier:Thomas",
-          "?name": '"Thomas Minier"@en',
+          s: createIRI("https://dblp.org/pers/m/Minier:Thomas"),
+          name: createLangLiteral("Thomas Minier", "en"),
         },
       ],
     },
@@ -68,7 +75,7 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          "?s": "https://dblp.org/pers/m/Minier:Thomas.nt",
+          s: createIRI("https://dblp.org/pers/m/Minier:Thomas.nt"),
         },
       ],
     },
@@ -87,10 +94,10 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          "?s": "https://dblp.org/pers/m/Minier:Thomas",
-          "?name": '"Thomas Minier"@en',
-          "?score": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
-          "?rank": '"0"^^http://www.w3.org/2001/XMLSchema#integer',
+          s: createIRI("https://dblp.org/pers/m/Minier:Thomas"),
+          name: createLangLiteral("Thomas Minier", "en"),
+          score: createFloat(0.5),
+          rank: createInteger(0),
         },
       ],
     },
@@ -106,8 +113,8 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          "?o": "https://dblp.org/pers/m/Minier:Thomas",
-          "?score": '"1"^^http://www.w3.org/2001/XMLSchema#float',
+          o: createIRI("https://dblp.org/pers/m/Minier:Thomas"),
+          score: createFloat(1),
         },
       ],
     },
@@ -124,8 +131,10 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          "?o": "\"provenance information for RDF data of dblp person 'm/Minier:Thomas'\"",
-          "?score": '"0.111"^^http://www.w3.org/2001/XMLSchema#float',
+          o: createLiteral(
+            "provenance information for RDF data of dblp person 'm/Minier:Thomas'"
+          ),
+          score: createFloat(0.111),
         },
       ],
     },
@@ -142,19 +151,19 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          "?o": "https://dblp.org/pers/m/Minier:Thomas",
-          "?score": '"1"^^http://www.w3.org/2001/XMLSchema#float',
-          "?rank": '"0"^^http://www.w3.org/2001/XMLSchema#integer',
+          o: createIRI("https://dblp.org/pers/m/Minier:Thomas"),
+          score: createFloat(1),
+          rank: createInteger(0),
         },
         {
-          "?o": '"Thomas Minier"@en',
-          "?score": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
-          "?rank": '"1"^^http://www.w3.org/2001/XMLSchema#integer',
+          o: createLangLiteral("Thomas Minier", "en"),
+          score: createFloat(0.5),
+          rank: createInteger(1),
         },
         {
-          "?o": "https://dblp.org/rec/conf/esws/MinierMSM17a",
-          "?score": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
-          "?rank": '"2"^^http://www.w3.org/2001/XMLSchema#integer',
+          o: createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
+          score: createFloat(0.5),
+          rank: createInteger(2),
         },
       ],
     },
@@ -172,14 +181,14 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          "?o": '"Thomas Minier"@en',
-          "?score": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
-          "?rank": '"1"^^http://www.w3.org/2001/XMLSchema#integer',
+          o: createLangLiteral("Thomas Minier", "en"),
+          score: createFloat(0.5),
+          rank: createInteger(1),
         },
         {
-          "?o": "https://dblp.org/rec/conf/esws/MinierMSM17a",
-          "?score": '"0.5"^^http://www.w3.org/2001/XMLSchema#float',
-          "?rank": '"2"^^http://www.w3.org/2001/XMLSchema#integer',
+          o: createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
+          score: createFloat(0.5),
+          rank: createInteger(2),
         },
       ],
     },
@@ -187,7 +196,7 @@ describe("Full Text Search SPARQL queries", () => {
 
   data.forEach((d) => {
     it(`should evaluate ${d.description}`, (t, done) => {
-      const results: ReturnType<BindingBase["toObject"]>[] = [];
+      const results: BindingsRecord[] = [];
       const iterator = engine.execute(d.query);
       iterator.subscribe(
         (b) => {

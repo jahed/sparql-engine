@@ -24,13 +24,13 @@ SOFTWARE.
 
 "use strict";
 
-import { isString } from "lodash-es";
-import type { Algebra } from "sparqljs";
+import type { Expression, Grouping, Query, VariableTerm } from "sparqljs";
 import bind from "../../operators/bind.ts";
 import type { CustomFunctions } from "../../operators/expressions/sparql-expression.ts";
 import filter from "../../operators/sparql-filter.ts";
 import groupBy from "../../operators/sparql-groupby.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
+import { isVariable } from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import StageBuilder from "./stage-builder.ts";
@@ -51,7 +51,7 @@ export default class AggregateStageBuilder extends StageBuilder {
    */
   execute(
     source: PipelineStage<Bindings>,
-    query: Algebra.RootNode,
+    query: Query,
     context: ExecutionContext,
     customFunctions?: CustomFunctions
   ): PipelineStage<Bindings> {
@@ -60,7 +60,7 @@ export default class AggregateStageBuilder extends StageBuilder {
     // WARNING: an empty GROUP BY clause will create a single group with all bindings
     iterator = this._executeGroupBy(
       source,
-      query.group || [],
+      ("group" in query && query.group) || [],
       context,
       customFunctions
     );
@@ -85,17 +85,17 @@ export default class AggregateStageBuilder extends StageBuilder {
    */
   _executeGroupBy(
     source: PipelineStage<Bindings>,
-    groupby: Algebra.Aggregation[],
+    groupby: Grouping[],
     context: ExecutionContext,
     customFunctions?: CustomFunctions
   ): PipelineStage<Bindings> {
     let iterator = source;
     // extract GROUP By variables & rewrite SPARQL expressions into BIND clauses
-    const groupingVars: string[] = [];
+    const groupingVars: VariableTerm[] = [];
     groupby.forEach((g) => {
-      if (isString(g.expression)) {
+      if (isVariable(g.expression)) {
         groupingVars.push(g.expression);
-      } else {
+      } else if (g.variable) {
         groupingVars.push(g.variable);
         iterator = bind(iterator, g.variable, g.expression, customFunctions);
       }
@@ -112,7 +112,7 @@ export default class AggregateStageBuilder extends StageBuilder {
    */
   _executeHaving(
     source: PipelineStage<Bindings>,
-    having: Algebra.Expression[],
+    having: Expression[],
     context: ExecutionContext,
     customFunctions?: CustomFunctions
   ): PipelineStage<Bindings> {

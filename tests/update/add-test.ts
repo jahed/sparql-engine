@@ -26,10 +26,12 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
+import { termToString } from "rdf-string";
+import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
-const GRAPH_A_IRI = "http://example.org#some-graph-a";
-const GRAPH_B_IRI = "http://example.org#some-graph-b";
+const GRAPH_A_IRI = createIRI("http://example.org#some-graph-a");
+const GRAPH_B_IRI = createIRI("http://example.org#some-graph-b");
 
 describe("SPARQL UPDATE: ADD queries", () => {
   let engine: TestEngine;
@@ -43,7 +45,7 @@ describe("SPARQL UPDATE: ADD queries", () => {
   const data = [
     {
       name: "ADD DEFAULT to NAMED",
-      query: `ADD DEFAULT TO <${GRAPH_B_IRI}>`,
+      query: `ADD DEFAULT TO <${termToString(GRAPH_B_IRI)}>`,
       testFun: () => {
         const triples = engine
           .getNamedGraph(GRAPH_B_IRI)
@@ -53,7 +55,7 @@ describe("SPARQL UPDATE: ADD queries", () => {
     },
     {
       name: "ADD NAMED to DEFAULT",
-      query: `ADD <${GRAPH_B_IRI}> TO DEFAULT`,
+      query: `ADD <${termToString(GRAPH_B_IRI)}> TO DEFAULT`,
       testFun: () => {
         const triples = engine._graph._store.getTriples(
           "https://dblp.org/pers/g/Grall:Arnaud"

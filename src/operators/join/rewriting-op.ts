@@ -24,14 +24,14 @@ SOFTWARE.
 
 "use strict";
 
-import type { Algebra } from "sparqljs";
 import ExecutionContext from "../../engine/context/execution-context.ts";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../../engine/pipeline/pipeline.ts";
 import BGPStageBuilder from "../../engine/stages/bgp-stage-builder.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
-import * as evaluation from "../../utils/evaluation.ts";
+import type { EngineTriple } from "../../types.ts";
+import { cacheEvalBGP } from "../../utils/evaluation.ts";
 
 /**
  * Find a rewriting key in a list of variables
@@ -106,7 +106,7 @@ function rewriteSolutions(
  */
 export default function rewritingOp(
   graph: Graph,
-  bgpBucket: Algebra.TripleObject[][],
+  bgpBucket: EngineTriple[][],
   rewritingTable: Map<number, Bindings>,
   builder: BGPStageBuilder,
   context: ExecutionContext
@@ -115,17 +115,11 @@ export default function rewritingOp(
   if (context.cachingEnabled()) {
     // partition the BGPs that can be evaluated using the cache from the others
     const stages: PipelineStage<Bindings>[] = [];
-    const others: Algebra.TripleObject[][] = [];
+    const others: EngineTriple[][] = [];
     bgpBucket.forEach((patterns) => {
       if (context.cache!.has({ patterns, graphIRI: graph.iri })) {
         stages.push(
-          evaluation.cacheEvalBGP(
-            patterns,
-            graph,
-            context.cache!,
-            builder,
-            context
-          )
+          cacheEvalBGP(patterns, graph, context.cache!, builder, context)
         );
       } else {
         others.push(patterns);

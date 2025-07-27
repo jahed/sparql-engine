@@ -26,18 +26,17 @@ SOFTWARE.
 
 import { BinarySearchTree } from "binary-search-tree";
 import { differenceWith, findIndex, maxBy } from "lodash-es";
-import type { Algebra } from "sparqljs";
 import { Bindings } from "../../rdf/bindings.ts";
-import * as rdf from "../../utils/rdf.ts";
-import * as sparql from "../../utils/sparql.ts";
+import type { EngineIRI, EngineTriple } from "../../types.ts";
+import { hashTriple, termToValue, tripleEquals } from "../../utils/rdf.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import { Pipeline } from "../pipeline/pipeline.ts";
 import { type AsyncCacheEntry, AsyncLRUCache } from "./cache-base.ts";
 import type { AsyncCache } from "./cache-interfaces.ts";
 
 export interface BasicGraphPattern {
-  patterns: Algebra.TripleObject[];
-  graphIRI: string;
+  patterns: EngineTriple[];
+  graphIRI: EngineIRI;
 }
 
 interface SavedBGP {
@@ -45,12 +44,8 @@ interface SavedBGP {
   key: string;
 }
 
-/**
- * Hash a BGP with a Graph IRI
- * @param bgp - BGP to hash
- */
 function hashBasicGraphPattern(bgp: BasicGraphPattern): string {
-  return `${sparql.hashBGP(bgp.patterns)}&graph-iri=${bgp.graphIRI}`;
+  return `${bgp.patterns.map(hashTriple).join(";")}&graph-iri=${termToValue(bgp.graphIRI)}`;
 }
 
 /**
@@ -66,9 +61,7 @@ export interface BGPCache
    * @param bgp - Basic Graph pattern
    * @return A pair [subset BGP, set of patterns not in cache]
    */
-  findSubset(
-    bgp: BasicGraphPattern
-  ): [Algebra.TripleObject[], Algebra.TripleObject[]];
+  findSubset(bgp: BasicGraphPattern): [EngineTriple[], EngineTriple[]];
 
   /**
    * Access the cache and returns a pipeline stage that returns the content of the cache for a given BGP
@@ -112,7 +105,7 @@ export class LRUBGPCache implements BGPCache {
         if (this._patternsPerBGP.has(key)) {
           const bgp = this._patternsPerBGP.get(key)!;
           bgp.patterns.forEach((pattern) =>
-            this._allKeys.delete(rdf.hashTriple(pattern), { bgp, key })
+            this._allKeys.delete(hashTriple(pattern), { bgp, key })
           );
           this._patternsPerBGP.delete(key);
         }
@@ -130,7 +123,7 @@ export class LRUBGPCache implements BGPCache {
       // update the indexes
       this._patternsPerBGP.set(key, bgp);
       bgp.patterns.forEach((pattern) =>
-        this._allKeys.insert(rdf.hashTriple(pattern), { bgp, key })
+        this._allKeys.insert(hashTriple(pattern), { bgp, key })
       );
     }
     this._cache.update(key, item, writerID);
@@ -171,7 +164,7 @@ export class LRUBGPCache implements BGPCache {
     // clear the indexes
     this._patternsPerBGP.delete(key);
     bgp.patterns.forEach((pattern) =>
-      this._allKeys.delete(rdf.hashTriple(pattern), { bgp, key })
+      this._allKeys.delete(hashTriple(pattern), { bgp, key })
     );
   }
 
@@ -179,9 +172,7 @@ export class LRUBGPCache implements BGPCache {
     return this._cache.count();
   }
 
-  findSubset(
-    bgp: BasicGraphPattern
-  ): [Algebra.TripleObject[], Algebra.TripleObject[]] {
+  findSubset(bgp: BasicGraphPattern): [EngineTriple[], EngineTriple[]] {
     // if the bgp is in the cache, then the computation is simple
     if (this.has(bgp)) {
       return [bgp.patterns, []];
@@ -190,18 +181,18 @@ export class LRUBGPCache implements BGPCache {
     let matches = [];
     for (let pattern of bgp.patterns) {
       const searchResults = this._allKeys
-        .search(rdf.hashTriple(pattern))
+        .search(hashTriple(pattern))
         .filter((v) => {
           // remove all BGPs that are not a subset of the input BGP
           // we use lodash.findIndex + rdf.tripleEquals to check for triple pattern equality
           return v.bgp.patterns.every(
-            (a) => findIndex(bgp.patterns, (b) => rdf.tripleEquals(a, b)) > -1
+            (a) => findIndex(bgp.patterns, (b) => tripleEquals(a, b)) > -1
           );
         });
       matches.push({ pattern, searchResults });
     }
     // compute the largest subset BGP and the missing patterns (missingPatterns = input_BGP - subset_BGP)
-    let foundPatterns: Algebra.TripleObject[] = [];
+    let foundPatterns: EngineTriple[] = [];
     let maxBGPLength = -1;
     for (let match of matches) {
       if (match.searchResults.length > 0) {
@@ -220,7 +211,7 @@ export class LRUBGPCache implements BGPCache {
     }
     return [
       foundPatterns,
-      differenceWith(bgp.patterns, foundPatterns, rdf.tripleEquals),
+      differenceWith(bgp.patterns, foundPatterns, tripleEquals),
     ];
   }
 }

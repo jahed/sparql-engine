@@ -24,16 +24,16 @@ SOFTWARE.
 
 "use strict";
 
-import type { Algebra } from "sparqljs";
-import type { Bindings } from "../../rdf/bindings.ts";
-import { Pipeline } from "../../engine/pipeline/pipeline.ts";
-import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
-import * as rdf from "../../utils/rdf.ts";
-import * as evaluation from "../../utils/evaluation.ts";
-import BGPStageBuilder from "../../engine/stages/bgp-stage-builder.ts";
 import ExecutionContext from "../../engine/context/execution-context.ts";
 import ContextSymbols from "../../engine/context/symbols.ts";
+import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import BGPStageBuilder from "../../engine/stages/bgp-stage-builder.ts";
+import type { Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
+import type { EngineTriple } from "../../types.ts";
+import { cacheEvalBGP } from "../../utils/evaluation.ts";
+import { dataFactory, isVariable } from "../../utils/rdf.ts";
 import rewritingOp from "./rewriting-op.ts";
 
 // The default size of the bucket of Basic Graph Patterns used by the Bound Join algorithm
@@ -41,7 +41,7 @@ const BOUND_JOIN_BUFFER_SIZE = 15;
 
 // A Basic graph pattern, i.e., a set of triple patterns
 // This type alias is defined to make the algorithm more readable ;)
-type BasicGraphPattern = Algebra.TripleObject[];
+type BasicGraphPattern = EngineTriple[];
 
 /**
  * Rewrite a triple pattern using a rewriting key,
@@ -51,19 +51,16 @@ type BasicGraphPattern = Algebra.TripleObject[];
  * @param tp - Triple pattern to rewrite
  * @return The rewritten triple pattern
  */
-function rewriteTriple(
-  triple: Algebra.TripleObject,
-  key: number
-): Algebra.TripleObject {
+function rewriteTriple(triple: EngineTriple, key: number): EngineTriple {
   const res = Object.assign({}, triple);
-  if (rdf.isVariable(triple.subject)) {
-    res.subject = `${triple.subject}_${key}`;
+  if (isVariable(triple.subject)) {
+    res.subject = dataFactory.variable(`${triple.subject.value}_${key}`);
   }
-  if (rdf.isVariable(triple.predicate)) {
-    res.predicate = `${triple.predicate}_${key}`;
+  if (isVariable(triple.predicate)) {
+    res.predicate = dataFactory.variable(`${triple.predicate.value}_${key}`);
   }
-  if (rdf.isVariable(triple.object)) {
-    res.object = `${triple.object}_${key}`;
+  if (isVariable(triple.object)) {
+    res.object = dataFactory.variable(`${triple.object.value}_${key}`);
   }
   return res;
 }
@@ -79,7 +76,7 @@ function rewriteTriple(
  */
 export default function boundJoin(
   source: PipelineStage<Bindings>,
-  bgp: Algebra.TripleObject[],
+  bgp: EngineTriple[],
   graph: Graph,
   builder: BGPStageBuilder,
   context: ExecutionContext
@@ -94,13 +91,7 @@ export default function boundJoin(
       // simple case: first join in the pipeline
       if (bucket.length === 1 && bucket[0].isEmpty) {
         if (context.cachingEnabled()) {
-          return evaluation.cacheEvalBGP(
-            bgp,
-            graph,
-            context.cache!,
-            builder,
-            context
-          );
+          return cacheEvalBGP(bgp, graph, context.cache!, builder, context);
         }
         return graph.evalBGP(bgp, context);
       } else {
@@ -123,9 +114,9 @@ export default function boundJoin(
             boundedBGP.push(boundedTriple);
             // track the number of fully bounded triples, i.e., triple patterns without any SPARQL variables
             if (
-              !rdf.isVariable(boundedTriple.subject) &&
-              !rdf.isVariable(boundedTriple.predicate) &&
-              !rdf.isVariable(boundedTriple.object)
+              !isVariable(boundedTriple.subject) &&
+              !isVariable(boundedTriple.predicate) &&
+              !isVariable(boundedTriple.object)
             ) {
               nbBounded++;
             }
@@ -229,7 +220,7 @@ export default function boundJoin(
           bucket.map(binding => {
             const boundedBGP: BasicGraphPattern = []
             bgp.forEach(triple => {
-              let boundedTriple: Algebra.TripleObject = binding.bound(triple)
+              let boundedTriple: EngineTriple = binding.bound(triple)
               // rewrite the triple pattern and save the rewriting into the table
               boundedTriple = rewriteTriple(boundedTriple, key)
               rewritingTable.set(key, binding)

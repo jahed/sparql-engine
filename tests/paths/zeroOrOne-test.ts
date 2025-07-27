@@ -28,6 +28,7 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/api.ts";
+import { createIRI, createLiteral } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL property paths: Zero or One paths", () => {
@@ -51,19 +52,19 @@ describe("SPARQL property paths: Zero or One paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"]) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?o"]).to.be.oneOf([
-              "http://example.org/Alice",
-              '"skypeAlice"',
+            expect(b["o"]).to.deep.be.oneOf([
+              createIRI("http://example.org/Alice"),
+              createLiteral("skypeAlice"),
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf([
-              "http://example.org/Bob",
-              '"skypeBob"',
+            expect(b["o"]).to.deep.be.oneOf([
+              createIRI("http://example.org/Bob"),
+              createLiteral("skypeBob"),
             ]);
             break;
         }
@@ -91,11 +92,14 @@ describe("SPARQL property paths: Zero or One paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"]) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf(["http://example.org/Bob", '"Carol"']);
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Bob"),
+              createLiteral("Carol"),
+            ]);
             break;
         }
         results.push(b);
@@ -122,26 +126,26 @@ describe("SPARQL property paths: Zero or One paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"]) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?o"]).to.be.oneOf([
-              "http://example.org/Alice",
-              "http://example.org/Didier",
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Alice"),
+              createIRI("http://example.org/Didier"),
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf([
-              "http://example.org/Bob",
-              "http://example.org/Carol",
-              '"Carol"',
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Bob"),
+              createIRI("http://example.org/Carol"),
+              createLiteral("Carol"),
             ]);
             break;
           case "http://example.org/Carol":
-            expect(b["?o"]).to.be.oneOf([
-              "http://example.org/Carol",
-              "http://example.org/Didier",
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Carol"),
+              createIRI("http://example.org/Didier"),
             ]);
             break;
         }
@@ -169,26 +173,26 @@ describe("SPARQL property paths: Zero or One paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"]) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?o"]).to.be.oneOf([
-              "http://example.org/Alice",
-              "mailto:alice@example",
-              "tel:0604651478",
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Alice"),
+              createIRI("mailto:alice@example"),
+              createIRI("tel:0604651478"),
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf([
-              "http://example.org/Bob",
-              "mailto:bob@example",
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Bob"),
+              createIRI("mailto:bob@example"),
             ]);
             break;
           case "http://example.org/Carol":
-            expect(b["?o"]).to.be.oneOf([
-              "http://example.org/Carol",
-              "tel:0645123549",
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Carol"),
+              createIRI("tel:0645123549"),
             ]);
             break;
         }
@@ -217,31 +221,31 @@ describe("SPARQL property paths: Zero or One paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("?s");
-        expect(b).to.have.property("?o");
-        switch (b["?s"]) {
+        expect(b).to.have.property("s");
+        expect(b).to.have.property("o");
+        switch (b["s"].value) {
           case "http://example.org/Alice":
-            expect(b["?o"]).to.be.oneOf([
-              "http://example.org/Alice",
-              "http://example.org/Didier",
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Alice"),
+              createIRI("http://example.org/Didier"),
             ]);
             break;
           case "http://example.org/Bob":
-            expect(b["?o"]).to.be.oneOf([
-              "http://example.org/Bob",
-              "http://example.org/Carol",
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Bob"),
+              createIRI("http://example.org/Carol"),
             ]);
             break;
           case "http://example.org/Carol":
-            expect(b["?o"]).to.be.oneOf([
-              "http://example.org/Carol",
-              "http://example.org/Didier",
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Carol"),
+              createIRI("http://example.org/Didier"),
             ]);
             break;
           case "http://example.org/Eve":
-            expect(b["?o"]).to.be.oneOf([
-              "http://example.org/Eve",
-              "http://example.org/Bob",
+            expect(b["o"]).to.be.deep.oneOf([
+              createIRI("http://example.org/Eve"),
+              createIRI("http://example.org/Bob"),
             ]);
             break;
         }

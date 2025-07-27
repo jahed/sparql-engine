@@ -1,27 +1,23 @@
 "use strict";
 
-import { includes, union } from "lodash-es";
-import type { Algebra } from "sparqljs";
-import * as rdf from "./rdf.ts";
-
-export function hashBGP(bgp: Algebra.TripleObject[]): string {
-  return bgp.map(rdf.hashTriple).join(";");
-}
+import { unionBy } from "lodash-es";
+import type { EngineTriple, EngineVariable } from "../types.ts";
+import { isVariable } from "./rdf.ts";
 
 /**
  * Get the set of SPARQL variables in a triple pattern
  * @param  pattern - Triple Pattern
  * @return The set of SPARQL variables in the triple pattern
  */
-export function variablesFromPattern(pattern: Algebra.TripleObject): string[] {
-  const res: string[] = [];
-  if (rdf.isVariable(pattern.subject)) {
+export function variablesFromPattern(pattern: EngineTriple): EngineVariable[] {
+  const res: EngineVariable[] = [];
+  if (isVariable(pattern.subject)) {
     res.push(pattern.subject);
   }
-  if (rdf.isVariable(pattern.predicate)) {
+  if (isVariable(pattern.predicate)) {
     res.push(pattern.predicate);
   }
-  if (rdf.isVariable(pattern.object)) {
+  if (isVariable(pattern.object)) {
     res.push(pattern.object);
   }
   return res;
@@ -34,10 +30,9 @@ export function variablesFromPattern(pattern: Algebra.TripleObject): string[] {
  * @return Order set of triple patterns
  */
 export function leftLinearJoinOrdering(
-  patterns: Algebra.TripleObject[]
-): Algebra.TripleObject[] {
-  const results: Algebra.TripleObject[] = [];
-  const x = new Set();
+  patterns: EngineTriple[]
+): EngineTriple[] {
+  const results: EngineTriple[] = [];
   if (patterns.length > 0) {
     // sort pattern by join predicate
     let p = patterns.shift()!;
@@ -46,10 +41,11 @@ export function leftLinearJoinOrdering(
     while (patterns.length > 0) {
       // find the next pattern with a common join predicate
       let index = patterns.findIndex((pattern) => {
-        return (
-          includes(variables, pattern.subject) ||
-          includes(variables, pattern.predicate) ||
-          includes(variables, pattern.object)
+        return variables.some(
+          (variable) =>
+            variable.equals(pattern.subject) ||
+            variable.equals(pattern.predicate) ||
+            variable.equals(pattern.object)
         );
       });
       // if not found, trigger a cartesian product with the first pattern of the sorted set
@@ -58,7 +54,7 @@ export function leftLinearJoinOrdering(
       }
       // get the new pattern to join with
       p = patterns.splice(index, 1)[0];
-      variables = union(variables, variablesFromPattern(p));
+      variables = unionBy(variables, variablesFromPattern(p), (v) => v.value);
       results.push(p);
     }
   }

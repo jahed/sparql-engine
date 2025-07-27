@@ -24,14 +24,17 @@ SOFTWARE.
 
 "use strict";
 
-import type { Term } from "rdf-js";
-import * as rdf from "../../utils/rdf.ts";
+import type { EngineTripleValue } from "../../types.ts";
+import {
+  asJS,
+  createFloat,
+  createLiteral,
+  literalIsNumeric,
+  termIsLiteral,
+} from "../../utils/rdf.ts";
 
-/**
- * Implementation of NON standard SPARQL operations offered by the framework
- * All arguments are pre-compiled from string to RDF.js terms
- * @author Thomas Minier
- */
+type Term = EngineTripleValue;
+
 export default {
   /*
     Hyperbolic functions (cosh, sinh, tanh, ...)
@@ -42,9 +45,9 @@ export default {
   "https://callidon.github.io/sparql-engine/functions#cosh": function (
     x: Term
   ): Term {
-    if (rdf.termIsLiteral(x) && rdf.literalIsNumeric(x)) {
-      const value = rdf.asJS(x.value, x.datatype.value);
-      return rdf.createFloat(Math.cosh(value));
+    if (termIsLiteral(x) && literalIsNumeric(x)) {
+      const value = asJS(x.value, x.datatype.value);
+      return createFloat(Math.cosh(value));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the hyperbolic cosinus of ${x}, as it is not a number`
@@ -55,9 +58,9 @@ export default {
   "https://callidon.github.io/sparql-engine/functions#sinh": function (
     x: Term
   ): Term {
-    if (rdf.termIsLiteral(x) && rdf.literalIsNumeric(x)) {
-      const value = rdf.asJS(x.value, x.datatype.value);
-      return rdf.createFloat(Math.sinh(value));
+    if (termIsLiteral(x) && literalIsNumeric(x)) {
+      const value = asJS(x.value, x.datatype.value);
+      return createFloat(Math.sinh(value));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the hyperbolic sinus of ${x}, as it is not a number`
@@ -68,9 +71,9 @@ export default {
   "https://callidon.github.io/sparql-engine/functions#tanh": function (
     x: Term
   ): Term {
-    if (rdf.termIsLiteral(x) && rdf.literalIsNumeric(x)) {
-      const value = rdf.asJS(x.value, x.datatype.value);
-      return rdf.createFloat(Math.tanh(value));
+    if (termIsLiteral(x) && literalIsNumeric(x)) {
+      const value = asJS(x.value, x.datatype.value);
+      return createFloat(Math.tanh(value));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the hyperbolic tangent of ${x}, as it is not a number`
@@ -81,16 +84,14 @@ export default {
   "https://callidon.github.io/sparql-engine/functions#coth": function (
     x: Term
   ): Term {
-    if (rdf.termIsLiteral(x) && rdf.literalIsNumeric(x)) {
-      const value = rdf.asJS(x.value, x.datatype.value);
+    if (termIsLiteral(x) && literalIsNumeric(x)) {
+      const value = asJS(x.value, x.datatype.value);
       if (value === 0) {
         throw new SyntaxError(
           `SPARQL expression error: cannot compute the hyperbolic cotangent of ${x}, as it is equals to 0`
         );
       }
-      return rdf.createFloat(
-        (Math.exp(2 * value) + 1) / (Math.exp(2 * value) - 1)
-      );
+      return createFloat((Math.exp(2 * value) + 1) / (Math.exp(2 * value) - 1));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the hyperbolic cotangent of ${x}, as it is not a number`
@@ -101,9 +102,9 @@ export default {
   "https://callidon.github.io/sparql-engine/functions#sech": function (
     x: Term
   ): Term {
-    if (rdf.termIsLiteral(x) && rdf.literalIsNumeric(x)) {
-      const value = rdf.asJS(x.value, x.datatype.value);
-      return rdf.createFloat((2 * Math.exp(value)) / (Math.exp(2 * value) + 1));
+    if (termIsLiteral(x) && literalIsNumeric(x)) {
+      const value = asJS(x.value, x.datatype.value);
+      return createFloat((2 * Math.exp(value)) / (Math.exp(2 * value) + 1));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the hyperbolic secant of ${x}, as it is not a number`
@@ -114,9 +115,9 @@ export default {
   "https://callidon.github.io/sparql-engine/functions#csch": function (
     x: Term
   ): Term {
-    if (rdf.termIsLiteral(x) && rdf.literalIsNumeric(x)) {
-      const value = rdf.asJS(x.value, x.datatype.value);
-      return rdf.createFloat((2 * Math.exp(value)) / (Math.exp(2 * value) - 1));
+    if (termIsLiteral(x) && literalIsNumeric(x)) {
+      const value = asJS(x.value, x.datatype.value);
+      return createFloat((2 * Math.exp(value)) / (Math.exp(2 * value) - 1));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the hyperbolic cosecant of ${x}, as it is not a number`
@@ -129,9 +130,9 @@ export default {
   "https://callidon.github.io/sparql-engine/functions#toDegrees": function (
     x: Term
   ): Term {
-    if (rdf.termIsLiteral(x) && rdf.literalIsNumeric(x)) {
-      const value = rdf.asJS(x.value, x.datatype.value);
-      return rdf.createFloat(value * (180 / Math.PI));
+    if (termIsLiteral(x) && literalIsNumeric(x)) {
+      const value = asJS(x.value, x.datatype.value);
+      return createFloat(value * (180 / Math.PI));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot convert ${x} to degrees, as it is does not look like radians`
@@ -141,9 +142,9 @@ export default {
   "https://callidon.github.io/sparql-engine/functions#toRadians": function (
     x: Term
   ): Term {
-    if (rdf.termIsLiteral(x) && rdf.literalIsNumeric(x)) {
-      const value = rdf.asJS(x.value, x.datatype.value);
-      return rdf.createFloat(value * (Math.PI / 180));
+    if (termIsLiteral(x) && literalIsNumeric(x)) {
+      const value = asJS(x.value, x.datatype.value);
+      return createFloat(value * (Math.PI / 180));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot convert ${x} to radians, as it is does not look like degrees`
@@ -161,7 +162,7 @@ export default {
   ): Iterable<Term> {
     return (function* () {
       for (let token of term.value.split(separator.value)) {
-        yield rdf.createLiteral(token);
+        yield createLiteral(token);
       }
       return;
     })();

@@ -28,6 +28,7 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/api.ts";
+import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("ORDER BY queries", () => {
@@ -49,11 +50,11 @@ describe("ORDER BY queries", () => {
     }
     ORDER BY ?article`;
     const results = [
-      "https://dblp.org/rec/conf/esws/MinierMSM17",
-      "https://dblp.org/rec/conf/esws/MinierMSM17a",
-      "https://dblp.org/rec/conf/esws/MinierSMV18",
-      "https://dblp.org/rec/conf/esws/MinierSMV18a",
-      "https://dblp.org/rec/journals/corr/abs-1806-00227",
+      createIRI("https://dblp.org/rec/conf/esws/MinierMSM17"),
+      createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
+      createIRI("https://dblp.org/rec/conf/esws/MinierSMV18"),
+      createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+      createIRI("https://dblp.org/rec/journals/corr/abs-1806-00227"),
     ];
 
     const iterator = engine.execute(query);
@@ -61,7 +62,7 @@ describe("ORDER BY queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b["?article"]).to.equal(results[0]);
+        expect(b["article"]).to.deep.equal(results[0]);
         results.shift();
       },
       done,
@@ -84,11 +85,11 @@ describe("ORDER BY queries", () => {
     }
     ORDER BY DESC(?article)`;
     const results = [
-      "https://dblp.org/rec/journals/corr/abs-1806-00227",
-      "https://dblp.org/rec/conf/esws/MinierSMV18a",
-      "https://dblp.org/rec/conf/esws/MinierSMV18",
-      "https://dblp.org/rec/conf/esws/MinierMSM17a",
-      "https://dblp.org/rec/conf/esws/MinierMSM17",
+      createIRI("https://dblp.org/rec/journals/corr/abs-1806-00227"),
+      createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+      createIRI("https://dblp.org/rec/conf/esws/MinierSMV18"),
+      createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
+      createIRI("https://dblp.org/rec/conf/esws/MinierMSM17"),
     ];
 
     const iterator = engine.execute(query);
@@ -96,7 +97,7 @@ describe("ORDER BY queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b["?article"]).to.equal(results[0]);
+        expect(b["article"]).to.deep.equal(results[0]);
         results.shift();
       },
       done,
@@ -119,11 +120,11 @@ describe("ORDER BY queries", () => {
     }
     ORDER BY ?name DESC(?article)`;
     const results = [
-      "https://dblp.org/rec/journals/corr/abs-1806-00227",
-      "https://dblp.org/rec/conf/esws/MinierSMV18a",
-      "https://dblp.org/rec/conf/esws/MinierSMV18",
-      "https://dblp.org/rec/conf/esws/MinierMSM17a",
-      "https://dblp.org/rec/conf/esws/MinierMSM17",
+      createIRI("https://dblp.org/rec/journals/corr/abs-1806-00227"),
+      createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+      createIRI("https://dblp.org/rec/conf/esws/MinierSMV18"),
+      createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
+      createIRI("https://dblp.org/rec/conf/esws/MinierMSM17"),
     ];
 
     const iterator = engine.execute(query);
@@ -131,7 +132,7 @@ describe("ORDER BY queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b["?article"]).to.equal(results[0]);
+        expect(b["article"]).to.deep.equal(results[0]);
         results.shift();
       },
       done,

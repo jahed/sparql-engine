@@ -24,8 +24,9 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../engine/pipeline/pipeline.ts";
+import { termToString } from "rdf-string";
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import { Bindings } from "../rdf/bindings.ts";
 
 /**
@@ -36,8 +37,8 @@ import { Bindings } from "../rdf/bindings.ts";
  */
 function _hash(bindings: Bindings): string {
   const items: string[] = [];
-  bindings.forEach((k: string, v: string) =>
-    items.push(`${k}=${encodeURIComponent(v)}`)
+  bindings.forEach((k, v) =>
+    items.push(`${k}=${encodeURIComponent(termToString(v))}`)
   );
   items.sort();
   return items.join("&");

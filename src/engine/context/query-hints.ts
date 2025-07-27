@@ -24,7 +24,8 @@ SOFTWARE.
 
 "use strict";
 
-import type { Algebra } from "sparqljs";
+import type { EngineTriple } from "../../types.ts";
+import { isIRI } from "../../utils/rdf.ts";
 
 const HINT_PREFIX = "http://callidon.github.io/sparql-engine/hints#";
 
@@ -129,24 +130,25 @@ export class QueryHints {
 }
 
 export function parseHints(
-  bgp: Algebra.TripleObject[],
+  bgp: EngineTriple[],
   previous?: QueryHints
-): [Algebra.TripleObject[], QueryHints] {
+): [EngineTriple[], QueryHints] {
   let res = new QueryHints();
-  const regularTriples: Algebra.TripleObject[] = [];
+  const regularTriples: EngineTriple[] = [];
   bgp.forEach((triple) => {
-    if (triple.subject.startsWith(HINT_PREFIX)) {
-      if (triple.subject === HINT("Group")) {
-        switch (triple.predicate) {
-          case HINT("HashJoin"):
-            res.add(QUERY_HINT_SCOPE.BGP, QUERY_HINT.USE_HASH_JOIN);
-            break;
-          case HINT("SymmetricHashJoin"):
-            res.add(QUERY_HINT_SCOPE.BGP, QUERY_HINT.USE_SYMMETRIC_HASH_JOIN);
-            break;
-          default:
-            break;
-        }
+    if (
+      isIRI(triple.subject) &&
+      triple.subject.value.startsWith(HINT_PREFIX) &&
+      triple.subject.value === HINT("Group") &&
+      isIRI(triple.predicate)
+    ) {
+      switch (triple.predicate.value) {
+        case HINT("HashJoin"):
+          res.add(QUERY_HINT_SCOPE.BGP, QUERY_HINT.USE_HASH_JOIN);
+          break;
+        case HINT("SymmetricHashJoin"):
+          res.add(QUERY_HINT_SCOPE.BGP, QUERY_HINT.USE_SYMMETRIC_HASH_JOIN);
+          break;
       }
     } else {
       regularTriples.push(triple);

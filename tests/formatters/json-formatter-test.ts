@@ -25,10 +25,10 @@ SOFTWARE.
 "use strict";
 
 import { expect } from "chai";
+import fs from "node:fs";
 import { before, describe, it } from "node:test";
 import jsonFormatter from "../../src/formatters/json-formatter.ts";
 import { getGraph, TestEngine } from "../utils.ts";
-import expected from "./select.json" with { type: "json" };
 
 describe("W3C JSON formatter", () => {
   let engine: TestEngine;
@@ -56,7 +56,14 @@ describe("W3C JSON formatter", () => {
       done,
       () => {
         const json = JSON.parse(results);
-        expect(json).to.deep.equals(expected);
+        expect(json).to.deep.equals(
+          JSON.parse(
+            fs.readFileSync(
+              new URL(import.meta.resolve("./select.json")).pathname,
+              "utf-8"
+            )
+          )
+        );
         done();
       }
     );

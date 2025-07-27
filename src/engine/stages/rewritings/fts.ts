@@ -1,18 +1,19 @@
 "use strict";
 
-import type { Algebra } from "sparqljs";
-import * as rdf from "../../../utils/rdf.ts";
+import type { VariableTerm } from "sparqljs";
+import type { EngineTriple } from "../../../types.ts";
+import { SES, isIRI, isVariable } from "../../../utils/rdf.ts";
 
 /**
  * A Full Text Search query
  */
 export interface FullTextSearchQuery {
   /** The pattern queried by the full text search */
-  pattern: Algebra.TripleObject;
+  pattern: EngineTriple;
   /** The SPARQL varibale on which the full text search is performed */
-  variable: string;
+  variable: VariableTerm;
   /** The magic triples sued to configured the full text search query */
-  magicTriples: Algebra.TripleObject[];
+  magicTriples: EngineTriple[];
 }
 
 /**
@@ -22,7 +23,7 @@ export interface ExtractionResults {
   /** The set of full text search queries extracted from the BGP */
   queries: FullTextSearchQuery[];
   /** Regular triple patterns, i.e., those who should be evaluated as a regular BGP */
-  classicPatterns: Algebra.TripleObject[];
+  classicPatterns: EngineTriple[];
 }
 
 /**
@@ -32,27 +33,27 @@ export interface ExtractionResults {
  * @return The extraction results
  */
 export function extractFullTextSearchQueries(
-  bgp: Algebra.TripleObject[]
+  bgp: EngineTriple[]
 ): ExtractionResults {
   const queries: FullTextSearchQuery[] = [];
-  const classicPatterns: Algebra.TripleObject[] = [];
+  const classicPatterns: EngineTriple[] = [];
   // find, validate and group all magic triples per query variable
-  const patterns: Algebra.TripleObject[] = [];
-  const magicGroups = new Map<string, Algebra.TripleObject[]>();
-  const prefix = rdf.SES("");
+  const patterns: EngineTriple[] = [];
+  const magicGroups = new Map<string, EngineTriple[]>();
+  const prefix = SES("");
   bgp.forEach((triple) => {
     // A magic triple is an IRI prefixed by 'https://callidon.github.io/sparql-engine/search#'
-    if (rdf.isIRI(triple.predicate) && triple.predicate.startsWith(prefix)) {
+    if (isIRI(triple.predicate) && triple.predicate.value.startsWith(prefix)) {
       // assert that the magic triple's subject is a variable
-      if (!rdf.isVariable(triple.subject)) {
+      if (!isVariable(triple.subject)) {
         throw new SyntaxError(
           `Invalid Full Text Search query: the subject of the magic triple ${triple} must a valid URI/IRI.`
         );
       }
-      if (!magicGroups.has(triple.subject)) {
-        magicGroups.set(triple.subject, [triple]);
+      if (!magicGroups.has(triple.subject.value)) {
+        magicGroups.set(triple.subject.value, [triple]);
       } else {
-        magicGroups.get(triple.subject)!.push(triple);
+        magicGroups.get(triple.subject.value)!.push(triple);
       }
     } else {
       patterns.push(triple);
@@ -60,17 +61,17 @@ export function extractFullTextSearchQueries(
   });
   // find all triple pattern whose object is the subject of some magic triples
   patterns.forEach((pattern) => {
-    if (magicGroups.has(pattern.subject)) {
+    if (magicGroups.has(pattern.subject.value)) {
       queries.push({
         pattern,
-        variable: pattern.subject,
-        magicTriples: magicGroups.get(pattern.subject)!,
+        variable: pattern.subject as VariableTerm,
+        magicTriples: magicGroups.get(pattern.subject.value)!,
       });
-    } else if (magicGroups.has(pattern.object)) {
+    } else if (magicGroups.has(pattern.object.value)) {
       queries.push({
         pattern,
-        variable: pattern.object,
-        magicTriples: magicGroups.get(pattern.object)!,
+        variable: pattern.object as VariableTerm,
+        magicTriples: magicGroups.get(pattern.object.value)!,
       });
     } else {
       classicPatterns.push(pattern);

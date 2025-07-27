@@ -25,9 +25,10 @@ SOFTWARE.
 "use strict";
 
 import fs from "fs";
-import { isArray, pick } from "lodash-es";
+import { isArray } from "lodash-es";
 import n3 from "n3";
-import type { Algebra } from "sparqljs";
+import { stringQuadToQuad, termToString } from "rdf-string";
+import type { Query } from "sparqljs";
 import {
   ExecutionContext,
   Graph,
@@ -38,6 +39,8 @@ import {
 } from "../src/api.ts";
 import type { QueryOutput } from "../src/engine/plan-builder.ts";
 import type { CustomFunctions } from "../src/operators/expressions/sparql-expression.ts";
+import type { EngineIRI, EngineTriple } from "../src/types.ts";
+import { isVariable } from "../src/utils/rdf.ts";
 
 const { Parser, Store } = n3;
 
@@ -61,17 +64,17 @@ export function getGraph(
   return graph;
 }
 
-function formatTriplePattern(triple: Algebra.TripleObject) {
+function formatTriplePattern(triple: EngineTriple) {
   let subject = null;
   let predicate = null;
   let object = null;
-  if (!triple.subject.startsWith("?")) {
+  if (!isVariable(triple.subject)) {
     subject = triple.subject;
   }
-  if (!triple.predicate.startsWith("?")) {
+  if (!isVariable(triple.predicate)) {
     predicate = triple.predicate;
   }
-  if (!triple.object.startsWith("?")) {
+  if (!isVariable(triple.object)) {
     object = triple.object;
   }
   return { subject, predicate, object };
@@ -94,24 +97,13 @@ export class N3Graph extends Graph {
     });
   }
 
-  insert(triple: Algebra.TripleObject) {
+  insert(triple: EngineTriple) {
     return new Promise<void>((resolve, reject) => {
       try {
-        this._store.addTriple(triple.subject, triple.predicate, triple.object);
-        resolve();
-      } catch (e) {
-        reject(e);
-      }
-    });
-  }
-
-  delete(triple: Algebra.TripleObject) {
-    return new Promise<void>((resolve, reject) => {
-      try {
-        this._store.removeTriple(
-          triple.subject,
-          triple.predicate,
-          triple.object
+        this._store.addTriple(
+          termToString(triple.subject),
+          termToString(triple.predicate),
+          termToString(triple.object)
         );
         resolve();
       } catch (e) {
@@ -120,17 +112,40 @@ export class N3Graph extends Graph {
     });
   }
 
-  find(triple: Algebra.TripleObject) {
-    const { subject, predicate, object } = formatTriplePattern(triple);
-    return this._store.getTriples(subject, predicate, object).map((t) => {
-      return pick(t, ["subject", "predicate", "object"]);
+  delete(triple: EngineTriple) {
+    return new Promise<void>((resolve, reject) => {
+      try {
+        this._store.removeTriple(
+          termToString(triple.subject),
+          termToString(triple.predicate),
+          termToString(triple.object)
+        );
+        resolve();
+      } catch (e) {
+        reject(e);
+      }
     });
   }
 
-  estimateCardinality(triple: Algebra.TripleObject) {
+  find(triple: EngineTriple) {
+    const { subject, predicate, object } = formatTriplePattern(triple);
+    return this._store
+      .getTriples(
+        termToString(subject),
+        termToString(predicate),
+        termToString(object)
+      )
+      .map((t) => stringQuadToQuad(t));
+  }
+
+  estimateCardinality(triple: EngineTriple) {
     const { subject, predicate, object } = formatTriplePattern(triple);
     return Promise.resolve(
-      this._store.countTriples(subject, predicate, object)
+      this._store.countTriples(
+        termToString(subject),
+        termToString(predicate),
+        termToString(object)
+      )
     );
   }
 
@@ -146,7 +161,7 @@ class UnionN3Graph extends N3Graph {
     super();
   }
 
-  evalUnion(patterns: Algebra.TripleObject[][], context: ExecutionContext) {
+  evalUnion(patterns: EngineTriple[][], context: ExecutionContext) {
     return Pipeline.getInstance().merge(
       ...patterns.map((pattern) => this.evalBGP(pattern, context))
     );
@@ -155,13 +170,13 @@ class UnionN3Graph extends N3Graph {
 
 export class TestEngine<G extends Graph = TestGraph> {
   public readonly _graph: G;
-  public readonly _defaultGraphIRI: string;
+  public readonly _defaultGraphIRI: EngineIRI;
   public readonly _dataset: HashMapDataset<G>;
   public readonly _builder: PlanBuilder;
 
   constructor(
     graph: G,
-    defaultGraphIRI?: string,
+    defaultGraphIRI?: EngineIRI,
     customOperations: CustomFunctions = {}
   ) {
     this._graph = graph;
@@ -174,19 +189,19 @@ export class TestEngine<G extends Graph = TestGraph> {
     return this._dataset.getDefaultGraph().iri;
   }
 
-  addNamedGraph(iri: string, db: G) {
+  addNamedGraph(iri: EngineIRI, db: G) {
     this._dataset.addNamedGraph(iri, db);
   }
 
-  getNamedGraph(iri: string): G {
+  getNamedGraph(iri: EngineIRI): G {
     return this._dataset.getNamedGraph(iri);
   }
 
-  hasNamedGraph(iri: string) {
+  hasNamedGraph(iri: EngineIRI) {
     return this._dataset.hasNamedGraph(iri);
   }
 
-  execute(query: string | Algebra.RootNode): PipelineStage<QueryOutput> {
+  execute(query: string | Query): PipelineStage<QueryOutput> {
     return this._builder.build(query);
   }
 }

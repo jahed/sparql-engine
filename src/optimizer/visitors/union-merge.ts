@@ -25,7 +25,8 @@ SOFTWARE.
 "use strict";
 
 import { cloneDeep, partition } from "lodash-es";
-import type { Algebra } from "sparqljs";
+
+import type { Pattern, UnionPattern } from "sparqljs";
 import PlanVisitor from "../plan-visitor.ts";
 
 /**
@@ -34,17 +35,17 @@ import PlanVisitor from "../plan-visitor.ts";
  * @author Thomas Minier
  */
 export default class UnionMerge extends PlanVisitor {
-  visitUnion(node: Algebra.GroupNode): Algebra.PlanNode {
+  visitUnion(node: UnionPattern): Pattern {
     const newNode = cloneDeep(node);
     const parts = partition(
       newNode.patterns,
       (group) => group.type === "union"
     );
-    const singleUnion = (parts[0] as Algebra.GroupNode[]).reduce(
-      (acc: Algebra.PlanNode[], c) => acc.concat(c.patterns),
+    const singleUnion = parts[0].reduce<Pattern[]>(
+      (acc, c) => acc.concat(c.patterns),
       []
     );
-    newNode.patterns = parts[1].concat(singleUnion);
+    newNode.patterns = (parts[1] as Pattern[]).concat(singleUnion);
     return newNode;
   }
 }

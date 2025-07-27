@@ -28,6 +28,7 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/api.ts";
+import { dataFactory } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("Semantic caching for SPARQL queries", () => {
@@ -49,7 +50,7 @@ describe("Semantic caching for SPARQL queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?s", "?p", "?o");
+        expect(b).to.have.keys("s", "p", "o");
         results.push(b);
       },
       done,
@@ -58,7 +59,13 @@ describe("Semantic caching for SPARQL queries", () => {
         expect(results.length).to.equal(34);
         // check for cache hits
         const bgp = {
-          patterns: [{ subject: "?s", predicate: "?p", object: "?o" }],
+          patterns: [
+            dataFactory.quad(
+              dataFactory.variable("s"),
+              dataFactory.variable("p"),
+              dataFactory.variable("o")
+            ),
+          ],
           graphIRI: engine.defaultGraphIRI(),
         };
         const cache = engine._builder._currentCache!;
@@ -88,7 +95,7 @@ describe("Semantic caching for SPARQL queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?s", "?p", "?o");
+        expect(b).to.have.keys("s", "p", "o");
         results.push(b);
       },
       done,
@@ -97,7 +104,13 @@ describe("Semantic caching for SPARQL queries", () => {
         expect(results.length).to.equal(10);
         // assert that the cache is empty for this BGP
         const bgp = {
-          patterns: [{ subject: "?s", predicate: "?p", object: "?o" }],
+          patterns: [
+            dataFactory.quad(
+              dataFactory.variable("s"),
+              dataFactory.variable("p"),
+              dataFactory.variable("o")
+            ),
+          ],
           graphIRI: engine.defaultGraphIRI(),
         };
         const cache = engine._builder._currentCache!;
@@ -121,7 +134,7 @@ describe("Semantic caching for SPARQL queries", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("?s", "?p", "?o");
+        expect(b).to.have.keys("s", "p", "o");
         results.push(b);
       },
       done,
@@ -130,7 +143,13 @@ describe("Semantic caching for SPARQL queries", () => {
         expect(results.length).to.equal(24);
         // assert that the cache is empty for this BGP
         const bgp = {
-          patterns: [{ subject: "?s", predicate: "?p", object: "?o" }],
+          patterns: [
+            dataFactory.quad(
+              dataFactory.variable("s"),
+              dataFactory.variable("p"),
+              dataFactory.variable("o")
+            ),
+          ],
           graphIRI: engine.defaultGraphIRI(),
         };
         const cache = engine._builder._currentCache!;

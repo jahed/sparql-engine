@@ -26,6 +26,8 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
+import { stringToTerm } from "rdf-string";
+import { createIRI, createLangLiteral } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
@@ -55,13 +57,15 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
         null
       );
       expect(triples.length).to.equal(1);
-      expect(triples[0].subject).to.equal(
-        "https://dblp.org/pers/m/Minier:Thomas"
+      expect(stringToTerm(triples[0].subject)).to.deep.equal(
+        createIRI("https://dblp.org/pers/m/Minier:Thomas")
       );
-      expect(triples[0].predicate).to.equal(
-        "http://purl.org/dc/elements/1.1/name"
+      expect(stringToTerm(triples[0].predicate)).to.deep.equal(
+        createIRI("http://purl.org/dc/elements/1.1/name")
       );
-      expect(triples[0].object).to.equal('"Thomas Minier"@fr');
+      expect(stringToTerm(triples[0].object)).to.deep.equal(
+        createLangLiteral("Thomas Minier", "fr")
+      );
       done();
     });
   });
@@ -93,10 +97,9 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX dc: <http://purl.org/dc/elements/1.1/>
     INSERT { ?s rdf:type rdf:Person . }
+    WHERE { ?s rdf:type dblp-rdf:Person . } ;
     DELETE { ?s rdf:type dblp-rdf:Person . }
-    WHERE {
-      ?s rdf:type dblp-rdf:Person .
-    }`;
+    WHERE { ?s rdf:type dblp-rdf:Person . }`;
 
     engine.execute(query).subscribe(undefined, done, () => {
       const triples = engine._graph._store.getTriples(
@@ -105,14 +108,14 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
         null
       );
       expect(triples.length).to.equal(1);
-      expect(triples[0].subject).to.equal(
-        "https://dblp.org/pers/m/Minier:Thomas"
+      expect(stringToTerm(triples[0].subject)).to.deep.equal(
+        createIRI("https://dblp.org/pers/m/Minier:Thomas")
       );
-      expect(triples[0].predicate).to.equal(
-        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+      expect(stringToTerm(triples[0].predicate)).to.deep.equal(
+        createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
       );
-      expect(triples[0].object).to.equal(
-        "http://www.w3.org/1999/02/22-rdf-syntax-ns#Person"
+      expect(stringToTerm(triples[0].object)).to.deep.equal(
+        createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#Person")
       );
       done();
     });
@@ -124,10 +127,9 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX dc: <http://purl.org/dc/elements/1.1/>
     INSERT { ?s rdf:type rdf:Person . }
+    WHERE { ?s rdf:type rdf:Person . } ;
     DELETE { ?s rdf:type dblp-rdf:Person . }
-    WHERE {
-      ?s rdf:type rdf:Person .
-    }`;
+    WHERE { ?s rdf:type rdf:Person . }`;
 
     engine.execute(query).subscribe(undefined, done, () => {
       const triples = engine._graph._store.getTriples(
@@ -136,14 +138,14 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
         null
       );
       expect(triples.length).to.equal(1);
-      expect(triples[0].subject).to.equal(
-        "https://dblp.org/pers/m/Minier:Thomas"
+      expect(stringToTerm(triples[0].subject)).to.deep.equal(
+        createIRI("https://dblp.org/pers/m/Minier:Thomas")
       );
-      expect(triples[0].predicate).to.equal(
-        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+      expect(stringToTerm(triples[0].predicate)).to.deep.equal(
+        createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
       );
-      expect(triples[0].object).to.equal(
-        "https://dblp.uni-trier.de/rdf/schema-2017-04-18#Person"
+      expect(stringToTerm(triples[0].object)).to.deep.equal(
+        createIRI("https://dblp.uni-trier.de/rdf/schema-2017-04-18#Person")
       );
       done();
     });

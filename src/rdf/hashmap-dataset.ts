@@ -24,6 +24,8 @@ SOFTWARE.
 
 "use strict";
 
+import { termToString } from "rdf-string";
+import type { IriTerm } from "sparqljs";
 import Dataset from "./dataset.ts";
 import Graph from "./graph.ts";
 
@@ -42,15 +44,15 @@ export default class HashMapDataset<
    * @param defaultGraphIRI - IRI of the Default Graph
    * @param defaultGraph     - Default Graph
    */
-  constructor(defaultGraphIRI: string, defaultGraph: G) {
+  constructor(defaultGraphIRI: IriTerm, defaultGraph: G) {
     super();
     defaultGraph.iri = defaultGraphIRI;
     this._defaultGraph = defaultGraph;
     this._namedGraphs = new Map();
   }
 
-  get iris(): string[] {
-    return Array.from(this._namedGraphs.keys());
+  get iris(): IriTerm[] {
+    return Array.from(this._namedGraphs.values().map((g) => g.iri));
   }
 
   setDefaultGraph(g: G): void {
@@ -61,29 +63,32 @@ export default class HashMapDataset<
     return this._defaultGraph;
   }
 
-  addNamedGraph(iri: string, g: G): void {
+  addNamedGraph(iri: IriTerm, g: G): void {
     g.iri = iri;
-    this._namedGraphs.set(iri, g);
+    this._namedGraphs.set(termToString(iri), g);
   }
 
-  getNamedGraph(iri: string): G {
-    if (iri === this._defaultGraph.iri) {
+  getNamedGraph(iri: IriTerm): G {
+    if (iri.equals(this._defaultGraph.iri)) {
       return this.getDefaultGraph();
-    } else if (!this._namedGraphs.has(iri)) {
-      throw new Error(`Unknown graph with iri ${iri}`);
     }
-    return this._namedGraphs.get(iri)!;
+    const key = termToString(iri);
+    if (!this._namedGraphs.has(key)) {
+      throw new Error(`Unknown graph with iri ${key}`);
+    }
+    return this._namedGraphs.get(key)!;
   }
 
-  hasNamedGraph(iri: string): boolean {
-    return this._namedGraphs.has(iri);
+  hasNamedGraph(iri: IriTerm): boolean {
+    return this._namedGraphs.has(termToString(iri));
   }
 
-  deleteNamedGraph(iri: string): void {
-    if (this._namedGraphs.has(iri)) {
-      this._namedGraphs.delete(iri);
+  deleteNamedGraph(iri: IriTerm): void {
+    const key = termToString(iri);
+    if (this._namedGraphs.has(key)) {
+      this._namedGraphs.delete(key);
     } else {
-      throw new Error(`Cannot delete unknown graph with iri ${iri}`);
+      throw new Error(`Cannot delete unknown graph with iri ${key}`);
     }
   }
 }

@@ -26,10 +26,12 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
+import { termToString } from "rdf-string";
+import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
-const GRAPH_A_IRI = "http://example.org#some-graph-a";
-const GRAPH_B_IRI = "http://example.org#some-graph-b";
+const GRAPH_A_IRI = createIRI("http://example.org#some-graph-a");
+const GRAPH_B_IRI = createIRI("http://example.org#some-graph-b");
 
 describe("SPARQL UPDATE: DROP queries", () => {
   let engine: TestEngine;
@@ -43,7 +45,7 @@ describe("SPARQL UPDATE: DROP queries", () => {
   const data = [
     {
       name: "DROP GRAPH",
-      query: `DROP GRAPH <${GRAPH_B_IRI}>`,
+      query: `DROP GRAPH <${termToString(GRAPH_B_IRI)}>`,
       testFun: () => {
         expect(engine.hasNamedGraph(GRAPH_B_IRI)).to.equal(false);
       },
