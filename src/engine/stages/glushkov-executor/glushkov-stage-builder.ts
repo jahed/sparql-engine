@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { termToString } from "rdf-string";
 import type { PropertyPath } from "sparqljs";
 import type { PipelineStage } from "../../../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../../../engine/pipeline/pipeline.ts";
@@ -35,6 +36,7 @@ import type {
   EngineTripleValue,
 } from "../../../types.ts";
 import * as rdf from "../../../utils/rdf.ts";
+import { UNBOUND } from "../../../utils/rdf.ts";
 import ExecutionContext from "../../context/execution-context.ts";
 import PathStageBuilder from "../path-stage-builder.ts";
 import { Automaton, Transition } from "./automaton.ts";
@@ -82,7 +84,7 @@ class Step {
    * @return True if the Steps are equal, False otherwise
    */
   equals(step: Step): boolean {
-    return this.node === step.node && this.state === step.state;
+    return this.state === step.state && this.node.equals(step.node);
   }
 
   /**
@@ -141,11 +143,7 @@ class ResultPath {
    * @return True if the given Step is in the ResultPath, False otherwise
    */
   contains(step: Step): boolean {
-    return (
-      this._steps.findIndex((value: Step) => {
-        return value.equals(step);
-      }) > -1
-    );
+    return this._steps.some((value: Step) => value.equals(step));
   }
 
   /**
@@ -198,11 +196,7 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
         let subject = rPath.firstStep().node;
         let object = rPath.lastStep().node;
         result = engine.of<EngineTriple>(
-          rdf.dataFactory.quad(
-            subject as EngineSubject,
-            rdf.dataFactory.namedNode(""),
-            object
-          )
+          rdf.dataFactory.quad(subject as EngineSubject, UNBOUND, object)
         );
       }
     } else {
@@ -210,11 +204,7 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
         let subject = rPath.lastStep().node;
         let object = rPath.firstStep().node;
         result = engine.of<EngineTriple>(
-          rdf.dataFactory.quad(
-            subject as EngineSubject,
-            rdf.dataFactory.namedNode(""),
-            object
-          )
+          rdf.dataFactory.quad(subject as EngineSubject, UNBOUND, object)
         );
       }
     }
@@ -243,7 +233,7 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
         (binding: Bindings) => {
           let p = binding.get("p");
           let o = binding.get("o")!;
-          if (p !== null ? !transition.hasPredicate(p) : true) {
+          if (p ? !transition.hasPredicate(p) : true) {
             let newStep;
             if (forward) {
               newStep = new Step(o, transition.to.name);
@@ -288,14 +278,14 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
     if (rdf.isVariable(subject) && !rdf.isVariable(obj)) {
       let result: EngineTriple = rdf.dataFactory.quad(
         obj as EngineSubject,
-        rdf.dataFactory.namedNode(""),
+        UNBOUND,
         obj
       );
       return engine.of(result);
     } else if (!rdf.isVariable(subject) && rdf.isVariable(obj)) {
       let result: EngineTriple = rdf.dataFactory.quad(
         subject,
-        rdf.dataFactory.namedNode(""),
+        UNBOUND,
         subject
       );
       return engine.of(result);
@@ -315,26 +305,22 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
             let o = binding.get("o")!;
             let t1: EngineTriple = rdf.dataFactory.quad(
               s as EngineSubject,
-              rdf.dataFactory.namedNode(""),
+              UNBOUND,
               s
             );
             let t2: EngineTriple = rdf.dataFactory.quad(
               o as EngineSubject,
-              rdf.dataFactory.namedNode(""),
+              UNBOUND,
               o
             );
             return engine.of(t1, t2);
           }
         ),
-        (triple: EngineTriple) => triple.subject
+        (triple: EngineTriple) => termToString(triple.subject)
       );
     }
-    if (subject === obj) {
-      let result = rdf.dataFactory.quad(
-        subject,
-        rdf.dataFactory.namedNode(""),
-        obj
-      );
+    if (subject.equals(obj)) {
+      let result = rdf.dataFactory.quad(subject, UNBOUND, obj);
       return engine.of(result);
     }
     return engine.empty();
@@ -401,8 +387,7 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
             : subject;
           let p = binding.get("p");
           let o = rdf.isVariable(obj) ? binding.get("o")! : obj;
-
-          if (p !== null ? !transition.hasPredicate(p) : true) {
+          if (p ? !transition.hasPredicate(p) : true) {
             let path = new ResultPath();
             if (forward) {
               path.add(new Step(s, transition.from.name));

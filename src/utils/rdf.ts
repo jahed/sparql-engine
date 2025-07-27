@@ -9,6 +9,7 @@ import type {
 } from "@rdfjs/types";
 import { formatISO, parseISO } from "date-fns";
 import { DataFactory } from "rdf-data-factory";
+import { termToString } from "rdf-string";
 import type { Triple, Wildcard } from "sparqljs";
 import type {
   EngineExpression,
@@ -29,32 +30,9 @@ export function tripleEquals(a: EngineTriple, b: EngineTriple): boolean {
   );
 }
 
-// export function tripleToStringQuad(triple: Triple): StringTriple {
-//   // quadToStringQuad does support undefined "graph".
-//   return quadToStringQuad(triple as BaseQuad);
-// }
-
-// export function stringQuadToTriple(triple: StringTriple): Triple {
-//   return stringQuadToQuad(triple) as Triple;
-// }
-
-// export interface PathTripleObject {
-//   subject: string;
-//   predicate: PropertyPath;
-//   object: string;
-//   graph?: string;
-// }
-
-// export function fromN3(term: string): Term {
-//   return stringToTerm(term);
-// }
-
-// export function toN3(term: Term): string {
-//   return termToString(term);
-// }
-
 /**
- * sparqljs predicates support paths syntax which are currently not supported.
+ * sparqljs predicates support PathProperty syntax which is currently ignored
+ * outside of PathStageBuilder for compatibility with standard Quads.
  */
 export function tripleToQuad(triple: Triple): Quad {
   return dataFactory.quad(
@@ -156,8 +134,8 @@ export function createDate(date: Date): Literal {
   return createTypedLiteral(formatISO(date), XSD("dateTime"));
 }
 
-export const UNBOUND = Object.freeze(createLiteral("UNBOUND"));
-export function createUnbound(): Literal {
+export const UNBOUND = Object.freeze(createIRI("UNBOUND"));
+export function createUnbound(): EngineIRI {
   return UNBOUND;
 }
 
@@ -267,21 +245,8 @@ export function isBlank(value: EngineTripleValue): value is BlankNode {
   return "termType" in value && value.termType === "BlankNode";
 }
 
-// export function getLiteralValue(literal: string): string {
-//   if (literal.startsWith('"')) {
-//     let stopIndex = literal.length - 1;
-//     if (literal.includes('"^^<') && literal.endsWith(">")) {
-//       stopIndex = literal.lastIndexOf('"^^<');
-//     } else if (literal.includes('"@') && !literal.endsWith('"')) {
-//       stopIndex = literal.lastIndexOf('"@');
-//     }
-//     return literal.slice(1, stopIndex);
-//   }
-//   return literal;
-// }
-
 export function hashTriple(triple: EngineTriple): string {
-  return `s=${triple.subject.value}&p=${triple.predicate.value}&o=${triple.object.value}`;
+  return `s=${termToString(triple.subject)}&p=${termToString(triple.predicate)}&o=${termToString(triple.object)}`;
 }
 
 export function XSD(suffix: string): string {

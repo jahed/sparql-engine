@@ -1,6 +1,6 @@
 "use strict";
 
-import { includes, union } from "lodash-es";
+import { unionBy } from "lodash-es";
 import type { EngineTriple, EngineVariable } from "../types.ts";
 import * as rdf from "./rdf.ts";
 
@@ -37,7 +37,6 @@ export function leftLinearJoinOrdering(
   patterns: EngineTriple[]
 ): EngineTriple[] {
   const results: EngineTriple[] = [];
-  const x = new Set();
   if (patterns.length > 0) {
     // sort pattern by join predicate
     let p = patterns.shift()!;
@@ -46,10 +45,11 @@ export function leftLinearJoinOrdering(
     while (patterns.length > 0) {
       // find the next pattern with a common join predicate
       let index = patterns.findIndex((pattern) => {
-        return (
-          includes(variables, pattern.subject) ||
-          includes(variables, pattern.predicate) ||
-          includes(variables, pattern.object)
+        return variables.some(
+          (variable) =>
+            variable.equals(pattern.subject) ||
+            variable.equals(pattern.predicate) ||
+            variable.equals(pattern.object)
         );
       });
       // if not found, trigger a cartesian product with the first pattern of the sorted set
@@ -58,7 +58,7 @@ export function leftLinearJoinOrdering(
       }
       // get the new pattern to join with
       p = patterns.splice(index, 1)[0];
-      variables = union(variables, variablesFromPattern(p));
+      variables = unionBy(variables, variablesFromPattern(p), (v) => v.value);
       results.push(p);
     }
   }

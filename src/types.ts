@@ -1,5 +1,5 @@
 import type { Literal, NamedNode, Quad, Variable } from "@rdfjs/types";
-import type { Expression } from "sparqljs";
+import type { Expression, PropertyPath } from "sparqljs";
 
 export type EngineTriple = Quad;
 export type EngineTripleValue =
@@ -14,3 +14,7 @@ export type EngineLiteral = Literal;
 export type EngineSubject = EngineTriple["subject"];
 export type EnginePredicate = EngineTriple["predicate"];
 export type EngineObject = EngineTriple["object"];
+
+export type EnginePathTriple = Pick<Quad, "subject" | "object"> & {
+  predicate: PropertyPath;
+};

@@ -489,8 +489,7 @@ export class PlanBuilder {
           );
         }
         // find possible Property paths
-        let [classicTriples, pathTriples, tempVariables] =
-          extractPropertyPaths(group);
+        let [classicTriples, pathTriples] = extractPropertyPaths(group);
         if (pathTriples.length > 0) {
           if (!this._stageBuilders.has(SPARQL_OPERATION.PROPERTY_PATH)) {
             throw new Error(
@@ -503,20 +502,12 @@ export class PlanBuilder {
         }
 
         // delegate remaining BGP evaluation to the dedicated executor
-        let iter = this._stageBuilders
-          .get(SPARQL_OPERATION.BGP)!
-          .execute(
-            source,
-            classicTriples,
-            childContext
-          ) as PipelineStage<Bindings>;
+        let iter = this._stageBuilders.get(SPARQL_OPERATION.BGP)!.execute(
+          source,
+          classicTriples,
+          childContext
+        ) as PipelineStage<Bindings>;
 
-        // filter out variables added by the rewriting of property paths
-        if (tempVariables.length > 0) {
-          iter = engine.map(iter, (bindings) => {
-            return bindings.filter((v) => tempVariables.indexOf(v) === -1);
-          });
-        }
         return iter;
       case "query":
         return this._buildQueryPlan(group, childContext, source);

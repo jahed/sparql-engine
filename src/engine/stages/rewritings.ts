@@ -205,9 +205,7 @@ export function rewriteMove(
  * @param  bgp - Set of RDF triples
  * @return A tuple [classic triples, triples with property paths, set of variables added during rewriting]
  */
-export function extractPropertyPaths(
-  bgp: BgpPattern
-): [Triple[], Triple[], string[]] {
+export function extractPropertyPaths(bgp: BgpPattern): [Triple[], Triple[]] {
   const classicTriples: Triple[] = [];
   const pathTriples: Triple[] = [];
   for (const triple of bgp.triples) {
@@ -217,5 +215,5 @@ export function extractPropertyPaths(
       classicTriples.push(triple);
     }
   }
-  return [classicTriples, pathTriples, []];
+  return [classicTriples, pathTriples];
 }

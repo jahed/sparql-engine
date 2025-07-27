@@ -139,7 +139,7 @@ describe("SPARQL property paths: Zero or One paths", () => {
             expect(b["o"]).to.be.deep.oneOf([
               createIRI("http://example.org/Bob"),
               createIRI("http://example.org/Carol"),
-              '"Carol"',
+              createLiteral("Carol"),
             ]);
             break;
           case "http://example.org/Carol":

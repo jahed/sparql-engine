@@ -28,6 +28,7 @@ import Graph from "../../rdf/graph.ts";
 import type {
   EngineIRI,
   EngineObject,
+  EnginePathTriple,
   EngineSubject,
   EngineTriple,
 } from "../../types.ts";
@@ -46,21 +47,21 @@ import StageBuilder from "./stage-builder.ts";
  * @return The bounded triple pattern
  */
 function boundPathTriple(
-  triple: EngineTriple,
+  triple: EnginePathTriple,
   bindings: Bindings
-): EngineTriple {
-  const t: Pick<EngineTriple, "subject" | "predicate" | "object"> = {
+): EnginePathTriple {
+  const result: Pick<EnginePathTriple, "subject" | "predicate" | "object"> = {
     subject: triple.subject,
     predicate: triple.predicate,
     object: triple.object,
   };
   if (isVariable(triple.subject) && bindings.has(triple.subject.value)) {
-    t.subject = bindings.get(triple.subject.value) as EngineSubject;
+    result.subject = bindings.get(triple.subject.value) as EngineSubject;
   }
   if (isVariable(triple.object) && bindings.has(triple.object.value)) {
-    t.object = bindings.get(triple.object.value)!;
+    result.object = bindings.get(triple.object.value)!;
   }
-  return rdf.dataFactory.quad(t.subject, t.predicate, t.object);
+  return result;
 }
 
 /**
@@ -96,31 +97,25 @@ export default abstract class PathStageBuilder extends StageBuilder {
    */
   execute(
     source: PipelineStage<Bindings>,
-    triples: EngineTriple[],
+    triples: EnginePathTriple[],
     context: ExecutionContext
   ): PipelineStage<Bindings> {
     // create a join pipeline between all property paths using an index join
     const engine = Pipeline.getInstance();
-    return triples.reduce(
-      (iter: PipelineStage<Bindings>, triple: EngineTriple) => {
-        return engine.mergeMap(iter, (bindings) => {
-          const { subject, predicate, object } = boundPathTriple(
-            triple,
-            bindings
-          );
-          return engine.map(
-            this._buildIterator(
-              subject,
-              predicate as unknown as PropertyPath,
-              object,
-              context
-            ),
-            (b: Bindings) => bindings.union(b)
-          );
-        });
-      },
-      source
-    );
+    return triples.reduce((iter, triple) => {
+      return engine.mergeMap(iter, (bindings) => {
+        const bounded = boundPathTriple(triple, bindings);
+        return engine.map(
+          this._buildIterator(
+            bounded.subject,
+            bounded.predicate,
+            bounded.object,
+            context
+          ),
+          (b: Bindings) => bindings.union(b)
+        );
+      });
+    }, source);
   }
 
   /**
@@ -158,8 +153,8 @@ export default abstract class PathStageBuilder extends StageBuilder {
       }
       // TODO: change the function's behavior for ask queries when subject and object are given
       if (!rdf.isVariable(subject) && !rdf.isVariable(obj)) {
-        temp.set("?ask_s", triple.subject);
-        temp.set("?ask_v", triple.object);
+        temp.set("ask_s", triple.subject);
+        temp.set("ask_v", triple.object);
       }
       return temp;
     });

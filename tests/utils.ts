@@ -40,6 +40,7 @@ import {
 import type { QueryOutput } from "../src/engine/plan-builder.ts";
 import type { CustomFunctions } from "../src/operators/expressions/sparql-expression.ts";
 import type { EngineIRI, EngineTriple } from "../src/types.ts";
+import { isVariable } from "../src/utils/rdf.ts";
 
 const { Parser, Store } = n3;
 
@@ -67,13 +68,13 @@ function formatTriplePattern(triple: EngineTriple) {
   let subject = null;
   let predicate = null;
   let object = null;
-  if (triple.subject.termType !== "Variable") {
+  if (!isVariable(triple.subject)) {
     subject = triple.subject;
   }
-  if (triple.predicate.termType !== "Variable") {
+  if (!isVariable(triple.predicate)) {
     predicate = triple.predicate;
   }
-  if (triple.object.termType !== "Variable") {
+  if (!isVariable(triple.object)) {
     object = triple.object;
   }
   return { subject, predicate, object };

@@ -24,7 +24,7 @@ SOFTWARE.
 
 import type { Term } from "@rdfjs/types";
 import type { EnginePredicate } from "../../../types.ts";
-import { Automaton, State, Transition } from "./automaton.ts";
+import { Automaton, State, Transition, type Primitive } from "./automaton.ts";
 
 /**
  * Interface of something that builds an automaton
@@ -32,7 +32,7 @@ import { Automaton, State, Transition } from "./automaton.ts";
  * @author Charlotte Cogan
  * @author Julien Aimonier-Davat
  */
-interface AutomatonBuilder<T, P extends Term> {
+interface AutomatonBuilder<T extends Primitive, P extends Term> {
   build(): Automaton<T, P>;
 }
 
