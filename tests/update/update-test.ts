@@ -97,10 +97,9 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX dc: <http://purl.org/dc/elements/1.1/>
     INSERT { ?s rdf:type rdf:Person . }
+    WHERE { ?s rdf:type dblp-rdf:Person . } ;
     DELETE { ?s rdf:type dblp-rdf:Person . }
-    WHERE {
-      ?s rdf:type dblp-rdf:Person .
-    }`;
+    WHERE { ?s rdf:type dblp-rdf:Person . }`;
 
     engine.execute(query).subscribe(undefined, done, () => {
       const triples = engine._graph._store.getTriples(
@@ -128,10 +127,9 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX dc: <http://purl.org/dc/elements/1.1/>
     INSERT { ?s rdf:type rdf:Person . }
+    WHERE { ?s rdf:type rdf:Person . } ;
     DELETE { ?s rdf:type dblp-rdf:Person . }
-    WHERE {
-      ?s rdf:type rdf:Person .
-    }`;
+    WHERE { ?s rdf:type rdf:Person . }`;
 
     engine.execute(query).subscribe(undefined, done, () => {
       const triples = engine._graph._store.getTriples(
