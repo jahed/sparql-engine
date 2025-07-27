@@ -24,8 +24,7 @@ SOFTWARE.
 
 import type { Term } from "@rdfjs/types";
 import { termToString } from "rdf-string";
-
-export type Primitive = number | string | boolean;
+import type { Primitive } from "../../../types.ts";
 
 /**
  * A state of the automaton

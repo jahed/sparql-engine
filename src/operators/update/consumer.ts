@@ -1,17 +1,26 @@
 "use strict";
 
-import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
+import {
+  createObserver,
+  createSubscription,
+  type PipelineObserver,
+  type PipelineObserverOrNext,
+  type PipelineStage,
+  type PipelineSubscription,
+} from "../../engine/pipeline/pipeline-engine.ts";
 import type { EngineTriple } from "../../types.ts";
 
 export abstract class Consumable<T> implements PipelineStage<T> {
   abstract execute(): Promise<void>;
 
   subscribe(
-    onData?: (value: T) => void,
-    onError?: (err: any) => void,
-    onEnd?: () => void
-  ): void {
-    this.execute().then(onEnd, onError);
+    observerOrNext: PipelineObserverOrNext<T>,
+    onError?: PipelineObserver<T>["error"],
+    onComplete?: PipelineObserver<T>["complete"]
+  ): PipelineSubscription {
+    const observer = createObserver(observerOrNext, onError, onComplete);
+    this.execute().then(observer.complete, observer.error);
+    return createSubscription();
   }
 
   forEach(cb: (value: T) => void): void {
@@ -21,7 +30,11 @@ export abstract class Consumable<T> implements PipelineStage<T> {
   pipe<N>(
     fn: (source: PipelineStage<T>) => PipelineStage<N>
   ): PipelineStage<N> {
-    throw new Error("Method not implemented.");
+    return fn(this);
+  }
+
+  async *[Symbol.asyncIterator](): AsyncIterator<T> {
+    await this.execute();
   }
 }
 
@@ -49,15 +62,15 @@ export abstract class Consumer<T> extends Consumable<T> {
   execute(): Promise<void> {
     return new Promise((resolve, reject) => {
       const promises: Promise<void>[] = [];
-      this._source.subscribe(
-        (triple) => {
+      this._source.subscribe({
+        next: (triple) => {
           promises.push(this.onData(triple));
         },
-        reject,
-        () => {
+        error: reject,
+        complete: () => {
           Promise.all(promises).then(() => resolve(), reject);
-        }
-      );
+        },
+      });
     });
   }
 

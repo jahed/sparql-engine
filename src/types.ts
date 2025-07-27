@@ -1,6 +1,8 @@
 import type { Literal, NamedNode, Quad, Variable } from "@rdfjs/types";
 import type { Expression, PropertyPath } from "sparqljs";
 
+export type Primitive = number | string | boolean;
+
 export type EngineTriple = Quad;
 export type EngineTripleValue =
   | EngineTriple["subject"]

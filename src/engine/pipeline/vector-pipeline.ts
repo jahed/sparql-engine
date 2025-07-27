@@ -27,8 +27,13 @@ SOFTWARE.
 import { chunk, flatMap, flatten, slice } from "lodash-es";
 import {
   type PipelineInput,
+  type PipelineObserver,
+  type PipelineObserverOrNext,
   type PipelineStage,
+  type PipelineSubscription,
   type StreamPipelineInput,
+  createObserver,
+  createSubscription,
   PipelineEngine,
 } from "./pipeline-engine.ts";
 
@@ -51,20 +56,22 @@ export class VectorStage<T> implements PipelineStage<T> {
   }
 
   subscribe(
-    onData?: (value: T) => void,
-    onError?: (err: any) => void,
-    onEnd?: () => void
-  ): void {
+    observerOrNext: PipelineObserverOrNext<T>,
+    onError?: PipelineObserver<T>["error"],
+    onComplete?: PipelineObserver<T>["complete"]
+  ): PipelineSubscription {
+    const observer = createObserver(observerOrNext, onError, onComplete);
     try {
       this._content
         .then((c) => {
-          if (onData) c.forEach(onData);
-          if (onEnd) onEnd();
+          if (observer.next) c.forEach(observer.next);
+          if (observer.complete) observer.complete();
         })
-        .catch(onError);
+        .catch(observer.error);
     } catch (e) {
-      if (onError) onError(e);
+      if (observer.error) observer.error(e);
     }
+    return createSubscription();
   }
 
   forEach(cb: (value: T) => void): void {
@@ -81,6 +88,12 @@ export class VectorStage<T> implements PipelineStage<T> {
     fn: (source: PipelineStage<T>) => PipelineStage<N>
   ): PipelineStage<N> {
     return fn(this);
+  }
+
+  async *[Symbol.asyncIterator](): AsyncIterator<T> {
+    for (const v of await this._content) {
+      yield v;
+    }
   }
 }
 

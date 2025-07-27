@@ -65,6 +65,47 @@ export interface StreamPipelineInput<T> {
   error(err?: any): void;
 }
 
+export type PipelineObserver<T> = {
+  next: (value: T) => void;
+  error: (err: any) => void;
+  complete: () => void;
+};
+
+export type PipelineSubscription = {
+  [Symbol.dispose](): void;
+};
+
+export function createSubscription() {
+  return {
+    [Symbol.dispose]() {},
+  };
+}
+
+export type PipelineObserverOrNext<T> =
+  | Partial<PipelineObserver<T>>
+  | PipelineObserver<T>["next"]
+  | undefined
+  | null;
+
+export function createObserver<T>(
+  observerOrNext?: PipelineObserverOrNext<T>,
+  onError?: PipelineObserver<T>["error"],
+  onComplete?: PipelineObserver<T>["complete"]
+): Partial<PipelineObserver<T>> {
+  if (onError || onComplete) {
+    return {
+      next: typeof observerOrNext === "function" ? observerOrNext : undefined,
+      error: onError,
+      complete: onComplete,
+    };
+  }
+  return observerOrNext
+    ? typeof observerOrNext === "object"
+      ? observerOrNext
+      : { next: observerOrNext }
+    : {};
+}
+
 /**
  * A step in a pipeline. Data can be consumed in a pull-based or push-bashed fashion.
  * @author Thomas Minier
@@ -77,10 +118,10 @@ export interface PipelineStage<T> {
    * @param  onEnd - Function invoked when the stage ends
    */
   subscribe(
-    onData?: (value: T) => void,
-    onError?: (err: any) => void,
-    onEnd?: () => void
-  ): void;
+    observerOrNext?: PipelineObserverOrNext<T>,
+    onError?: PipelineObserver<T>["error"],
+    onComplete?: PipelineObserver<T>["complete"]
+  ): PipelineSubscription;
 
   /**
    * Invoke a callback on each item produced by the stage
@@ -89,6 +130,8 @@ export interface PipelineStage<T> {
   forEach(cb: (value: T) => void): void;
 
   pipe<N>(fn: (source: PipelineStage<T>) => PipelineStage<N>): PipelineStage<N>;
+
+  [Symbol.asyncIterator](): AsyncIterator<T>;
 }
 
 /**

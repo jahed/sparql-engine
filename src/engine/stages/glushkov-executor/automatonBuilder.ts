@@ -23,8 +23,8 @@ SOFTWARE.
 */
 
 import type { Term } from "@rdfjs/types";
-import type { EnginePredicate } from "../../../types.ts";
-import { Automaton, State, Transition, type Primitive } from "./automaton.ts";
+import type { EnginePredicate, Primitive } from "../../../types.ts";
+import { Automaton, State, Transition } from "./automaton.ts";
 
 /**
  * Interface of something that builds an automaton

@@ -35,7 +35,6 @@ import {
   filter,
   finalize,
   first,
-  flatMap,
   from,
   map,
   mergeMap,
@@ -45,11 +44,45 @@ import {
   shareReplay,
   skip,
   Subscriber,
+  type Subscription,
   take,
   tap,
   toArray,
 } from "rxjs";
-import { type StreamPipelineInput, PipelineEngine } from "./pipeline-engine.ts";
+import {
+  PipelineEngine,
+  type PipelineObserver,
+  type PipelineObserverOrNext,
+  type StreamPipelineInput,
+} from "./pipeline-engine.ts";
+
+const flatMap = mergeMap;
+
+declare module "rxjs" {
+  export interface Observable<T> {
+    subscribe(
+      observerOrNext: PipelineObserverOrNext<T>,
+      onError?: PipelineObserver<T>["error"],
+      onComplete?: PipelineObserver<T>["complete"]
+    ): Subscription;
+  }
+}
+
+const originalSubscribe = Observable.prototype.subscribe;
+Observable.prototype.subscribe = function subscribe<T>(
+  observerOrNext: PipelineObserverOrNext<T>,
+  onError?: PipelineObserver<T>["error"],
+  onComplete?: PipelineObserver<T>["complete"]
+): Subscription {
+  if (onError || onComplete) {
+    return originalSubscribe.call(this, {
+      next: typeof observerOrNext === "function" ? observerOrNext : undefined,
+      error: onError,
+      complete: onComplete,
+    });
+  }
+  return originalSubscribe.call(this, observerOrNext);
+};
 
 /**
  * A StreamPipelineInput implemented using Rxjs' subscribers.
@@ -181,19 +214,19 @@ export default class RxjsPipeline extends PipelineEngine {
     } else {
       return new Observable<T>((subscriber) => {
         let isEmpty: boolean = true;
-        return input.subscribe(
-          (x: T) => {
+        return input.subscribe({
+          next: (x: T) => {
             isEmpty = false;
             subscriber.next(x);
           },
-          (err) => subscriber.error(err),
-          () => {
+          error: (err) => subscriber.error(err),
+          complete: () => {
             if (isEmpty) {
               values.forEach((v: T) => subscriber.next(v));
             }
             subscriber.complete();
-          }
-        );
+          },
+        });
       });
     }
   }
