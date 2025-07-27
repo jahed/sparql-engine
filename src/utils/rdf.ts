@@ -86,6 +86,8 @@ export function asJS(value: string, type: string | null): any {
   }
 }
 
+export const UNBOUND = Object.freeze(createIRI("UNBOUND"));
+
 export function createIRI(value: string): NamedNode {
   return dataFactory.namedNode(value);
 }
@@ -132,11 +134,6 @@ export function createFalse(): Literal {
 
 export function createDate(date: Date): Literal {
   return createTypedLiteral(formatISO(date), XSD("dateTime"));
-}
-
-export const UNBOUND = Object.freeze(createIRI("UNBOUND"));
-export function createUnbound(): EngineIRI {
-  return UNBOUND;
 }
 
 export function shallowCloneTerm(

@@ -37,6 +37,7 @@ import { isNull } from "lodash-es";
 import type { EngineTripleValue } from "../../types.ts";
 import { parseISO8601 } from "../../utils/date.ts";
 import * as rdf from "../../utils/rdf.ts";
+import { UNBOUND } from "../../utils/rdf.ts";
 
 type Term = EngineTripleValue;
 
@@ -73,7 +74,7 @@ export default {
     } else if (!isNull(defaultValue)) {
       return defaultValue;
     }
-    return rdf.createUnbound();
+    return UNBOUND;
   },
 
   /*

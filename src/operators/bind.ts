@@ -31,7 +31,7 @@ import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import { Bindings } from "../rdf/bindings.ts";
 import type { EngineTripleValue } from "../types.ts";
-import * as rdf from "../utils/rdf.ts";
+import { UNBOUND } from "../utils/rdf.ts";
 import {
   SPARQLExpression,
   type CustomFunctions,
@@ -73,7 +73,7 @@ export default function bind(
             for (let term of value) {
               const mu = bindings.clone();
               if (!term) {
-                mu.set(variable.value, rdf.createUnbound());
+                mu.set(variable.value, UNBOUND);
               } else {
                 mu.set(variable.value, term);
               }
@@ -90,7 +90,7 @@ export default function bind(
         // null values indicates that an error occurs during the expression's evaluation
         // in this case, the variable is bind to a special UNBOUND value
         if (!value) {
-          res.set(variable.value, rdf.createUnbound());
+          res.set(variable.value, UNBOUND);
         } else {
           res.set(variable.value, value);
         }

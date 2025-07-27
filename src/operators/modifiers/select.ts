@@ -29,7 +29,7 @@ import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../../engine/pipeline/pipeline.ts";
 
 import type { Bindings } from "../../rdf/bindings.ts";
-import * as rdf from "../../utils/rdf.ts";
+import { UNBOUND } from "../../utils/rdf.ts";
 
 /**
  * Evaluates a SPARQL SELECT operation, i.e., perform a selection over sets of solutions bindings
@@ -58,7 +58,7 @@ export default function select(source: PipelineStage<Bindings>, query: Query) {
       if (bindings.has(v.value)) {
         obj.set(v.value, bindings.get(v.value)!);
       } else {
-        obj.set(v.value, rdf.createUnbound());
+        obj.set(v.value, UNBOUND);
       }
       return obj;
     }, bindings.empty());

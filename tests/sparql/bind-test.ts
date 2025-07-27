@@ -32,7 +32,7 @@ import {
   createInteger,
   createLangLiteral,
   createLiteral,
-  createUnbound,
+  UNBOUND,
 } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
@@ -154,7 +154,7 @@ describe("SPARQL BIND", () => {
         expect(b).to.have.all.keys("s", "s2", "name", "undefined");
         expect(b["s2"]).to.deep.equal(b["s"]);
         expect(b["name"]).to.deep.equal(createLiteral("Thomas Minier"));
-        expect(b["undefined"]).to.deep.equal(createUnbound());
+        expect(b["undefined"]).to.deep.equal(UNBOUND);
         results.push(b);
       },
       done,
