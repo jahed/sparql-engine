@@ -31,15 +31,23 @@ import { BindingBase, Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
 import { GRAPH_CAPABILITY } from "../../rdf/graph_capability.ts";
 import type { EngineTriple, EngineTripleValue } from "../../types.ts";
-import * as evaluation from "../../utils/evaluation.ts";
-import * as rdf from "../../utils/rdf.ts";
-import { isBlank } from "../../utils/rdf.ts";
+import { cacheEvalBGP } from "../../utils/evaluation.ts";
+import {
+  createFloat,
+  createInteger,
+  dataFactory,
+  isBlank,
+  isIRI,
+  isLiteral,
+  isVariable,
+  SES,
+} from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import { parseHints } from "../context/query-hints.ts";
 import ContextSymbols from "../context/symbols.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import { Pipeline } from "../pipeline/pipeline.ts";
-import * as fts from "./rewritings/fts.ts";
+import { extractFullTextSearchQueries } from "./rewritings/fts.ts";
 import StageBuilder from "./stage-builder.ts";
 
 /**
@@ -60,7 +68,7 @@ function bgpEvaluation(
     // check the cache
     let iterator;
     if (context.cachingEnabled()) {
-      iterator = evaluation.cacheEvalBGP(
+      iterator = cacheEvalBGP(
         boundedBGP,
         graph,
         context.cache!,
@@ -123,7 +131,7 @@ export default class BGPStageBuilder extends StageBuilder {
 
     // extract full text search queries from the BGP
     // they will be executed after the main BGP, to ensure an average best join ordering
-    const extractionResults = fts.extractFullTextSearchQueries(extraction[0]);
+    const extractionResults = extractFullTextSearchQueries(extraction[0]);
 
     // rewrite the BGP to remove blank node addedd by the Turtle notation
     const [bgp, artificals] = this._replaceBlankNodes(
@@ -133,7 +141,7 @@ export default class BGPStageBuilder extends StageBuilder {
     // if the graph is a variable, go through each binding and look for its value
     if (
       context.defaultGraphs.length > 0 &&
-      rdf.isVariable(context.defaultGraphs[0])
+      isVariable(context.defaultGraphs[0])
     ) {
       const engine = Pipeline.getInstance();
       return engine.mergeMap(source, (value: Bindings) => {
@@ -143,7 +151,7 @@ export default class BGPStageBuilder extends StageBuilder {
         const graph =
           graphs.length > 0
             ? graphs[0]
-            : iri !== null && rdf.isIRI(iri)
+            : iri && isIRI(iri)
               ? this.dataset.createGraph(iri)
               : null;
         if (graph) {
@@ -210,7 +218,7 @@ export default class BGPStageBuilder extends StageBuilder {
     function rewrite<T extends EngineTripleValue>(term: T): T | VariableTerm {
       let res: T | VariableTerm = term;
       if (isBlank(term)) {
-        res = rdf.dataFactory.variable(term.value);
+        res = dataFactory.variable(term.value);
         if (!newVariables.some((v) => v.equals(res))) {
           newVariables.push(res);
         }
@@ -218,7 +226,7 @@ export default class BGPStageBuilder extends StageBuilder {
       return res;
     }
     const newBGP = patterns.map((p) => {
-      return rdf.dataFactory.quad(
+      return dataFactory.quad(
         rewrite(p.subject),
         rewrite(p.predicate),
         rewrite(p.object)
@@ -290,8 +298,8 @@ export default class BGPStageBuilder extends StageBuilder {
       }
       switch (triple.predicate.value) {
         // keywords: ?o ses:search “neil gaiman”
-        case rdf.SES("search"): {
-          if (!rdf.isLiteral(triple.object)) {
+        case SES("search"): {
+          if (!isLiteral(triple.object)) {
             throw new SyntaxError(
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
             );
@@ -300,14 +308,14 @@ export default class BGPStageBuilder extends StageBuilder {
           break;
         }
         // match all keywords: ?o ses:matchAllTerms "true"
-        case rdf.SES("matchAllTerms"): {
+        case SES("matchAllTerms"): {
           const value = triple.object.value.toLowerCase();
           matchAll = value === "true" || value === "1";
           break;
         }
         // min relevance score: ?o ses:minRelevance “0.25”
-        case rdf.SES("minRelevance"): {
-          if (!rdf.isLiteral(triple.object)) {
+        case SES("minRelevance"): {
+          if (!isLiteral(triple.object)) {
             throw new SyntaxError(
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
             );
@@ -322,8 +330,8 @@ export default class BGPStageBuilder extends StageBuilder {
           break;
         }
         // max relevance score: ?o ses:maxRelevance “0.75”
-        case rdf.SES("maxRelevance"): {
-          if (!rdf.isLiteral(triple.object)) {
+        case SES("maxRelevance"): {
+          if (!isLiteral(triple.object)) {
             throw new SyntaxError(
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
             );
@@ -338,8 +346,8 @@ export default class BGPStageBuilder extends StageBuilder {
           break;
         }
         // min rank: ?o ses:minRank "5" .
-        case rdf.SES("minRank"): {
-          if (!rdf.isLiteral(triple.object)) {
+        case SES("minRank"): {
+          if (!isLiteral(triple.object)) {
             throw new SyntaxError(
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
             );
@@ -354,8 +362,8 @@ export default class BGPStageBuilder extends StageBuilder {
           break;
         }
         // max rank: ?o ses:maxRank “1000” .
-        case rdf.SES("maxRank"): {
-          if (!rdf.isLiteral(triple.object)) {
+        case SES("maxRank"): {
+          if (!isLiteral(triple.object)) {
             throw new SyntaxError(
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
             );
@@ -370,8 +378,8 @@ export default class BGPStageBuilder extends StageBuilder {
           break;
         }
         // include relevance score: ?o ses:relevance ?score .
-        case rdf.SES("relevance"): {
-          if (!rdf.isVariable(triple.object)) {
+        case SES("relevance"): {
+          if (!isVariable(triple.object)) {
             throw new SyntaxError(
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a SPARQL variable.`
             );
@@ -381,8 +389,8 @@ export default class BGPStageBuilder extends StageBuilder {
           break;
         }
         // include rank: ?o ses:rank ?rank .
-        case rdf.SES("rank"): {
-          if (!rdf.isVariable(triple.object)) {
+        case SES("rank"): {
+          if (!isVariable(triple.object)) {
             throw new SyntaxError(
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a SPARQL variable.`
             );
@@ -436,30 +444,24 @@ export default class BGPStageBuilder extends StageBuilder {
         const [triple, score, rank] = item;
         // build solutions bindings from the matching RDF triple
         const mu = new BindingBase();
-        if (
-          rdf.isVariable(boundedPattern.subject) &&
-          !rdf.isVariable(triple.subject)
-        ) {
+        if (isVariable(boundedPattern.subject) && !isVariable(triple.subject)) {
           mu.set(boundedPattern.subject.value, triple.subject);
         }
         if (
-          rdf.isVariable(boundedPattern.predicate) &&
-          !rdf.isVariable(triple.predicate)
+          isVariable(boundedPattern.predicate) &&
+          !isVariable(triple.predicate)
         ) {
           mu.set(boundedPattern.predicate.value, triple.predicate);
         }
-        if (
-          rdf.isVariable(boundedPattern.object) &&
-          !rdf.isVariable(triple.object)
-        ) {
+        if (isVariable(boundedPattern.object) && !isVariable(triple.object)) {
           mu.set(boundedPattern.object.value, triple.object);
         }
         // add score and rank if required
         if (addScore) {
-          mu.set(scoreVariable, rdf.createFloat(score));
+          mu.set(scoreVariable, createFloat(score));
         }
         if (addRank) {
-          mu.set(rankVariable, rdf.createInteger(rank));
+          mu.set(rankVariable, createInteger(rank));
         }
         // Merge with input bindings and then return the final results
         return bindings.union(mu);

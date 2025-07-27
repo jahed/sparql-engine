@@ -31,7 +31,7 @@ import BGPStageBuilder from "../../engine/stages/bgp-stage-builder.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
 import type { EngineTriple } from "../../types.ts";
-import * as evaluation from "../../utils/evaluation.ts";
+import { cacheEvalBGP } from "../../utils/evaluation.ts";
 
 /**
  * Find a rewriting key in a list of variables
@@ -119,13 +119,7 @@ export default function rewritingOp(
     bgpBucket.forEach((patterns) => {
       if (context.cache!.has({ patterns, graphIRI: graph.iri })) {
         stages.push(
-          evaluation.cacheEvalBGP(
-            patterns,
-            graph,
-            context.cache!,
-            builder,
-            context
-          )
+          cacheEvalBGP(patterns, graph, context.cache!, builder, context)
         );
       } else {
         others.push(patterns);

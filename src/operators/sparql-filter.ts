@@ -33,7 +33,7 @@ import {
 
 import type { Expression } from "sparqljs";
 import { Bindings } from "../rdf/bindings.ts";
-import * as rdf from "../utils/rdf.ts";
+import { literalIsBoolean, termIsLiteral, termToValue } from "../utils/rdf.ts";
 
 /**
  * Evaluate SPARQL Filter clauses
@@ -55,10 +55,10 @@ export default function sparqlFilter(
     if (
       result &&
       "datatype" in result &&
-      rdf.termIsLiteral(result) &&
-      rdf.literalIsBoolean(result)
+      termIsLiteral(result) &&
+      literalIsBoolean(result)
     ) {
-      return rdf.termToValue(result);
+      return termToValue(result);
     }
     return false;
   });

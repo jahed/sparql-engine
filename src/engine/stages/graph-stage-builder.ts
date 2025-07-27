@@ -24,11 +24,6 @@ SOFTWARE.
 
 "use strict";
 
-import * as rdf from "../../utils/rdf.ts";
-import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
-import { Pipeline } from "../pipeline/pipeline.ts";
-import StageBuilder from "./stage-builder.ts";
-
 import {
   Wildcard,
   type GraphPattern,
@@ -36,8 +31,12 @@ import {
   type Query,
 } from "sparqljs";
 import type { Bindings } from "../../rdf/bindings.ts";
+import { isVariable } from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import ContextSymbols from "../context/symbols.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import { Pipeline } from "../pipeline/pipeline.ts";
+import StageBuilder from "./stage-builder.ts";
 
 /**
  * A GraphStageBuilder evaluates GRAPH clauses in a SPARQL query.
@@ -69,7 +68,7 @@ export default class GraphStageBuilder extends StageBuilder {
       };
     }
     // handle the case where the GRAPh IRI is a SPARQL variable
-    if (rdf.isVariable(node.name)) {
+    if (isVariable(node.name)) {
       // clone the source first
       source = Pipeline.getInstance().clone(source);
       let namedGraphs: IriTerm[] = [];

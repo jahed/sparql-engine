@@ -34,8 +34,8 @@ import type {
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import indexJoin from "../operators/join/index-join.ts";
 import type { EngineTriple } from "../types.ts";
-import * as rdf from "../utils/rdf.ts";
-import * as sparql from "../utils/sparql.ts";
+import { countVariables, dataFactory } from "../utils/rdf.ts";
+import { leftLinearJoinOrdering } from "../utils/sparql.ts";
 import { BindingBase, Bindings } from "./bindings.ts";
 import { GRAPH_CAPABILITY, type GraphCapability } from "./graph_capability.ts";
 
@@ -69,7 +69,7 @@ export default abstract class Graph {
   private _capabilities: Map<GraphCapability, boolean>;
 
   constructor() {
-    this._iri = rdf.dataFactory.namedNode("");
+    this._iri = dataFactory.namedNode("");
     this._capabilities = new Map();
     parseCapabilities(this._capabilities, Object.getPrototypeOf(this));
   }
@@ -300,14 +300,14 @@ export default abstract class Graph {
               return {
                 triple,
                 cardinality: c,
-                nbVars: rdf.countVariables(triple),
+                nbVars: countVariables(triple),
               };
             });
           })
         )
       );
       return engine.mergeMap(op, (results: PatternMetadata[]) => {
-        const sortedPatterns = sparql.leftLinearJoinOrdering(
+        const sortedPatterns = leftLinearJoinOrdering(
           sortBy(results, "cardinality").map((t) => t.triple)
         );
         const start = engine.of(new BindingBase());
@@ -322,11 +322,12 @@ export default abstract class Graph {
       // FIX ME: this trick is required, otherwise ADD, COPY and MOVE queries are not evaluated correctly. We need to find why...
       return engine.mergeMap(engine.from(Promise.resolve(null)), () => {
         const start = engine.of(new BindingBase());
-        return sparql
-          .leftLinearJoinOrdering(bgp)
-          .reduce((iter: PipelineStage<Bindings>, t: EngineTriple) => {
+        return leftLinearJoinOrdering(bgp).reduce(
+          (iter: PipelineStage<Bindings>, t: EngineTriple) => {
             return indexJoin(iter, t, this, context);
-          }, start);
+          },
+          start
+        );
       });
     }
   }

@@ -194,22 +194,6 @@ export function literalIsBoolean(literal: Literal): boolean {
   return literal.datatype.value === XSD("boolean");
 }
 
-// export function termEquals(a: Term, b: Term): boolean {
-//   if (termIsLiteral(a) && termIsLiteral(b)) {
-//     if (literalIsDate(a) && literalIsDate(b)) {
-//       const valueA = asJS(a.value, a.datatype.value);
-//       const valueB = asJS(b.value, b.datatype.value);
-//       return isEqual(valueA, valueB);
-//     }
-//     return (
-//       a.value === b.value &&
-//       a.datatype.value === b.datatype.value &&
-//       a.language === b.language
-//     );
-//   }
-//   return a.value === b.value;
-// }
-
 export function countVariables(triple: EngineTriple): number {
   let count = 0;
   if (isVariable(triple.subject)) {

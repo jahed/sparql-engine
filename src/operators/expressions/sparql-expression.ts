@@ -36,7 +36,7 @@ import type {
 } from "sparqljs";
 import { Bindings } from "../../rdf/bindings.ts";
 import type { EngineTripleValue } from "../../types.ts";
-import * as rdf from "../../utils/rdf.ts";
+import { isVariable } from "../../utils/rdf.ts";
 import type { Group } from "../sparql-groupby.ts";
 import CUSTOM_AGGREGATES from "./custom-aggregates.ts";
 import CUSTOM_OPERATIONS from "./custom-operations.ts";
@@ -170,7 +170,7 @@ export class SPARQLExpression {
           `Unsupported SPARQL aggregation: ${expression.aggregation}`
         );
       }
-      if (!rdf.isVariable(aggVariable)) {
+      if (!isVariable(aggVariable)) {
         throw new Error(
           `SPARQL aggregation expression must be a variable: ${aggVariable}`
         );

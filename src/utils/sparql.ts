@@ -2,11 +2,7 @@
 
 import { unionBy } from "lodash-es";
 import type { EngineTriple, EngineVariable } from "../types.ts";
-import * as rdf from "./rdf.ts";
-
-export function hashBGP(bgp: EngineTriple[]): string {
-  return bgp.map(rdf.hashTriple).join(";");
-}
+import { isVariable } from "./rdf.ts";
 
 /**
  * Get the set of SPARQL variables in a triple pattern
@@ -15,13 +11,13 @@ export function hashBGP(bgp: EngineTriple[]): string {
  */
 export function variablesFromPattern(pattern: EngineTriple): EngineVariable[] {
   const res: EngineVariable[] = [];
-  if (rdf.isVariable(pattern.subject)) {
+  if (isVariable(pattern.subject)) {
     res.push(pattern.subject);
   }
-  if (rdf.isVariable(pattern.predicate)) {
+  if (isVariable(pattern.predicate)) {
     res.push(pattern.predicate);
   }
-  if (rdf.isVariable(pattern.object)) {
+  if (isVariable(pattern.object)) {
     res.push(pattern.object);
   }
   return res;

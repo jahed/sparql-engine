@@ -24,7 +24,6 @@ SOFTWARE.
 
 "use strict";
 
-import * as crypto from "crypto";
 import {
   addMilliseconds,
   isAfter,
@@ -33,11 +32,30 @@ import {
   subMilliseconds,
 } from "date-fns";
 import { isNull } from "lodash-es";
-
+import { createHash, randomUUID } from "node:crypto";
 import type { EngineTripleValue } from "../../types.ts";
 import { parseISO8601 } from "../../utils/date.ts";
-import * as rdf from "../../utils/rdf.ts";
-import { UNBOUND } from "../../utils/rdf.ts";
+import {
+  asJS,
+  createBNode,
+  createBoolean,
+  createDate,
+  createDecimal,
+  createInteger,
+  createIRI,
+  createLangLiteral,
+  createLiteral,
+  createTypedLiteral,
+  literalIsBoolean,
+  literalIsDate,
+  literalIsNumeric,
+  shallowCloneTerm,
+  termIsBNode,
+  termIsIRI,
+  termIsLiteral,
+  UNBOUND,
+  XSD,
+} from "../../utils/rdf.ts";
 
 type Term = EngineTripleValue;
 
@@ -49,9 +67,9 @@ type Term = EngineTripleValue;
  */
 function applyHash(hashType: string): (v: Term) => Term {
   return (v) => {
-    const hash = crypto.createHash(hashType);
+    const hash = createHash(hashType);
     hash.update(v.value);
-    return rdf.createLiteral(hash.digest("hex"));
+    return createLiteral(hash.digest("hex"));
   };
 }
 
@@ -91,10 +109,10 @@ export default {
       );
     }
     if (
-      rdf.termIsLiteral(booleanValue) &&
-      (rdf.literalIsBoolean(booleanValue) || rdf.literalIsNumeric(booleanValue))
+      termIsLiteral(booleanValue) &&
+      (literalIsBoolean(booleanValue) || literalIsNumeric(booleanValue))
     ) {
-      return rdf.asJS(booleanValue.value, booleanValue.datatype.value)
+      return asJS(booleanValue.value, booleanValue.datatype.value)
         ? valueIfTrue
         : valueIfFalse;
     }
@@ -107,25 +125,25 @@ export default {
     XQuery & XPath functions https://www.w3.org/TR/sparql11-query/#OperatorMapping
   */
   "+": function (a: Term, b: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.termIsLiteral(b)) {
-      const valueA = rdf.asJS(a.value, a.datatype.value);
-      const valueB = rdf.asJS(b.value, b.datatype.value);
-      if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        return rdf.createDate(addMilliseconds(valueA, valueB.getTime()));
+    if (termIsLiteral(a) && termIsLiteral(b)) {
+      const valueA = asJS(a.value, a.datatype.value);
+      const valueB = asJS(b.value, b.datatype.value);
+      if (literalIsDate(a) && literalIsDate(b)) {
+        return createDate(addMilliseconds(valueA, valueB.getTime()));
       }
-      return rdf.createTypedLiteral(valueA + valueB, a.datatype.value);
+      return createTypedLiteral(valueA + valueB, a.datatype.value);
     }
-    return rdf.createLiteral(rdf.asJS(a.value, null) + rdf.asJS(b.value, null));
+    return createLiteral(asJS(a.value, null) + asJS(b.value, null));
   },
 
   "-": function (a: Term, b: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.termIsLiteral(b)) {
-      const valueA = rdf.asJS(a.value, a.datatype.value);
-      const valueB = rdf.asJS(b.value, b.datatype.value);
-      if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        return rdf.createDate(subMilliseconds(valueA, valueB.getTime()));
+    if (termIsLiteral(a) && termIsLiteral(b)) {
+      const valueA = asJS(a.value, a.datatype.value);
+      const valueB = asJS(b.value, b.datatype.value);
+      if (literalIsDate(a) && literalIsDate(b)) {
+        return createDate(subMilliseconds(valueA, valueB.getTime()));
       }
-      return rdf.createTypedLiteral(valueA - valueB, a.datatype.value);
+      return createTypedLiteral(valueA - valueB, a.datatype.value);
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot substract non-Literals ${a} and ${b}`
@@ -133,13 +151,13 @@ export default {
   },
 
   "*": function (a: Term, b: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.termIsLiteral(b)) {
-      const valueA = rdf.asJS(a.value, a.datatype.value);
-      const valueB = rdf.asJS(b.value, b.datatype.value);
-      if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        return rdf.createDate(new Date(valueA.getTime() * valueB.getTime()));
+    if (termIsLiteral(a) && termIsLiteral(b)) {
+      const valueA = asJS(a.value, a.datatype.value);
+      const valueB = asJS(b.value, b.datatype.value);
+      if (literalIsDate(a) && literalIsDate(b)) {
+        return createDate(new Date(valueA.getTime() * valueB.getTime()));
       }
-      return rdf.createTypedLiteral(valueA * valueB, a.datatype.value);
+      return createTypedLiteral(valueA * valueB, a.datatype.value);
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot multiply non-Literals ${a} and ${b}`
@@ -147,13 +165,13 @@ export default {
   },
 
   "/": function (a: Term, b: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.termIsLiteral(b)) {
-      const valueA = rdf.asJS(a.value, a.datatype.value);
-      const valueB = rdf.asJS(b.value, b.datatype.value);
-      if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        return rdf.createDate(new Date(valueA.getTime() / valueB.getTime()));
+    if (termIsLiteral(a) && termIsLiteral(b)) {
+      const valueA = asJS(a.value, a.datatype.value);
+      const valueB = asJS(b.value, b.datatype.value);
+      if (literalIsDate(a) && literalIsDate(b)) {
+        return createDate(new Date(valueA.getTime() / valueB.getTime()));
       }
-      return rdf.createTypedLiteral(valueA / valueB, a.datatype.value);
+      return createTypedLiteral(valueA / valueB, a.datatype.value);
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot divide non-Literals ${a} and ${b}`
@@ -161,68 +179,68 @@ export default {
   },
 
   "=": function (a: Term, b: Term): Term {
-    return rdf.createBoolean(a.equals(b));
+    return createBoolean(a.equals(b));
   },
 
   "!=": function (a: Term, b: Term): Term {
-    return rdf.createBoolean(!a.equals(b));
+    return createBoolean(!a.equals(b));
   },
 
   "<": function (a: Term, b: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.termIsLiteral(b)) {
-      const valueA = rdf.asJS(a.value, a.datatype.value);
-      const valueB = rdf.asJS(b.value, b.datatype.value);
-      if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        return rdf.createBoolean(isBefore(valueA, valueB));
+    if (termIsLiteral(a) && termIsLiteral(b)) {
+      const valueA = asJS(a.value, a.datatype.value);
+      const valueB = asJS(b.value, b.datatype.value);
+      if (literalIsDate(a) && literalIsDate(b)) {
+        return createBoolean(isBefore(valueA, valueB));
       }
-      return rdf.createBoolean(valueA < valueB);
+      return createBoolean(valueA < valueB);
     }
-    return rdf.createBoolean(a.value < b.value);
+    return createBoolean(a.value < b.value);
   },
 
   "<=": function (a: Term, b: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.termIsLiteral(b)) {
-      const valueA = rdf.asJS(a.value, a.datatype.value);
-      const valueB = rdf.asJS(b.value, b.datatype.value);
-      if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        return rdf.createBoolean(
+    if (termIsLiteral(a) && termIsLiteral(b)) {
+      const valueA = asJS(a.value, a.datatype.value);
+      const valueB = asJS(b.value, b.datatype.value);
+      if (literalIsDate(a) && literalIsDate(b)) {
+        return createBoolean(
           isEqual(valueA, valueB) || isBefore(valueA, valueB)
         );
       }
-      return rdf.createBoolean(valueA <= valueB);
+      return createBoolean(valueA <= valueB);
     }
-    return rdf.createBoolean(a.value <= b.value);
+    return createBoolean(a.value <= b.value);
   },
 
   ">": function (a: Term, b: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.termIsLiteral(b)) {
-      const valueA = rdf.asJS(a.value, a.datatype.value);
-      const valueB = rdf.asJS(b.value, b.datatype.value);
-      if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        return rdf.createBoolean(isAfter(valueA, valueB));
+    if (termIsLiteral(a) && termIsLiteral(b)) {
+      const valueA = asJS(a.value, a.datatype.value);
+      const valueB = asJS(b.value, b.datatype.value);
+      if (literalIsDate(a) && literalIsDate(b)) {
+        return createBoolean(isAfter(valueA, valueB));
       }
-      return rdf.createBoolean(valueA > valueB);
+      return createBoolean(valueA > valueB);
     }
-    return rdf.createBoolean(a.value > b.value);
+    return createBoolean(a.value > b.value);
   },
 
   ">=": function (a: Term, b: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.termIsLiteral(b)) {
-      const valueA = rdf.asJS(a.value, a.datatype.value);
-      const valueB = rdf.asJS(b.value, b.datatype.value);
-      if (rdf.literalIsDate(a) && rdf.literalIsDate(b)) {
-        return rdf.createBoolean(
+    if (termIsLiteral(a) && termIsLiteral(b)) {
+      const valueA = asJS(a.value, a.datatype.value);
+      const valueB = asJS(b.value, b.datatype.value);
+      if (literalIsDate(a) && literalIsDate(b)) {
+        return createBoolean(
           isEqual(valueA, valueB) || isAfter(valueA, valueB)
         );
       }
-      return rdf.createBoolean(valueA >= valueB);
+      return createBoolean(valueA >= valueB);
     }
-    return rdf.createBoolean(a.value >= b.value);
+    return createBoolean(a.value >= b.value);
   },
 
   "!": function (a: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.literalIsBoolean(a)) {
-      return rdf.createBoolean(!rdf.asJS(a.value, a.datatype.value));
+    if (termIsLiteral(a) && literalIsBoolean(a)) {
+      return createBoolean(!asJS(a.value, a.datatype.value));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the negation of a non boolean literal ${a}`
@@ -231,14 +249,13 @@ export default {
 
   "&&": function (a: Term, b: Term): Term {
     if (
-      rdf.termIsLiteral(a) &&
-      rdf.termIsLiteral(b) &&
-      rdf.literalIsBoolean(a) &&
-      rdf.literalIsBoolean(b)
+      termIsLiteral(a) &&
+      termIsLiteral(b) &&
+      literalIsBoolean(a) &&
+      literalIsBoolean(b)
     ) {
-      return rdf.createBoolean(
-        rdf.asJS(a.value, a.datatype.value) &&
-          rdf.asJS(b.value, b.datatype.value)
+      return createBoolean(
+        asJS(a.value, a.datatype.value) && asJS(b.value, b.datatype.value)
       );
     }
     throw new SyntaxError(
@@ -248,14 +265,13 @@ export default {
 
   "||": function (a: Term, b: Term): Term {
     if (
-      rdf.termIsLiteral(a) &&
-      rdf.termIsLiteral(b) &&
-      rdf.literalIsBoolean(a) &&
-      rdf.literalIsBoolean(b)
+      termIsLiteral(a) &&
+      termIsLiteral(b) &&
+      literalIsBoolean(a) &&
+      literalIsBoolean(b)
     ) {
-      return rdf.createBoolean(
-        rdf.asJS(a.value, a.datatype.value) ||
-          rdf.asJS(b.value, b.datatype.value)
+      return createBoolean(
+        asJS(a.value, a.datatype.value) || asJS(b.value, b.datatype.value)
       );
     }
     throw new SyntaxError(
@@ -267,19 +283,19 @@ export default {
     SPARQL Functional forms https://www.w3.org/TR/sparql11-query/#func-forms
   */
   bound: function (a: Term) {
-    return rdf.createBoolean(!isNull(a));
+    return createBoolean(!isNull(a));
   },
 
   sameterm: function (a: Term, b: Term): Term {
-    return rdf.createBoolean(a.value === b.value);
+    return createBoolean(a.value === b.value);
   },
 
   in: function (a: Term, b: Term[]): Term {
-    return rdf.createBoolean(b.some((elt) => a.equals(elt)));
+    return createBoolean(b.some((elt) => a.equals(elt)));
   },
 
   notin: function (a: Term, b: Term[]): Term {
-    return rdf.createBoolean(!b.some((elt) => a.equals(elt)));
+    return createBoolean(!b.some((elt) => a.equals(elt)));
   },
 
   /*
@@ -287,64 +303,64 @@ export default {
   */
 
   isiri: function (a: Term): Term {
-    return rdf.createBoolean(rdf.termIsIRI(a));
+    return createBoolean(termIsIRI(a));
   },
 
   isblank: function (a: Term): Term {
-    return rdf.createBoolean(rdf.termIsBNode(a));
+    return createBoolean(termIsBNode(a));
   },
 
   isliteral: function (a: Term): Term {
-    return rdf.createBoolean(rdf.termIsLiteral(a));
+    return createBoolean(termIsLiteral(a));
   },
 
   isnumeric: function (a: Term): Term {
-    return rdf.createBoolean(rdf.termIsLiteral(a) && rdf.literalIsNumeric(a));
+    return createBoolean(termIsLiteral(a) && literalIsNumeric(a));
   },
 
   str: function (a: Term): Term {
-    return rdf.createLiteral(a.value);
+    return createLiteral(a.value);
   },
 
   lang: function (a: Term): Term {
-    if (rdf.termIsLiteral(a)) {
-      return rdf.createLiteral(a.language.toLowerCase());
+    if (termIsLiteral(a)) {
+      return createLiteral(a.language.toLowerCase());
     }
-    return rdf.createLiteral("");
+    return createLiteral("");
   },
 
   datatype: function (a: Term): Term {
-    if (rdf.termIsLiteral(a)) {
+    if (termIsLiteral(a)) {
       return a.datatype;
     }
-    return rdf.createLiteral("");
+    return createLiteral("");
   },
 
   iri: function (a: Term): Term {
-    return rdf.createIRI(a.value);
+    return createIRI(a.value);
   },
 
   bnode: function (a?: Term): Term {
     if (a === undefined) {
-      return rdf.createBNode();
+      return createBNode();
     }
-    return rdf.createBNode(a.value);
+    return createBNode(a.value);
   },
 
   strdt: function (x: Term, datatype: Term): Term {
-    return rdf.createTypedLiteral(x.value, datatype.value);
+    return createTypedLiteral(x.value, datatype.value);
   },
 
   strlang: function (x: Term, lang: Term): Term {
-    return rdf.createLangLiteral(x.value, lang.value);
+    return createLangLiteral(x.value, lang.value);
   },
 
   uuid: function (): Term {
-    return rdf.createIRI(`urn:uuid:${crypto.randomUUID()}`);
+    return createIRI(`urn:uuid:${randomUUID()}`);
   },
 
   struuid: function (): Term {
-    return rdf.createLiteral(crypto.randomUUID());
+    return createLiteral(randomUUID());
   },
 
   /*
@@ -352,11 +368,11 @@ export default {
   */
 
   strlen: function (a: Term): Term {
-    return rdf.createInteger(a.value.length);
+    return createInteger(a.value.length);
   },
 
   substr: function (str: Term, index: Term, length?: Term): Term {
-    const indexValue = rdf.asJS(index.value, rdf.XSD("integer"));
+    const indexValue = asJS(index.value, XSD("integer"));
     if (indexValue < 1) {
       throw new SyntaxError(
         "SPARQL SUBSTR error: the index of the first character in a string is 1 (according to the SPARQL W3C specs)"
@@ -364,60 +380,60 @@ export default {
     }
     let value = str.value.substring(indexValue - 1);
     if (length !== undefined) {
-      const lengthValue = rdf.asJS(length.value, rdf.XSD("integer"));
+      const lengthValue = asJS(length.value, XSD("integer"));
       value = value.substring(0, lengthValue);
     }
-    return rdf.shallowCloneTerm(str, value);
+    return shallowCloneTerm(str, value);
   },
 
   ucase: function (a: Term): Term {
-    return rdf.shallowCloneTerm(a, a.value.toUpperCase());
+    return shallowCloneTerm(a, a.value.toUpperCase());
   },
 
   lcase: function (a: Term): Term {
-    return rdf.shallowCloneTerm(a, a.value.toLowerCase());
+    return shallowCloneTerm(a, a.value.toLowerCase());
   },
 
   strstarts: function (term: Term, substring: Term): Term {
     const a = term.value;
     const b = substring.value;
-    return rdf.createBoolean(a.startsWith(b));
+    return createBoolean(a.startsWith(b));
   },
 
   strends: function (term: Term, substring: Term): Term {
     const a = term.value;
     const b = substring.value;
-    return rdf.createBoolean(a.endsWith(b));
+    return createBoolean(a.endsWith(b));
   },
 
   contains: function (term: Term, substring: Term): Term {
     const a = term.value;
     const b = substring.value;
-    return rdf.createBoolean(a.indexOf(b) >= 0);
+    return createBoolean(a.indexOf(b) >= 0);
   },
 
   strbefore: function (term: Term, token: Term): Term {
     const index = term.value.indexOf(token.value);
     const value = index > -1 ? term.value.substring(0, index) : "";
-    return rdf.shallowCloneTerm(term, value);
+    return shallowCloneTerm(term, value);
   },
 
   strafter: function (str: Term, token: Term): Term {
     const index = str.value.indexOf(token.value);
     const value =
       index > -1 ? str.value.substring(index + token.value.length) : "";
-    return rdf.shallowCloneTerm(str, value);
+    return shallowCloneTerm(str, value);
   },
 
   encode_for_uri: function (a: Term): Term {
-    return rdf.createLiteral(encodeURIComponent(a.value));
+    return createLiteral(encodeURIComponent(a.value));
   },
 
   concat: function (a: Term, b: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.termIsLiteral(b)) {
-      return rdf.shallowCloneTerm(a, a.value + b.value);
+    if (termIsLiteral(a) && termIsLiteral(b)) {
+      return shallowCloneTerm(a, a.value + b.value);
     }
-    return rdf.createLiteral(a.value + b.value);
+    return createLiteral(a.value + b.value);
   },
 
   langmatches: function (langTag: Term, langRange: Term): Term {
@@ -428,7 +444,7 @@ export default {
       tag === range ||
       range === "*" ||
       tag.substr(1, range.length + 1) === range + "-";
-    return rdf.createBoolean(test);
+    return createBoolean(test);
   },
 
   regex: function (subject: Term, pattern: Term, flags?: Term) {
@@ -436,7 +452,7 @@ export default {
       flags === undefined
         ? new RegExp(pattern.value)
         : new RegExp(pattern.value, flags.value);
-    return rdf.createBoolean(regexp.test(subject.value));
+    return createBoolean(regexp.test(subject.value));
   },
 
   replace: function (
@@ -450,12 +466,12 @@ export default {
         ? new RegExp(pattern.value)
         : new RegExp(pattern.value, flags.value);
     const newValue = arg.value.replace(regexp, replacement.value);
-    if (rdf.termIsIRI(arg)) {
-      return rdf.createIRI(newValue);
-    } else if (rdf.termIsBNode(arg)) {
-      return rdf.createBNode(newValue);
+    if (termIsIRI(arg)) {
+      return createIRI(newValue);
+    } else if (termIsBNode(arg)) {
+      return createBNode(newValue);
     }
-    return rdf.shallowCloneTerm(arg, newValue);
+    return shallowCloneTerm(arg, newValue);
   },
 
   /*
@@ -463,8 +479,8 @@ export default {
   */
 
   abs: function (a: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.literalIsNumeric(a)) {
-      return rdf.createInteger(Math.abs(rdf.asJS(a.value, a.datatype.value)));
+    if (termIsLiteral(a) && literalIsNumeric(a)) {
+      return createInteger(Math.abs(asJS(a.value, a.datatype.value)));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the absolute value of the non-numeric term ${a}`
@@ -472,8 +488,8 @@ export default {
   },
 
   round: function (a: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.literalIsNumeric(a)) {
-      return rdf.createInteger(Math.round(rdf.asJS(a.value, a.datatype.value)));
+    if (termIsLiteral(a) && literalIsNumeric(a)) {
+      return createInteger(Math.round(asJS(a.value, a.datatype.value)));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the rounded value of the non-numeric term ${a}`
@@ -481,8 +497,8 @@ export default {
   },
 
   ceil: function (a: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.literalIsNumeric(a)) {
-      return rdf.createInteger(Math.ceil(rdf.asJS(a.value, a.datatype.value)));
+    if (termIsLiteral(a) && literalIsNumeric(a)) {
+      return createInteger(Math.ceil(asJS(a.value, a.datatype.value)));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute Math.ceil on the non-numeric term ${a}`
@@ -490,8 +506,8 @@ export default {
   },
 
   floor: function (a: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.literalIsNumeric(a)) {
-      return rdf.createInteger(Math.floor(rdf.asJS(a.value, a.datatype.value)));
+    if (termIsLiteral(a) && literalIsNumeric(a)) {
+      return createInteger(Math.floor(asJS(a.value, a.datatype.value)));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute Math.floor on the non-numeric term ${a}`
@@ -503,12 +519,12 @@ export default {
   */
 
   now: function (): Term {
-    return rdf.createDate(new Date());
+    return createDate(new Date());
   },
 
   year: function (a: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.literalIsDate(a)) {
-      return rdf.createInteger(Number(parseISO8601(a.value).year));
+    if (termIsLiteral(a) && literalIsDate(a)) {
+      return createInteger(Number(parseISO8601(a.value).year));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the year of the RDF Term ${a}, as it is not a date`
@@ -516,9 +532,9 @@ export default {
   },
 
   month: function (a: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.literalIsDate(a)) {
-      const value = rdf.asJS(a.value, a.datatype.value);
-      return rdf.createInteger(Number(parseISO8601(a.value).month));
+    if (termIsLiteral(a) && literalIsDate(a)) {
+      const value = asJS(a.value, a.datatype.value);
+      return createInteger(Number(parseISO8601(a.value).month));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the month of the RDF Term ${a}, as it is not a date`
@@ -526,8 +542,8 @@ export default {
   },
 
   day: function (a: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.literalIsDate(a)) {
-      return rdf.createInteger(Number(parseISO8601(a.value).day));
+    if (termIsLiteral(a) && literalIsDate(a)) {
+      return createInteger(Number(parseISO8601(a.value).day));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the day of the RDF Term ${a}, as it is not a date`
@@ -535,8 +551,8 @@ export default {
   },
 
   hours: function (a: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.literalIsDate(a)) {
-      return rdf.createInteger(Number(parseISO8601(a.value).hour));
+    if (termIsLiteral(a) && literalIsDate(a)) {
+      return createInteger(Number(parseISO8601(a.value).hour));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the hours of the RDF Term ${a}, as it is not a date`
@@ -544,8 +560,8 @@ export default {
   },
 
   minutes: function (a: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.literalIsDate(a)) {
-      return rdf.createInteger(Number(parseISO8601(a.value).minute));
+    if (termIsLiteral(a) && literalIsDate(a)) {
+      return createInteger(Number(parseISO8601(a.value).minute));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the minutes of the RDF Term ${a}, as it is not a date`
@@ -553,8 +569,8 @@ export default {
   },
 
   seconds: function (a: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.literalIsDate(a)) {
-      return rdf.createDecimal(Number(parseISO8601(a.value).second));
+    if (termIsLiteral(a) && literalIsDate(a)) {
+      return createDecimal(Number(parseISO8601(a.value).second));
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the seconds of the RDF Term ${a}, as it is not a date`
@@ -562,8 +578,8 @@ export default {
   },
 
   tz: function (a: Term): Term {
-    if (rdf.termIsLiteral(a) && rdf.literalIsDate(a)) {
-      return rdf.createLiteral(parseISO8601(a.value).timezone);
+    if (termIsLiteral(a) && literalIsDate(a)) {
+      return createLiteral(parseISO8601(a.value).timezone);
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the timezone of the RDF Term ${a}, as it is not a date`

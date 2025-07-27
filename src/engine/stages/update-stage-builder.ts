@@ -51,7 +51,7 @@ import ExecutionContext from "../context/execution-context.ts";
 import ContextSymbols from "../context/symbols.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import { Pipeline } from "../pipeline/pipeline.ts";
-import * as rewritings from "./rewritings.ts";
+import { rewriteAdd, rewriteCopy, rewriteMove } from "./rewritings.ts";
 import StageBuilder from "./stage-builder.ts";
 
 /**
@@ -157,19 +157,19 @@ export default class UpdateStageBuilder extends StageBuilder {
               return this._handleClearQuery(update);
             case "add":
               return this._handleInsertDelete(
-                rewritings.rewriteAdd(update, this._dataset),
+                rewriteAdd(update, this._dataset),
                 context
               );
             case "copy":
               // A COPY query is rewritten into a sequence [CLEAR query, INSERT query]
-              queries = rewritings.rewriteCopy(update, this._dataset);
+              queries = rewriteCopy(update, this._dataset);
               return new ManyConsumers([
                 this._handleClearQuery(queries[0]),
                 this._handleInsertDelete(queries[1], context),
               ]);
             case "move":
               // A MOVE query is rewritten into a sequence [CLEAR query, INSERT query, CLEAR query]
-              queries = rewritings.rewriteMove(update, this._dataset);
+              queries = rewriteMove(update, this._dataset);
               return new ManyConsumers([
                 this._handleClearQuery(queries[0]),
                 this._handleInsertDelete(queries[1], context),

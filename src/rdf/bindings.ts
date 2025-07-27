@@ -29,7 +29,7 @@ import { isNull, isUndefined } from "lodash-es";
 import { stringToTerm, termToString } from "rdf-string";
 import type { ValuePatternRow } from "sparqljs";
 import type { EngineTriple, EngineTripleValue } from "../types.ts";
-import * as rdf from "../utils/rdf.ts";
+import { isVariable } from "../utils/rdf.ts";
 
 type Term = EngineTripleValue;
 
@@ -202,13 +202,13 @@ export abstract class Bindings {
    */
   bound(triple: EngineTriple): EngineTriple {
     const newTriple = Object.assign({}, triple);
-    if (rdf.isVariable(triple.subject) && this.has(triple.subject.value)) {
+    if (isVariable(triple.subject) && this.has(triple.subject.value)) {
       newTriple.subject = this.get(triple.subject.value) as Quad_Subject;
     }
-    if (rdf.isVariable(triple.predicate) && this.has(triple.predicate.value)) {
+    if (isVariable(triple.predicate) && this.has(triple.predicate.value)) {
       newTriple.predicate = this.get(triple.predicate.value) as Quad_Predicate;
     }
-    if (rdf.isVariable(triple.object) && this.has(triple.object.value)) {
+    if (isVariable(triple.object) && this.has(triple.object.value)) {
       newTriple.object = this.get(triple.object.value)!;
     }
     return newTriple;

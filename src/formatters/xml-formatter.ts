@@ -31,7 +31,7 @@ import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import { Bindings } from "../rdf/bindings.ts";
 import type { EngineTripleValue } from "../types.ts";
-import * as rdf from "../utils/rdf.ts";
+import { termIsBNode, termIsIRI, termIsLiteral } from "../utils/rdf.ts";
 
 type Term = EngineTripleValue;
 type RDFBindings = { [key: string]: Term };
@@ -53,11 +53,11 @@ function _writeBindings(input: Bindings, results: any) {
   results.push({
     result: map(bindings, (value, variable) => {
       let xmlTag;
-      if (rdf.termIsIRI(value)) {
+      if (termIsIRI(value)) {
         xmlTag = { uri: value.value };
-      } else if (rdf.termIsBNode(value)) {
+      } else if (termIsBNode(value)) {
         xmlTag = { bnode: value.value };
-      } else if (rdf.termIsLiteral(value)) {
+      } else if (termIsLiteral(value)) {
         if (value.language === "") {
           xmlTag = {
             literal: [{ _attr: { "xml:lang": value.language } }, value.value],

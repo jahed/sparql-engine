@@ -32,8 +32,8 @@ import BGPStageBuilder from "../../engine/stages/bgp-stage-builder.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
 import type { EngineTriple } from "../../types.ts";
-import * as evaluation from "../../utils/evaluation.ts";
-import * as rdf from "../../utils/rdf.ts";
+import { cacheEvalBGP } from "../../utils/evaluation.ts";
+import { dataFactory, isVariable } from "../../utils/rdf.ts";
 import rewritingOp from "./rewriting-op.ts";
 
 // The default size of the bucket of Basic Graph Patterns used by the Bound Join algorithm
@@ -53,16 +53,14 @@ type BasicGraphPattern = EngineTriple[];
  */
 function rewriteTriple(triple: EngineTriple, key: number): EngineTriple {
   const res = Object.assign({}, triple);
-  if (rdf.isVariable(triple.subject)) {
-    res.subject = rdf.dataFactory.variable(`${triple.subject.value}_${key}`);
+  if (isVariable(triple.subject)) {
+    res.subject = dataFactory.variable(`${triple.subject.value}_${key}`);
   }
-  if (rdf.isVariable(triple.predicate)) {
-    res.predicate = rdf.dataFactory.variable(
-      `${triple.predicate.value}_${key}`
-    );
+  if (isVariable(triple.predicate)) {
+    res.predicate = dataFactory.variable(`${triple.predicate.value}_${key}`);
   }
-  if (rdf.isVariable(triple.object)) {
-    res.object = rdf.dataFactory.variable(`${triple.object.value}_${key}`);
+  if (isVariable(triple.object)) {
+    res.object = dataFactory.variable(`${triple.object.value}_${key}`);
   }
   return res;
 }
@@ -93,13 +91,7 @@ export default function boundJoin(
       // simple case: first join in the pipeline
       if (bucket.length === 1 && bucket[0].isEmpty) {
         if (context.cachingEnabled()) {
-          return evaluation.cacheEvalBGP(
-            bgp,
-            graph,
-            context.cache!,
-            builder,
-            context
-          );
+          return cacheEvalBGP(bgp, graph, context.cache!, builder, context);
         }
         return graph.evalBGP(bgp, context);
       } else {
@@ -122,9 +114,9 @@ export default function boundJoin(
             boundedBGP.push(boundedTriple);
             // track the number of fully bounded triples, i.e., triple patterns without any SPARQL variables
             if (
-              !rdf.isVariable(boundedTriple.subject) &&
-              !rdf.isVariable(boundedTriple.predicate) &&
-              !rdf.isVariable(boundedTriple.object)
+              !isVariable(boundedTriple.subject) &&
+              !isVariable(boundedTriple.predicate) &&
+              !isVariable(boundedTriple.object)
             ) {
               nbBounded++;
             }

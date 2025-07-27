@@ -72,8 +72,7 @@ import { isNull, isUndefined, partition, some, sortBy } from "lodash-es";
 import type { CustomFunctions } from "../operators/expressions/sparql-expression.ts";
 import type { EngineTriple } from "../types.ts";
 import { deepApplyBindings, extendByBindings } from "../utils.ts";
-import * as rdf from "../utils/rdf.ts";
-import { dataFactory } from "../utils/rdf.ts";
+import { dataFactory, isVariable } from "../utils/rdf.ts";
 import ExecutionContext from "./context/execution-context.ts";
 import ContextSymbols from "./context/symbols.ts";
 import { extractPropertyPaths } from "./stages/rewritings.ts";
@@ -425,7 +424,7 @@ export class PlanBuilder {
     groups = sortBy(groups, (g) => {
       switch (g.type) {
         case "graph":
-          if (rdf.isVariable(g.name)) {
+          if (isVariable(g.name)) {
             return 5;
           }
           return 0;
@@ -502,11 +501,13 @@ export class PlanBuilder {
         }
 
         // delegate remaining BGP evaluation to the dedicated executor
-        let iter = this._stageBuilders.get(SPARQL_OPERATION.BGP)!.execute(
-          source,
-          classicTriples,
-          childContext
-        ) as PipelineStage<Bindings>;
+        let iter = this._stageBuilders
+          .get(SPARQL_OPERATION.BGP)!
+          .execute(
+            source,
+            classicTriples,
+            childContext
+          ) as PipelineStage<Bindings>;
 
         return iter;
       case "query":

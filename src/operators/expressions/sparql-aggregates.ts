@@ -28,7 +28,13 @@ import { maxBy, meanBy, minBy, sample } from "lodash-es";
 
 import type { VariableTerm } from "sparqljs";
 import type { EngineTripleValue } from "../../types.ts";
-import * as rdf from "../../utils/rdf.ts";
+import {
+  asJS,
+  createInteger,
+  createLiteral,
+  literalIsNumeric,
+  termIsLiteral,
+} from "../../utils/rdf.ts";
 
 type Term = EngineTripleValue;
 
@@ -48,52 +54,52 @@ export default {
     if (variable.value in rows) {
       count = rows[variable.value].map((v: Term) => v !== null).length;
     }
-    return rdf.createInteger(count);
+    return createInteger(count);
   },
   sum: function (variable: VariableTerm, rows: TermRows): Term {
     let sum = 0;
     if (variable.value in rows) {
       sum = rows[variable.value].reduce((acc: number, b: Term) => {
-        if (rdf.termIsLiteral(b) && rdf.literalIsNumeric(b)) {
-          return acc + rdf.asJS(b.value, b.datatype.value);
+        if (termIsLiteral(b) && literalIsNumeric(b)) {
+          return acc + asJS(b.value, b.datatype.value);
         }
         return acc;
       }, 0);
     }
-    return rdf.createInteger(sum);
+    return createInteger(sum);
   },
 
   avg: function (variable: VariableTerm, rows: TermRows): Term {
     let avg = 0;
     if (variable.value in rows) {
       avg = meanBy(rows[variable.value], (term: Term) => {
-        if (rdf.termIsLiteral(term) && rdf.literalIsNumeric(term)) {
-          return rdf.asJS(term.value, term.datatype.value);
+        if (termIsLiteral(term) && literalIsNumeric(term)) {
+          return asJS(term.value, term.datatype.value);
         }
       });
     }
-    return rdf.createInteger(avg);
+    return createInteger(avg);
   },
 
   min: function (variable: VariableTerm, rows: TermRows): Term {
     return (
       minBy(rows[variable.value], (v: Term) => {
-        if (rdf.termIsLiteral(v)) {
-          return rdf.asJS(v.value, v.datatype.value);
+        if (termIsLiteral(v)) {
+          return asJS(v.value, v.datatype.value);
         }
         return v.value;
-      }) || rdf.createInteger(-1)
+      }) || createInteger(-1)
     );
   },
 
   max: function (variable: VariableTerm, rows: TermRows): Term {
     return (
       maxBy(rows[variable.value], (v: Term) => {
-        if (rdf.termIsLiteral(v)) {
-          return rdf.asJS(v.value, v.datatype.value);
+        if (termIsLiteral(v)) {
+          return asJS(v.value, v.datatype.value);
         }
         return v.value;
-      }) || rdf.createInteger(-1)
+      }) || createInteger(-1)
     );
   },
 
@@ -103,7 +109,7 @@ export default {
     sep: string = ""
   ): Term {
     const value = rows[variable.value].map((v: Term) => v.value).join(sep);
-    return rdf.createLiteral(value);
+    return createLiteral(value);
   },
 
   sample: function (variable: VariableTerm, rows: TermRows): Term {

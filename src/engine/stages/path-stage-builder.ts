@@ -32,7 +32,6 @@ import type {
   EngineSubject,
   EngineTriple,
 } from "../../types.ts";
-import * as rdf from "../../utils/rdf.ts";
 import { isVariable } from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
@@ -145,14 +144,14 @@ export default abstract class PathStageBuilder extends StageBuilder {
     );
     return Pipeline.getInstance().map(evaluator, (triple: EngineTriple) => {
       const temp = new BindingBase();
-      if (rdf.isVariable(subject)) {
+      if (isVariable(subject)) {
         temp.set(subject.value, triple.subject);
       }
-      if (rdf.isVariable(obj)) {
+      if (isVariable(obj)) {
         temp.set(obj.value, triple.object);
       }
       // TODO: change the function's behavior for ask queries when subject and object are given
-      if (!rdf.isVariable(subject) && !rdf.isVariable(obj)) {
+      if (!isVariable(subject) && !isVariable(obj)) {
         temp.set("ask_s", triple.subject);
         temp.set("ask_v", triple.object);
       }

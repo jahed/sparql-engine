@@ -28,8 +28,7 @@ import { BinarySearchTree } from "binary-search-tree";
 import { differenceWith, findIndex, maxBy } from "lodash-es";
 import { Bindings } from "../../rdf/bindings.ts";
 import type { EngineIRI, EngineTriple } from "../../types.ts";
-import * as rdf from "../../utils/rdf.ts";
-import * as sparql from "../../utils/sparql.ts";
+import { hashTriple, termToValue, tripleEquals } from "../../utils/rdf.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import { Pipeline } from "../pipeline/pipeline.ts";
 import { type AsyncCacheEntry, AsyncLRUCache } from "./cache-base.ts";
@@ -45,12 +44,8 @@ interface SavedBGP {
   key: string;
 }
 
-/**
- * Hash a BGP with a Graph IRI
- * @param bgp - BGP to hash
- */
 function hashBasicGraphPattern(bgp: BasicGraphPattern): string {
-  return `${sparql.hashBGP(bgp.patterns)}&graph-iri=${bgp.graphIRI.value}`;
+  return `${bgp.patterns.map(hashTriple).join(";")}&graph-iri=${termToValue(bgp.graphIRI)}`;
 }
 
 /**
@@ -110,7 +105,7 @@ export class LRUBGPCache implements BGPCache {
         if (this._patternsPerBGP.has(key)) {
           const bgp = this._patternsPerBGP.get(key)!;
           bgp.patterns.forEach((pattern) =>
-            this._allKeys.delete(rdf.hashTriple(pattern), { bgp, key })
+            this._allKeys.delete(hashTriple(pattern), { bgp, key })
           );
           this._patternsPerBGP.delete(key);
         }
@@ -128,7 +123,7 @@ export class LRUBGPCache implements BGPCache {
       // update the indexes
       this._patternsPerBGP.set(key, bgp);
       bgp.patterns.forEach((pattern) =>
-        this._allKeys.insert(rdf.hashTriple(pattern), { bgp, key })
+        this._allKeys.insert(hashTriple(pattern), { bgp, key })
       );
     }
     this._cache.update(key, item, writerID);
@@ -169,7 +164,7 @@ export class LRUBGPCache implements BGPCache {
     // clear the indexes
     this._patternsPerBGP.delete(key);
     bgp.patterns.forEach((pattern) =>
-      this._allKeys.delete(rdf.hashTriple(pattern), { bgp, key })
+      this._allKeys.delete(hashTriple(pattern), { bgp, key })
     );
   }
 
@@ -186,12 +181,12 @@ export class LRUBGPCache implements BGPCache {
     let matches = [];
     for (let pattern of bgp.patterns) {
       const searchResults = this._allKeys
-        .search(rdf.hashTriple(pattern))
+        .search(hashTriple(pattern))
         .filter((v) => {
           // remove all BGPs that are not a subset of the input BGP
           // we use lodash.findIndex + rdf.tripleEquals to check for triple pattern equality
           return v.bgp.patterns.every(
-            (a) => findIndex(bgp.patterns, (b) => rdf.tripleEquals(a, b)) > -1
+            (a) => findIndex(bgp.patterns, (b) => tripleEquals(a, b)) > -1
           );
         });
       matches.push({ pattern, searchResults });
@@ -216,7 +211,7 @@ export class LRUBGPCache implements BGPCache {
     }
     return [
       foundPatterns,
-      differenceWith(bgp.patterns, foundPatterns, rdf.tripleEquals),
+      differenceWith(bgp.patterns, foundPatterns, tripleEquals),
     ];
   }
 }

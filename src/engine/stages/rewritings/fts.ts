@@ -2,7 +2,7 @@
 
 import type { VariableTerm } from "sparqljs";
 import type { EngineTriple } from "../../../types.ts";
-import * as rdf from "../../../utils/rdf.ts";
+import { SES, isIRI, isVariable } from "../../../utils/rdf.ts";
 
 /**
  * A Full Text Search query
@@ -40,15 +40,12 @@ export function extractFullTextSearchQueries(
   // find, validate and group all magic triples per query variable
   const patterns: EngineTriple[] = [];
   const magicGroups = new Map<string, EngineTriple[]>();
-  const prefix = rdf.SES("");
+  const prefix = SES("");
   bgp.forEach((triple) => {
     // A magic triple is an IRI prefixed by 'https://callidon.github.io/sparql-engine/search#'
-    if (
-      rdf.isIRI(triple.predicate) &&
-      triple.predicate.value.startsWith(prefix)
-    ) {
+    if (isIRI(triple.predicate) && triple.predicate.value.startsWith(prefix)) {
       // assert that the magic triple's subject is a variable
-      if (!rdf.isVariable(triple.subject)) {
+      if (!isVariable(triple.subject)) {
         throw new SyntaxError(
           `Invalid Full Text Search query: the subject of the magic triple ${triple} must a valid URI/IRI.`
         );
