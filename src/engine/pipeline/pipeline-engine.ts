@@ -221,6 +221,11 @@ export abstract class PipelineEngine {
     mapper: (value: F) => PipelineStage<T>
   ): PipelineStage<T>;
 
+  abstract mergeMapAsync<F, T>(
+    input: PipelineStage<F>,
+    predicate: (value: F) => PipelineStage<T> | Promise<PipelineStage<T>>
+  ): PipelineStage<T>;
+
   /**
    * Do something after the PipelineStage has produced all its results
    * @param  input    - Input PipelineStage
@@ -263,6 +268,11 @@ export abstract class PipelineEngine {
   abstract filter<T>(
     input: PipelineStage<T>,
     predicate: (value: T) => boolean
+  ): PipelineStage<T>;
+
+  abstract filterAsync<T>(
+    input: PipelineStage<T>,
+    predicate: (value: T) => boolean | Promise<boolean>
   ): PipelineStage<T>;
 
   /**

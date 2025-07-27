@@ -50,16 +50,19 @@ export default function sparqlFilter(
   customFunctions?: CustomFunctions
 ) {
   const expr = new SPARQLExpression(expression, customFunctions);
-  return Pipeline.getInstance().filter(source, (bindings: Bindings) => {
-    const result = expr.evaluate(bindings);
-    if (
-      result &&
-      "datatype" in result &&
-      termIsLiteral(result) &&
-      literalIsBoolean(result)
-    ) {
-      return termToValue(result);
+  return Pipeline.getInstance().filterAsync(
+    source,
+    async (bindings: Bindings) => {
+      const result = await expr.evaluate(bindings);
+      if (
+        result &&
+        "datatype" in result &&
+        termIsLiteral(result) &&
+        literalIsBoolean(result)
+      ) {
+        return termToValue(result);
+      }
+      return false;
     }
-    return false;
-  });
+  );
 }

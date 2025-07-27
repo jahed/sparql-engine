@@ -213,13 +213,29 @@ export default class VectorPipeline extends PipelineEngine {
     mapper: (value: F) => VectorStage<T>
   ): VectorStage<T> {
     return new VectorStage<T>(
-      input.getContent().then((content) => {
-        const stages: VectorStage<T>[] = content.map((value) => mapper(value));
-        return Promise.all(stages.map((s) => s.getContent())).then(
-          (contents: T[][]) => {
-            return flatten(contents);
-          }
-        );
+      input.getContent().then(async (content) => {
+        let result: T[] = [];
+        for (const item of content) {
+          const mapped = mapper(item);
+          result = result.concat(await mapped.getContent());
+        }
+        return result;
+      })
+    );
+  }
+
+  mergeMapAsync<F, T>(
+    input: VectorStage<F>,
+    mapper: (value: F) => VectorStage<T> | Promise<VectorStage<T>>
+  ): VectorStage<T> {
+    return new VectorStage<T>(
+      input.getContent().then(async (content) => {
+        let result: T[] = [];
+        for (const item of content) {
+          const mapped = await mapper(item);
+          result = result.concat(await mapped.getContent());
+        }
+        return result;
       })
     );
   }
@@ -230,6 +246,23 @@ export default class VectorPipeline extends PipelineEngine {
   ): VectorStage<T> {
     return new VectorStage<T>(
       input.getContent().then((c) => c.filter(predicate))
+    );
+  }
+
+  filterAsync<T>(
+    input: VectorStage<T>,
+    predicate: (value: T) => boolean | Promise<boolean>
+  ): VectorStage<T> {
+    return new VectorStage<T>(
+      input.getContent().then(async (c) => {
+        const results = [];
+        for (const item of c) {
+          if (await predicate(item)) {
+            results.push(item);
+          }
+        }
+        return results;
+      })
     );
   }
 

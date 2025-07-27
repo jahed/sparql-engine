@@ -63,9 +63,9 @@ export default function bind(
   customFunctions?: CustomFunctions
 ): PipelineStage<Bindings> {
   const expr = new SPARQLExpression(expression, customFunctions);
-  return Pipeline.getInstance().mergeMap(source, (bindings) => {
+  return Pipeline.getInstance().mergeMapAsync(source, async (bindings) => {
     try {
-      const value = expr.evaluate(bindings);
+      const value = await expr.evaluate(bindings);
       if (value && (isArray(value) || isIterable(value))) {
         // build a source of bindings from the array/iterable produced by the expression's evaluation
         return Pipeline.getInstance().fromAsync((input) => {

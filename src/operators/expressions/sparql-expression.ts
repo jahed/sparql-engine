@@ -32,7 +32,6 @@ import type {
   Expression,
   FunctionCallExpression,
   OperationExpression,
-  VariableTerm,
 } from "sparqljs";
 import { Bindings } from "../../rdf/bindings.ts";
 import type { EngineTripleValue } from "../../types.ts";
@@ -62,7 +61,9 @@ export type ExpressionOutput = Term | Term[] | Iterable<Term | null> | null;
 /**
  * A SPARQL expression compiled as a function
  */
-export type CompiledExpression = (bindings: Bindings) => ExpressionOutput;
+export type CompiledExpression = (
+  bindings: Bindings
+) => Promise<ExpressionOutput>;
 
 /**
  * Type alias to describe the shape of custom functions. It's basically a JSON object from an IRI (in string form) to a function of 0 to many RDFTerms that produces an RDFTerm.
@@ -99,20 +100,6 @@ function isFunctionCall(expr: Expression): expr is FunctionCallExpression {
 }
 
 /**
- * Get a function that, given a SPARQL variable, fetch the associated RDF Term in an input set of bindings,
- * or null if it was not found.
- * @param variable - SPARQL variable
- * A fetch the RDF Term associated with the variable in an input set of bindings, or null if it was not found.
- */
-function bindArgument(
-  variable: VariableTerm
-): (bindings: Bindings) => Term | null {
-  return (bindings: Bindings) => {
-    return bindings.get(variable.value);
-  };
-}
-
-/**
  * Compile and evaluate a SPARQL expression (found in FILTER clauses, for example)
  * @author Thomas Minier
  */
@@ -140,14 +127,16 @@ export class SPARQLExpression {
   ): CompiledExpression {
     // case 1: the expression is a SPARQL variable to bound or a RDF term
     if ("termType" in expression) {
-      if (expression.termType === "Variable") {
-        return bindArgument(expression);
+      if (isVariable(expression)) {
+        return async (bindings: Bindings) => {
+          return bindings.get(expression.value);
+        };
       }
-      return () => expression;
+      return async () => expression;
     } else if (isArray(expression)) {
       // case 2: the expression is a list of RDF terms
       // because IN and NOT IN expressions accept arrays as argument
-      return () => expression as Term[];
+      return async () => expression as Term[];
     } else if (isOperation(expression)) {
       // case 3: a SPARQL operation, so we recursively compile each argument
       // and then evaluate the expression
@@ -159,9 +148,11 @@ export class SPARQLExpression {
       }
       const operation = SPARQL_OPERATIONS[
         expression.operator as keyof typeof SPARQL_OPERATIONS
-      ] as (...args: ExpressionOutput[]) => ExpressionOutput;
-      return (bindings: Bindings) =>
-        operation(...args.map((arg) => arg(bindings)));
+      ] as (
+        ...args: ExpressionOutput[]
+      ) => ExpressionOutput | Promise<ExpressionOutput>;
+      return async (bindings: Bindings) =>
+        operation(...(await Promise.all(args.map((arg) => arg(bindings)))));
     } else if (isAggregation(expression)) {
       const aggVariable = expression.expression;
       // case 3: a SPARQL aggregation
@@ -179,7 +170,7 @@ export class SPARQLExpression {
         SPARQL_AGGREGATES[
           expression.aggregation as keyof typeof SPARQL_AGGREGATES
         ];
-      return (bindings: Bindings) => {
+      return async (bindings: Bindings) => {
         if (bindings.hasProperty("__aggregate")) {
           let rows = bindings.getProperty("__aggregate") as Group;
           if (expression.distinct) {
@@ -218,7 +209,7 @@ export class SPARQLExpression {
         );
       }
       if (isAggregate) {
-        return (bindings: Bindings) => {
+        return async (bindings: Bindings) => {
           if (bindings.hasProperty("__aggregate")) {
             const rows = bindings.getProperty("__aggregate");
             return customFunction(...expression.args, rows);
@@ -228,12 +219,14 @@ export class SPARQLExpression {
           );
         };
       }
-      return (bindings: Bindings) => {
+      return async (bindings: Bindings) => {
         try {
           const args = expression.args.map((args) =>
             this._compileExpression(args, customFunctions)
           );
-          return customFunction(...args.map((arg) => arg(bindings)));
+          return customFunction(
+            ...(await Promise.all(args.map((arg) => arg(bindings))))
+          );
         } catch (e) {
           // In section 10 of the sparql docs (https://www.w3.org/TR/sparql11-query/#assignment) it states:
           // "If the evaluation of the expression produces an error, the variable remains unbound for that solution but the query evaluation continues."
@@ -252,7 +245,7 @@ export class SPARQLExpression {
    * @param  bindings - Set of mappings
    * @return Results of the evaluation
    */
-  evaluate(bindings: Bindings): ExpressionOutput {
+  async evaluate(bindings: Bindings): Promise<ExpressionOutput> {
     return this._expression(bindings);
   }
 }

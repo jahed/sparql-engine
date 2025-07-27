@@ -172,11 +172,34 @@ export default class RxjsPipeline extends PipelineEngine {
     return input.pipe(mergeMap(mapper));
   }
 
+  mergeMapAsync<F, T>(
+    input: Observable<F>,
+    mapper: (value: F) => Observable<T> | Promise<Observable<T>>
+  ): Observable<T> {
+    return input.pipe(
+      mergeMap((v) => from(Promise.resolve(mapper(v))).pipe(mergeMap((n) => n)))
+    );
+  }
+
   filter<T>(
     input: Observable<T>,
     predicate: (value: T) => boolean
   ): Observable<T> {
     return input.pipe(filter(predicate));
+  }
+
+  filterAsync<T>(
+    input: Observable<T>,
+    predicate: (value: T) => boolean | Promise<boolean>
+  ): Observable<T> {
+    return input.pipe(
+      flatMap((v) =>
+        from(Promise.resolve(predicate(v))).pipe(
+          filter((b) => b),
+          map(() => v)
+        )
+      )
+    );
   }
 
   finalize<T>(input: Observable<T>, callback: () => void): Observable<T> {
