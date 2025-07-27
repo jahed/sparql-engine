@@ -154,11 +154,11 @@ export default class BGPStageBuilder extends StageBuilder {
             context
           );
           if (artificals.length > 0) {
-            iterator = engine.map(iterator, (b: Bindings) =>
-              b.filter((variable) =>
-                artificals.some((a) => a.value === variable)
-              )
-            );
+            iterator = engine.map(iterator, (b: Bindings) => {
+              return b.filter(
+                (variable) => !artificals.some((a) => a.value === variable)
+              );
+            });
           }
           return iterator;
         }
@@ -189,9 +189,11 @@ export default class BGPStageBuilder extends StageBuilder {
 
     // remove artificials variables from bindings
     if (artificals.length > 0) {
-      iterator = Pipeline.getInstance().map(iterator, (b: Bindings) =>
-        b.filter((variable) => artificals.some((a) => a.value === variable))
-      );
+      iterator = Pipeline.getInstance().map(iterator, (b: Bindings) => {
+        return b.filter(
+          (variable) => !artificals.some((a) => a.value === variable)
+        );
+      });
     }
     return iterator;
   }
@@ -203,8 +205,8 @@ export default class BGPStageBuilder extends StageBuilder {
    */
   _replaceBlankNodes(
     patterns: EngineTriple[]
-  ): [EngineTriple[], EngineTripleValue[]] {
-    const newVariables: EngineTripleValue[] = [];
+  ): [EngineTriple[], VariableTerm[]] {
+    const newVariables: VariableTerm[] = [];
     function rewrite<T extends EngineTripleValue>(term: T): T | VariableTerm {
       let res: T | VariableTerm = term;
       if (isBlank(term)) {

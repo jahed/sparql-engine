@@ -25,6 +25,7 @@ SOFTWARE.
 "use strict";
 
 import { isNull, mean, orderBy, round, sortBy } from "lodash-es";
+import type { IriTerm, VariableTerm } from "sparqljs";
 import ExecutionContext from "../engine/context/execution-context.ts";
 import type {
   PipelineInput,
@@ -37,7 +38,6 @@ import * as rdf from "../utils/rdf.ts";
 import * as sparql from "../utils/sparql.ts";
 import { BindingBase, Bindings } from "./bindings.ts";
 import { GRAPH_CAPABILITY, type GraphCapability } from "./graph_capability.ts";
-import type { IriTerm, VariableTerm } from "sparqljs";
 
 /**
  * Metadata used for query optimization
