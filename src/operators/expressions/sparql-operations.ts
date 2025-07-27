@@ -314,7 +314,7 @@ export default {
 
   datatype: function (a: Term): Term {
     if (rdf.termIsLiteral(a)) {
-      return rdf.createLiteral(a.datatype.value);
+      return a.datatype;
     }
     return rdf.createLiteral("");
   },

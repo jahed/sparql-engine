@@ -31,9 +31,9 @@ import {
   SPARQLExpression,
 } from "./expressions/sparql-expression.ts";
 
+import type { Expression } from "sparqljs";
 import { Bindings } from "../rdf/bindings.ts";
 import * as rdf from "../utils/rdf.ts";
-import type { Expression } from "sparqljs";
 
 /**
  * Evaluate SPARQL Filter clauses
@@ -57,7 +57,7 @@ export default function sparqlFilter(
       rdf.termIsLiteral(value) &&
       rdf.literalIsBoolean(value)
     ) {
-      return rdf.asJS(value.value, value.datatype.value);
+      return rdf.termToValue(value);
     }
     return false;
   });
