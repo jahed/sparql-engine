@@ -29,6 +29,7 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 import { Bindings, rdf } from "../../src/api.ts";
 import type { CustomFunctions } from "../../src/operators/expressions/sparql-expression.ts";
+import { termToValue } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL custom operators", () => {
@@ -133,11 +134,8 @@ describe("SPARQL custom operators", () => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
         expect(b).to.have.keys("length");
-        const length = parseInt(
-          b["length"].value.split("^^")[0].replace(/"/g, "")
-        );
+        const length = termToValue<number>(b["length"]);
         expect(length % 2).to.equal(0);
-
         results.push(b);
       },
       done,

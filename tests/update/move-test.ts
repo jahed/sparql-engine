@@ -26,6 +26,7 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
+import { termToString } from "rdf-string";
 import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
@@ -44,7 +45,7 @@ describe("SPARQL UPDATE: MOVE queries", () => {
   const data = [
     {
       name: "MOVE DEFAULT to NAMED",
-      query: `MOVE DEFAULT TO <${GRAPH_B_IRI}>`,
+      query: `MOVE DEFAULT TO <${termToString(GRAPH_B_IRI)}>`,
       testFun: () => {
         // destination graph should only contains data from the source
         let triples = engine
@@ -62,7 +63,7 @@ describe("SPARQL UPDATE: MOVE queries", () => {
     },
     {
       name: "MOVE NAMED to DEFAULT",
-      query: `MOVE <${GRAPH_B_IRI}> TO DEFAULT`,
+      query: `MOVE <${termToString(GRAPH_B_IRI)}> TO DEFAULT`,
       testFun: () => {
         // destination graph should only contains data from the source
         let triples = engine._graph._store.getTriples(

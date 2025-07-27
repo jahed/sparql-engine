@@ -26,8 +26,9 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
-import { getGraph, N3Graph, TestEngine } from "../utils.ts";
+import { termToString } from "rdf-string";
 import { createIRI } from "../../src/utils/rdf.ts";
+import { getGraph, N3Graph, TestEngine } from "../utils.ts";
 
 const GRAPH_A_IRI = createIRI("http://example.org#some-graph-a");
 const GRAPH_B_IRI = createIRI("http://example.org#some-graph-b");
@@ -43,7 +44,7 @@ describe("SPARQL UPDATE: CREATE queries", () => {
   const data = [
     {
       name: "CREATE GRAPH",
-      query: `CREATE GRAPH <${GRAPH_B_IRI}>`,
+      query: `CREATE GRAPH <${termToString(GRAPH_B_IRI)}>`,
       testFun: () => {
         expect(engine.hasNamedGraph(GRAPH_B_IRI)).to.equal(true);
       },

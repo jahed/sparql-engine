@@ -64,6 +64,13 @@ export function tripleToQuad(triple: Triple): Quad {
   );
 }
 
+export function termToValue<T = unknown>(term: EngineTripleValue): T {
+  if (isLiteral(term)) {
+    return asJS(term.value, term.datatype.value);
+  }
+  return term.value as T;
+}
+
 export function asJS(value: string, type: string | null): any {
   switch (type) {
     case XSD("integer"):
@@ -149,8 +156,9 @@ export function createDate(date: Date): Literal {
   return createTypedLiteral(formatISO(date), XSD("dateTime"));
 }
 
+export const UNBOUND = Object.freeze(createLiteral("UNBOUND"));
 export function createUnbound(): Literal {
-  return createLiteral("UNBOUND");
+  return UNBOUND;
 }
 
 export function shallowCloneTerm(

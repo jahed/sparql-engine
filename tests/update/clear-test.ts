@@ -26,6 +26,7 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
+import { termToString } from "rdf-string";
 import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
@@ -72,7 +73,7 @@ describe("SPARQL UPDATE: CLEAR queries", () => {
     },
     {
       name: "CLEAR GRAPH",
-      query: `CLEAR GRAPH <${GRAPH_B_IRI}>`,
+      query: `CLEAR GRAPH <${termToString(GRAPH_B_IRI)}>`,
       testFun: () => {
         let triples = engine._graph._store.getTriples();
         expect(triples.length).to.not.equal(0);

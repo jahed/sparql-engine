@@ -33,6 +33,8 @@ import * as rdf from "../utils/rdf.ts";
 
 type Term = EngineTripleValue;
 
+export type BindingsRecord = Record<string, Term>;
+
 /**
  * A set of mappings from a variable to a RDF Term.
  * @abstract
@@ -140,8 +142,8 @@ export abstract class Bindings {
    * Serialize the set of mappings as a plain JS Object
    * @return The set of mappings as a plain JS Object
    */
-  toObject(): Record<string, Term> {
-    return this.reduce<Record<string, Term>>((acc, variable, value) => {
+  toObject(): BindingsRecord {
+    return this.reduce<BindingsRecord>((acc, variable, value) => {
       acc[variable] = value;
       return acc;
     }, {});

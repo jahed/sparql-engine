@@ -28,6 +28,8 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/api.ts";
+import type { BindingsRecord } from "../../src/rdf/bindings.ts";
+import { createFloat, createLiteral } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("Non standard SPARQL functions", () => {
@@ -47,7 +49,7 @@ describe("Non standard SPARQL functions", () => {
       }`,
       results: [
         {
-          x: '"1.5430806348152437"^^http://www.w3.org/2001/XMLSchema#float',
+          x: createFloat(1.5430806348152437),
         },
       ],
     },
@@ -60,7 +62,7 @@ describe("Non standard SPARQL functions", () => {
       }`,
       results: [
         {
-          x: '"1.1752011936438014"^^http://www.w3.org/2001/XMLSchema#float',
+          x: createFloat(1.1752011936438014),
         },
       ],
     },
@@ -73,7 +75,7 @@ describe("Non standard SPARQL functions", () => {
       }`,
       results: [
         {
-          x: '"0.7615941559557649"^^http://www.w3.org/2001/XMLSchema#float',
+          x: createFloat(0.7615941559557649),
         },
       ],
     },
@@ -86,7 +88,7 @@ describe("Non standard SPARQL functions", () => {
       }`,
       results: [
         {
-          x: '"1.3130352854993312"^^http://www.w3.org/2001/XMLSchema#float',
+          x: createFloat(1.3130352854993312),
         },
       ],
     },
@@ -99,7 +101,7 @@ describe("Non standard SPARQL functions", () => {
       }`,
       results: [
         {
-          x: '"0.6480542736638853"^^http://www.w3.org/2001/XMLSchema#float',
+          x: createFloat(0.6480542736638853),
         },
       ],
     },
@@ -112,7 +114,7 @@ describe("Non standard SPARQL functions", () => {
       }`,
       results: [
         {
-          x: '"0.8509181282393214"^^http://www.w3.org/2001/XMLSchema#float',
+          x: createFloat(0.8509181282393214),
         },
       ],
     },
@@ -126,10 +128,10 @@ describe("Non standard SPARQL functions", () => {
       }`,
       results: [
         {
-          y: '"Thomas"',
+          y: createLiteral("Thomas"),
         },
         {
-          y: '"Minier"',
+          y: createLiteral("Minier"),
         },
       ],
     },
@@ -137,7 +139,7 @@ describe("Non standard SPARQL functions", () => {
 
   data.forEach((d) => {
     it(`should evaluate the "${d.name}" SPARQL function`, (t, done) => {
-      const results: ReturnType<Bindings["toObject"]>[] = [];
+      const results: BindingsRecord[] = [];
       const iterator = engine.execute(d.query);
       iterator.subscribe(
         (b) => {

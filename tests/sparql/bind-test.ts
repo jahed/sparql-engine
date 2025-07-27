@@ -28,6 +28,12 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/api.ts";
+import {
+  createInteger,
+  createLangLiteral,
+  createLiteral,
+  createUnbound,
+} from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL BIND", () => {
@@ -54,7 +60,9 @@ describe("SPARQL BIND", () => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
         expect(b).to.have.all.keys("s", "name");
-        expect(b["name"]).to.equal('"Thomas Minier"@fr');
+        expect(b["name"]).to.deep.equal(
+          createLangLiteral("Thomas Minier", "fr")
+        );
         results.push(b);
       },
       done,
@@ -82,9 +90,7 @@ describe("SPARQL BIND", () => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
         expect(b).to.have.all.keys("s", "foo");
-        expect(b["foo"]).to.equal(
-          '"30"^^http://www.w3.org/2001/XMLSchema#integer'
-        );
+        expect(b["foo"]).to.deep.equal(createInteger(30));
         results.push(b);
       },
       done,
@@ -113,10 +119,10 @@ describe("SPARQL BIND", () => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
         expect(b).to.have.all.keys("s", "name", "foo");
-        expect(b["name"]).to.equal('"Thomas Minier"@fr');
-        expect(b["foo"]).to.equal(
-          '"30"^^http://www.w3.org/2001/XMLSchema#integer'
+        expect(b["name"]).to.deep.equal(
+          createLangLiteral("Thomas Minier", "fr")
         );
+        expect(b["foo"]).to.deep.equal(createInteger(30));
         results.push(b);
       },
       done,
@@ -146,9 +152,9 @@ describe("SPARQL BIND", () => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
         expect(b).to.have.all.keys("s", "s2", "name", "undefined");
-        expect(b["s2"]).to.equal(b["s"]);
-        expect(b["name"]).to.equal('"Thomas Minier"');
-        expect(b["undefined"]).to.equal('"UNBOUND"');
+        expect(b["s2"]).to.deep.equal(b["s"]);
+        expect(b["name"]).to.deep.equal(createLiteral("Thomas Minier"));
+        expect(b["undefined"]).to.deep.equal(createUnbound());
         results.push(b);
       },
       done,

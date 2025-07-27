@@ -27,8 +27,10 @@ SOFTWARE.
 import { expect } from "chai";
 import assert from "node:assert";
 import { beforeEach, describe, it } from "node:test";
+import { termToString } from "rdf-string";
 import { BindingBase } from "../../src/api.ts";
-import { createIRI } from "../../src/utils/rdf.ts";
+import type { BindingsRecord } from "../../src/rdf/bindings.ts";
+import { createIRI, createLangLiteral } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine, type TestGraph } from "../utils.ts";
 
 const GRAPH_A_IRI = createIRI("http://example.org#some-graph-a");
@@ -43,7 +45,7 @@ describe("SERVICE queries (using bound joins)", () => {
     gB = getGraph("./tests/data/dblp2.nt", true);
     engine = new TestEngine(gA, GRAPH_A_IRI);
     engine._dataset.setGraphFactory((iri) => {
-      if (iri === GRAPH_B_IRI) {
+      if (iri.equals(GRAPH_B_IRI)) {
         return gB;
       }
       return gA;
@@ -54,7 +56,7 @@ describe("SERVICE queries (using bound joins)", () => {
     text: string;
     query: string;
     nbResults: number;
-    testFun: (b: ReturnType<BindingBase["toObject"]>) => void;
+    testFun: (b: BindingsRecord) => void;
   }[] = [
     {
       text: "should evaluate simple SPARQL SERVICE queries using the bound join algorithm",
@@ -64,7 +66,7 @@ describe("SERVICE queries (using bound joins)", () => {
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
       SELECT ?name ?article WHERE {
         ?s rdf:type dblp-rdf:Person .
-        SERVICE <${GRAPH_A_IRI}> {
+        SERVICE <${termToString(GRAPH_A_IRI)}> {
           ?s dblp-rdf:primaryFullPersonName ?name .
           ?s dblp-rdf:authorOf ?article .
         }
@@ -72,13 +74,15 @@ describe("SERVICE queries (using bound joins)", () => {
       nbResults: 5,
       testFun: function (b) {
         expect(b).to.have.all.keys(["name", "article"]);
-        expect(b["name"]).to.equal('"Thomas Minier"@en');
-        expect(b["article"]).to.be.oneOf([
-          "https://dblp.org/rec/conf/esws/MinierSMV18a",
-          "https://dblp.org/rec/conf/esws/MinierSMV18",
-          "https://dblp.org/rec/journals/corr/abs-1806-00227",
-          "https://dblp.org/rec/conf/esws/MinierMSM17",
-          "https://dblp.org/rec/conf/esws/MinierMSM17a",
+        expect(b["name"]).to.deep.equal(
+          createLangLiteral("Thomas Minier", "en")
+        );
+        expect(b["article"]).to.be.deep.oneOf([
+          createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+          createIRI("https://dblp.org/rec/conf/esws/MinierSMV18"),
+          createIRI("https://dblp.org/rec/journals/corr/abs-1806-00227"),
+          createIRI("https://dblp.org/rec/conf/esws/MinierMSM17"),
+          createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
         ]);
       },
     },
@@ -90,14 +94,15 @@ describe("SERVICE queries (using bound joins)", () => {
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
       SELECT * WHERE {
         ?s rdf:type dblp-rdf:Person .
-        SERVICE <${GRAPH_A_IRI}> {
+        SERVICE <${termToString(GRAPH_A_IRI)}> {
           ?s dblp-rdf:primaryFullPersonName "Thomas Minier"@en .
         }
       }`,
       nbResults: 1,
       testFun: function (b) {
-        expect(b).to.have.all.keys(["s"]);
-        expect(b["s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
+        expect(b["s"]).to.deep.equal(
+          createIRI("https://dblp.org/pers/m/Minier:Thomas")
+        );
       },
     },
     {
@@ -109,20 +114,21 @@ describe("SERVICE queries (using bound joins)", () => {
       SELECT ?s ?article WHERE {
         ?s rdf:type dblp-rdf:Person .
         ?s dblp-rdf:authorOf ?article .
-        SERVICE <${GRAPH_A_IRI}> {
+        SERVICE <${termToString(GRAPH_A_IRI)}> {
           ?s dblp-rdf:primaryFullPersonName "Thomas Minier"@en .
         }
       }`,
       nbResults: 5,
       testFun: function (b) {
-        expect(b).to.have.all.keys(["s", "article"]);
-        expect(b["s"]).to.equal("https://dblp.org/pers/m/Minier:Thomas");
-        expect(b["article"]).to.be.oneOf([
-          "https://dblp.org/rec/conf/esws/MinierSMV18a",
-          "https://dblp.org/rec/conf/esws/MinierSMV18",
-          "https://dblp.org/rec/journals/corr/abs-1806-00227",
-          "https://dblp.org/rec/conf/esws/MinierMSM17",
-          "https://dblp.org/rec/conf/esws/MinierMSM17a",
+        expect(b["s"]).to.deep.equal(
+          createIRI("https://dblp.org/pers/m/Minier:Thomas")
+        );
+        expect(b["article"]).to.be.deep.oneOf([
+          createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+          createIRI("https://dblp.org/rec/conf/esws/MinierSMV18"),
+          createIRI("https://dblp.org/rec/journals/corr/abs-1806-00227"),
+          createIRI("https://dblp.org/rec/conf/esws/MinierMSM17"),
+          createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
         ]);
       },
     },
@@ -135,8 +141,7 @@ describe("SERVICE queries (using bound joins)", () => {
       iterator.subscribe(
         (bindings) => {
           assert(bindings instanceof BindingBase);
-          const b = bindings.toObject();
-          d.testFun(b);
+          d.testFun(bindings.toObject());
           nbResults++;
         },
         done,

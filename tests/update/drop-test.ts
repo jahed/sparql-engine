@@ -26,6 +26,7 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
+import { termToString } from "rdf-string";
 import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
@@ -44,7 +45,7 @@ describe("SPARQL UPDATE: DROP queries", () => {
   const data = [
     {
       name: "DROP GRAPH",
-      query: `DROP GRAPH <${GRAPH_B_IRI}>`,
+      query: `DROP GRAPH <${termToString(GRAPH_B_IRI)}>`,
       testFun: () => {
         expect(engine.hasNamedGraph(GRAPH_B_IRI)).to.equal(false);
       },
