@@ -6,10 +6,11 @@
   "main": "dist/api.js",
   "types": "dist/api.d.ts",
   "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.dist.json",
     "format": "prettier -w .",
     "lint": "tsc -p tsconfig.json",
-    "test": "node --experimental-strip-types --experimental-test-isolation=none --test-timeout=5000 --test tests/**/*-test.ts",
-    "build": "rm -rf dist && tsc -p tsconfig.dist.json"
+    "test": "npm run test:file -- 'tests/**/*-test.ts'",
+    "test:file": "node --disable-warning=ExperimentalWarning --experimental-strip-types --experimental-test-isolation=none --test-timeout=5000 --test"
   },
   "repository": {
     "type": "git",

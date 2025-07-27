@@ -28,6 +28,7 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/api.ts";
+import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL property paths: sequence paths", () => {
@@ -51,16 +52,14 @@ describe("SPARQL property paths: sequence paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.property("s");
-        expect(b).to.have.property("o");
-        expect(b["s"]).to.be.oneOf([
-          "http://example.org/Alice",
-          "http://example.org/Bob",
-          "http://example.org/Carol",
+        expect(b["s"]).to.be.deep.oneOf([
+          createIRI("http://example.org/Alice"),
+          createIRI("http://example.org/Bob"),
+          createIRI("http://example.org/Carol"),
         ]);
-        expect(b["o"]).to.be.oneOf([
-          "http://example.org/Man",
-          "http://example.org/Woman",
+        expect(b["o"]).to.be.deep.oneOf([
+          createIRI("http://example.org/Man"),
+          createIRI("http://example.org/Woman"),
         ]);
         results.push(b);
       },
@@ -86,10 +85,9 @@ describe("SPARQL property paths: sequence paths", () => {
       (bindings) => {
         assert.ok(bindings instanceof Bindings);
         const b = bindings.toObject();
-        expect(b).to.have.keys("s");
-        expect(b["s"]).to.be.oneOf([
-          "http://example.org/Alice",
-          "http://example.org/Carol",
+        expect(b["s"]).to.be.deep.oneOf([
+          createIRI("http://example.org/Alice"),
+          createIRI("http://example.org/Carol"),
         ]);
         results.push(b);
       },
@@ -119,10 +117,10 @@ describe("SPARQL property paths: sequence paths", () => {
         expect(b).to.have.property("o");
         switch (b["s"].value) {
           case "http://example.org/Bob":
-            expect(b["o"]).to.be.oneOf(["tel:0645123549"]);
+            expect(b["o"]).to.be.deep.oneOf([createIRI("tel:0645123549")]);
             break;
           case "http://example.org/Eve":
-            expect(b["o"]).to.be.oneOf(["mailto:bob@example"]);
+            expect(b["o"]).to.be.deep.oneOf([createIRI("mailto:bob@example")]);
             break;
         }
         results.push(b);

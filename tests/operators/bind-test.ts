@@ -58,9 +58,9 @@ describe("Bind operator", () => {
         const b = bindings.toObject();
         expect(b).to.have.all.keys("x", "y", "z");
         if (b["x"].value === "1") {
-          expect(b["z"]).to.equal(createInteger(3));
+          expect(b["z"]).to.deep.equal(createInteger(3));
         } else {
-          expect(b["z"]).to.equal(createInteger(5));
+          expect(b["z"]).to.deep.equal(createInteger(5));
         }
         nbResults++;
       },

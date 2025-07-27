@@ -33,34 +33,38 @@ import { createIRI, createLiteral } from "../../src/utils/rdf.ts";
 
 describe("Hash Join operator", () => {
   it("should perform a join between two sources of bindings", (t, done) => {
+    const toto = createIRI("http://example.org#toto");
+    const titi = createIRI("http://example.org#titi");
+    const tata = createIRI("http://example.org#tata");
+
     let nbResults = 0;
     let nbEach = new Map();
-    nbEach.set("http://example.org#toto", 0);
-    nbEach.set("http://example.org#titi", 0);
-    nbEach.set("http://example.org#tata", 0);
+    nbEach.set(toto, 0);
+    nbEach.set(titi, 0);
+    nbEach.set(tata, 0);
     const left = from([
-      BindingBase.fromObject({ x: createIRI("http://example.org#toto") }),
-      BindingBase.fromObject({ x: createIRI("http://example.org#titi") }),
+      BindingBase.fromObject({ x: toto }),
+      BindingBase.fromObject({ x: titi }),
     ]);
     const right = from([
       BindingBase.fromObject({
-        x: createIRI("http://example.org#toto"),
+        x: toto,
         y: createLiteral("1"),
       }),
       BindingBase.fromObject({
-        x: createIRI("http://example.org#toto"),
+        x: toto,
         y: createLiteral("2"),
       }),
       BindingBase.fromObject({
-        x: createIRI("http://example.org#toto"),
+        x: toto,
         y: createLiteral("3"),
       }),
       BindingBase.fromObject({
-        x: createIRI("http://example.org#titi"),
+        x: titi,
         y: createLiteral("4"),
       }),
       BindingBase.fromObject({
-        x: createIRI("http://example.org#tata"),
+        x: tata,
         y: createLiteral("5"),
       }),
     ]);
@@ -68,32 +72,33 @@ describe("Hash Join operator", () => {
     const op = hashJoin(left, right, "x");
     op.subscribe(
       (value) => {
-        expect(value.toObject()).to.have.all.keys("x", "y");
-        switch (value.get("x")?.value) {
-          case "http://example.org#toto":
-            expect(value.get("y")).to.be.oneOf(['"1"', '"2"', '"3"']);
-            nbEach.set(
-              "http://example.org#toto",
-              nbEach.get("http://example.org#toto") + 1
-            );
-            break;
-          case "http://example.org#titi":
-            expect(value.get("y")).to.be.oneOf(['"4"']);
-            nbEach.set(
-              "http://example.org#titi",
-              nbEach.get("http://example.org#titi") + 1
-            );
-            break;
-          default:
-            throw new Error(`Unexpected "x" value: ${value.get("x")}`);
-        }
+        const b = value.toObject();
+        expect(b).to.have.all.keys("x", "y");
         nbResults++;
+
+        if (b["x"].equals(toto)) {
+          expect(b["y"]).to.be.deep.oneOf([
+            createLiteral("1"),
+            createLiteral("2"),
+            createLiteral("3"),
+          ]);
+          nbEach.set(toto, nbEach.get(toto) + 1);
+          return;
+        }
+
+        if (b["x"].equals(titi)) {
+          expect(value.get("y")).to.be.deep.oneOf([createLiteral("4")]);
+          nbEach.set(titi, nbEach.get(titi) + 1);
+          return;
+        }
+
+        throw new Error(`Unexpected "x" value: ${b["x"]}`);
       },
       done,
       () => {
         expect(nbResults).to.equal(4);
-        expect(nbEach.get("http://example.org#toto")).to.equal(3);
-        expect(nbEach.get("http://example.org#titi")).to.equal(1);
+        expect(nbEach.get(toto)).to.equal(3);
+        expect(nbEach.get(titi)).to.equal(1);
         done();
       }
     );
