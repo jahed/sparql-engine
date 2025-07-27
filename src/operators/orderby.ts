@@ -40,9 +40,11 @@ function _compileComparators(comparators: Ordering[]) {
   const comparatorsFuncs = comparators.map((c: Ordering) => {
     return (left: Bindings, right: Bindings) => {
       const expr = (c.expression as Term).value;
-      if (left.get(expr)! < right.get(expr)!) {
+      const a = left.get(expr)?.value || "";
+      const b = right.get(expr)?.value || "";
+      if (a < b) {
         return c.descending ? 1 : -1;
-      } else if (left.get(expr)! > right.get(expr)!) {
+      } else if (a > b) {
         return c.descending ? -1 : 1;
       }
       return 0;
@@ -73,15 +75,7 @@ export default function orderby(
   source: PipelineStage<Bindings>,
   comparators: Ordering[]
 ) {
-  const comparator = _compileComparators(
-    comparators.map((c: Ordering) => {
-      // explicity tag ascending comparators (sparqljs leaves them untagged)
-      if (!("descending" in c)) {
-        c.descending = false;
-      }
-      return c;
-    })
-  );
+  const comparator = _compileComparators(comparators);
   const engine = Pipeline.getInstance();
   return engine.mergeMap(engine.collect(source), (values: Bindings[]) => {
     values.sort((a, b) => comparator(a, b));
