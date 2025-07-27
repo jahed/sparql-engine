@@ -60,7 +60,7 @@ describe("Non standard SPARQL aggregates", () => {
       query: `
       PREFIX sea: <https://callidon.github.io/sparql-engine/aggregates#>
       SELECT (sea:gmean(?x) AS ?gmean) WHERE {
-        { 
+        {
           { BIND(1 as ?g) BIND(4 AS ?x) }
           UNION
           { BIND(1 as ?g) BIND(1 AS ?x) }
@@ -79,7 +79,7 @@ describe("Non standard SPARQL aggregates", () => {
       name: "sea:rmse",
       query: `
       PREFIX sea: <https://callidon.github.io/sparql-engine/aggregates#>
-      SELECT (sea:rmse(?x, ?y) AS ?mse) WHERE { 
+      SELECT (sea:rmse(?x, ?y) AS ?mse) WHERE {
         { BIND(1 as ?g) BIND(10 AS ?x) BIND(5 AS ?y) }
         UNION
         { BIND(1 as ?g) BIND(5 AS ?x) BIND(8 AS ?y) }

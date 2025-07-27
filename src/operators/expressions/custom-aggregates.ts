@@ -26,6 +26,7 @@ SOFTWARE.
 
 import { intersectionWith, isUndefined, sum, zip } from "lodash-es";
 
+import type { VariableTerm } from "sparqljs";
 import type { EngineTripleValue } from "../../types.ts";
 import * as rdf from "../../utils/rdf.ts";
 
@@ -59,8 +60,8 @@ export default {
   // Accuracy: computes percentage of times two variables have different values
   // In regular SPARQL, equivalent to sum(if(?a = ?b, 1, 0)) / count(*)
   "https://callidon.github.io/sparql-engine/aggregates#accuracy": function (
-    a: string,
-    b: string,
+    { value: a }: VariableTerm,
+    { value: b }: VariableTerm,
     rows: TermRows
   ): Term {
     const tests = zip(rows[a], rows[b]).map((v) => {
@@ -76,7 +77,7 @@ export default {
   // "The geometric mean is a mean or average, which indicates the central tendency or typical value of a set of
   // numbers by using the product of their values (as opposed to the arithmetic mean which uses their sum)."
   "https://callidon.github.io/sparql-engine/aggregates#gmean": function (
-    variable: string,
+    { value: variable }: VariableTerm,
     rows: TermRows
   ): Term {
     if (variable in rows) {
@@ -100,8 +101,8 @@ export default {
   // the average squared difference between the estimated values and the actual value.
   // In regular SPARQL, equivalent to sum(?a - ?b) * (?a - ?b / count(*))
   "https://callidon.github.io/sparql-engine/aggregates#mse": function (
-    a: string,
-    b: string,
+    { value: a }: VariableTerm,
+    { value: b }: VariableTerm,
     rows: TermRows
   ): Term {
     const values = zip(rows[a], rows[b]).map((v) => {
@@ -131,8 +132,8 @@ export default {
   // Root mean Square error: computes the root of the average of the squares of the errors
   // In regular SPARQL, equivalent to sqrt(sum(?a - ?b) * (?a - ?b / count(*)))
   "https://callidon.github.io/sparql-engine/aggregates#rmse": function (
-    a: string,
-    b: string,
+    { value: a }: VariableTerm,
+    { value: b }: VariableTerm,
     rows: TermRows
   ): Term {
     const values = zip(rows[a], rows[b]).map((v) => {
@@ -161,8 +162,8 @@ export default {
 
   // Precision: the fraction of retrieved values that are relevant to the query
   "https://callidon.github.io/sparql-engine/aggregates#precision": function (
-    a: string,
-    b: string,
+    { value: a }: VariableTerm,
+    { value: b }: VariableTerm,
     rows: TermRows
   ): Term {
     if (!(a in rows) || !(b in rows)) {
@@ -173,8 +174,8 @@ export default {
 
   // Recall: the fraction of retrieved values that are successfully retrived
   "https://callidon.github.io/sparql-engine/aggregates#recall": function (
-    a: string,
-    b: string,
+    { value: a }: VariableTerm,
+    { value: b }: VariableTerm,
     rows: TermRows
   ): Term {
     if (!(a in rows) || !(b in rows)) {
@@ -185,8 +186,8 @@ export default {
 
   // F1 score: The F1 score can be interpreted as a weighted average of the precision and recall, where an F1 score reaches its best value at 1 and worst score at 0.
   "https://callidon.github.io/sparql-engine/aggregates#f1": function (
-    a: string,
-    b: string,
+    { value: a }: VariableTerm,
+    { value: b }: VariableTerm,
     rows: TermRows
   ): Term {
     if (!(a in rows) || !(b in rows)) {
