@@ -26,7 +26,7 @@ SOFTWARE.
 
 import type { Quad_Predicate, Quad_Subject } from "@rdfjs/types";
 import { isNull, isUndefined } from "lodash-es";
-import { termToString } from "rdf-string";
+import { stringToTerm, termToString } from "rdf-string";
 import type { ValuePatternRow } from "sparqljs";
 import type { EngineTriple, EngineTripleValue } from "../types.ts";
 import * as rdf from "../utils/rdf.ts";
@@ -415,10 +415,10 @@ export class BindingBase extends Bindings {
 
   static fromValuePatternRow(row: ValuePatternRow): Bindings {
     const res = new BindingBase();
-    for (let key in row) {
-      const v = row[key];
+    for (let variableString in row) {
+      const v = row[variableString];
       if (v) {
-        res.set(key, v);
+        res.set(stringToTerm(variableString).value, v);
       }
     }
     return res;
