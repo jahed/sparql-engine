@@ -109,7 +109,7 @@ describe("SPARQL custom operators", () => {
     const customFunctions: CustomFunctions = {
       "http://test.com#IS_EVEN": function (a) {
         assert.ok(a && "datatype" in a);
-        const value = rdf.asJS(a.value, a.datatype.value);
+        const value = rdf.termToValue<number>(a);
         return rdf.createBoolean(value % 2 === 0);
       },
     };

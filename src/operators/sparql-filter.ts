@@ -51,13 +51,14 @@ export default function sparqlFilter(
 ) {
   const expr = new SPARQLExpression(expression, customFunctions);
   return Pipeline.getInstance().filter(source, (bindings: Bindings) => {
-    const value: any = expr.evaluate(bindings);
+    const result = expr.evaluate(bindings);
     if (
-      value !== null &&
-      rdf.termIsLiteral(value) &&
-      rdf.literalIsBoolean(value)
+      result &&
+      "datatype" in result &&
+      rdf.termIsLiteral(result) &&
+      rdf.literalIsBoolean(result)
     ) {
-      return rdf.termToValue(value);
+      return rdf.termToValue(result);
     }
     return false;
   });

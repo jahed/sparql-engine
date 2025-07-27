@@ -30,6 +30,7 @@ import type { CustomFunctions } from "../../operators/expressions/sparql-express
 import filter from "../../operators/sparql-filter.ts";
 import groupBy from "../../operators/sparql-groupby.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
+import { isVariable } from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import StageBuilder from "./stage-builder.ts";
@@ -92,14 +93,11 @@ export default class AggregateStageBuilder extends StageBuilder {
     // extract GROUP By variables & rewrite SPARQL expressions into BIND clauses
     const groupingVars: VariableTerm[] = [];
     groupby.forEach((g) => {
-      if (g.variable) {
+      if (isVariable(g.expression)) {
+        groupingVars.push(g.expression);
+      } else if (g.variable) {
         groupingVars.push(g.variable);
-        iterator = bind(
-          iterator,
-          g.variable,
-          g.expression,
-          customFunctions
-        );
+        iterator = bind(iterator, g.variable, g.expression, customFunctions);
       }
     });
     return groupBy(iterator, groupingVars);

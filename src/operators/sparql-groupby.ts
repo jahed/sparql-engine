@@ -24,12 +24,14 @@ SOFTWARE.
 
 "use strict";
 
+import { sortedIndexOf } from "lodash-es";
 import { termToString } from "rdf-string";
 import type { VariableTerm } from "sparqljs";
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import { Bindings } from "../rdf/bindings.ts";
 import type { EngineTripleValue } from "../types.ts";
+import { UNBOUND } from "../utils/rdf.ts";
 
 /**
  * Hash functions for set of bindings
@@ -38,15 +40,14 @@ import type { EngineTripleValue } from "../types.ts";
  * @param  bindings  - Set of bindings to hash
  * @return Hashed set of bindings
  */
-function _hashBindings(variables: VariableTerm[], bindings: Bindings): string {
+function _hashBindings(variables: string[], bindings: Bindings): string {
   // if no GROUP BY variables are used (in the case of an empty GROUP BY)
   // then we use a default grouping key
   if (variables.length === 0) {
     return "http://callidon.github.io/sparql-engine#DefaultGroupKey";
   }
   return variables
-    .map((v) => bindings.get(v.value))
-    .map((t) => termToString(t))
+    .map((v) => termToString(bindings.get(v) ?? UNBOUND))
     .join(";");
 }
 
@@ -67,14 +68,15 @@ export default function sparqlGroupBy(
   const groups: Map<string, Group> = new Map();
   const keys: Map<string, Bindings> = new Map();
   const engine = Pipeline.getInstance();
+  const groupVariables = variables.map((v) => v.value).sort();
   let op = engine.map(source, (bindings: Bindings) => {
-    const key = _hashBindings(variables, bindings);
+    const key = _hashBindings(groupVariables, bindings);
     // create a new group is needed
     if (!groups.has(key)) {
       keys.set(
         key,
-        bindings.filter((variable) =>
-          variables.some((v) => v.value === variable)
+        bindings.filter(
+          (variable) => sortedIndexOf(groupVariables, variable) > -1
         )
       );
       groups.set(key, {});

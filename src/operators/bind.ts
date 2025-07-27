@@ -66,13 +66,13 @@ export default function bind(
   return Pipeline.getInstance().mergeMap(source, (bindings) => {
     try {
       const value = expr.evaluate(bindings);
-      if (value !== null && (isArray(value) || isIterable(value))) {
+      if (value && (isArray(value) || isIterable(value))) {
         // build a source of bindings from the array/iterable produced by the expression's evaluation
         return Pipeline.getInstance().fromAsync((input) => {
           try {
             for (let term of value) {
               const mu = bindings.clone();
-              if (term === null) {
+              if (!term) {
                 mu.set(variable.value, rdf.createUnbound());
               } else {
                 mu.set(variable.value, term);
@@ -89,7 +89,7 @@ export default function bind(
         const res = bindings.clone();
         // null values indicates that an error occurs during the expression's evaluation
         // in this case, the variable is bind to a special UNBOUND value
-        if (value === null) {
+        if (!value) {
           res.set(variable.value, rdf.createUnbound());
         } else {
           res.set(variable.value, value);
@@ -97,7 +97,7 @@ export default function bind(
         return Pipeline.getInstance().of(res);
       }
     } catch (e) {
-      // silence errors
+      console.debug("internal bind() error", e);
     }
     return Pipeline.getInstance().empty();
   });
