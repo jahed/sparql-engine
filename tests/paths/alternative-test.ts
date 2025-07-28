@@ -27,8 +27,8 @@ SOFTWARE.
 import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
-import { Bindings } from "../../src/api.ts";
 import type { QueryOutput } from "../../src/engine/plan-builder.ts";
+import { Bindings } from "../../src/index.ts";
 import { createIRI, createLiteral } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 

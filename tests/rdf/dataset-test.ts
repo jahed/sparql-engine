@@ -32,7 +32,7 @@ import {
   Graph,
   HashMapDataset,
   type PipelineInput,
-} from "../../src/api.ts";
+} from "../../src/index.ts";
 import type { EngineIRI, EngineTriple } from "../../src/types.ts";
 import { createIRI } from "../../src/utils/rdf.ts";
 

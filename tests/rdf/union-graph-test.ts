@@ -27,7 +27,7 @@ SOFTWARE.
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { stringToTerm, termToString } from "rdf-string";
-import { ExecutionContext, RxjsPipeline } from "../../src/api.ts";
+import { ExecutionContext, RxjsPipeline } from "../../src/index.ts";
 import UnionGraph from "../../src/rdf/union-graph.ts";
 import { createIRI, dataFactory } from "../../src/utils/rdf.ts";
 import { getGraph } from "../utils.ts";

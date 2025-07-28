@@ -27,7 +27,7 @@ SOFTWARE.
 import { expect } from "chai";
 import { describe, it } from "node:test";
 import { from } from "rxjs";
-import { BindingBase } from "../../src/api.ts";
+import { BindingBase } from "../../src/index.ts";
 import hashJoin from "../../src/operators/join/hash-join.ts";
 import { createIRI, createLiteral } from "../../src/utils/rdf.ts";
 

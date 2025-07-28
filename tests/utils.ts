@@ -29,6 +29,7 @@ import { isArray } from "lodash-es";
 import n3 from "n3";
 import { stringQuadToQuad, termToString } from "rdf-string";
 import type { Query } from "sparqljs";
+import type { QueryOutput } from "../src/engine/plan-builder.ts";
 import {
   ExecutionContext,
   Graph,
@@ -36,8 +37,7 @@ import {
   Pipeline,
   type PipelineStage,
   PlanBuilder,
-} from "../src/api.ts";
-import type { QueryOutput } from "../src/engine/plan-builder.ts";
+} from "../src/index.ts";
 import type { CustomFunctions } from "../src/operators/expressions/sparql-expression.ts";
 import type { EngineIRI, EngineTriple } from "../src/types.ts";
 import { isVariable } from "../src/utils/rdf.ts";

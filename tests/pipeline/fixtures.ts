@@ -26,7 +26,7 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { describe, it } from "node:test";
-import type { PipelineEngine } from "../../src/api.ts";
+import type { PipelineEngine } from "../../src/index.ts";
 
 /**
  * Test an implementation of PipelineEngine

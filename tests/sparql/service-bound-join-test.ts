@@ -28,7 +28,7 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { beforeEach, describe, it } from "node:test";
 import { termToString } from "rdf-string";
-import { BindingBase } from "../../src/api.ts";
+import { BindingBase } from "../../src/index.ts";
 import type { BindingsRecord } from "../../src/rdf/bindings.ts";
 import { createIRI, createLangLiteral } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine, type TestGraph } from "../utils.ts";

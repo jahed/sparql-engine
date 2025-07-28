@@ -26,7 +26,11 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { describe, it } from "node:test";
-import { ExecutionContext, Graph, type PipelineInput } from "../../src/api.ts";
+import {
+  ExecutionContext,
+  Graph,
+  type PipelineInput,
+} from "../../src/index.ts";
 import type { EngineTriple } from "../../src/types.ts";
 import { dataFactory } from "../../src/utils/rdf.ts";
 
