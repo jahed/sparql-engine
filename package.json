@@ -37,7 +37,8 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
-    "src"
+    "src",
+    "AUTHORS"
   ],
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.dist.json",
