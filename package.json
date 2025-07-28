@@ -22,10 +22,19 @@
     "semantic web"
   ],
   "type": "module",
-  "main": "./dist/api.js",
-  "exports": "./dist/api.js",
-  "module": "./dist/api.js",
-  "types": "./dist/api.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*.js": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist",
     "src"
