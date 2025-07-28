@@ -1,5 +1,4 @@
-// type delcaration for https://www.npmjs.com/package/binary-search-tree
-declare module "binary-search-tree" {
+declare module "@seald-io/binary-search-tree" {
   export interface BSTOptions<K, T> {
     unique?: boolean;
     compareKeys?: (a: K, b: K) => number;
