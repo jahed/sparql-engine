@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { isArray } from "lodash-es";
 
 import type { Expression, VariableTerm } from "sparqljs";

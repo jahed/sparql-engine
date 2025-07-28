@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 // General libraries
 import {
   Parser,

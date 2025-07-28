@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import StageBuilder from "./stage-builder.ts";
 
 import type { GroupPattern } from "sparqljs";

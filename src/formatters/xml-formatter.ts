@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { isBoolean, isNull, isUndefined, map } from "lodash-es";
 
 import xml from "xml";

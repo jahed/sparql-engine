@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 /**
  * Enum describing the query capabilities of a Graph
  */

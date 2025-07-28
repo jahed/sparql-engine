@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 export default {
   /** The set of prefixes of a SPARQL query, as extracted by sparql.js */
   PREFIXES: Symbol("SPARQL_ENGINE_QUERY_PREFIXES"),

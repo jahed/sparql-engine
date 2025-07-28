@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { cloneDeep } from "lodash-es";
 import type {
   BgpPattern,

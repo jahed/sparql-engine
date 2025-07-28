@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 // stages builders
 import { SPARQL_OPERATION } from "./engine/plan-builder.ts";
 import AggregateStageBuilder from "./engine/stages/aggregate-stage-builder.ts";

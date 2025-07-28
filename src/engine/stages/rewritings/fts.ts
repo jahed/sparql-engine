@@ -1,5 +1,3 @@
-"use strict";
-
 import type { VariableTerm } from "sparqljs";
 import type { EngineTriple } from "../../../types.ts";
 import { SES, isIRI, isVariable } from "../../../utils/rdf.ts";

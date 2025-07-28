@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { identity, isUndefined, uniqBy } from "lodash-es";
 
 /**

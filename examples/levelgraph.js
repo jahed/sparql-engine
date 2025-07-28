@@ -1,5 +1,3 @@
-"use strict";
-
 const {
   BindingBase,
   HashMapDataset,
@@ -41,7 +39,7 @@ class LevelRDFGraph extends Graph {
       stream.on("end", () => input.complete());
       // convert Levelgraph solutions into Bindings objects (the format used by sparql-engine)
       stream.on("data", (results) =>
-        input.next(BindingBase.fromObject(results)),
+        input.next(BindingBase.fromObject(results))
       );
     });
   }
@@ -111,6 +109,6 @@ db.put([triple1, triple2], () => {
     },
     () => {
       console.log("Query evaluation complete!");
-    },
+    }
   );
 });

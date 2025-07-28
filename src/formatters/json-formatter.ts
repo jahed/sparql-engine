@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { isBoolean } from "lodash-es";
 import type {
   PipelineStage,

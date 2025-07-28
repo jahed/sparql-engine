@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { expect } from "chai";
 import fs from "node:fs";
 import { before, describe, it } from "node:test";

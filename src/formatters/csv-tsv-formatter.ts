@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { isBoolean } from "lodash-es";
 import { termToString } from "rdf-string";
 import type {

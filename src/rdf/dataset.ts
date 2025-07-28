@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import type { IriTerm } from "sparqljs";
 import Graph from "./graph.ts";
 import UnionGraph from "./union-graph.ts";

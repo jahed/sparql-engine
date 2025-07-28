@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { Consumable } from "./consumer.ts";
 
 /**

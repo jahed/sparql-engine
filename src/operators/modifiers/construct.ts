@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { compact } from "lodash-es";
 import type { ConstructQuery } from "sparqljs";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";

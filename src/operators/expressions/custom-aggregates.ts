@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { intersectionWith, isUndefined, sum, zip } from "lodash-es";
 
 import type { VariableTerm } from "sparqljs";

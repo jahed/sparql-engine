@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import exists from "../../operators/exists.ts";
 import sparqlFilter from "../../operators/sparql-filter.ts";
 import StageBuilder from "./stage-builder.ts";

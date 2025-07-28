@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import type { EngineTripleValue } from "../../types.ts";
 import {
   asJS,

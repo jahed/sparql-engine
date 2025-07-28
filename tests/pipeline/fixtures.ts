@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { expect } from "chai";
 import { describe, it } from "node:test";
 import type { PipelineEngine } from "../../src/index.ts";

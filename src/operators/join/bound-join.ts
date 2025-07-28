@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import ExecutionContext from "../../engine/context/execution-context.ts";
 import ContextSymbols from "../../engine/context/symbols.ts";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";

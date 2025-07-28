@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { AsyncLRUCache } from "../../src/engine/cache/cache-base.ts";

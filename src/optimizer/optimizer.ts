@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import type { Pattern } from "sparqljs";
 import PlanVisitor from "./plan-visitor.ts";
 import UnionMerge from "./visitors/union-merge.ts";

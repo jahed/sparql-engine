@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { BinarySearchTree } from "@seald-io/binary-search-tree";
 import { differenceWith, findIndex, maxBy } from "lodash-es";
 import { Bindings } from "../../rdf/bindings.ts";

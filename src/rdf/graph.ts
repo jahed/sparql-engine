@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { isNull, mean, orderBy, round, sortBy } from "lodash-es";
 import type { IriTerm, VariableTerm } from "sparqljs";
 import ExecutionContext from "../engine/context/execution-context.ts";

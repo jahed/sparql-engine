@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import type { Expression, Grouping, Query, VariableTerm } from "sparqljs";
 import bind from "../../operators/bind.ts";
 import type { CustomFunctions } from "../../operators/expressions/sparql-expression.ts";

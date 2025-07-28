@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { expect } from "chai";
 import { before, describe, it } from "node:test";
 import { csvFormatter } from "../../src/formatters/csv-tsv-formatter.ts";

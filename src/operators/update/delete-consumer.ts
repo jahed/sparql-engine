@@ -1,5 +1,3 @@
-"use strict";
-
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 import Graph from "../../rdf/graph.ts";
 import type { EngineTriple } from "../../types.ts";

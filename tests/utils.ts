@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import fs from "fs";
 import { isArray } from "lodash-es";
 import n3 from "n3";

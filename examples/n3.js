@@ -1,5 +1,3 @@
-"use strict";
-
 const { Parser, Store } = require("n3");
 const { HashMapDataset, Graph, PlanBuilder } = require("sparql-engine");
 
@@ -44,7 +42,7 @@ class N3Graph extends Graph {
         this._store.removeTriple(
           triple.subject,
           triple.predicate,
-          triple.object,
+          triple.object
         );
         resolve();
       } catch (e) {
@@ -61,7 +59,7 @@ class N3Graph extends Graph {
   estimateCardinality(triple) {
     const { subject, predicate, object } = formatTriplePattern(triple);
     return Promise.resolve(
-      this._store.countTriples(subject, predicate, object),
+      this._store.countTriples(subject, predicate, object)
     );
   }
 }
@@ -78,7 +76,7 @@ parser
   @prefix : <http://example.org#> .
   :a foaf:name "a" .
   :b foaf:name "b" .
-`,
+`
   )
   .forEach((t) => {
     graph._store.addTriple(t);
@@ -107,5 +105,5 @@ iterator.subscribe(
   },
   () => {
     console.log("Query evaluation complete!");
-  },
+  }
 );

@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { isInteger, isNaN, isNull } from "lodash-es";
 import type { IriTerm, VariableTerm } from "sparqljs";
 import boundJoin from "../../operators/join/bound-join.ts";

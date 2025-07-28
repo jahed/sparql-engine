@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { termToString } from "rdf-string";
 import ExecutionContext from "../engine/context/execution-context.ts";
 import type { PipelineInput } from "../engine/pipeline/pipeline-engine.ts";

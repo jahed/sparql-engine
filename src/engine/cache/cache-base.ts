@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { LRUCache } from "lru-cache";
 import type { AsyncCache, Cache } from "./cache-interfaces.ts";
 

@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import type { IriTerm } from "sparqljs";
 import type { BGPCache } from "../cache/bgp-cache.ts";
 import { QueryHints } from "./query-hints.ts";

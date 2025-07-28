@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { assert, expect } from "chai";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/index.ts";

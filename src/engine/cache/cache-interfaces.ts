@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 /**
  * A cache is a vue that materializes data for latter re-use
  */

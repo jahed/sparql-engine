@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import Graph from "../../rdf/graph.ts";
 import { Consumable } from "./consumer.ts";
 

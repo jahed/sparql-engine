@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import type { Quad_Predicate, Quad_Subject } from "@rdfjs/types";
 import { isNull, isUndefined } from "lodash-es";
 import { stringToTerm, termToString } from "rdf-string";

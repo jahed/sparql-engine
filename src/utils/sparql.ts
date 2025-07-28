@@ -1,5 +1,3 @@
-"use strict";
-
 import { unionBy } from "lodash-es";
 import type { EngineTriple, EngineVariable } from "../types.ts";
 import { isVariable } from "./rdf.ts";

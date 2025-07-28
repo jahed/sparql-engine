@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import type { Bindings } from "../../rdf/bindings.ts";
 import Dataset from "../../rdf/dataset.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";

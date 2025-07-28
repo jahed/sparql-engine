@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { LRUBGPCache } from "../../src/engine/cache/bgp-cache.ts";

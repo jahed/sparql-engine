@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { maxBy, meanBy, minBy, sample } from "lodash-es";
 
 import type { VariableTerm } from "sparqljs";

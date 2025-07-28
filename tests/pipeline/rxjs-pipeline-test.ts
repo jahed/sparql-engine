@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { describe } from "node:test";
 import RxjsPipeline from "../../src/engine/pipeline/rxjs-pipeline.ts";
 import testPipelineEngine from "./fixtures.ts";

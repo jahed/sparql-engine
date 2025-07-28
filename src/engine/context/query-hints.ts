@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import type { EngineTriple } from "../../types.ts";
 import { isIRI } from "../../utils/rdf.ts";
 

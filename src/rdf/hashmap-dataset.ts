@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { termToString } from "rdf-string";
 import type { IriTerm } from "sparqljs";
 import Dataset from "./dataset.ts";

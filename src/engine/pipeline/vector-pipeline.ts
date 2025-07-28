@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { chunk, flatMap, flatten, slice } from "lodash-es";
 import {
   type PipelineInput,

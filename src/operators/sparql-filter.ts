@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import {

@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MIT
-"use strict";
-
 import { cloneDeep, partition } from "lodash-es";
 
 import type { Pattern, UnionPattern } from "sparqljs";
