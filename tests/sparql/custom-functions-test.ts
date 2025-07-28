@@ -2,10 +2,12 @@
 import { expect } from "chai";
 import assert from "node:assert";
 import { describe, it } from "node:test";
-import { Bindings, rdf } from "../../src/index.ts";
+import { Bindings } from "../../src/index.ts";
 import type { CustomFunctions } from "../../src/operators/expressions/sparql-expression.ts";
 import {
+  createBoolean,
   createLangLiteral,
+  shallowCloneTerm,
   termToValue,
   UNBOUND,
 } from "../../src/utils/rdf.ts";
@@ -16,7 +18,7 @@ describe("SPARQL custom operators", () => {
     const customFunctions: CustomFunctions = {
       "http://test.com#REVERSE": function (a) {
         assert.ok(a && !Array.isArray(a));
-        return rdf.shallowCloneTerm(a, a.value.split("").reverse().join(""));
+        return shallowCloneTerm(a, a.value.split("").reverse().join(""));
       },
     };
 
@@ -56,7 +58,7 @@ describe("SPARQL custom operators", () => {
     const customFunctions: CustomFunctions = {
       "http://test.com#CONTAINS_THOMAS": function (a) {
         assert.ok(a && !Array.isArray(a));
-        return rdf.createBoolean(a.value.toLowerCase().indexOf("thomas") >= 0);
+        return createBoolean(a.value.toLowerCase().indexOf("thomas") >= 0);
       },
     };
     const g = getGraph("./tests/data/dblp.nt");
@@ -91,8 +93,8 @@ describe("SPARQL custom operators", () => {
     const customFunctions: CustomFunctions = {
       "http://test.com#IS_EVEN": function (a) {
         assert.ok(a && "datatype" in a);
-        const value = rdf.termToValue<number>(a);
-        return rdf.createBoolean(value % 2 === 0);
+        const value = termToValue<number>(a);
+        return createBoolean(value % 2 === 0);
       },
     };
     const g = getGraph("./tests/data/dblp.nt");
