@@ -1,7 +1,7 @@
-/* file : distinct-stage-builder.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,15 +24,14 @@ SOFTWARE.
 
 "use strict";
 
-import StageBuilder from "./stage-builder.ts";
 import sparqlDistinct from "../../operators/sparql-distinct.ts";
-import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
 import ExecutionContext from "../context/execution-context.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import StageBuilder from "./stage-builder.ts";
 
 /**
  * A DistinctStageBuilder evaluates DISTINCT modifiers
- * @author Thomas Minier
  */
 export default class DistinctStageBuilder extends StageBuilder {
   execute(

@@ -1,7 +1,7 @@
-/* file : dataset.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,6 @@ import UnionGraph from "./union-graph.ts";
 /**
  * An abstraction over an RDF datasets, i.e., a collection of RDF graphs.
  * @abstract
- * @author Thomas Minier
  */
 export default abstract class Dataset<G extends Graph = Graph> {
   private _graphFactory: (iri: IriTerm) => G | null;

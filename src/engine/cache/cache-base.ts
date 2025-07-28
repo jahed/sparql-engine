@@ -1,7 +1,7 @@
-/* file: cache-base.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the 'Software'), to deal
@@ -29,7 +29,6 @@ import type { AsyncCache, Cache } from "./cache-interfaces.ts";
 
 /**
  * An in-memory LRU cache
- * @author Thomas Minier
  */
 export class BaseLRUCache<K extends {}, T extends {}> implements Cache<K, T> {
   private readonly _content: LRUCache<K, T>;
@@ -77,7 +76,6 @@ export class BaseLRUCache<K extends {}, T extends {}> implements Cache<K, T> {
 
 /**
  * Data-structure used for the base implementation of an asynchronous cache.
- * @author Thomas Minier
  */
 export interface AsyncCacheEntry<T, I> {
   /** The cache entry's content */
@@ -93,7 +91,6 @@ export interface AsyncCacheEntry<T, I> {
 /**
  * A base class for implementing an asynchronous cache.
  * It simply needs to provides a data structure used to cache items
- * @author Thomas Minier
  */
 export abstract class BaseAsyncCache<K extends {}, T extends {}, I>
   implements AsyncCache<K, T, I>
@@ -175,7 +172,6 @@ export abstract class BaseAsyncCache<K extends {}, T extends {}, I>
 
 /**
  * An in-memory LRU implementation of an asynchronous cache.
- * @author Thomas Minier
  */
 export class AsyncLRUCache<
   K extends {},

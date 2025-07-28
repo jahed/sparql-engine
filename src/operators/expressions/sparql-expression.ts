@@ -1,7 +1,7 @@
-/* file : sparql-expression.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -101,7 +101,6 @@ function isFunctionCall(expr: Expression): expr is FunctionCallExpression {
 
 /**
  * Compile and evaluate a SPARQL expression (found in FILTER clauses, for example)
- * @author Thomas Minier
  */
 export class SPARQLExpression {
   private readonly _expression: CompiledExpression;

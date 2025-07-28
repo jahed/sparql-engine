@@ -1,7 +1,7 @@
-/* file : plan-visitor.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,6 @@ import type {
  * A Visitor which performs a Depth-first traversal of a SPARQL query expression tree
  * and transforms each node.
  * Subclasses are used to implements SPARQl query optimization rules.
- * @author Thomas Minier
  */
 export default class PlanVisitor {
   /**

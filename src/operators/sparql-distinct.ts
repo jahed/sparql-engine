@@ -1,7 +1,7 @@
-/* file : sparql-distinct.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,6 @@ function _hash(bindings: Bindings): string {
 /**
  * Applies a DISTINCT modifier on the output of another operator.
  * @see {@link https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modDuplicates}
- * @author Thomas Minier
  * @param source - Input {@link PipelineStage}
  * @return A {@link PipelineStage} which evaluate the DISTINCT operation
  */

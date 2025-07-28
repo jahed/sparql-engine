@@ -1,7 +1,7 @@
-/* file : bgp-stage-builder.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -89,8 +89,6 @@ function bgpEvaluation(
 /**
  * A BGPStageBuilder evaluates Basic Graph Patterns in a SPARQL query.
  * Users can extend this class and overrides the "_buildIterator" method to customize BGP evaluation.
- * @author Thomas Minier
- * @author Corentin Marionneau
  */
 export default class BGPStageBuilder extends StageBuilder {
   /**

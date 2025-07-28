@@ -1,7 +1,7 @@
-/* file : sparql-operations.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -83,8 +83,6 @@ function toHex(buffer: ArrayBuffer): string {
  * All possible intermediate representation are gathered in the `src/rdf-terms.js` file,
  * and are used to represents RDF Terms.
  * Each SPARQL operation is also expected to return the same kind of intermediate representation.
- * @author Thomas Minier
- * @author Corentin Marionneau
  */
 export default {
   /*

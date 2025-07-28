@@ -1,7 +1,7 @@
-/* file : path-stage-builder.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -67,7 +67,6 @@ function boundPathTriple(
  * The base class to implements to evaluate Property Paths.
  * A subclass of this class only has to implement the `_executePropertyPath` method to provide an execution logic for property paths.
  * @abstract
- * @author Thomas Minier
  */
 export default abstract class PathStageBuilder extends StageBuilder {
   /**

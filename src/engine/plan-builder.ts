@@ -1,7 +1,7 @@
-/* file : plan-builder.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -107,8 +107,6 @@ export const SPARQL_OPERATION = {
  * i.e., an iterator that can be consumed to get query results.
  * Internally, it implements a Builder design pattern, where various {@link StageBuilder} are used
  * for building each part of the query execution plan.
- * @author Thomas Minier
- * @author Corentin Marionneau
  */
 export class PlanBuilder {
   private readonly _parser: SparqlParser;

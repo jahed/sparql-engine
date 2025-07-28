@@ -1,7 +1,7 @@
-/* file : vector-pipeline.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,6 @@ import {
 
 /**
  * A PipelineStage which materializes all intermediate results in main memory.
- * @author Thomas Minier
  */
 export class VectorStage<T> implements PipelineStage<T> {
   // We need to use Promise to store the stage content,
@@ -126,7 +125,6 @@ export class VectorStreamInput<T> implements StreamPipelineInput<T> {
  * This pipeline is more efficient CPU-wise than {@link RxjsPipeline}, but it also consumes much more memory, as it materializes evey stage of the pipeline before moving to the next.
  * It should only be used when SPARQL queries generate few intermediate results.
  * @see P. A. Boncz, S. Manegold, and M. L. Kersten. "Database architecture evolution: Mammals flourished long before dinosaurs became extinct". PVLDB, (2009)
- * @author Thomas Minier
  */
 export default class VectorPipeline extends PipelineEngine {
   empty<T>(): VectorStage<T> {

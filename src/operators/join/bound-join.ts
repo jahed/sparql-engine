@@ -1,7 +1,7 @@
-/* file : bind-join.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,6 @@ type BasicGraphPattern = EngineTriple[];
 /**
  * Rewrite a triple pattern using a rewriting key,
  * i.e., append "_key" to each SPARQL variable in the triple pattern
- * @author Thomas Minier
  * @param key - Rewriting key
  * @param tp - Triple pattern to rewrite
  * @return The rewritten triple pattern
@@ -67,7 +66,6 @@ function rewriteTriple(triple: EngineTriple, key: number): EngineTriple {
 
 /**
  * Join the set of bindings produced by a pipeline stage with a BGP using the Bound Join algorithm.
- * @author Thomas Minier
  * @param  source - Source of bindings
  * @param  bgp - Basic Pattern to join with
  * @param  graph - Graphe queried

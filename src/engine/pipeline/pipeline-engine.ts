@@ -1,7 +1,7 @@
-/* file : pipeline-engine.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,6 @@ interface SubGroup<K, R> {
 /**
  * An input of a {@link PipelineStage} which produces items in stream/async way.
  * Usefull for connecting a Node.JS stream into a pipeline of iterators.
- * @author Thomas Minier
  */
 export interface StreamPipelineInput<T> {
   /**
@@ -108,7 +107,6 @@ export function createObserver<T>(
 
 /**
  * A step in a pipeline. Data can be consumed in a pull-based or push-bashed fashion.
- * @author Thomas Minier
  */
 export interface PipelineStage<T> {
   /**
@@ -138,7 +136,6 @@ export interface PipelineStage<T> {
  * Abstract representation used to apply transformations on a pipeline of iterators.
  * Concrete subclasses are used by the framework to build the query execution pipeline.
  * @abstract
- * @author Thomas Minier
  */
 export abstract class PipelineEngine {
   /**

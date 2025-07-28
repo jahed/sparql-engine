@@ -1,7 +1,7 @@
-/* file : json-formatter.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -92,7 +92,6 @@ function writeBindings(
 /**
  * Formats query solutions (bindings or booleans) from a PipelineStage in W3C SPARQL JSON format
  * @see https://www.w3.org/TR/2013/REC-sparql11-results-json-20130321/
- * @author Thomas Minier
  * @param source - Input pipeline
  * @return A pipeline that yields results in W3C SPARQL JSON format
  */

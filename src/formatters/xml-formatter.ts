@@ -1,7 +1,7 @@
-/* file : xml-formatter.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -83,8 +83,6 @@ function _writeBindings(input: Bindings, results: any) {
 /**
  * Formats query solutions (bindings or booleans) from a PipelineStage in W3C SPARQL XML format
  * @see https://www.w3.org/TR/2013/REC-rdf-sparql-XMLres-20130321/
- * @author Thomas Minier
- * @author Corentin Marionneau
  * @param source - Input pipeline
  * @return A pipeline s-that yields results in W3C SPARQL XML format
  */

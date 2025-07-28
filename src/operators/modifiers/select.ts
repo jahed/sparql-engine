@@ -1,7 +1,7 @@
-/* file : select.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -34,8 +34,6 @@ import { UNBOUND } from "../../utils/rdf.ts";
 /**
  * Evaluates a SPARQL SELECT operation, i.e., perform a selection over sets of solutions bindings
  * @see {@link https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#select}
- * @author Thomas Minier
- * @author Corentin Marionneau
  * @param source - Input {@link PipelineStage}
  * @param query - SELECT query
  * @return A {@link PipelineStage} which evaluate the SELECT modifier

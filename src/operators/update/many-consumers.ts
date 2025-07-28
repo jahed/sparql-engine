@@ -1,7 +1,7 @@
-/* file : many-consumers.js
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,6 @@ import { Consumable } from "./consumer.ts";
 
 /**
  * ManyConsumers group multiple {@link Consumable} to be evaluated in sequence
- * @author Thomas Minier
  */
 export default class ManyConsumers<T> extends Consumable<T> {
   private readonly _consumers: Consumable<T>[];

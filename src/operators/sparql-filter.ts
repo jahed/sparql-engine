@@ -1,7 +1,7 @@
-/* file : sparql-filter.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,6 @@ import { literalIsBoolean, termIsLiteral, termToValue } from "../utils/rdf.ts";
 /**
  * Evaluate SPARQL Filter clauses
  * @see {@link https://www.w3.org/TR/sparql11-query/#expressions}
- * @author Thomas Minier
  * @param source - Input {@link PipelineStage}
  * @param expression - FILTER expression
  * @param customFunctions - User-defined SPARQL functions (optional)

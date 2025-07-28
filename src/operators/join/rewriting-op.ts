@@ -1,7 +1,7 @@
-/* file : rewriting-op.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -96,7 +96,6 @@ function rewriteSolutions(
  * A special operator used to evaluate a UNION query with a RDF Graph,
  * and then rewrite bindings generated and performs union with original bindings.
  * It is designed to be used in the bound join algorithm
- * @author Thomas Minier
  * @private
  * @param  graph - Graph queried
  * @param  bgpBucket - List of BGPs to evaluate

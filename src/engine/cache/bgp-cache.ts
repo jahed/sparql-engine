@@ -1,7 +1,7 @@
-/* file: bgp-cache.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the 'Software'), to deal
@@ -50,7 +50,6 @@ function hashBasicGraphPattern(bgp: BasicGraphPattern): string {
 
 /**
  * An async cache that stores the solution bindings from BGP evaluation
- * @author Thomas Minier
  */
 export interface BGPCache
   extends AsyncCache<BasicGraphPattern, Bindings, string> {
@@ -77,7 +76,6 @@ export interface BGPCache
 
 /**
  * An implementation of a {@link BGPCache} using an {@link AsyncLRUCache}
- * @author Thomas Minier
  */
 export class LRUBGPCache implements BGPCache {
   // Main index: for each triple pattern, register the BGP where their occurs

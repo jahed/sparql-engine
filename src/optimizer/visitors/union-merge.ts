@@ -1,7 +1,7 @@
-/* file : union-merge.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,6 @@ import PlanVisitor from "../plan-visitor.ts";
 /**
  * Implements the UNION Merge rule: all SPARQL UNION clauses in the same group pattern
  * should be merged as one single UNION clause.
- * @author Thomas Minier
  */
 export default class UnionMerge extends PlanVisitor {
   visitUnion(node: UnionPattern): Pattern {

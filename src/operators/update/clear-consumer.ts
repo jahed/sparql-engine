@@ -1,7 +1,7 @@
-/* file : clear-consumer.js
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +24,11 @@ SOFTWARE.
 
 "use strict";
 
-import { Consumable } from "./consumer.ts";
 import Graph from "../../rdf/graph.ts";
+import { Consumable } from "./consumer.ts";
 
 /**
  * Clear all RDF triples in a RDF Graph
- * @author Thomas Minier
  */
 export default class ClearConsumer<T> extends Consumable<T> {
   private readonly _graph: Graph;
@@ -39,7 +38,7 @@ export default class ClearConsumer<T> extends Consumable<T> {
    * @param graph - Input RDF Graph
    */
   constructor(graph: Graph) {
-    super()
+    super();
     this._graph = graph;
   }
 

@@ -1,7 +1,7 @@
-/* file : aggregates-test.js
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -29,13 +29,13 @@ import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { termToString } from "rdf-string";
 import { Bindings } from "../../src/api.ts";
+import type { BindingsRecord } from "../../src/rdf/bindings.ts";
 import {
   createInteger,
   createIRI,
   createLiteral,
 } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
-import type { BindingsRecord } from "../../src/rdf/bindings.ts";
 
 describe("SPARQL aggregates", () => {
   let engine: TestEngine;

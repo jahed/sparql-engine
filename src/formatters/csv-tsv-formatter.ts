@@ -1,7 +1,7 @@
-/* file : csv-tsv-formatter.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -80,7 +80,6 @@ function writeBindings(
 
 /**
  * Create a function that formats query solutions in CSV/TSV using a separator
- * @author Thomas Minier
  * @param separator - Separator to use
  * @return A function that formats query results in a pipeline fashion
  */
@@ -120,7 +119,6 @@ function genericFormatter(separator: string) {
 /**
  * Formats query solutions (bindings or booleans) from a PipelineStage in W3C SPARQL CSV format
  * @see https://www.w3.org/TR/2013/REC-sparql11-results-csv-tsv-20130321/
- * @author Thomas Minier
  * @param source - Input pipeline
  * @return A pipeline that yields results in W3C SPARQL CSV format
  */
@@ -129,7 +127,6 @@ export const csvFormatter = genericFormatter(",");
 /**
  * Formats query solutions (bindings or booleans) from a PipelineStage in W3C SPARQL TSV format
  * @see https://www.w3.org/TR/2013/REC-sparql11-results-csv-tsv-20130321/
- * @author Thomas Minier
  * @param source - Input pipeline
  * @return A pipeline that yields results in W3C SPARQL TSV format
  */

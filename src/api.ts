@@ -1,7 +1,7 @@
-/* file : api.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -34,9 +34,9 @@ import FilterStageBuilder from "./engine/stages/filter-stage-builder.ts";
 import GlushkovStageBuilder from "./engine/stages/glushkov-executor/glushkov-stage-builder.ts";
 import GraphStageBuilder from "./engine/stages/graph-stage-builder.ts";
 import MinusStageBuilder from "./engine/stages/minus-stage-builder.ts";
-import ServiceStageBuilder from "./engine/stages/service-stage-builder.ts";
 import OptionalStageBuilder from "./engine/stages/optional-stage-builder.ts";
 import OrderByStageBuilder from "./engine/stages/orderby-stage-builder.ts";
+import ServiceStageBuilder from "./engine/stages/service-stage-builder.ts";
 import UnionStageBuilder from "./engine/stages/union-stage-builder.ts";
 import UpdateStageBuilder from "./engine/stages/update-stage-builder.ts";
 
@@ -58,29 +58,29 @@ const stages = {
 };
 
 // base types
-export { default as Dataset } from "./rdf/dataset.ts";
-export { Bindings, BindingBase } from "./rdf/bindings.ts";
-export { default as HashMapDataset } from "./rdf/hashmap-dataset.ts";
-export { default as Graph } from "./rdf/graph.ts";
 export { default as ExecutionContext } from "./engine/context/execution-context.ts";
 export { PlanBuilder } from "./engine/plan-builder.ts";
+export { BindingBase, Bindings } from "./rdf/bindings.ts";
+export { default as Dataset } from "./rdf/dataset.ts";
+export { default as Graph } from "./rdf/graph.ts";
+export { default as HashMapDataset } from "./rdf/hashmap-dataset.ts";
 // pipeline
-export { Pipeline } from "./engine/pipeline/pipeline.ts";
 export {
   PipelineEngine,
   type PipelineInput,
   type PipelineStage,
   type StreamPipelineInput,
 } from "./engine/pipeline/pipeline-engine.ts";
+export { Pipeline } from "./engine/pipeline/pipeline.ts";
 export { default as RxjsPipeline } from "./engine/pipeline/rxjs-pipeline.ts";
 export { default as VectorPipeline } from "./engine/pipeline/vector-pipeline.ts";
 // RDF terms Utilities
 export * as rdf from "./utils/rdf.ts";
 // Formatters
-export { default as JsonFormat } from "./formatters/json-formatter.ts";
 export {
   csvFormatter as CSVFormat,
   tsvFormatter as TSVFormat,
 } from "./formatters/csv-tsv-formatter.ts";
+export { default as JsonFormat } from "./formatters/json-formatter.ts";
 
 export { stages };

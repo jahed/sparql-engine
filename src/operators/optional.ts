@@ -1,7 +1,7 @@
-/* file : optional-iterator.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,6 @@ import { Bindings } from "../rdf/bindings.ts";
 /**
  * Handles an SPARQL OPTIONAL clause
  * @see {@link https://www.w3.org/TR/sparql11-query/#optionals}
- * @author Thomas Minier
  * @param source - Input {@link PipelineStage}
  * @param patterns - OPTIONAL clause, i.e., a SPARQL group pattern
  * @param builder - Instance of the current {@link PlanBuilder}

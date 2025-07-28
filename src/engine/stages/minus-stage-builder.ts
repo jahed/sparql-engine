@@ -1,7 +1,7 @@
-/* file : minus-stage-builder.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,6 @@ import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 
 /**
  * A MinusStageBuilder evaluates MINUS clauses
- * @author Thomas Minier
  */
 export default class MinusStageBuilder extends StageBuilder {
   execute(

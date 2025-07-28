@@ -1,7 +1,7 @@
-/* file : glushkov-stage-builder.ts
+/*
 MIT License
 
-Copyright (c) 2019 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the 'Software'), to deal
@@ -43,9 +43,6 @@ import { GlushkovBuilder } from "./automatonBuilder.ts";
 
 /**
  * A Step in the evaluation of a property path
- * @author Arthur Trottier
- * @author Charlotte Cogan
- * @author Julien Aimonier-Davat
  */
 class Step {
   private _node: EngineTripleValue;
@@ -98,9 +95,6 @@ class Step {
 
 /**
  * A solution path, found during the evaluation of a property path
- * @author Arthur Trottier
- * @author Charlotte Cogan
- * @author Julien Aimonier-Davat
  */
 class ResultPath {
   private _steps: Array<Step>;
@@ -160,9 +154,6 @@ class ResultPath {
 
 /**
  * A GlushkovStageBuilder is responsible for evaluation a SPARQL property path query using a Glushkov state automata.
- * @author Arthur Trottier
- * @author Charlotte Cogan
- * @author Julien Aimonier-Davat
  */
 export default class GlushkovStageBuilder extends PathStageBuilder {
   /**

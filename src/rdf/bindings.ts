@@ -1,7 +1,7 @@
-/* file : bindings.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,6 @@ export type BindingsRecord = Record<string, Term>;
 /**
  * A set of mappings from a variable to a RDF Term.
  * @abstract
- * @author Thomas Minier
  */
 export abstract class Bindings {
   private readonly _properties: Map<string, any>;
@@ -382,7 +381,6 @@ export abstract class Bindings {
 
 /**
  * A set of mappings from a variable to a RDF Term, implements using a HashMap
- * @author Thomas Minier
  */
 export class BindingBase extends Bindings {
   private readonly _content: Map<string, Term>;

@@ -1,7 +1,7 @@
-/* file: action-consumer.ts
+/*
 MIT License
 
-Copyright (c) 2019-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the 'Software'), to deal
@@ -26,7 +26,6 @@ import { Consumable } from "./consumer.ts";
 
 /**
  * A consumer that executes a simple action
- * @author Thomas Minier
  */
 export default class ActionConsumer<T> extends Consumable<T> {
   private _action: () => void;

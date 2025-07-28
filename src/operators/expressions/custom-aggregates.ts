@@ -1,7 +1,7 @@
-/* file : custom-aggregations.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -55,7 +55,6 @@ function recall(expected: Term[], predicted: Term[]): number {
 /**
  * Implementation of Non standard SPARQL aggregations offered by the framework
  * All arguments are pre-compiled from string to js terms
- * @author Thomas Minier
  */
 export default {
   /*

@@ -1,7 +1,7 @@
-/* file : union-graph.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,6 @@ import Graph from "./graph.ts";
  * Searching for RDF triple smatching a triple pattern in such Graph is equivalent
  * as the Union of matching RDF triples in all graphs.
  * @extends Graph
- * @author Thomas Minier
  */
 export default class UnionGraph extends Graph {
   public readonly _graphs: Graph[]; // Public for tests.

@@ -1,7 +1,7 @@
-/* file : sparql-aggregates.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,6 @@ type TermRows = { [key: string]: Term[] };
  * solutions bindings on which the aggregation must be applied.
  * Each operations is expected to return a term, as with classic SPARQL operations
  * @see https://www.w3.org/TR/sparql11-query/#aggregateAlgebra
- * @author Thomas Minier
  */
 export default {
   count: function (variable: VariableTerm, rows: TermRows): Term {

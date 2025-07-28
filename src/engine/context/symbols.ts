@@ -1,7 +1,7 @@
-/* file: symbols.ts
+/*
 MIT License
 
-Copyright (c) 2019-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the 'Software'), to deal
@@ -31,7 +31,7 @@ export default {
   HAS_LIMIT_OFFSET: Symbol("SPARQL_ENGINE_QUERY_HAS_LIMIT_OFFSET"),
   /** The default buffer size used in the bound join algorithm */
   BOUND_JOIN_BUFFER_SIZE: Symbol(
-    "SPARQL_ENGINE_INTERNALS_BOUND_JOIN_BUFFER_SIZE",
+    "SPARQL_ENGINE_INTERNALS_BOUND_JOIN_BUFFER_SIZE"
   ),
   /** Forces all joins to be done using the Index Join algorithm */
   FORCE_INDEX_JOIN: Symbol("SPARQL_ENGINE_FORCE_INDEX_JOIN"),

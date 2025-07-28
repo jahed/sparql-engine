@@ -1,7 +1,7 @@
-/* file : automatonBuilder.ts
+/*
 MIT License
 
-Copyright (c) 2019 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -28,9 +28,6 @@ import { Automaton, State, Transition } from "./automaton.ts";
 
 /**
  * Interface of something that builds an automaton
- * @author Arthur Trottier
- * @author Charlotte Cogan
- * @author Julien Aimonier-Davat
  */
 interface AutomatonBuilder<T extends Primitive, P extends Term> {
   build(): Automaton<T, P>;
@@ -38,9 +35,7 @@ interface AutomatonBuilder<T extends Primitive, P extends Term> {
 
 /**
  * Perform the union of two sets
- * @author Arthur Trottier
- * @author Charlotte Cogan
- * @author Julien Aimonier-Davat
+
  * @param setA - first set
  * @param setB - second set
  * @return The union of the two sets
@@ -55,9 +50,6 @@ export function union(setA: Set<number>, setB: Set<number>): Set<number> {
 
 /**
  * A GlushkovBuilder is responsible for build the automaton used to evaluate a SPARQL property path.
- * @author Arthur Trottier
- * @author Charlotte Cogan
- * @author Julien Aimonier-Davat
  */
 export class GlushkovBuilder
   implements AutomatonBuilder<number, EnginePredicate>

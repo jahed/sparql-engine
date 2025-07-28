@@ -1,7 +1,7 @@
-/* file : aggregate-stage-builder.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,6 @@ import StageBuilder from "./stage-builder.ts";
  * An AggregateStageBuilder handles the evaluation of Aggregations operations,
  * GROUP BY and HAVING clauses in SPARQL queries.
  * @see https://www.w3.org/TR/sparql11-query/#aggregates
- * @author Thomas Minier
  */
 export default class AggregateStageBuilder extends StageBuilder {
   /**

@@ -1,7 +1,7 @@
-/* file : bind.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -49,8 +49,6 @@ function isIterable(obj: Object): obj is Iterable<EngineTripleValue | null> {
 /**
  * Apply a SPARQL BIND clause
  * @see {@link https://www.w3.org/TR/sparql11-query/#bind}
- * @author Thomas Minier
- * @author Corentin Marionneau
  * @param source - Source {@link PipelineStage}
  * @param variable  - SPARQL variable used to bind results
  * @param expression - SPARQL expression

@@ -1,7 +1,7 @@
-/* file : service-stage-builder.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -40,8 +40,6 @@ import { Pipeline } from "../pipeline/pipeline.ts";
 
 /**
  * A ServiceStageBuilder is responsible for evaluation a SERVICE clause in a SPARQL query.
- * @author Thomas Minier
- * @author Corentin Marionneau
  */
 export default class ServiceStageBuilder extends StageBuilder {
   /**

@@ -1,7 +1,7 @@
-/* file : ask.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,15 +24,14 @@ SOFTWARE.
 
 "use strict";
 
-import { Pipeline } from "../../engine/pipeline/pipeline.ts";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
-import { Bindings, BindingBase } from "../../rdf/bindings.ts";
+import { Pipeline } from "../../engine/pipeline/pipeline.ts";
+import { BindingBase, Bindings } from "../../rdf/bindings.ts";
 
 /**
  * A AskOperator output True if a source iterator has solutions, false otherwise.
  * results are outputed following the SPARQL XML results format
  * @see {@link https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#ask}
- * @author Thomas Minier
  * @param source - Source {@link PipelineStage}
  * @return A {@link PipelineStage} that evaluate the ASK modifier
  */

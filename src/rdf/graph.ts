@@ -1,7 +1,7 @@
-/* file : graph.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -62,7 +62,6 @@ function parseCapabilities(
 /**
  * An abstract RDF Graph, accessed through a RDF Dataset
  * @abstract
- * @author Thomas Minier
  */
 export default abstract class Graph {
   private _iri: IriTerm;

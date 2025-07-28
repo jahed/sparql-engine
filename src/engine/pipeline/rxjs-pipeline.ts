@@ -1,7 +1,7 @@
-/* file : rxjs-pipeline.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -86,7 +86,6 @@ Observable.prototype.subscribe = function subscribe<T>(
 
 /**
  * A StreamPipelineInput implemented using Rxjs' subscribers.
- * @author Thomas Minier
  */
 export class RxjsStreamInput<T> implements StreamPipelineInput<T> {
   private readonly _subscriber: Subscriber<T>;
@@ -110,7 +109,6 @@ export class RxjsStreamInput<T> implements StreamPipelineInput<T> {
 
 /**
  * A pipeline implemented using Rx.js
- * @author Thomas Minier
  */
 export default class RxjsPipeline extends PipelineEngine {
   empty<T>(): Observable<T> {

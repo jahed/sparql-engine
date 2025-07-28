@@ -1,7 +1,7 @@
-/* file : orderby.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -68,7 +68,6 @@ function _compileComparators(comparators: Ordering[]) {
  * A OrderByOperator implements a ORDER BY clause, i.e.,
  * it sorts solution mappings produced by another operator
  * @see {@link https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy}
- * @author Thomas Minier
  * @param source - Input {@link PipelineStage}
  * @param comparators - Set of ORDER BY comparators
  * @return A {@link PipelineStage} which evaluate the ORDER BY operation

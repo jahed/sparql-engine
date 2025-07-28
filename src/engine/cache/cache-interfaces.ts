@@ -1,7 +1,7 @@
-/* file: cache-interfaces.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the 'Software'), to deal
@@ -26,7 +26,6 @@ SOFTWARE.
 
 /**
  * A cache is a vue that materializes data for latter re-use
- * @author Thomas Minier
  */
 export interface Cache<K extends {}, T extends {}> {
   /**
@@ -68,7 +67,6 @@ export interface Cache<K extends {}, T extends {}> {
 /**
  * An async cache is cache which stores collections of items that are built over time.
  * Writers will call the update and commit method to update the cache content & mark items as available.
- * @author Thomas Minier
  */
 export interface AsyncCache<K, T, I> {
   /**

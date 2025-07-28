@@ -1,7 +1,7 @@
-/* file: nop-consumer.ts
+/*
 MIT License
 
-Copyright (c) 2019-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the 'Software'), to deal
@@ -26,7 +26,6 @@ import { Consumable } from "./consumer.ts";
 
 /**
  * A Consumer that does nothing
- * @author Thomas Minier
  */
 export default class NoopConsumer<T> extends Consumable<T> {
   execute(): Promise<void> {

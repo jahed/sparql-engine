@@ -1,7 +1,7 @@
-/* file : minus.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,6 @@ import { Bindings } from "../rdf/bindings.ts";
 /**
  * Evaluates a SPARQL MINUS clause
  * @see {@link https://www.w3.org/TR/sparql11-query/#neg-minus}
- * @author Thomas Minier
  * @param leftSource - Left input {@link PipelineStage}
  * @param rightSource - Right input {@link PipelineStage}
  * @return A {@link PipelineStage} which evaluate the MINUS operation

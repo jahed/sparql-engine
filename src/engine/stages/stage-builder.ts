@@ -1,7 +1,7 @@
-/* file : sateg-builder.ts
+/*
 MIT License
 
-Copyright (c) 2018-2020 Thomas Minier
+Copyright (c) 2025 The SPARQL Engine Authors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,16 +24,14 @@ SOFTWARE.
 
 "use strict";
 
-import { PlanBuilder } from "../plan-builder.ts";
-import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
-import type { Consumable } from "../../operators/update/consumer.ts";
-import Dataset from "../../rdf/dataset.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
+import Dataset from "../../rdf/dataset.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import { PlanBuilder } from "../plan-builder.ts";
 
 /**
  * A StageBuilder encapsulate a strategy for executing a class of SPARQL operations
  * @abstract
- * @author Thomas Minier
  */
 export default abstract class StageBuilder {
   protected _builder: PlanBuilder | null = null;
