@@ -59,19 +59,10 @@ export abstract class Consumer<T> extends Consumable<T> {
     this._source = source;
   }
 
-  execute(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const promises: Promise<void>[] = [];
-      this._source.subscribe({
-        next: (triple) => {
-          promises.push(this.onData(triple));
-        },
-        error: reject,
-        complete: () => {
-          Promise.all(promises).then(() => resolve(), reject);
-        },
-      });
-    });
+  async execute(): Promise<void> {
+    for await (const data of this._source) {
+      this.onData(data);
+    }
   }
 
   abstract onData(triple: EngineTriple): Promise<void>;
