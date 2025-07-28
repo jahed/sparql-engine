@@ -31,8 +31,8 @@ import {
   isEqual,
   subMilliseconds,
 } from "date-fns";
+import { md5 } from "js-md5";
 import { isNull } from "lodash-es";
-import { createHash, randomUUID } from "node:crypto";
 import type { EngineTripleValue } from "../../types.ts";
 import { parseISO8601 } from "../../utils/date.ts";
 import {
@@ -59,18 +59,22 @@ import {
 
 type Term = EngineTripleValue;
 
-/**
- * Return a high-orderpply a Hash function  to a RDF
- * and returns the corresponding RDF Literal
- * @param  {string} hashType - Type of hash (md5, sha256, etc)
- * @return {function} A function that hashes RDF term
- */
-function applyHash(hashType: string): (v: Term) => Term {
-  return (v) => {
-    const hash = createHash(hashType);
-    hash.update(v.value);
-    return createLiteral(hash.digest("hex"));
+function digestOperation(hashType: string): (v: Term) => Promise<Term> {
+  return async (v) => {
+    return createLiteral(
+      toHex(
+        await crypto.subtle.digest(hashType, new TextEncoder().encode(v.value))
+      )
+    );
   };
+}
+
+function toHex(buffer: ArrayBuffer): string {
+  const result: string[] = [];
+  for (const byte of new Uint8Array(buffer)) {
+    result.push(byte.toString(16).padStart(2, "0"));
+  }
+  return result.join("");
 }
 
 /**
@@ -356,11 +360,11 @@ export default {
   },
 
   uuid: function (): Term {
-    return createIRI(`urn:uuid:${randomUUID()}`);
+    return createIRI(`urn:uuid:${crypto.randomUUID()}`);
   },
 
   struuid: function (): Term {
-    return createLiteral(randomUUID());
+    return createLiteral(crypto.randomUUID());
   },
 
   /*
@@ -590,9 +594,11 @@ export default {
     Hash Functions https://www.w3.org/TR/sparql11-query/#func-hash
   */
 
-  md5: applyHash("md5"),
-  sha1: applyHash("sha1"),
-  sha256: applyHash("sha256"),
-  sha384: applyHash("sha384"),
-  sha512: applyHash("sha512"),
+  md5: function (a: Term): Term {
+    return createLiteral(md5.hex(a.value));
+  },
+  sha1: digestOperation("SHA-1"),
+  sha256: digestOperation("SHA-256"),
+  sha384: digestOperation("SHA-384"),
+  sha512: digestOperation("SHA-512"),
 };

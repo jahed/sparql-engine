@@ -26,6 +26,7 @@ SOFTWARE.
 
 import { expect } from "chai";
 import { before, describe, it } from "node:test";
+import type { QueryOutput } from "../../src/engine/plan-builder.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("FILTER SPARQL queries", () => {
@@ -931,19 +932,12 @@ describe("FILTER SPARQL queries", () => {
   ];
 
   data.forEach((d) => {
-    it(`should evaluate the "${d.name}" FILTER`, (t, done) => {
-      const results = [];
-      const iterator = engine.execute(d.query);
-      iterator.subscribe(
-        (b) => {
-          results.push(b);
-        },
-        done,
-        () => {
-          expect(results.length).to.equal(d.expectedNb);
-          done();
-        }
-      );
+    it(`should evaluate the "${d.name}" FILTER`, async () => {
+      const results: QueryOutput[] = [];
+      for await (const bindings of engine.execute(d.query)) {
+        results.push(bindings);
+      }
+      expect(results.length).to.equal(d.expectedNb);
     });
   });
 });

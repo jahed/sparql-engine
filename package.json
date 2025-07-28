@@ -57,6 +57,7 @@
   "dependencies": {
     "binary-search-tree": "^0.2.6",
     "date-fns": "^4.1.0",
+    "js-md5": "^0.8.3",
     "lodash-es": "^4.17.21",
     "lru-cache": "^11.1.0",
     "rdf-data-factory": "^2.0.2",
