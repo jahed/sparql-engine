@@ -3,3 +3,5 @@ dist
 *.tgz
 *.log
 .tmp
+packages/*/LICENSE
+packages/*/AUTHORS

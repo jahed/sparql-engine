@@ -17,6 +17,24 @@ The aim of this project is to use newer Web APIs, language features, and make th
 npm install @jahed/sparql-engine
 ```
 
+Ensure you're using `rdf-data-factory@2` across your project for compatibility.
+
+```sh
+npm ls rdf-data-factory
+```
+
+Add `overrides` to your `package.json` to modify transitive dependency versions.
+
+```json
+{
+  "overrides": {
+    "sparqljs": {
+      "rdf-data-factory": "^2"
+    }
+  }
+}
+```
+
 ## Usage
 
 ```ts

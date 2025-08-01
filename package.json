@@ -1,63 +1,16 @@
 {
-  "name": "@jahed/sparql-engine",
-  "version": "0.9.0",
-  "description": "SPARQL query engine for servers and web browsers.",
-  "author": "Jahed Ahmed",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jahed/sparql-engine.git"
-  },
-  "bugs": "https://github.com/jahed/sparql-engine/issues",
-  "funding": "https://jahed.dev/donate",
-  "keywords": [
-    "sparql",
-    "engine",
-    "query",
-    "graph",
-    "database",
-    "rdf",
-    "turtle",
-    "semantic",
-    "semantic web"
-  ],
+  "name": "@jahed/sparql-engine-root",
+  "version": "0.0.1",
+  "private": true,
   "type": "module",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./*.js": {
-      "types": "./dist/*.d.ts",
-      "default": "./dist/*.js"
-    }
-  },
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist",
-    "src",
-    "AUTHORS"
+  "workspaces": [
+    "packages/*"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsc -p tsconfig.dist.json",
-    "format": "prettier -w .",
-    "lint": "tsc -p tsconfig.json",
-    "test": "npm run test:file -- 'tests/**/*-test.ts'",
-    "test:file": "node --disable-warning=ExperimentalWarning --experimental-strip-types --experimental-test-isolation=none --test-timeout=5000 --test"
-  },
-  "dependencies": {
-    "@seald-io/binary-search-tree": "^1.0.3",
-    "date-fns": "^4.1.0",
-    "js-md5": "^0.8.3",
-    "lodash-es": "^4.17.21",
-    "lru-cache": "^11.1.0",
-    "rdf-data-factory": "^2.0.2",
-    "rdf-string": "^2.0.1",
-    "rxjs": "^8.0.0-alpha.14",
-    "sparqljs": "^3.7.3",
-    "xml": "^1.0.1"
+    "clean": "npm run --workspaces --if-present clean",
+    "lint": "npm run --workspaces --if-present lint",
+    "test": "npm run --workspaces --if-present test",
+    "build": "npm run --workspaces --if-present build"
   },
   "devDependencies": {
     "@rdfjs/types": "^2.0.1",
@@ -69,16 +22,14 @@
     "@types/node": "^22.16.5",
     "@types/rdfjs__data-model": "^2.0.9",
     "@types/sparqljs": "^3.1.12",
-    "@types/xml": "^1.0.2",
     "chai": "^5.2.1",
-    "chai-xml": "^0.4.1",
     "n3": "^0.11.3",
     "prettier": "^3.6.2",
     "typescript": "5.8.x"
   },
   "overrides": {
     "sparqljs": {
-      "rdf-data-factory": "$rdf-data-factory"
+      "rdf-data-factory": "^2"
     }
   }
 }

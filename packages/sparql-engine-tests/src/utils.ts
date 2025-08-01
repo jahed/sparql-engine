@@ -1,0 +1,187 @@
+// SPDX-License-Identifier: MIT
+import type { QueryOutput } from "@jahed/sparql-engine/engine/plan-builder.ts";
+import {
+  ExecutionContext,
+  Graph,
+  HashMapDataset,
+  Pipeline,
+  type PipelineStage,
+  PlanBuilder,
+} from "@jahed/sparql-engine/index.ts";
+import type { CustomFunctions } from "@jahed/sparql-engine/operators/expressions/sparql-expression.ts";
+import type { EngineIRI, EngineTriple } from "@jahed/sparql-engine/types.ts";
+import { isVariable } from "@jahed/sparql-engine/utils/rdf.ts";
+import { isArray } from "lodash-es";
+import n3 from "n3";
+import fs from "node:fs";
+import path from "node:path";
+import { stringQuadToQuad, termToString } from "rdf-string";
+import type { Query } from "sparqljs";
+
+const { Parser, Store } = n3;
+
+export type TestGraph = N3Graph | UnionN3Graph;
+
+export function getGraph(
+  filePaths?: string | string[] | null,
+  isUnion = false
+) {
+  let graph: TestGraph;
+  if (isUnion) {
+    graph = new UnionN3Graph();
+  } else {
+    graph = new N3Graph();
+  }
+  if (typeof filePaths === "string") {
+    graph.parse(filePaths);
+  } else if (isArray(filePaths)) {
+    filePaths.forEach((filePath) => graph.parse(filePath));
+  }
+  return graph;
+}
+
+function formatTriplePattern(triple: EngineTriple) {
+  let subject = null;
+  let predicate = null;
+  let object = null;
+  if (!isVariable(triple.subject)) {
+    subject = triple.subject;
+  }
+  if (!isVariable(triple.predicate)) {
+    predicate = triple.predicate;
+  }
+  if (!isVariable(triple.object)) {
+    object = triple.object;
+  }
+  return { subject, predicate, object };
+}
+
+export class N3Graph extends Graph {
+  public readonly _store: n3.N3StoreWriter;
+  public readonly _parser: n3.N3Parser;
+
+  constructor() {
+    super();
+    this._store = Store()!;
+    this._parser = Parser()!;
+  }
+
+  parse(file: string) {
+    const content = fs
+      .readFileSync(
+        path.resolve(new URL(import.meta.resolve("../data/")).pathname, file)
+      )
+      .toString("utf-8");
+    this._parser.parse(content)?.forEach((t) => {
+      this._store.addTriple(t);
+    });
+  }
+
+  insert(triple: EngineTriple) {
+    return new Promise<void>((resolve, reject) => {
+      try {
+        this._store.addTriple(
+          termToString(triple.subject),
+          termToString(triple.predicate),
+          termToString(triple.object)
+        );
+        resolve();
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  delete(triple: EngineTriple) {
+    return new Promise<void>((resolve, reject) => {
+      try {
+        this._store.removeTriple(
+          termToString(triple.subject),
+          termToString(triple.predicate),
+          termToString(triple.object)
+        );
+        resolve();
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  find(triple: EngineTriple) {
+    const { subject, predicate, object } = formatTriplePattern(triple);
+    return this._store
+      .getTriples(
+        termToString(subject),
+        termToString(predicate),
+        termToString(object)
+      )
+      .map((t) => stringQuadToQuad(t));
+  }
+
+  estimateCardinality(triple: EngineTriple) {
+    const { subject, predicate, object } = formatTriplePattern(triple);
+    return Promise.resolve(
+      this._store.countTriples(
+        termToString(subject),
+        termToString(predicate),
+        termToString(object)
+      )
+    );
+  }
+
+  clear() {
+    const triples = this._store.getTriples(null, null, null);
+    this._store.removeTriples(triples);
+    return Promise.resolve();
+  }
+}
+
+class UnionN3Graph extends N3Graph {
+  constructor() {
+    super();
+  }
+
+  evalUnion(patterns: EngineTriple[][], context: ExecutionContext) {
+    return Pipeline.getInstance().merge(
+      ...patterns.map((pattern) => this.evalBGP(pattern, context))
+    );
+  }
+}
+
+export class TestEngine<G extends Graph = TestGraph> {
+  public readonly _graph: G;
+  public readonly _defaultGraphIRI: EngineIRI;
+  public readonly _dataset: HashMapDataset<G>;
+  public readonly _builder: PlanBuilder;
+
+  constructor(
+    graph: G,
+    defaultGraphIRI?: EngineIRI,
+    customOperations: CustomFunctions = {}
+  ) {
+    this._graph = graph;
+    this._defaultGraphIRI = defaultGraphIRI || this._graph.iri;
+    this._dataset = new HashMapDataset(this._defaultGraphIRI, this._graph);
+    this._builder = new PlanBuilder(this._dataset, {}, customOperations);
+  }
+
+  defaultGraphIRI() {
+    return this._dataset.getDefaultGraph().iri;
+  }
+
+  addNamedGraph(iri: EngineIRI, db: G) {
+    this._dataset.addNamedGraph(iri, db);
+  }
+
+  getNamedGraph(iri: EngineIRI): G {
+    return this._dataset.getNamedGraph(iri);
+  }
+
+  hasNamedGraph(iri: EngineIRI) {
+    return this._dataset.hasNamedGraph(iri);
+  }
+
+  execute(query: string | Query): PipelineStage<QueryOutput> {
+    return this._builder.build(query);
+  }
+}

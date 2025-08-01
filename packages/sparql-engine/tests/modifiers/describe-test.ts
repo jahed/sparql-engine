@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: MIT
+import { getGraph, TestEngine } from "@jahed/sparql-engine-tests/utils.ts";
+import { expect } from "chai";
+import assert from "node:assert";
+import { before, describe, it } from "node:test";
+import { createIRI } from "../../src/utils/rdf.ts";
+
+describe("DESCRIBE SPARQL queries", () => {
+  let engine: TestEngine;
+  before(() => {
+    const g = getGraph("dblp.nt");
+    engine = new TestEngine(g);
+  });
+
+  it("should evaluate simple DESCRIBE queries", async () => {
+    const query = `
+    PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    DESCRIBE ?s
+    WHERE {
+      ?s rdf:type dblp-rdf:Person .
+    }`;
+    const results = [];
+
+    for await (const triple of engine.execute(query)) {
+      assert.ok(typeof triple === "object" && "subject" in triple);
+      expect(triple.subject).to.deep.equal(
+        createIRI("https://dblp.org/pers/m/Minier:Thomas")
+      );
+      expect(triple.predicate).to.be.deep.oneOf([
+        createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+        createIRI(
+          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName"
+        ),
+        createIRI("https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf"),
+        createIRI(
+          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith"
+        ),
+      ]);
+      results.push(triple);
+    }
+    expect(results.length).to.equal(11);
+  });
+});

@@ -1,0 +1,55 @@
+{
+  "name": "@jahed/sparql-engine-formatter-xml",
+  "version": "0.9.0",
+  "description": "XML formatter for SPARQL query engine.",
+  "author": "Jahed Ahmed",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jahed/sparql-engine.git",
+    "directory": "packages/sparql-engine-formatter-xml"
+  },
+  "bugs": "https://github.com/jahed/sparql-engine/issues",
+  "funding": "https://jahed.dev/donate",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*.js": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    },
+    "./*.ts": {
+      "default": "./src/*.ts"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "AUTHORS"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist LICENSE AUTHORS",
+    "build": "npm run clean && tsc -p tsconfig.build.json && cp ../../LICENSE ../../AUTHORS .",
+    "format": "prettier -w .",
+    "lint": "tsc --noEmit",
+    "test": "npm run test:file -- 'tests/**/*-test.ts'",
+    "test:file": "node --disable-warning=ExperimentalWarning --experimental-strip-types --experimental-test-isolation=none --test-timeout=5000 --test"
+  },
+  "dependencies": {
+    "lodash-es": "^4.17.21",
+    "xml": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/xml": "^1.0.2",
+    "@jahed/sparql-engine-tests": "^0.0.1"
+  },
+  "peerDependencies": {
+    "@jahed/sparql-engine": "^0.9.0"
+  }
+}

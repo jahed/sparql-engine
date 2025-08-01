@@ -1,0 +1,23 @@
+{
+  "name": "@jahed/sparql-engine-tests",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*.ts": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "format": "prettier -w .",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "lodash-es": "^4.17.21"
+  },
+  "devDependencies": {
+  },
+  "peerDependencies": {
+    "@jahed/sparql-engine": "^0.9.0"
+  }
+}

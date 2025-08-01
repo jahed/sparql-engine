@@ -4,6 +4,9 @@
     "@tsconfig/node-ts/tsconfig.json"
   ],
   "compilerOptions": {
+    "noEmit": true,
+    "declaration": true,
+    "sourceMap": true,
     "lib": [
       "es2024",
       "ESNext.Array",
@@ -11,7 +14,6 @@
       "ESNext.Iterator",
       "DOM",
       "DOM.Iterable"
-    ],
-    "noEmit": true
+    ]
   }
 }
