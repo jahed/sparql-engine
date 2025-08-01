@@ -2,7 +2,6 @@
 import { chunk, flatMap, flatten, slice } from "lodash-es";
 import {
   type PipelineInput,
-  type PipelineObserver,
   type PipelineObserverOrNext,
   type PipelineStage,
   type PipelineSubscription,
@@ -29,12 +28,8 @@ export class VectorStage<T> implements PipelineStage<T> {
     return this._content;
   }
 
-  subscribe(
-    observerOrNext: PipelineObserverOrNext<T>,
-    onError?: PipelineObserver<T>["error"],
-    onComplete?: PipelineObserver<T>["complete"]
-  ): PipelineSubscription {
-    const observer = createObserver(observerOrNext, onError, onComplete);
+  subscribe(observerOrNext: PipelineObserverOrNext<T>): PipelineSubscription {
+    const observer = createObserver(observerOrNext);
     try {
       this._content
         .then((c) => {

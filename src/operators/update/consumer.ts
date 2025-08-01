@@ -1,10 +1,9 @@
 import {
   createObserver,
   createSubscription,
-  type PipelineObserver,
   type PipelineObserverOrNext,
   type PipelineStage,
-  type PipelineSubscription,
+  type PipelineSubscription
 } from "../../engine/pipeline/pipeline-engine.ts";
 import type { EngineTriple } from "../../types.ts";
 
@@ -13,10 +12,8 @@ export abstract class Consumable<T> implements PipelineStage<T> {
 
   subscribe(
     observerOrNext: PipelineObserverOrNext<T>,
-    onError?: PipelineObserver<T>["error"],
-    onComplete?: PipelineObserver<T>["complete"]
   ): PipelineSubscription {
-    const observer = createObserver(observerOrNext, onError, onComplete);
+    const observer = createObserver(observerOrNext);
     this.execute().then(observer.complete, observer.error);
     return createSubscription();
   }

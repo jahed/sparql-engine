@@ -62,17 +62,8 @@ export type PipelineObserverOrNext<T> =
   | null;
 
 export function createObserver<T>(
-  observerOrNext?: PipelineObserverOrNext<T>,
-  onError?: PipelineObserver<T>["error"],
-  onComplete?: PipelineObserver<T>["complete"]
+  observerOrNext?: PipelineObserverOrNext<T>
 ): Partial<PipelineObserver<T>> {
-  if (onError || onComplete) {
-    return {
-      next: typeof observerOrNext === "function" ? observerOrNext : undefined,
-      error: onError,
-      complete: onComplete,
-    };
-  }
   return observerOrNext
     ? typeof observerOrNext === "object"
       ? observerOrNext

@@ -19,45 +19,13 @@ import {
   shareReplay,
   skip,
   Subscriber,
-  type Subscription,
   take,
   tap,
   toArray,
 } from "rxjs";
-import {
-  PipelineEngine,
-  type PipelineObserver,
-  type PipelineObserverOrNext,
-  type StreamPipelineInput,
-} from "./pipeline-engine.ts";
+import { PipelineEngine, type StreamPipelineInput } from "./pipeline-engine.ts";
 
 const flatMap = mergeMap;
-
-declare module "rxjs" {
-  export interface Observable<T> {
-    subscribe(
-      observerOrNext: PipelineObserverOrNext<T>,
-      onError?: PipelineObserver<T>["error"],
-      onComplete?: PipelineObserver<T>["complete"]
-    ): Subscription;
-  }
-}
-
-const originalSubscribe = Observable.prototype.subscribe;
-Observable.prototype.subscribe = function subscribe<T>(
-  observerOrNext: PipelineObserverOrNext<T>,
-  onError?: PipelineObserver<T>["error"],
-  onComplete?: PipelineObserver<T>["complete"]
-): Subscription {
-  if (onError || onComplete) {
-    return originalSubscribe.call(this, {
-      next: typeof observerOrNext === "function" ? observerOrNext : undefined,
-      error: onError,
-      complete: onComplete,
-    });
-  }
-  return originalSubscribe.call(this, observerOrNext);
-};
 
 /**
  * A StreamPipelineInput implemented using Rxjs' subscribers.
