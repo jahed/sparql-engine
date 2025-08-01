@@ -2,7 +2,7 @@
 import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
-import { BindingBase } from "../../src/index.ts";
+import { BindingBase } from "../../src/rdf/bindings.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SELECT SPARQL queries", () => {

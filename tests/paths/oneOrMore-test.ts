@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 import { assert, expect } from "chai";
 import { before, describe, it } from "node:test";
-import { Bindings } from "../../src/index.ts";
+import { Bindings } from "../../src/rdf/bindings.ts";
 import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 

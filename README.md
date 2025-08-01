@@ -20,7 +20,8 @@ npm install @jahed/sparql-engine
 ## Usage
 
 ```ts
-import type { ExecutionContext, PipelineInput } from "@jahed/sparql-engine";
+import type { ExecutionContext } from "@jahed/sparql-engine/engine/context/execution-context.js";
+import type { PipelineInput } from "@jahed/sparql-engine/engine/pipeline/pipeline-engine.js";
 import SparqlEngineGraph from "@jahed/sparql-engine/rdf/graph.js";
 import HashMapDataset from "@jahed/sparql-engine/rdf/hashmap-dataset.js";
 import { dataFactory } from "@jahed/sparql-engine/utils/rdf.js";

@@ -3,7 +3,7 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import type { QueryOutput } from "../../src/engine/plan-builder.ts";
-import { Bindings } from "../../src/index.ts";
+import { Bindings } from "../../src/rdf/bindings.ts";
 import { createIRI, createLiteral } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 

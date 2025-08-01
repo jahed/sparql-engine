@@ -2,8 +2,11 @@
 import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
-import { BindingBase, Bindings } from "../../src/index.ts";
-import type { BindingsRecord } from "../../src/rdf/bindings.ts";
+import {
+  BindingBase,
+  Bindings,
+  type BindingsRecord,
+} from "../../src/rdf/bindings.ts";
 import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 

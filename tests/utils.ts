@@ -4,16 +4,13 @@ import { isArray } from "lodash-es";
 import n3 from "n3";
 import { stringQuadToQuad, termToString } from "rdf-string";
 import type { Query } from "sparqljs";
-import type { QueryOutput } from "../src/engine/plan-builder.ts";
-import {
-  ExecutionContext,
-  Graph,
-  HashMapDataset,
-  Pipeline,
-  type PipelineStage,
-  PlanBuilder,
-} from "../src/index.ts";
+import type ExecutionContext from "../src/engine/context/execution-context.ts";
+import type { PipelineStage } from "../src/engine/pipeline/pipeline-engine.ts";
+import { Pipeline } from "../src/engine/pipeline/pipeline.ts";
+import { PlanBuilder, type QueryOutput } from "../src/engine/plan-builder.ts";
 import type { CustomFunctions } from "../src/operators/expressions/sparql-expression.ts";
+import Graph from "../src/rdf/graph.ts";
+import HashMapDataset from "../src/rdf/hashmap-dataset.ts";
 import type { EngineIRI, EngineTriple } from "../src/types.ts";
 import { isVariable } from "../src/utils/rdf.ts";
 

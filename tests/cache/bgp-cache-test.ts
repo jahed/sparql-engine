@@ -2,7 +2,7 @@
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { LRUBGPCache } from "../../src/engine/cache/bgp-cache.ts";
-import { BindingBase } from "../../src/index.ts";
+import { BindingBase } from "../../src/rdf/bindings.ts";
 import type { EngineTriple } from "../../src/types.ts";
 import { createIRI, dataFactory } from "../../src/utils/rdf.ts";
 

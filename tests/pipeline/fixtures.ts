@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: MIT
 import { expect } from "chai";
 import { describe, it } from "node:test";
-import type { PipelineEngine } from "../../src/index.ts";
+import type { PipelineEngine } from "../../src/engine/pipeline/pipeline-engine.ts";
 
-/**
- * Test an implementation of PipelineEngine
- * @param  {PipelineEngine} pipeline - Pipeline engine to test
- */
-function testPipelineEngine(pipeline: PipelineEngine) {
+export default function testPipelineEngine(pipeline: PipelineEngine) {
   // empty method
   describe("#empty", () => {
     it("should create a PipelineStage which emits no items", async () => {
@@ -579,5 +575,3 @@ function testPipelineEngine(pipeline: PipelineEngine) {
     });
   });
 }
-
-export default testPipelineEngine;

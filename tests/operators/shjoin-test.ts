@@ -2,8 +2,8 @@
 import { expect } from "chai";
 import { describe, it } from "node:test";
 import { from } from "rxjs";
-import { BindingBase } from "../../src/index.ts";
 import symHashJoin from "../../src/operators/join/shjoin.ts";
+import { BindingBase } from "../../src/rdf/bindings.ts";
 import { createIRI, createLiteral } from "../../src/utils/rdf.ts";
 
 describe("Symmetric Hash Join operator", () => {

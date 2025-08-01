@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 import { expect } from "chai";
 import { describe, it } from "node:test";
-import {
-  Dataset,
-  ExecutionContext,
-  Graph,
-  HashMapDataset,
-  type PipelineInput,
-} from "../../src/index.ts";
+import type ExecutionContext from "../../src/engine/context/execution-context.ts";
+import type { PipelineInput } from "../../src/engine/pipeline/pipeline-engine.ts";
+import Dataset from "../../src/rdf/dataset.ts";
+import Graph from "../../src/rdf/graph.ts";
+import HashMapDataset from "../../src/rdf/hashmap-dataset.ts";
 import type { EngineIRI, EngineTriple } from "../../src/types.ts";
 import { createIRI } from "../../src/utils/rdf.ts";
 

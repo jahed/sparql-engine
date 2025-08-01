@@ -4,8 +4,8 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 import { from } from "rxjs";
 import type { OperationExpression } from "sparqljs";
-import { BindingBase, Bindings } from "../../src/index.ts";
 import bind from "../../src/operators/bind.ts";
+import { BindingBase, Bindings } from "../../src/rdf/bindings.ts";
 import { createInteger, dataFactory } from "../../src/utils/rdf.ts";
 
 describe("Bind operator", () => {
