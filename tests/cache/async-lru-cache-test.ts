@@ -13,22 +13,17 @@ describe("AsyncLRUCache", () => {
   });
 
   describe("#update/commit", () => {
-    it("should supports insertion of items over time", (t, done) => {
+    it("should supports insertion of items over time", async () => {
       const writerID = 1;
       cache.update(1, 1, writerID);
       cache.update(1, 2, writerID);
       cache.update(1, 3, writerID);
       cache.commit(1, writerID);
-      cache
-        .get(1)!
-        .then((content) => {
-          expect(content).to.deep.equals([1, 2, 3]);
-          done();
-        })
-        .catch(done);
+      const content = await cache.get(1)!;
+      expect(content).to.deep.equals([1, 2, 3]);
     });
 
-    it("should supports concurrent insertions of items from distinct writers", (t, done) => {
+    it("should supports concurrent insertions of items from distinct writers", async () => {
       const firstID = 1;
       const secondID = 2;
       cache.update(1, 1, firstID);
@@ -40,13 +35,8 @@ describe("AsyncLRUCache", () => {
       cache.update(1, "4", secondID);
       cache.commit(1, secondID);
       cache.commit(1, firstID);
-      cache
-        .get(firstID)!
-        .then((content) => {
-          expect(content).to.deep.equals([1, 2, 3]);
-          done();
-        })
-        .catch(done);
+      const content = await cache.get(firstID)!;
+      expect(content).to.deep.equals([1, 2, 3]);
     });
   });
 
@@ -74,18 +64,15 @@ describe("AsyncLRUCache", () => {
       expect(cache.get(1)).to.deep.equals(null);
     });
 
-    it("should delay execution until the cache entry is committed", (t, done) => {
+    it("should delay execution until the cache entry is committed", async () => {
       const writerID = 1;
       cache.update(1, 1, writerID);
-      cache
-        .get(1)!
-        .then((content) => {
-          expect(content).to.deep.equals([1, 2]);
-          done();
-        })
-        .catch(done);
+      const promise = cache.get(1)!;
       cache.update(1, 2, writerID);
       cache.commit(1, writerID);
+      return promise.then((content) => {
+        expect(content).to.deep.equals([1, 2]);
+      });
     });
   });
 
@@ -98,17 +85,14 @@ describe("AsyncLRUCache", () => {
       expect(cache.has(1)).to.deep.equals(false);
     });
 
-    it("should resolve get promises to an empty array when an uncommitted entry is deleted", (t, done) => {
+    it("should resolve get promises to an empty array when an uncommitted entry is deleted", async () => {
       const writerID = 1;
       cache.update(1, 1, writerID);
-      cache
-        .get(1)!
-        .then((content) => {
-          expect(content.length).to.deep.equals(0);
-          done();
-        })
-        .catch(done);
+      const promise = cache.get(1)!;
       cache.delete(1, writerID);
+      return promise.then((content) => {
+        expect(content.length).to.deep.equals(0);
+      });
     });
   });
 });

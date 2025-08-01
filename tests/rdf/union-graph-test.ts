@@ -21,66 +21,62 @@ describe("Union Graph", () => {
   });
 
   describe("#insert", () => {
-    it("should evaluates insertion of the left-most graphs of the Union", (t, done) => {
+    it("should evaluates insertion of the left-most graphs of the Union", async () => {
       const union = new UnionGraph([gA, gB]);
       const triple = dataFactory.quad(
         createIRI("http://example.org#toto"),
         createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
         createIRI("http://example.org#Person")
       );
-      union.insert(triple).then(() => {
-        // check triples have been inserted in gA and not gB
-        let triples = gA._store.getTriples(
-          termToString(triple.subject),
-          termToString(triple.predicate),
-          termToString(triple.object)
-        );
-        expect(triples.length).to.equal(1);
-        expect(stringToTerm(triples[0].subject)).to.deep.equal(triple.subject);
-        expect(stringToTerm(triples[0].predicate)).to.deep.equal(
-          triple.predicate
-        );
-        expect(stringToTerm(triples[0].object)).to.deep.equal(triple.object);
-        triples = gB._store.getTriples(
-          termToString(triple.subject),
-          termToString(triple.predicate),
-          termToString(triple.object)
-        );
-        expect(triples.length).to.equal(0);
-        done();
-      });
+      await union.insert(triple);
+      // check triples have been inserted in gA and not gB
+      let triples = gA._store.getTriples(
+        termToString(triple.subject),
+        termToString(triple.predicate),
+        termToString(triple.object)
+      );
+      expect(triples.length).to.equal(1);
+      expect(stringToTerm(triples[0].subject)).to.deep.equal(triple.subject);
+      expect(stringToTerm(triples[0].predicate)).to.deep.equal(
+        triple.predicate
+      );
+      expect(stringToTerm(triples[0].object)).to.deep.equal(triple.object);
+      triples = gB._store.getTriples(
+        termToString(triple.subject),
+        termToString(triple.predicate),
+        termToString(triple.object)
+      );
+      expect(triples.length).to.equal(0);
     });
   });
 
   describe("#delete", () => {
-    it("should evaluates deletions on all graphs in the Union", (t, done) => {
+    it("should evaluates deletions on all graphs in the Union", async () => {
       const union = new UnionGraph([gA, gB]);
       const triple = dataFactory.quad(
         createIRI("https://dblp.org/pers/m/Minier:Thomas"),
         createIRI("https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf"),
         createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a")
       );
-      union.delete(triple).then(() => {
-        // check triples have been inserted in gA and not gB
-        let triples = gA._store.getTriples(
-          termToString(triple.subject),
-          termToString(triple.predicate),
-          termToString(triple.object)
-        );
-        expect(triples.length).to.equal(0);
-        triples = gB._store.getTriples(
-          termToString(triple.subject),
-          termToString(triple.predicate),
-          termToString(triple.object)
-        );
-        expect(triples.length).to.equal(0);
-        done();
-      });
+      await union.delete(triple);
+      // check triples have been inserted in gA and not gB
+      let triples = gA._store.getTriples(
+        termToString(triple.subject),
+        termToString(triple.predicate),
+        termToString(triple.object)
+      );
+      expect(triples.length).to.equal(0);
+      triples = gB._store.getTriples(
+        termToString(triple.subject),
+        termToString(triple.predicate),
+        termToString(triple.object)
+      );
+      expect(triples.length).to.equal(0);
     });
   });
 
   describe("#find", () => {
-    it("should searches for RDF triples in all graphs", (t, done) => {
+    it("should searches for RDF triples in all graphs", async () => {
       const union = new UnionGraph([gA, gB]);
       const triple = dataFactory.quad(
         createIRI("https://dblp.org/pers/m/Minier:Thomas"),
@@ -100,26 +96,18 @@ describe("Union Graph", () => {
         createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
         createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
       ];
-      const iterator = new RxjsPipeline().from(
+      for await (const b of new RxjsPipeline().from(
         union.find(triple, new ExecutionContext())
-      );
-
-      iterator.subscribe(
-        (b) => {
-          expect(b.subject).to.deep.equal(triple.subject);
-          expect(b.predicate).to.deep.equal(triple.predicate);
-          expect(b.object).to.be.deep.oneOf(expectedArticles);
-          const index = expectedArticles.findIndex((v) => v.equals(b.object));
-          expectedArticles.splice(index, 1);
-          nbResults++;
-        },
-        done,
-        () => {
-          expect(nbResults).to.equal(10);
-          expect(expectedArticles.length).to.equal(0);
-          done();
-        }
-      );
+      )) {
+        expect(b.subject).to.deep.equal(triple.subject);
+        expect(b.predicate).to.deep.equal(triple.predicate);
+        expect(b.object).to.be.deep.oneOf(expectedArticles);
+        const index = expectedArticles.findIndex((v) => v.equals(b.object));
+        expectedArticles.splice(index, 1);
+        nbResults++;
+      }
+      expect(nbResults).to.equal(10);
+      expect(expectedArticles.length).to.equal(0);
     });
   });
 });

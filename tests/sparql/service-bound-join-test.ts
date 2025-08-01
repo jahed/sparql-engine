@@ -110,21 +110,14 @@ describe("SERVICE queries (using bound joins)", () => {
   ];
 
   data.forEach((d) => {
-    it(d.text, (t, done) => {
+    it(d.text, async () => {
       let nbResults = 0;
-      const iterator = engine.execute(d.query);
-      iterator.subscribe(
-        (bindings) => {
-          assert(bindings instanceof BindingBase);
-          d.testFun(bindings.toObject());
-          nbResults++;
-        },
-        done,
-        () => {
-          expect(nbResults).to.equal(d.nbResults);
-          done();
-        }
-      );
+      for await (const bindings of engine.execute(d.query)) {
+        assert(bindings instanceof BindingBase);
+        d.testFun(bindings.toObject());
+        nbResults++;
+      }
+      expect(nbResults).to.equal(d.nbResults);
     });
   });
 });

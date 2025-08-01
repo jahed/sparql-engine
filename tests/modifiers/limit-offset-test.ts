@@ -70,27 +70,20 @@ describe("SPARQL queries with LIMIT/OFFSET", () => {
   ];
 
   data.forEach((d) => {
-    it(d.text, (t, done) => {
+    it(d.text, async () => {
       const expectedCardinality = d.results.length;
       let nbResults = 0;
-      const iterator = engine.execute(d.query);
-      iterator.subscribe(
-        (bindings) => {
-          assert.ok(bindings instanceof Bindings);
-          const b = bindings.toObject();
-          expect(b["article"]).to.be.deep.oneOf(d.results);
-          d.results.splice(
-            d.results.findIndex((r) => r.equals(b["article"])),
-            1
-          );
-          nbResults++;
-        },
-        done,
-        () => {
-          expect(nbResults).to.equal(expectedCardinality);
-          done();
-        }
-      );
+      for await (const bindings of engine.execute(d.query)) {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
+        expect(b["article"]).to.be.deep.oneOf(d.results);
+        d.results.splice(
+          d.results.findIndex((r) => r.equals(b["article"])),
+          1
+        );
+        nbResults++;
+      }
+      expect(nbResults).to.equal(expectedCardinality);
     });
   });
 });

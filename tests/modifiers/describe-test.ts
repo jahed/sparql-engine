@@ -12,7 +12,7 @@ describe("DESCRIBE SPARQL queries", () => {
     engine = new TestEngine(g);
   });
 
-  it("should evaluate simple DESCRIBE queries", (t, done) => {
+  it("should evaluate simple DESCRIBE queries", async () => {
     const query = `
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -22,30 +22,23 @@ describe("DESCRIBE SPARQL queries", () => {
     }`;
     const results = [];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (triple) => {
-        assert.ok(typeof triple === "object" && "subject" in triple);
-        expect(triple.subject).to.deep.equal(
-          createIRI("https://dblp.org/pers/m/Minier:Thomas")
-        );
-        expect(triple.predicate).to.be.deep.oneOf([
-          createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-          createIRI(
-            "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName"
-          ),
-          createIRI("https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf"),
-          createIRI(
-            "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith"
-          ),
-        ]);
-        results.push(triple);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(11);
-        done();
-      }
-    );
+    for await (const triple of engine.execute(query)) {
+      assert.ok(typeof triple === "object" && "subject" in triple);
+      expect(triple.subject).to.deep.equal(
+        createIRI("https://dblp.org/pers/m/Minier:Thomas")
+      );
+      expect(triple.predicate).to.be.deep.oneOf([
+        createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+        createIRI(
+          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName"
+        ),
+        createIRI("https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf"),
+        createIRI(
+          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith"
+        ),
+      ]);
+      results.push(triple);
+    }
+    expect(results.length).to.equal(11);
   });
 });

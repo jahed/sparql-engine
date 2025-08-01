@@ -10,7 +10,7 @@ describe("SPARQL ASK queries", () => {
     engine = new TestEngine(g);
   });
 
-  it("should evaluate ASK queries that evaluates to true", (t, done) => {
+  it("should evaluate ASK queries that evaluates to true", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -21,21 +21,14 @@ describe("SPARQL ASK queries", () => {
       ?s dblp-rdf:authorOf ?article .
     }`;
     const results = [];
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (b) => {
-        expect(b).to.equal(true);
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(1);
-        done();
-      }
-    );
+    for await (const b of engine.execute(query)) {
+      expect(b).to.equal(true);
+      results.push(b);
+    }
+    expect(results.length).to.equal(1);
   });
 
-  it("should evaluate ASK queries that evaluates to false", (t, done) => {
+  it("should evaluate ASK queries that evaluates to false", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -46,17 +39,10 @@ describe("SPARQL ASK queries", () => {
       ?s dblp-rdf:authorOf ?article .
     }`;
     const results = [];
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (b) => {
-        expect(b).to.equal(false);
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(1);
-        done();
-      }
-    );
+    for await (const b of engine.execute(query)) {
+      expect(b).to.equal(false);
+      results.push(b);
+    }
+    expect(results.length).to.equal(1);
   });
 });

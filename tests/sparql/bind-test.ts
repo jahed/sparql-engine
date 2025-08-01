@@ -18,7 +18,7 @@ describe("SPARQL BIND", () => {
     engine = new TestEngine(g);
   });
 
-  it("should evaluate a simple BIND clause", (t, done) => {
+  it("should evaluate a simple BIND clause", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -29,26 +29,17 @@ describe("SPARQL BIND", () => {
     }`;
     const results = [];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.all.keys("s", "name");
-        expect(b["name"]).to.deep.equal(
-          createLangLiteral("Thomas Minier", "fr")
-        );
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(1);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.all.keys("s", "name");
+      expect(b["name"]).to.deep.equal(createLangLiteral("Thomas Minier", "fr"));
+      results.push(b);
+    }
+    expect(results.length).to.equal(1);
   });
 
-  it("should evaluate BIND clauses with complex SPARQL expressions", (t, done) => {
+  it("should evaluate BIND clauses with complex SPARQL expressions", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -59,24 +50,17 @@ describe("SPARQL BIND", () => {
     }`;
     const results = [];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.all.keys("s", "foo");
-        expect(b["foo"]).to.deep.equal(createInteger(30));
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(1);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.all.keys("s", "foo");
+      expect(b["foo"]).to.deep.equal(createInteger(30));
+      results.push(b);
+    }
+    expect(results.length).to.equal(1);
   });
 
-  it("should evaluate chained BIND clauses", (t, done) => {
+  it("should evaluate chained BIND clauses", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -88,27 +72,18 @@ describe("SPARQL BIND", () => {
     }`;
     const results = [];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.all.keys("s", "name", "foo");
-        expect(b["name"]).to.deep.equal(
-          createLangLiteral("Thomas Minier", "fr")
-        );
-        expect(b["foo"]).to.deep.equal(createInteger(30));
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(1);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.all.keys("s", "name", "foo");
+      expect(b["name"]).to.deep.equal(createLangLiteral("Thomas Minier", "fr"));
+      expect(b["foo"]).to.deep.equal(createInteger(30));
+      results.push(b);
+    }
+    expect(results.length).to.equal(1);
   });
 
-  it("should evaluate a BIND clause with the COALESCE function", (t, done) => {
+  it("should evaluate a BIND clause with the COALESCE function", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -121,22 +96,15 @@ describe("SPARQL BIND", () => {
     }`;
     const results = [];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.all.keys("s", "s2", "name", "undefined");
-        expect(b["s2"]).to.deep.equal(b["s"]);
-        expect(b["name"]).to.deep.equal(createLiteral("Thomas Minier"));
-        expect(b["undefined"]).to.deep.equal(UNBOUND);
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(1);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.all.keys("s", "s2", "name", "undefined");
+      expect(b["s2"]).to.deep.equal(b["s"]);
+      expect(b["name"]).to.deep.equal(createLiteral("Thomas Minier"));
+      expect(b["undefined"]).to.deep.equal(UNBOUND);
+      results.push(b);
+    }
+    expect(results.length).to.equal(1);
   });
 });

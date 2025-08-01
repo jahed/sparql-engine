@@ -243,21 +243,14 @@ describe("GRAPH/FROM queries", () => {
   ];
 
   data.forEach((d) => {
-    it(d.text, (t, done) => {
+    it(d.text, async () => {
       let nbResults = 0;
-      const iterator = engine.execute(d.query);
-      iterator.subscribe(
-        (b) => {
-          assert.ok(b instanceof BindingBase);
-          d.testFun(b.toObject());
-          nbResults++;
-        },
-        done,
-        () => {
-          expect(nbResults).to.equal(d.nbResults);
-          done();
-        }
-      );
+      for await (const b of engine.execute(d.query)) {
+        assert.ok(b instanceof BindingBase);
+        d.testFun(b.toObject());
+        nbResults++;
+      }
+      expect(nbResults).to.equal(d.nbResults);
     });
   });
 });

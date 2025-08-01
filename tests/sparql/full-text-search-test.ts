@@ -170,20 +170,13 @@ describe("Full Text Search SPARQL queries", () => {
   ];
 
   data.forEach((d) => {
-    it(`should evaluate ${d.description}`, (t, done) => {
+    it(`should evaluate ${d.description}`, async () => {
       const results: BindingsRecord[] = [];
-      const iterator = engine.execute(d.query);
-      iterator.subscribe(
-        (b) => {
-          assert.ok(b instanceof BindingBase);
-          results.push(b.toObject());
-        },
-        done,
-        () => {
-          expect(results).to.deep.equals(d.results);
-          done();
-        }
-      );
+      for await (const b of engine.execute(d.query)) {
+        assert.ok(b instanceof BindingBase);
+        results.push(b.toObject());
+      }
+      expect(results).to.deep.equals(d.results);
     });
   });
 });

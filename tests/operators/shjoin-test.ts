@@ -7,7 +7,7 @@ import symHashJoin from "../../src/operators/join/shjoin.ts";
 import { createIRI, createLiteral } from "../../src/utils/rdf.ts";
 
 describe("Symmetric Hash Join operator", () => {
-  it("should perform a join between two sources of bindings", (t, done) => {
+  it("should perform a join between two sources of bindings", async () => {
     const toto = createIRI("http://example.org#toto");
     const titi = createIRI("http://example.org#titi");
     const tata = createIRI("http://example.org#tata");
@@ -44,38 +44,31 @@ describe("Symmetric Hash Join operator", () => {
       }),
     ]);
 
-    const op = symHashJoin("x", left, right);
-    op.subscribe(
-      (value) => {
-        const b = value.toObject();
-        expect(b).to.have.all.keys("x", "y");
-        nbResults++;
+    for await (const value of symHashJoin("x", left, right)) {
+      const b = value.toObject();
+      expect(b).to.have.all.keys("x", "y");
+      nbResults++;
 
-        if (b["x"].equals(toto)) {
-          expect(b["y"]).to.be.deep.oneOf([
-            createLiteral("1"),
-            createLiteral("2"),
-            createLiteral("3"),
-          ]);
-          nbEach.set(toto, nbEach.get(toto) + 1);
-          return;
-        }
-
-        if (b["x"].equals(titi)) {
-          expect(b["y"]).to.be.deep.oneOf([createLiteral("4")]);
-          nbEach.set(titi, nbEach.get(titi) + 1);
-          return;
-        }
-
-        throw new Error(`Unexpected "x" value: ${b["x"]}`);
-      },
-      done,
-      () => {
-        expect(nbResults).to.equal(4);
-        expect(nbEach.get(toto)).to.equal(3);
-        expect(nbEach.get(titi)).to.equal(1);
-        done();
+      if (b["x"].equals(toto)) {
+        expect(b["y"]).to.be.deep.oneOf([
+          createLiteral("1"),
+          createLiteral("2"),
+          createLiteral("3"),
+        ]);
+        nbEach.set(toto, nbEach.get(toto) + 1);
+        return;
       }
-    );
+
+      if (b["x"].equals(titi)) {
+        expect(b["y"]).to.be.deep.oneOf([createLiteral("4")]);
+        nbEach.set(titi, nbEach.get(titi) + 1);
+        return;
+      }
+
+      throw new Error(`Unexpected "x" value: ${b["x"]}`);
+    }
+    expect(nbResults).to.equal(4);
+    expect(nbEach.get(toto)).to.equal(3);
+    expect(nbEach.get(titi)).to.equal(1);
   });
 });

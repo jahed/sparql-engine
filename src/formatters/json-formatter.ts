@@ -73,12 +73,12 @@ function writeBindings(
 export default function jsonFormat(
   source: PipelineStage<QueryOutput>
 ): PipelineStage<string> {
-  return Pipeline.getInstance().fromAsync((input) => {
-    input.next("{");
-    let cpt = 0;
-    let isAsk = false;
-    source.subscribe(
-      (b: QueryOutput) => {
+  return Pipeline.getInstance().fromAsync(async (input) => {
+    try {
+      input.next("{");
+      let cpt = 0;
+      let isAsk = false;
+      for await (const b of source) {
         // Build the head attribute from the first set of bindings
         if (cpt === 0 && b instanceof BindingBase) {
           writeHead(b, input);
@@ -98,12 +98,11 @@ export default function jsonFormat(
           input.next("}");
         }
         cpt++;
-      },
-      (err) => console.error(err),
-      () => {
-        input.next(isAsk ? "}" : "]}}");
-        input.complete();
       }
-    );
+      input.next(isAsk ? "}" : "]}}");
+      input.complete();
+    } catch (error) {
+      console.error(error);
+    }
   });
 }

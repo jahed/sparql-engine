@@ -12,7 +12,7 @@ describe("CONSTRUCT SPARQL queries", () => {
     engine = new TestEngine(g);
   });
 
-  it("should evaluate simple CONSTRUCT queries", (t, done) => {
+  it("should evaluate simple CONSTRUCT queries", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -35,43 +35,36 @@ describe("CONSTRUCT SPARQL queries", () => {
     ];
     const results = [];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (triple) => {
-        assert.ok(typeof triple === "object" && "subject" in triple);
-        expect(triple.subject).to.deep.equal(
-          createIRI("https://dblp.org/pers/m/Minier:Thomas")
-        );
-        expect(triple.predicate).to.be.deep.oneOf([
+    for await (const triple of engine.execute(query)) {
+      assert.ok(typeof triple === "object" && "subject" in triple);
+      expect(triple.subject).to.deep.equal(
+        createIRI("https://dblp.org/pers/m/Minier:Thomas")
+      );
+      expect(triple.predicate).to.be.deep.oneOf([
+        createIRI(
+          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName"
+        ),
+        createIRI("https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf"),
+      ]);
+      if (
+        triple.predicate.equals(
           createIRI(
             "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName"
-          ),
-          createIRI("https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf"),
-        ]);
-        if (
-          triple.predicate.equals(
-            createIRI(
-              "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName"
-            )
           )
-        ) {
-          expect(triple.object).to.deep.equal(
-            createLangLiteral("Thomas Minier", "en")
-          );
-        } else {
-          expect(triple.object).to.be.deep.oneOf(expectedArticles);
-          expectedArticles = expectedArticles.filter(
-            (a) => !triple.object.equals(a)
-          );
-        }
-        results.push(triple);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(10);
-        expect(expectedArticles.length).to.equal(0);
-        done();
+        )
+      ) {
+        expect(triple.object).to.deep.equal(
+          createLangLiteral("Thomas Minier", "en")
+        );
+      } else {
+        expect(triple.object).to.be.deep.oneOf(expectedArticles);
+        expectedArticles = expectedArticles.filter(
+          (a) => !triple.object.equals(a)
+        );
       }
-    );
+      results.push(triple);
+    }
+    expect(results.length).to.equal(10);
+    expect(expectedArticles.length).to.equal(0);
   });
 });

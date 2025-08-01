@@ -12,7 +12,7 @@ describe("Queries with Turtle notation", () => {
     engine = new TestEngine(g);
   });
 
-  it("should evaluate SPARQL queries with Turtle notation", (t, done) => {
+  it("should evaluate SPARQL queries with Turtle notation", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -25,19 +25,12 @@ describe("Queries with Turtle notation", () => {
       ] .
     }`;
     const results = [];
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.keys("name", "article");
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(5);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.keys("name", "article");
+      results.push(b);
+    }
+    expect(results.length).to.equal(5);
   });
 });

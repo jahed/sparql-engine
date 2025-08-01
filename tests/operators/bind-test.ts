@@ -9,7 +9,7 @@ import bind from "../../src/operators/bind.ts";
 import { createInteger, dataFactory } from "../../src/utils/rdf.ts";
 
 describe("Bind operator", () => {
-  it("should bind results of valid SPARQL expression to a variable", (t, done) => {
+  it("should bind results of valid SPARQL expression to a variable", async () => {
     let nbResults = 0;
     const source = from([
       BindingBase.fromObject({
@@ -26,24 +26,21 @@ describe("Bind operator", () => {
       operator: "+",
       args: [dataFactory.variable("x"), dataFactory.variable("y")],
     };
-    const op = bind(source, dataFactory.variable("z"), expr);
-    op.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.all.keys("x", "y", "z");
-        if (b["x"].value === "1") {
-          expect(b["z"]).to.deep.equal(createInteger(3));
-        } else {
-          expect(b["z"]).to.deep.equal(createInteger(5));
-        }
-        nbResults++;
-      },
-      done,
-      () => {
-        expect(nbResults).to.equal(2);
-        done();
+    for await (const bindings of bind(
+      source,
+      dataFactory.variable("z"),
+      expr
+    )) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.all.keys("x", "y", "z");
+      if (b["x"].value === "1") {
+        expect(b["z"]).to.deep.equal(createInteger(3));
+      } else {
+        expect(b["z"]).to.deep.equal(createInteger(5));
       }
-    );
+      nbResults++;
+    }
+    expect(nbResults).to.equal(2);
   });
 });

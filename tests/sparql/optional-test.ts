@@ -19,7 +19,7 @@ describe("SPARQL queries with OPTIONAL", () => {
     engine = new TestEngine(g);
   });
 
-  it("should evaluate OPTIONAL clauses that yield nothing", (t, done) => {
+  it("should evaluate OPTIONAL clauses that yield nothing", async () => {
     const query = `
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -33,24 +33,17 @@ describe("SPARQL queries with OPTIONAL", () => {
     }`;
     const results = [];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.keys("name", "article", "label");
-        expect(b["label"]).to.deep.equal(UNBOUND);
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(5);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.keys("name", "article", "label");
+      expect(b["label"]).to.deep.equal(UNBOUND);
+      results.push(b);
+    }
+    expect(results.length).to.equal(5);
   });
 
-  it("should evaluate OPTIONAL clauses that yield something", (t, done) => {
+  it("should evaluate OPTIONAL clauses that yield something", async () => {
     const query = `
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -62,34 +55,25 @@ describe("SPARQL queries with OPTIONAL", () => {
     }`;
     const results = [];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.keys("s", "article");
-        expect(b["s"]).to.be.deep.oneOf([
-          createIRI("https://dblp.org/pers/m/Minier:Thomas"),
-          createIRI("https://dblp.org/pers/m/Minier:Thomas_2"),
-        ]);
-        if (
-          b["s"].equals(createIRI("https://dblp.org/pers/m/Minier:Thomas_2"))
-        ) {
-          expect(b["article"]).to.deep.equal(UNBOUND);
-        } else {
-          expect(b["article"]).to.not.deep.equal(UNBOUND);
-        }
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(6);
-        done();
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.keys("s", "article");
+      expect(b["s"]).to.be.deep.oneOf([
+        createIRI("https://dblp.org/pers/m/Minier:Thomas"),
+        createIRI("https://dblp.org/pers/m/Minier:Thomas_2"),
+      ]);
+      if (b["s"].equals(createIRI("https://dblp.org/pers/m/Minier:Thomas_2"))) {
+        expect(b["article"]).to.deep.equal(UNBOUND);
+      } else {
+        expect(b["article"]).to.not.deep.equal(UNBOUND);
       }
-    );
+      results.push(b);
+    }
+    expect(results.length).to.equal(6);
   });
 
-  it("should evaluate complex OPTIONAL clauses that yield nothing", (t, done) => {
+  it("should evaluate complex OPTIONAL clauses that yield nothing", async () => {
     const query = `
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -103,24 +87,17 @@ describe("SPARQL queries with OPTIONAL", () => {
     }`;
     const results = [];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.keys("name", "article");
-        expect(b["article"]).to.deep.equal(UNBOUND);
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(1);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.keys("name", "article");
+      expect(b["article"]).to.deep.equal(UNBOUND);
+      results.push(b);
+    }
+    expect(results.length).to.equal(1);
   });
 
-  it("should evaluate complex OPTIONAL clauses that yield something", (t, done) => {
+  it("should evaluate complex OPTIONAL clauses that yield something", async () => {
     const query = `
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -133,34 +110,25 @@ describe("SPARQL queries with OPTIONAL", () => {
     }`;
     const results = [];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.keys("s", "article");
-        expect(b["s"]).to.be.deep.oneOf([
-          createIRI("https://dblp.org/pers/m/Minier:Thomas"),
-          createIRI("https://dblp.org/pers/m/Minier:Thomas_2"),
-        ]);
-        if (
-          b["s"].equals(createIRI("https://dblp.org/pers/m/Minier:Thomas_2"))
-        ) {
-          expect(b["article"]).to.deep.equal(UNBOUND);
-        } else {
-          expect(b["article"]).to.not.deep.equal(UNBOUND);
-        }
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(6);
-        done();
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.keys("s", "article");
+      expect(b["s"]).to.be.deep.oneOf([
+        createIRI("https://dblp.org/pers/m/Minier:Thomas"),
+        createIRI("https://dblp.org/pers/m/Minier:Thomas_2"),
+      ]);
+      if (b["s"].equals(createIRI("https://dblp.org/pers/m/Minier:Thomas_2"))) {
+        expect(b["article"]).to.deep.equal(UNBOUND);
+      } else {
+        expect(b["article"]).to.not.deep.equal(UNBOUND);
       }
-    );
+      results.push(b);
+    }
+    expect(results.length).to.equal(6);
   });
 
-  it("should not get an extra result when an OPTIONAL value exists", (t, done) => {
+  it("should not get an extra result when an OPTIONAL value exists", async () => {
     const graph = getGraph("./tests/data/SPARQL-Query-1.1-6.2.ttl");
     engine = new TestEngine(graph);
     const query = `
@@ -176,32 +144,24 @@ describe("SPARQL queries with OPTIONAL", () => {
     }
     `;
     const results: BindingsRecord[] = [];
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        results.push(bindings.toObject());
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(2);
-        results.forEach((b) => {
-          expect(b["title"]).to.be.deep.oneOf([
-            createLiteral("SPARQL Tutorial"),
-            createLiteral("The Semantic Web"),
-          ]);
-          expect(b["price"]).to.be.deep.oneOf([
-            createInteger(42),
-            createInteger(23),
-          ]);
-        });
-
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      results.push(bindings.toObject());
+    }
+    expect(results.length).to.equal(2);
+    results.forEach((b) => {
+      expect(b["title"]).to.be.deep.oneOf([
+        createLiteral("SPARQL Tutorial"),
+        createLiteral("The Semantic Web"),
+      ]);
+      expect(b["price"]).to.be.deep.oneOf([
+        createInteger(42),
+        createInteger(23),
+      ]);
+    });
   });
 
-  it("should not get an extra result when an OPTIONAL value exists and multiple OPTIONAL clauses are used", (t, done) => {
+  it("should not get an extra result when an OPTIONAL value exists and multiple OPTIONAL clauses are used", async () => {
     const graph = getGraph("./tests/data/SPARQL-Query-1.1-6.2.ttl");
     engine = new TestEngine(graph);
     const query = `
@@ -219,33 +179,25 @@ describe("SPARQL queries with OPTIONAL", () => {
     }
     `;
     const results: BindingsRecord[] = [];
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(2);
-        results.map((b) => {
-          expect(b["title"]).to.be.deep.oneOf([
-            createLiteral("SPARQL Tutorial"),
-            createLiteral("The Semantic Web"),
-          ]);
-          expect(b["price"]).to.be.deep.oneOf([
-            createInteger(42),
-            createInteger(23),
-          ]);
-        });
-
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      results.push(b);
+    }
+    expect(results.length).to.equal(2);
+    results.map((b) => {
+      expect(b["title"]).to.be.deep.oneOf([
+        createLiteral("SPARQL Tutorial"),
+        createLiteral("The Semantic Web"),
+      ]);
+      expect(b["price"]).to.be.deep.oneOf([
+        createInteger(42),
+        createInteger(23),
+      ]);
+    });
   });
 
-  it("should get the correct number of results when an OPTIONAL results in an UNBOUND", (t, done) => {
+  it("should get the correct number of results when an OPTIONAL results in an UNBOUND", async () => {
     const graph = getGraph("./tests/data/SPARQL-Query-1.1-6.2.ttl");
     engine = new TestEngine(graph);
     const query = `
@@ -261,29 +213,21 @@ describe("SPARQL queries with OPTIONAL", () => {
     }
     `;
     const results: BindingsRecord[] = [];
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        results.push(bindings.toObject());
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(2);
-        results.map((b) => {
-          expect(b["title"]).to.be.deep.oneOf([
-            createLiteral("SPARQL Tutorial"),
-            createLiteral("The Semantic Web"),
-          ]);
-          expect(b["price"]).to.be.deep.oneOf([createInteger(42), UNBOUND]);
-        });
-
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      results.push(bindings.toObject());
+    }
+    expect(results.length).to.equal(2);
+    results.map((b) => {
+      expect(b["title"]).to.be.deep.oneOf([
+        createLiteral("SPARQL Tutorial"),
+        createLiteral("The Semantic Web"),
+      ]);
+      expect(b["price"]).to.be.deep.oneOf([createInteger(42), UNBOUND]);
+    });
   });
 
-  it("should get the correct number of results when an OPTIONAL results in an UNBOUND value with multiple OPTIONAL clauses", (t, done) => {
+  it("should get the correct number of results when an OPTIONAL results in an UNBOUND value with multiple OPTIONAL clauses", async () => {
     const graph = getGraph("./tests/data/SPARQL-Query-1.1-6.2.ttl");
     engine = new TestEngine(graph);
     const query = `
@@ -301,25 +245,17 @@ describe("SPARQL queries with OPTIONAL", () => {
     }
     `;
     const results: BindingsRecord[] = [];
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        results.push(bindings.toObject());
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(2);
-        results.map((b) => {
-          expect(b["title"]).to.be.deep.oneOf([
-            createLiteral("SPARQL Tutorial"),
-            createLiteral("The Semantic Web"),
-          ]);
-          expect(b["price"]).to.be.deep.oneOf([createInteger(42), UNBOUND]);
-        });
-
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      results.push(bindings.toObject());
+    }
+    expect(results.length).to.equal(2);
+    results.map((b) => {
+      expect(b["title"]).to.be.deep.oneOf([
+        createLiteral("SPARQL Tutorial"),
+        createLiteral("The Semantic Web"),
+      ]);
+      expect(b["price"]).to.be.deep.oneOf([createInteger(42), UNBOUND]);
+    });
   });
 });

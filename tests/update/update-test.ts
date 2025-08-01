@@ -12,7 +12,7 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
     engine = new TestEngine(g);
   });
 
-  it("should evaluate basic INSERT queries", (t, done) => {
+  it("should evaluate basic INSERT queries", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -25,27 +25,26 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
       ?s dblp-rdf:authorOf ?article .
     }`;
 
-    engine.execute(query).subscribe(undefined, done, () => {
-      const triples = engine._graph._store.getTriples(
-        "https://dblp.org/pers/m/Minier:Thomas",
-        "http://purl.org/dc/elements/1.1/name",
-        null
-      );
-      expect(triples.length).to.equal(1);
-      expect(stringToTerm(triples[0].subject)).to.deep.equal(
-        createIRI("https://dblp.org/pers/m/Minier:Thomas")
-      );
-      expect(stringToTerm(triples[0].predicate)).to.deep.equal(
-        createIRI("http://purl.org/dc/elements/1.1/name")
-      );
-      expect(stringToTerm(triples[0].object)).to.deep.equal(
-        createLangLiteral("Thomas Minier", "fr")
-      );
-      done();
-    });
+    for await (const b of engine.execute(query)) {
+    }
+    const triples = engine._graph._store.getTriples(
+      "https://dblp.org/pers/m/Minier:Thomas",
+      "http://purl.org/dc/elements/1.1/name",
+      null
+    );
+    expect(triples.length).to.equal(1);
+    expect(stringToTerm(triples[0].subject)).to.deep.equal(
+      createIRI("https://dblp.org/pers/m/Minier:Thomas")
+    );
+    expect(stringToTerm(triples[0].predicate)).to.deep.equal(
+      createIRI("http://purl.org/dc/elements/1.1/name")
+    );
+    expect(stringToTerm(triples[0].object)).to.deep.equal(
+      createLangLiteral("Thomas Minier", "fr")
+    );
   });
 
-  it("should evaluate basic DELETE queries", (t, done) => {
+  it("should evaluate basic DELETE queries", async () => {
     const query = `
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -55,18 +54,17 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
       ?s rdf:type dblp-rdf:Person .
     }`;
 
-    engine.execute(query).subscribe(undefined, done, () => {
-      const triples = engine._graph._store.getTriples(
-        "https://dblp.org/pers/m/Minier:Thomas",
-        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-        null
-      );
-      expect(triples.length).to.equal(0);
-      done();
-    });
+    for await (const b of engine.execute(query)) {
+    }
+    const triples = engine._graph._store.getTriples(
+      "https://dblp.org/pers/m/Minier:Thomas",
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      null
+    );
+    expect(triples.length).to.equal(0);
   });
 
-  it("should evaluate basic INSERT/DELETE queries", (t, done) => {
+  it("should evaluate basic INSERT/DELETE queries", async () => {
     const query = `
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -76,27 +74,26 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
     DELETE { ?s rdf:type dblp-rdf:Person . }
     WHERE { ?s rdf:type dblp-rdf:Person . }`;
 
-    engine.execute(query).subscribe(undefined, done, () => {
-      const triples = engine._graph._store.getTriples(
-        "https://dblp.org/pers/m/Minier:Thomas",
-        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-        null
-      );
-      expect(triples.length).to.equal(1);
-      expect(stringToTerm(triples[0].subject)).to.deep.equal(
-        createIRI("https://dblp.org/pers/m/Minier:Thomas")
-      );
-      expect(stringToTerm(triples[0].predicate)).to.deep.equal(
-        createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
-      );
-      expect(stringToTerm(triples[0].object)).to.deep.equal(
-        createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#Person")
-      );
-      done();
-    });
+    for await (const b of engine.execute(query)) {
+    }
+    const triples = engine._graph._store.getTriples(
+      "https://dblp.org/pers/m/Minier:Thomas",
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      null
+    );
+    expect(triples.length).to.equal(1);
+    expect(stringToTerm(triples[0].subject)).to.deep.equal(
+      createIRI("https://dblp.org/pers/m/Minier:Thomas")
+    );
+    expect(stringToTerm(triples[0].predicate)).to.deep.equal(
+      createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+    );
+    expect(stringToTerm(triples[0].object)).to.deep.equal(
+      createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#Person")
+    );
   });
 
-  it("should evaluate INSERT/DELETE queries where the WHERE evaluates to 0 solutions", (t, done) => {
+  it("should evaluate INSERT/DELETE queries where the WHERE evaluates to 0 solutions", async () => {
     const query = `
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -106,23 +103,22 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
     DELETE { ?s rdf:type dblp-rdf:Person . }
     WHERE { ?s rdf:type rdf:Person . }`;
 
-    engine.execute(query).subscribe(undefined, done, () => {
-      const triples = engine._graph._store.getTriples(
-        "https://dblp.org/pers/m/Minier:Thomas",
-        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-        null
-      );
-      expect(triples.length).to.equal(1);
-      expect(stringToTerm(triples[0].subject)).to.deep.equal(
-        createIRI("https://dblp.org/pers/m/Minier:Thomas")
-      );
-      expect(stringToTerm(triples[0].predicate)).to.deep.equal(
-        createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
-      );
-      expect(stringToTerm(triples[0].object)).to.deep.equal(
-        createIRI("https://dblp.uni-trier.de/rdf/schema-2017-04-18#Person")
-      );
-      done();
-    });
+    for await (const b of engine.execute(query)) {
+    }
+    const triples = engine._graph._store.getTriples(
+      "https://dblp.org/pers/m/Minier:Thomas",
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      null
+    );
+    expect(triples.length).to.equal(1);
+    expect(stringToTerm(triples[0].subject)).to.deep.equal(
+      createIRI("https://dblp.org/pers/m/Minier:Thomas")
+    );
+    expect(stringToTerm(triples[0].predicate)).to.deep.equal(
+      createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+    );
+    expect(stringToTerm(triples[0].object)).to.deep.equal(
+      createIRI("https://dblp.uni-trier.de/rdf/schema-2017-04-18#Person")
+    );
   });
 });

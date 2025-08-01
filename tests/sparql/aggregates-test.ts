@@ -20,7 +20,7 @@ describe("SPARQL aggregates", () => {
     engine = new TestEngine(g);
   });
 
-  it("should evaluate simple SPARQL queries with GROUP BY", (t, done) => {
+  it("should evaluate simple SPARQL queries with GROUP BY", async () => {
     const query = `
     SELECT ?p (COUNT(?p) AS ?nbPreds) WHERE {
       <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
@@ -29,37 +29,30 @@ describe("SPARQL aggregates", () => {
     `;
     const results = [];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.keys("p", "nbPreds");
-        switch (b["p"].value) {
-          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
-          case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
-            expect(b["nbPreds"]).to.deep.equal(createInteger(1));
-            break;
-          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
-            expect(b["nbPreds"]).to.deep.equal(createInteger(5));
-            break;
-          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
-            expect(b["nbPreds"]).to.deep.equal(createInteger(4));
-            break;
-          default:
-            expect.fail(`Unexpected predicate found: ${termToString(b["p"])}`);
-        }
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(4);
-        done();
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.keys("p", "nbPreds");
+      switch (b["p"].value) {
+        case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
+        case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
+          expect(b["nbPreds"]).to.deep.equal(createInteger(1));
+          break;
+        case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
+          expect(b["nbPreds"]).to.deep.equal(createInteger(5));
+          break;
+        case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
+          expect(b["nbPreds"]).to.deep.equal(createInteger(4));
+          break;
+        default:
+          expect.fail(`Unexpected predicate found: ${termToString(b["p"])}`);
       }
-    );
+      results.push(b);
+    }
+    expect(results.length).to.equal(4);
   });
 
-  it("should evaluate queries with SPARQL expressions in GROUP BY", (t, done) => {
+  it("should evaluate queries with SPARQL expressions in GROUP BY", async () => {
     const query = `
     SELECT ?p ?z (COUNT(?p) AS ?nbPreds) WHERE {
       <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
@@ -68,63 +61,49 @@ describe("SPARQL aggregates", () => {
     `;
     const results = [];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.keys("p", "nbPreds", "z");
-        expect(b["z"]).to.deep.equal(createInteger(10));
-        switch (b["p"].value) {
-          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
-          case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
-            expect(b["nbPreds"]).to.deep.equal(createInteger(1));
-            break;
-          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
-            expect(b["nbPreds"]).to.deep.equal(createInteger(5));
-            break;
-          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
-            expect(b["nbPreds"]).to.deep.equal(createInteger(4));
-            break;
-          default:
-            expect.fail(`Unexpected predicate found: ${termToString(b["p"])}`);
-            break;
-        }
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(4);
-        done();
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.keys("p", "nbPreds", "z");
+      expect(b["z"]).to.deep.equal(createInteger(10));
+      switch (b["p"].value) {
+        case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
+        case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
+          expect(b["nbPreds"]).to.deep.equal(createInteger(1));
+          break;
+        case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
+          expect(b["nbPreds"]).to.deep.equal(createInteger(5));
+          break;
+        case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
+          expect(b["nbPreds"]).to.deep.equal(createInteger(4));
+          break;
+        default:
+          expect.fail(`Unexpected predicate found: ${termToString(b["p"])}`);
+          break;
       }
-    );
+      results.push(b);
+    }
+    expect(results.length).to.equal(4);
   });
 
-  it("should allow aggregate queries without a GROUP BY clause", (t, done) => {
+  it("should allow aggregate queries without a GROUP BY clause", async () => {
     const query = `
     SELECT (COUNT(?p) AS ?nbPreds) WHERE {
       <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
     }`;
     let nbResults = 0;
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.keys("nbPreds");
-        expect(b["nbPreds"]).to.deep.equal(createInteger(11));
-        nbResults++;
-      },
-      done,
-      () => {
-        expect(nbResults).to.equal(1);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.keys("nbPreds");
+      expect(b["nbPreds"]).to.deep.equal(createInteger(11));
+      nbResults++;
+    }
+    expect(nbResults).to.equal(1);
   });
 
-  it("should evaluate queries that mix aggregations and numeric operations", (t, done) => {
+  it("should evaluate queries that mix aggregations and numeric operations", async () => {
     const query = `
     SELECT ?p (COUNT(?p) * 2 AS ?nbPreds) WHERE {
       <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
@@ -133,38 +112,31 @@ describe("SPARQL aggregates", () => {
     `;
     const results = [];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.keys("p", "nbPreds");
-        switch (b["p"].value) {
-          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
-          case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
-            expect(b["nbPreds"]).to.deep.equal(createInteger(2));
-            break;
-          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
-            expect(b["nbPreds"]).to.deep.equal(createInteger(10));
-            break;
-          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
-            expect(b["nbPreds"]).to.deep.equal(createInteger(8));
-            break;
-          default:
-            expect.fail(`Unexpected predicate found: ${termToString(b["p"])}`);
-            break;
-        }
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(4);
-        done();
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.keys("p", "nbPreds");
+      switch (b["p"].value) {
+        case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
+        case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
+          expect(b["nbPreds"]).to.deep.equal(createInteger(2));
+          break;
+        case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
+          expect(b["nbPreds"]).to.deep.equal(createInteger(10));
+          break;
+        case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
+          expect(b["nbPreds"]).to.deep.equal(createInteger(8));
+          break;
+        default:
+          expect.fail(`Unexpected predicate found: ${termToString(b["p"])}`);
+          break;
       }
-    );
+      results.push(b);
+    }
+    expect(results.length).to.equal(4);
   });
 
-  it("should evaluate aggregates with HAVING clauses", (t, done) => {
+  it("should evaluate aggregates with HAVING clauses", async () => {
     const query = `
     SELECT ?p (COUNT(?p) AS ?nbPreds) WHERE {
       <https://dblp.org/pers/m/Minier:Thomas> ?p ?o .
@@ -174,35 +146,28 @@ describe("SPARQL aggregates", () => {
     `;
     const results = [];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.keys("p", "nbPreds");
-        switch (b["p"].value) {
-          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
-            expect(b["nbPreds"]).to.deep.equal(createInteger(5));
-            break;
-          case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
-            expect(b["nbPreds"]).to.deep.equal(createInteger(4));
-            break;
-          default:
-            throw new Error(
-              `Unexpected predicate found: ${termToString(b["p"])}`
-            );
-        }
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(2);
-        done();
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.keys("p", "nbPreds");
+      switch (b["p"].value) {
+        case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
+          expect(b["nbPreds"]).to.deep.equal(createInteger(5));
+          break;
+        case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
+          expect(b["nbPreds"]).to.deep.equal(createInteger(4));
+          break;
+        default:
+          throw new Error(
+            `Unexpected predicate found: ${termToString(b["p"])}`
+          );
       }
-    );
+      results.push(b);
+    }
+    expect(results.length).to.equal(2);
   });
 
-  it("should evaluate aggregation queries with non-compatible UNION clauses", (t, done) => {
+  it("should evaluate aggregation queries with non-compatible UNION clauses", async () => {
     const query = `
     SELECT ?s (COUNT(?s) AS ?nbSubjects) WHERE {
       { ?s a ?o1 . } UNION { ?s a ?o2}
@@ -211,24 +176,17 @@ describe("SPARQL aggregates", () => {
     `;
     const results = [];
 
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.keys("s", "nbSubjects");
-        expect(b["s"]).to.deep.equal(
-          createIRI("https://dblp.org/pers/m/Minier:Thomas")
-        );
-        expect(b["nbSubjects"]).to.deep.equal(createInteger(2));
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(1);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.keys("s", "nbSubjects");
+      expect(b["s"]).to.deep.equal(
+        createIRI("https://dblp.org/pers/m/Minier:Thomas")
+      );
+      expect(b["nbSubjects"]).to.deep.equal(createInteger(2));
+      results.push(b);
+    }
+    expect(results.length).to.equal(1);
   });
 
   const data: {
@@ -366,23 +324,16 @@ describe("SPARQL aggregates", () => {
   ];
 
   data.forEach((d) => {
-    it(`should evaluate the "${d.name}" aggregate`, (t, done) => {
+    it(`should evaluate the "${d.name}" aggregate`, async () => {
       const results = [];
-      const iterator = engine.execute(d.query);
-      iterator.subscribe(
-        (bindings) => {
-          assert.ok(bindings instanceof Bindings);
-          const b = bindings.toObject();
-          expect(b).to.have.keys(...d.keys);
-          d.testFun(b);
-          results.push(b);
-        },
-        done,
-        () => {
-          expect(results.length).to.equal(d.nbResults);
-          done();
-        }
-      );
+      for await (const bindings of engine.execute(d.query)) {
+        assert.ok(bindings instanceof Bindings);
+        const b = bindings.toObject();
+        expect(b).to.have.keys(...d.keys);
+        d.testFun(b);
+        results.push(b);
+      }
+      expect(results.length).to.equal(d.nbResults);
     });
   });
 });

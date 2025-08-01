@@ -14,7 +14,7 @@ import {
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL custom operators", () => {
-  it("should allow for custom functions in BIND", (t, done) => {
+  it("should allow for custom functions in BIND", async () => {
     const customFunctions: CustomFunctions = {
       "http://test.com#REVERSE": function (a) {
         assert.ok(a && !Array.isArray(a));
@@ -35,26 +35,19 @@ describe("SPARQL custom operators", () => {
     }
     `;
     const results = [];
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.keys("reversed");
-        expect(b["reversed"]).to.deep.equal(
-          createLangLiteral("reiniM samohT", "en")
-        );
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(1);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.keys("reversed");
+      expect(b["reversed"]).to.deep.equal(
+        createLangLiteral("reiniM samohT", "en")
+      );
+      results.push(b);
+    }
+    expect(results.length).to.equal(1);
   });
 
-  it("should allow for custom functions in FILTER", (t, done) => {
+  it("should allow for custom functions in FILTER", async () => {
     const customFunctions: CustomFunctions = {
       "http://test.com#CONTAINS_THOMAS": function (a) {
         assert.ok(a && !Array.isArray(a));
@@ -73,23 +66,16 @@ describe("SPARQL custom operators", () => {
     }
     `;
     const results = [];
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.keys("o");
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(3);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.keys("o");
+      results.push(b);
+    }
+    expect(results.length).to.equal(3);
   });
 
-  it("should allow for custom functions in HAVING", (t, done) => {
+  it("should allow for custom functions in HAVING", async () => {
     const customFunctions: CustomFunctions = {
       "http://test.com#IS_EVEN": function (a) {
         assert.ok(a && "datatype" in a);
@@ -112,25 +98,18 @@ describe("SPARQL custom operators", () => {
     HAVING (test:IS_EVEN(?length))
     `;
     const results = [];
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.keys("length");
-        const length = termToValue<number>(b["length"]);
-        expect(length % 2).to.equal(0);
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(8);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.keys("length");
+      const length = termToValue<number>(b["length"]);
+      expect(length % 2).to.equal(0);
+      results.push(b);
+    }
+    expect(results.length).to.equal(8);
   });
 
-  it('should consider the solution "unbound" on an error, but query should continue continue', (t, done) => {
+  it('should consider the solution "unbound" on an error, but query should continue continue', async () => {
     const customFunctions: CustomFunctions = {
       "http://test.com#ERROR": function (a) {
         throw new Error(
@@ -152,24 +131,17 @@ describe("SPARQL custom operators", () => {
     }
     `;
     const results = [];
-    const iterator = engine.execute(query);
-    iterator.subscribe(
-      (bindings) => {
-        assert.ok(bindings instanceof Bindings);
-        const b = bindings.toObject();
-        expect(b).to.have.keys("error");
-        expect(b["error"]).to.deep.equal(UNBOUND);
-        results.push(b);
-      },
-      done,
-      () => {
-        expect(results.length).to.equal(1);
-        done();
-      }
-    );
+    for await (const bindings of engine.execute(query)) {
+      assert.ok(bindings instanceof Bindings);
+      const b = bindings.toObject();
+      expect(b).to.have.keys("error");
+      expect(b["error"]).to.deep.equal(UNBOUND);
+      results.push(b);
+    }
+    expect(results.length).to.equal(1);
   });
 
-  it("should fail if the custom function does not exist", (t, done) => {
+  it("should fail if the custom function does not exist", async () => {
     const g = getGraph("./tests/data/dblp.nt");
     const engine = new TestEngine(g);
 
@@ -183,6 +155,5 @@ describe("SPARQL custom operators", () => {
     }
     `;
     expect(() => engine.execute(query)).to.throw(Error);
-    done();
   });
 });

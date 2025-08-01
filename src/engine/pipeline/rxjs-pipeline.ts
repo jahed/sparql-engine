@@ -99,9 +99,9 @@ export default class RxjsPipeline extends PipelineEngine {
   }
 
   fromAsync<T>(cb: (input: StreamPipelineInput<T>) => void): Observable<T> {
-    return new Observable<T>((subscriber) =>
-      cb(new RxjsStreamInput(subscriber))
-    );
+    return new Observable<T>((subscriber) => {
+      cb(new RxjsStreamInput(subscriber));
+    });
   }
 
   clone<T>(stage: Observable<T>): Observable<T> {

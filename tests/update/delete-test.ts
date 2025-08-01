@@ -16,7 +16,7 @@ describe("SPARQL UPDATE: DELETE DATA queries", () => {
     engine.addNamedGraph(GRAPH_IRI, gB);
   });
 
-  it("should evaluate DELETE DATA queries without a named Graph", (t, done) => {
+  it("should evaluate DELETE DATA queries without a named Graph", async () => {
     const query = `
     DELETE DATA {
       <https://dblp.org/pers/m/Minier:Thomas> <https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf> <https://dblp.org/rec/conf/esws/MinierSMV18a>
@@ -28,18 +28,17 @@ describe("SPARQL UPDATE: DELETE DATA queries", () => {
       "https://dblp.org/rec/conf/esws/MinierSMV18a"
     );
 
-    engine.execute(query).subscribe(undefined, done, () => {
-      const triples = engine._graph._store.getTriples(
-        "https://dblp.org/pers/m/Minier:Thomas",
-        "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf",
-        "https://dblp.org/rec/conf/esws/MinierSMV18a"
-      );
-      expect(triples.length).to.equal(0);
-      done();
-    });
+    for await (const b of engine.execute(query)) {
+    }
+    const triples = engine._graph._store.getTriples(
+      "https://dblp.org/pers/m/Minier:Thomas",
+      "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf",
+      "https://dblp.org/rec/conf/esws/MinierSMV18a"
+    );
+    expect(triples.length).to.equal(0);
   });
 
-  it("should evaluate DELETE DATA queries using a named Graph", (t, done) => {
+  it("should evaluate DELETE DATA queries using a named Graph", async () => {
     const query = `
     DELETE DATA {
       GRAPH <${termToString(GRAPH_IRI)}> {
@@ -54,16 +53,15 @@ describe("SPARQL UPDATE: DELETE DATA queries", () => {
         "https://dblp.org/rec/conf/esws/MinierSMV18a"
       );
 
-    engine.execute(query).subscribe(undefined, done, () => {
-      const triples = engine
-        .getNamedGraph(GRAPH_IRI)
-        ._store.getTriples(
-          "https://dblp.org/pers/m/Minier:Thomas",
-          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf",
-          "https://dblp.org/rec/conf/esws/MinierSMV18a"
-        );
-      expect(triples.length).to.equal(0);
-      done();
-    });
+    for await (const b of engine.execute(query)) {
+    }
+    const triples = engine
+      .getNamedGraph(GRAPH_IRI)
+      ._store.getTriples(
+        "https://dblp.org/pers/m/Minier:Thomas",
+        "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf",
+        "https://dblp.org/rec/conf/esws/MinierSMV18a"
+      );
+    expect(triples.length).to.equal(0);
   });
 });

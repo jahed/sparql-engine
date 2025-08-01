@@ -64,24 +64,20 @@ function _writeBindings(input: Bindings, results: any) {
 export default function xmlFormat(
   source: PipelineStage<Bindings | boolean>
 ): PipelineStage<string> {
-  const results = xml.element({});
-  const root = xml.element({
-    _attr: { xmlns: "http://www.w3.org/2005/sparql-results#" },
-    results: results,
-  });
-  const stream: any = xml(
-    { sparql: root },
-    { stream: true, indent: "\t", declaration: true }
-  );
-  return Pipeline.getInstance().fromAsync((input) => {
-    // manually pipe the xml stream's results into the pipeline
-    stream.on("error", (err: Error) => input.error(err));
-    stream.on("end", () => input.complete());
+  return Pipeline.getInstance().fromAsync(async (input) => {
+    const results = xml.element({});
+    const root = xml.element({
+      _attr: { xmlns: "http://www.w3.org/2005/sparql-results#" },
+      results: results,
+    });
+    const stream = xml(
+      { sparql: root },
+      { stream: true, indent: "\t", declaration: true }
+    );
+    try {
+      let warmup = true;
 
-    let warmup = true;
-    source.subscribe(
-      (b: Bindings | boolean) => {
-        // Build the head attribute from the first set of bindings
+      for await (const b of source) {
         if (warmup && !isBoolean(b)) {
           const variables: string[] = Array.from(b.variables());
           root.push({
@@ -93,21 +89,25 @@ export default function xmlFormat(
           });
           warmup = false;
         }
-        // handle results (boolean for ASK queries, bindings for SELECT queries)
         if (isBoolean(b)) {
           _writeBoolean(b, root);
         } else {
           _writeBindings(b, results);
         }
-      },
-      (err) => console.error(err),
-      () => {
-        results.close();
-        root.close();
       }
-    );
+      results.close();
+      root.close();
+    } catch (error) {
+      console.error(error);
+    }
 
-    // consume the xml stream
-    stream.on("data", (x: any) => input.next(x));
+    try {
+      for await (const data of stream) {
+        input.next(data.toString("utf-8"));
+      }
+      input.complete();
+    } catch (error) {
+      input.error(error);
+    }
   });
 }

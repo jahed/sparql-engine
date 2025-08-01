@@ -139,15 +139,6 @@ export default abstract class Graph {
    * @param maxRank - Maximum rank of the matches (set it to null to disable it)
    * @param context - Execution options
    * @return A {@link PipelineInput} which output tuples of shape [matching RDF triple, score, rank].
-   * @example
-   * const pattern = { subject: '?s', predicate: 'foaf:name', object: '?n'}
-   * const keywords = [ 'Ann' , 'Bob' ]
-   * // Find the top 100 RDF triples matching the pattern where ?n contains the keyword 'Ann' or 'Bob'
-   * // with a minimum relevance score of 0.25 and no maximum relevance score.
-   * const pipeline = graph.fullTextSearch(pattern, '?n', keywords, 0.25, null, null, 100, context)
-   * pipeline.subscribe(item => {
-   *   console.log(`Matching RDF triple ${item[0]} with score ${item[1]} and rank ${item[2]}`)
-   * }, console.error, () => console.log('Search completed!'))
    */
   fullTextSearch(
     pattern: EngineTriple,

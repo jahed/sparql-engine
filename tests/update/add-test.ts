@@ -41,11 +41,10 @@ describe("SPARQL UPDATE: ADD queries", () => {
   ];
 
   data.forEach((d) => {
-    it(`should evaluate "${d.name}" queries`, (t, done) => {
-      engine.execute(d.query).subscribe(undefined, done, () => {
-        d.testFun();
-        done();
-      });
+    it(`should evaluate "${d.name}" queries`, async () => {
+      for await (const b of engine.execute(d.query)) {
+      }
+      d.testFun();
     });
   });
 });

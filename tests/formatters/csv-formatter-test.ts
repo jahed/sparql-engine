@@ -11,7 +11,7 @@ describe("W3C CSV formatter", () => {
     engine = new TestEngine(g);
   });
 
-  it("should evaluate SELECT queries", (t, done) => {
+  it("should evaluate SELECT queries", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -29,20 +29,13 @@ describe("W3C CSV formatter", () => {
 "Thomas Minier"@en,https://dblp.org/rec/conf/esws/MinierSMV18
 "Thomas Minier"@en,https://dblp.org/rec/conf/esws/MinierSMV18a
 `;
-    const iterator = engine.execute(query).pipe(csvFormatter);
-    iterator.subscribe(
-      (b) => {
-        results += b;
-      },
-      done,
-      () => {
-        expect(results).to.equals(expected);
-        done();
-      }
-    );
+    for await (const b of engine.execute(query).pipe(csvFormatter)) {
+      results += b;
+    }
+    expect(results).to.equals(expected);
   });
 
-  it("should evaluate ASK queries", (t, done) => {
+  it("should evaluate ASK queries", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -53,19 +46,12 @@ describe("W3C CSV formatter", () => {
       ?s dblp-rdf:authorOf ?article .
     }`;
     let results = "";
-    const iterator = engine.execute(query).pipe(csvFormatter);
     const expected = `boolean
 true
 `;
-    iterator.subscribe(
-      (b) => {
-        results += b;
-      },
-      done,
-      () => {
-        expect(results).to.equals(expected);
-        done();
-      }
-    );
+    for await (const b of engine.execute(query).pipe(csvFormatter)) {
+      results += b;
+    }
+    expect(results).to.equals(expected);
   });
 });

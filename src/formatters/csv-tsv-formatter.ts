@@ -60,13 +60,12 @@ function writeBindings(
  */
 function genericFormatter(separator: string) {
   return (source: PipelineStage<QueryOutput>): PipelineStage<string> => {
-    return Pipeline.getInstance().fromAsync((input) => {
-      let warmup = true;
-      let isAsk = false;
-      let ordering: string[] = [];
-      source.subscribe(
-        (b: QueryOutput) => {
-          // Build the head attribute from the first set of bindings
+    return Pipeline.getInstance().fromAsync(async (input) => {
+      try {
+        let warmup = true;
+        let isAsk = false;
+        let ordering: string[] = [];
+        for await (const b of source) {
           if (warmup && b instanceof BindingBase) {
             ordering = writeHead(b, separator, input);
           } else if (warmup && isBoolean(b)) {
@@ -81,12 +80,11 @@ function genericFormatter(separator: string) {
             writeBindings(b, separator, ordering, input);
             input.next("\n");
           }
-        },
-        (err) => console.error(err),
-        () => {
-          input.complete();
         }
-      );
+        input.complete();
+      } catch (error) {
+        console.error(error);
+      }
     });
   };
 }

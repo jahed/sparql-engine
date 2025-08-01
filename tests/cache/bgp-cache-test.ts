@@ -23,7 +23,7 @@ describe("LRUBGPCache", () => {
   });
 
   describe("#update/commit", () => {
-    it("should supports insertion of items over time", (t, done) => {
+    it("should supports insertion of items over time", async () => {
       const writerID = "1";
       const patterns = [
         dataFactory.quad(
@@ -46,15 +46,10 @@ describe("LRUBGPCache", () => {
       cache.update(bgp, bindings[0], writerID);
       cache.update(bgp, bindings[1], writerID);
       cache.commit(bgp, writerID);
-      cache
-        .get(bgp)!
-        .then((content) => {
-          expect(content.map((x) => x.toObject())).to.deep.equals(
-            bindings.map((x) => x.toObject())
-          );
-          done();
-        })
-        .catch(done);
+      const content = await cache.get(bgp)!;
+      expect(content.map((x) => x.toObject())).to.deep.equals(
+        bindings.map((x) => x.toObject())
+      );
     });
   });
 

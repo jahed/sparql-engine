@@ -12,7 +12,7 @@ describe("W3C JSON formatter", () => {
     engine = new TestEngine(g);
   });
 
-  it("should evaluate SELECT queries", (t, done) => {
+  it("should evaluate SELECT queries", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -23,28 +23,21 @@ describe("W3C JSON formatter", () => {
       ?s dblp-rdf:authorOf ?article .
     }`;
     let results = "";
-    const iterator = engine.execute(query).pipe(jsonFormatter);
-    iterator.subscribe(
-      (b) => {
-        results += b;
-      },
-      done,
-      () => {
-        const json = JSON.parse(results);
-        expect(json).to.deep.equals(
-          JSON.parse(
-            fs.readFileSync(
-              new URL(import.meta.resolve("./select.json")).pathname,
-              "utf-8"
-            )
-          )
-        );
-        done();
-      }
+    for await (const b of engine.execute(query).pipe(jsonFormatter)) {
+      results += b;
+    }
+    const json = JSON.parse(results);
+    expect(json).to.deep.equals(
+      JSON.parse(
+        fs.readFileSync(
+          new URL(import.meta.resolve("./select.json")).pathname,
+          "utf-8"
+        )
+      )
     );
   });
 
-  it("should evaluate ASK queries", (t, done) => {
+  it("should evaluate ASK queries", async () => {
     const query = `
     PREFIX dblp-pers: <https://dblp.org/pers/m/>
     PREFIX dblp-rdf: <https://dblp.uni-trier.de/rdf/schema-2017-04-18#>
@@ -55,19 +48,12 @@ describe("W3C JSON formatter", () => {
       ?s dblp-rdf:authorOf ?article .
     }`;
     let results = "";
-    const iterator = engine.execute(query).pipe(jsonFormatter);
-    iterator.subscribe(
-      (b) => {
-        results += b;
-      },
-      done,
-      () => {
-        const json = JSON.parse(results);
-        expect(json).to.deep.equals({
-          boolean: true,
-        });
-        done();
-      }
-    );
+    for await (const b of engine.execute(query).pipe(jsonFormatter)) {
+      results += b;
+    }
+    const json = JSON.parse(results);
+    expect(json).to.deep.equals({
+      boolean: true,
+    });
   });
 });

@@ -113,20 +113,13 @@ describe("Non standard SPARQL functions", () => {
   ];
 
   data.forEach((d) => {
-    it(`should evaluate the "${d.name}" SPARQL function`, (t, done) => {
+    it(`should evaluate the "${d.name}" SPARQL function`, async () => {
       const results: BindingsRecord[] = [];
-      const iterator = engine.execute(d.query);
-      iterator.subscribe(
-        (b) => {
-          assert.ok(b instanceof Bindings);
-          results.push(b.toObject());
-        },
-        done,
-        () => {
-          expect(results).to.deep.equals(d.results);
-          done();
-        }
-      );
+      for await (const b of engine.execute(d.query)) {
+        assert.ok(b instanceof Bindings);
+        results.push(b.toObject());
+      }
+      expect(results).to.deep.equals(d.results);
     });
   });
 });
