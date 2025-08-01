@@ -6,7 +6,6 @@ import {
   isEqual,
   subMilliseconds,
 } from "date-fns";
-import { md5 } from "js-md5";
 import { isNull } from "lodash-es";
 import type { EngineTripleValue } from "../../types.ts";
 import { parseISO8601 } from "../../utils/date.ts";
@@ -567,8 +566,8 @@ export default {
     Hash Functions https://www.w3.org/TR/sparql11-query/#func-hash
   */
 
-  md5: function (a: Term): Term {
-    return createLiteral(md5.hex(a.value));
+  md5: async function (a: Term): Promise<Term> {
+    return createLiteral((await import("js-md5")).md5.hex(a.value));
   },
   sha1: digestOperation("SHA-1"),
   sha256: digestOperation("SHA-256"),
