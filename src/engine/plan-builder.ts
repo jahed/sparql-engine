@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// General libraries
+import { isNull, isUndefined, partition, some, sortBy } from "lodash-es";
 import {
   Parser,
   type BgpPattern,
@@ -11,20 +11,22 @@ import {
   type Variable,
   type VariableExpression,
 } from "sparqljs";
-import type { Consumable } from "../operators/update/consumer.ts";
-// pipelining engine
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
-// RDF core classes
-import { BindingBase, Bindings } from "../rdf/bindings.ts";
-import Dataset from "../rdf/dataset.ts";
-// Optimization
-import Optimizer from "../optimizer/optimizer.ts";
-// Solution modifiers
+import type { CustomFunctions } from "../operators/expressions/sparql-expression.ts";
 import ask from "../operators/modifiers/ask.ts";
 import construct from "../operators/modifiers/construct.ts";
 import select from "../operators/modifiers/select.ts";
-// Stage builders
+import type { Consumable } from "../operators/update/consumer.ts";
+import Optimizer from "../optimizer/optimizer.ts";
+import { BindingBase, Bindings } from "../rdf/bindings.ts";
+import Dataset from "../rdf/dataset.ts";
+import type { EngineTriple } from "../types.ts";
+import { deepApplyBindings, extendByBindings } from "../utils.ts";
+import { dataFactory, isVariable } from "../utils/rdf.ts";
+import type { BGPCache } from "./cache/bgp-cache.ts";
+import ExecutionContext from "./context/execution-context.ts";
+import ContextSymbols from "./context/symbols.ts";
 import AggregateStageBuilder from "./stages/aggregate-stage-builder.ts";
 import BGPStageBuilder from "./stages/bgp-stage-builder.ts";
 import BindStageBuilder from "./stages/bind-stage-builder.ts";
@@ -35,31 +37,14 @@ import GraphStageBuilder from "./stages/graph-stage-builder.ts";
 import MinusStageBuilder from "./stages/minus-stage-builder.ts";
 import OptionalStageBuilder from "./stages/optional-stage-builder.ts";
 import OrderByStageBuilder from "./stages/orderby-stage-builder.ts";
+import { extractPropertyPaths } from "./stages/rewritings.ts";
 import ServiceStageBuilder from "./stages/service-stage-builder.ts";
 import StageBuilder from "./stages/stage-builder.ts";
 import UnionStageBuilder from "./stages/union-stage-builder.ts";
 import UpdateStageBuilder from "./stages/update-stage-builder.ts";
-// caching
-import { LRUBGPCache, type BGPCache } from "./cache/bgp-cache.ts";
-// utilities
-import { isNull, isUndefined, partition, some, sortBy } from "lodash-es";
 
-import type { CustomFunctions } from "../operators/expressions/sparql-expression.ts";
-import type { EngineTriple } from "../types.ts";
-import { deepApplyBindings, extendByBindings } from "../utils.ts";
-import { dataFactory, isVariable } from "../utils/rdf.ts";
-import ExecutionContext from "./context/execution-context.ts";
-import ContextSymbols from "./context/symbols.ts";
-import { extractPropertyPaths } from "./stages/rewritings.ts";
-
-/**
- * Output of a physical query execution plan
- */
 export type QueryOutput = Bindings | EngineTriple | boolean;
 
-/*
- * Class of SPARQL operations that are evaluated by a Stage Builder
- */
 export type SparqlOperation = number;
 export const SPARQL_OPERATION = {
   AGGREGATE: 0,
@@ -163,8 +148,9 @@ export class PlanBuilder {
    * a maximum of 500 items and a max age of 20 minutes.
    * @param customCache - (optional) Custom cache instance
    */
-  useCache(customCache?: BGPCache): void {
+  async useCache(customCache?: BGPCache): Promise<void> {
     if (customCache === undefined) {
+      const { LRUBGPCache } = await import("./cache/bgp-cache.ts");
       this._currentCache = new LRUBGPCache(500, 1200 * 60 * 60);
     } else {
       this._currentCache = customCache;

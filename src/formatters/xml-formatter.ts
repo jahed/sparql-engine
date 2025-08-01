@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
 import { isBoolean, isNull, isUndefined, map } from "lodash-es";
-
-import xml from "xml";
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import { Bindings } from "../rdf/bindings.ts";
@@ -65,6 +63,7 @@ export default function xmlFormat(
   source: PipelineStage<Bindings | boolean>
 ): PipelineStage<string> {
   return Pipeline.getInstance().fromAsync(async (input) => {
+    const { default: xml } = await import("xml");
     const results = xml.element({});
     const root = xml.element({
       _attr: { xmlns: "http://www.w3.org/2005/sparql-results#" },

@@ -18,7 +18,7 @@ describe("Semantic caching for SPARQL queries", () => {
     SELECT ?s ?p ?o WHERE {
       { ?s ?p ?o } UNION { ?s ?p ?o }
     }`;
-    engine._builder.useCache();
+    await engine._builder.useCache();
     const results = [];
     for await (const bindings of engine.execute(query)) {
       assert.ok(bindings instanceof Bindings);
@@ -52,7 +52,7 @@ describe("Semantic caching for SPARQL queries", () => {
     SELECT ?s ?p ?o WHERE {
       { ?s ?p ?o } UNION { ?s ?p ?o }
     } LIMIT 10`;
-    engine._builder.useCache();
+    await engine._builder.useCache();
     const results = [];
     for await (const bindings of engine.execute(query)) {
       assert.ok(bindings instanceof Bindings);
@@ -84,7 +84,7 @@ describe("Semantic caching for SPARQL queries", () => {
     SELECT ?s ?p ?o WHERE {
       { ?s ?p ?o } UNION { ?s ?p ?o }
     } OFFSET 10`;
-    engine._builder.useCache();
+    await engine._builder.useCache();
     const results = [];
     for await (const bindings of engine.execute(query)) {
       assert.ok(bindings instanceof Bindings);
