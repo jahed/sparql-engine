@@ -2,7 +2,7 @@
 import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
-import { dataFactory } from "../../src/utils/rdf.ts";
+import { RDF } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("DESCRIBE SPARQL queries", () => {
@@ -25,19 +25,17 @@ describe("DESCRIBE SPARQL queries", () => {
     for await (const triple of engine.execute(query)) {
       assert.ok(typeof triple === "object" && "subject" in triple);
       expect(triple.subject).to.deep.equal(
-        dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas")
+        RDF.namedNode("https://dblp.org/pers/m/Minier:Thomas")
       );
       expect(triple.predicate).to.be.deep.oneOf([
-        dataFactory.namedNode(
-          "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-        ),
-        dataFactory.namedNode(
+        RDF.namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+        RDF.namedNode(
           "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName"
         ),
-        dataFactory.namedNode(
+        RDF.namedNode(
           "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf"
         ),
-        dataFactory.namedNode(
+        RDF.namedNode(
           "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith"
         ),
       ]);

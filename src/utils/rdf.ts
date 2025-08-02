@@ -17,7 +17,7 @@ import type {
   EngineVariable,
 } from "../types.ts";
 
-export const dataFactory = new DataFactory();
+export const RDF = new DataFactory();
 
 export function tripleEquals(a: EngineTriple, b: EngineTriple): boolean {
   return (
@@ -32,7 +32,7 @@ export function tripleEquals(a: EngineTriple, b: EngineTriple): boolean {
  * outside of PathStageBuilder for compatibility with standard Quads.
  */
 export function tripleToQuad(triple: Triple): Quad {
-  return dataFactory.quad(
+  return RDF.quad(
     triple.subject,
     triple.predicate as Quad_Predicate,
     triple.object
@@ -84,11 +84,11 @@ export function asJS(value: string, type: string | null): any {
 }
 
 export function createTypedLiteral(value: any, type: string): Literal {
-  return dataFactory.literal(`${value}`, dataFactory.namedNode(type));
+  return RDF.literal(`${value}`, RDF.namedNode(type));
 }
 
 export function createLangLiteral(value: string, language: string): Literal {
-  return dataFactory.literal(value, language);
+  return RDF.literal(value, language);
 }
 
 export function createInteger(value: number): Literal {
@@ -121,7 +121,7 @@ export function shallowCloneTerm(
     }
     return createTypedLiteral(newValue, term.datatype.value);
   }
-  return dataFactory.literal(newValue);
+  return RDF.literal(newValue);
 }
 
 export function termIsLiteral(term: EngineTripleValue): term is Literal {
@@ -216,10 +216,10 @@ export const XSD_duration = XSD("duration");
 export const XSD_hexBinary = XSD("hexBinary");
 export const XSD_base64Binary = XSD("base64Binary");
 
-export const UNBOUND = Object.freeze(dataFactory.namedNode("UNBOUND"));
-export const VARIABLE_s = Object.freeze(dataFactory.variable("s"));
-export const VARIABLE_p = Object.freeze(dataFactory.variable("p"));
-export const VARIABLE_o = Object.freeze(dataFactory.variable("o"));
+export const UNBOUND = Object.freeze(RDF.namedNode("UNBOUND"));
+export const VARIABLE_s = Object.freeze(RDF.variable("s"));
+export const VARIABLE_p = Object.freeze(RDF.variable("p"));
+export const VARIABLE_o = Object.freeze(RDF.variable("o"));
 export const LITERAL_true = Object.freeze(
   createTypedLiteral("true", XSD_boolean)
 );

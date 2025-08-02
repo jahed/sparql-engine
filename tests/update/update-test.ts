@@ -2,7 +2,7 @@
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { stringToTerm } from "rdf-string";
-import { createLangLiteral, dataFactory } from "../../src/utils/rdf.ts";
+import { createLangLiteral, RDF } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
@@ -34,10 +34,10 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
     );
     expect(triples.length).to.equal(1);
     expect(stringToTerm(triples[0].subject)).to.deep.equal(
-      dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas")
+      RDF.namedNode("https://dblp.org/pers/m/Minier:Thomas")
     );
     expect(stringToTerm(triples[0].predicate)).to.deep.equal(
-      dataFactory.namedNode("http://purl.org/dc/elements/1.1/name")
+      RDF.namedNode("http://purl.org/dc/elements/1.1/name")
     );
     expect(stringToTerm(triples[0].object)).to.deep.equal(
       createLangLiteral("Thomas Minier", "fr")
@@ -83,13 +83,13 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
     );
     expect(triples.length).to.equal(1);
     expect(stringToTerm(triples[0].subject)).to.deep.equal(
-      dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas")
+      RDF.namedNode("https://dblp.org/pers/m/Minier:Thomas")
     );
     expect(stringToTerm(triples[0].predicate)).to.deep.equal(
-      dataFactory.namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+      RDF.namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
     );
     expect(stringToTerm(triples[0].object)).to.deep.equal(
-      dataFactory.namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#Person")
+      RDF.namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#Person")
     );
   });
 
@@ -112,15 +112,13 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
     );
     expect(triples.length).to.equal(1);
     expect(stringToTerm(triples[0].subject)).to.deep.equal(
-      dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas")
+      RDF.namedNode("https://dblp.org/pers/m/Minier:Thomas")
     );
     expect(stringToTerm(triples[0].predicate)).to.deep.equal(
-      dataFactory.namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+      RDF.namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
     );
     expect(stringToTerm(triples[0].object)).to.deep.equal(
-      dataFactory.namedNode(
-        "https://dblp.uni-trier.de/rdf/schema-2017-04-18#Person"
-      )
+      RDF.namedNode("https://dblp.uni-trier.de/rdf/schema-2017-04-18#Person")
     );
   });
 });

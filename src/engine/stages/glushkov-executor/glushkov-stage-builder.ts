@@ -13,8 +13,8 @@ import type {
   EngineTripleValue,
 } from "../../../types.ts";
 import {
-  dataFactory,
   isVariable,
+  RDF,
   UNBOUND,
   VARIABLE_o,
   VARIABLE_p,
@@ -170,7 +170,7 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
         let subject = rPath.firstStep().node;
         let object = rPath.lastStep().node;
         result = engine.of<EngineTriple>(
-          dataFactory.quad(subject as EngineSubject, UNBOUND, object)
+          RDF.quad(subject as EngineSubject, UNBOUND, object)
         );
       }
     } else {
@@ -178,7 +178,7 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
         let subject = rPath.lastStep().node;
         let object = rPath.firstStep().node;
         result = engine.of<EngineTriple>(
-          dataFactory.quad(subject as EngineSubject, UNBOUND, object)
+          RDF.quad(subject as EngineSubject, UNBOUND, object)
         );
       }
     }
@@ -192,7 +192,7 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
       let reverse =
         (forward && transition.reverse) || (!forward && !transition.reverse);
       let bgp: Array<EngineTriple> = [
-        dataFactory.quad(
+        RDF.quad(
           reverse ? VARIABLE_o : (lastStep.node as EngineSubject),
           transition.negation ? VARIABLE_p : transition.predicates[0],
           reverse ? lastStep.node : VARIABLE_o
@@ -246,18 +246,14 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
   ): PipelineStage<EngineTriple> {
     const engine = Pipeline.getInstance();
     if (isVariable(subject) && !isVariable(obj)) {
-      let result: EngineTriple = dataFactory.quad(
-        obj as EngineSubject,
-        UNBOUND,
-        obj
-      );
+      let result: EngineTriple = RDF.quad(obj as EngineSubject, UNBOUND, obj);
       return engine.of(result);
     } else if (!isVariable(subject) && isVariable(obj)) {
-      let result: EngineTriple = dataFactory.quad(subject, UNBOUND, subject);
+      let result: EngineTriple = RDF.quad(subject, UNBOUND, subject);
       return engine.of(result);
     } else if (isVariable(subject) && isVariable(obj)) {
       let bgp: Array<EngineTriple> = [
-        dataFactory.quad(VARIABLE_s, VARIABLE_p, VARIABLE_o),
+        RDF.quad(VARIABLE_s, VARIABLE_p, VARIABLE_o),
       ];
       return engine.distinct(
         engine.mergeMap(
@@ -265,16 +261,8 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
           (binding: Bindings) => {
             let s = binding.get(VARIABLE_s.value)!;
             let o = binding.get(VARIABLE_o.value)!;
-            let t1: EngineTriple = dataFactory.quad(
-              s as EngineSubject,
-              UNBOUND,
-              s
-            );
-            let t2: EngineTriple = dataFactory.quad(
-              o as EngineSubject,
-              UNBOUND,
-              o
-            );
+            let t1: EngineTriple = RDF.quad(s as EngineSubject, UNBOUND, s);
+            let t2: EngineTriple = RDF.quad(o as EngineSubject, UNBOUND, o);
             return engine.of(t1, t2);
           }
         ),
@@ -282,7 +270,7 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
       );
     }
     if (subject.equals(obj)) {
-      let result = dataFactory.quad(subject, UNBOUND, obj);
+      let result = RDF.quad(subject, UNBOUND, obj);
       return engine.of(result);
     }
     return engine.empty();
@@ -324,7 +312,7 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
       let reverse =
         (forward && transition.reverse) || (!forward && !transition.reverse);
       let bgp: Array<EngineTriple> = [
-        dataFactory.quad(
+        RDF.quad(
           reverse
             ? isVariable(obj)
               ? VARIABLE_o

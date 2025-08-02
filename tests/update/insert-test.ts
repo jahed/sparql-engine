@@ -2,10 +2,10 @@
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { stringToTerm, termToString } from "rdf-string";
-import { dataFactory } from "../../src/utils/rdf.ts";
+import { RDF } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
-const GRAPH_IRI = dataFactory.namedNode("htpp://example.org#some-graph");
+const GRAPH_IRI = RDF.namedNode("htpp://example.org#some-graph");
 
 describe("SPARQL UPDATE: INSERT DATA queries", () => {
   let engine: TestEngine;
@@ -30,13 +30,13 @@ describe("SPARQL UPDATE: INSERT DATA queries", () => {
     );
     expect(triples.length).to.equal(1);
     expect(stringToTerm(triples[0].subject)).to.deep.equal(
-      dataFactory.namedNode("http://example/book1")
+      RDF.namedNode("http://example/book1")
     );
     expect(stringToTerm(triples[0].predicate)).to.deep.equal(
-      dataFactory.namedNode("http://purl.org/dc/elements/1.1/title")
+      RDF.namedNode("http://purl.org/dc/elements/1.1/title")
     );
     expect(stringToTerm(triples[0].object)).to.deep.equal(
-      dataFactory.literal("Fundamentals of Compiler Design")
+      RDF.literal("Fundamentals of Compiler Design")
     );
   });
 
@@ -56,13 +56,13 @@ describe("SPARQL UPDATE: INSERT DATA queries", () => {
       ._store.getTriples("http://example/book1", null, null);
     expect(triples.length).to.equal(1);
     expect(stringToTerm(triples[0].subject)).to.deep.equal(
-      dataFactory.namedNode("http://example/book1")
+      RDF.namedNode("http://example/book1")
     );
     expect(stringToTerm(triples[0].predicate)).to.deep.equal(
-      dataFactory.namedNode("http://purl.org/dc/elements/1.1/title")
+      RDF.namedNode("http://purl.org/dc/elements/1.1/title")
     );
     expect(stringToTerm(triples[0].object)).to.deep.equal(
-      dataFactory.literal("Fundamentals of Compiler Design")
+      RDF.literal("Fundamentals of Compiler Design")
     );
   });
 });

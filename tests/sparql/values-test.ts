@@ -3,7 +3,7 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/rdf/bindings.ts";
-import { dataFactory } from "../../src/utils/rdf.ts";
+import { RDF } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL VALUES", () => {
@@ -32,8 +32,8 @@ describe("SPARQL VALUES", () => {
       const b = bindings.toObject();
       expect(b).to.have.all.keys("name", "article");
       expect(b["article"]).to.be.deep.oneOf([
-        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17"),
-        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+        RDF.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17"),
+        RDF.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18a"),
       ]);
       results.push(b);
     }
@@ -56,11 +56,11 @@ describe("SPARQL VALUES", () => {
       const b = bindings.toObject();
       expect(b).to.have.all.keys("author", "article");
       expect(b["author"]).to.deep.equal(
-        dataFactory.namedNode("https://dblp.uni-trier.de/pers/m/Minier:Thomas")
+        RDF.namedNode("https://dblp.uni-trier.de/pers/m/Minier:Thomas")
       );
       expect(b["article"]).to.be.deep.oneOf([
-        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17"),
-        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+        RDF.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17"),
+        RDF.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18a"),
       ]);
       results.push(b);
     }

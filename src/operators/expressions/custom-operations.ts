@@ -3,8 +3,8 @@ import type { EngineTripleValue } from "../../types.ts";
 import {
   asJS,
   createFloat,
-  dataFactory,
   literalIsNumeric,
+  RDF,
   termIsLiteral,
 } from "../../utils/rdf.ts";
 
@@ -137,7 +137,7 @@ export default {
   ): Iterable<Term> {
     return (function* () {
       for (let token of term.value.split(separator.value)) {
-        yield dataFactory.literal(token);
+        yield RDF.literal(token);
       }
       return;
     })();

@@ -8,7 +8,7 @@ import type { Bindings } from "../../rdf/bindings.ts";
 import Graph from "../../rdf/graph.ts";
 import type { EngineTriple } from "../../types.ts";
 import { cacheEvalBGP } from "../../utils/evaluation.ts";
-import { dataFactory, isVariable } from "../../utils/rdf.ts";
+import { RDF, isVariable } from "../../utils/rdf.ts";
 import rewritingOp from "./rewriting-op.ts";
 
 // The default size of the bucket of Basic Graph Patterns used by the Bound Join algorithm
@@ -28,13 +28,13 @@ type BasicGraphPattern = EngineTriple[];
 function rewriteTriple(triple: EngineTriple, key: number): EngineTriple {
   const res = Object.assign({}, triple);
   if (isVariable(triple.subject)) {
-    res.subject = dataFactory.variable(`${triple.subject.value}_${key}`);
+    res.subject = RDF.variable(`${triple.subject.value}_${key}`);
   }
   if (isVariable(triple.predicate)) {
-    res.predicate = dataFactory.variable(`${triple.predicate.value}_${key}`);
+    res.predicate = RDF.variable(`${triple.predicate.value}_${key}`);
   }
   if (isVariable(triple.object)) {
-    res.object = dataFactory.variable(`${triple.object.value}_${key}`);
+    res.object = RDF.variable(`${triple.object.value}_${key}`);
   }
   return res;
 }

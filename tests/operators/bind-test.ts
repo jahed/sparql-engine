@@ -6,7 +6,7 @@ import { from } from "rxjs";
 import type { OperationExpression } from "sparqljs";
 import bind from "../../src/operators/bind.ts";
 import { BindingBase, Bindings } from "../../src/rdf/bindings.ts";
-import { createInteger, dataFactory } from "../../src/utils/rdf.ts";
+import { createInteger, RDF } from "../../src/utils/rdf.ts";
 
 describe("Bind operator", () => {
   it("should bind results of valid SPARQL expression to a variable", async () => {
@@ -24,13 +24,9 @@ describe("Bind operator", () => {
     const expr: OperationExpression = {
       type: "operation",
       operator: "+",
-      args: [dataFactory.variable("x"), dataFactory.variable("y")],
+      args: [RDF.variable("x"), RDF.variable("y")],
     };
-    for await (const bindings of bind(
-      source,
-      dataFactory.variable("z"),
-      expr
-    )) {
+    for await (const bindings of bind(source, RDF.variable("z"), expr)) {
       assert.ok(bindings instanceof Bindings);
       const b = bindings.toObject();
       expect(b).to.have.all.keys("x", "y", "z");

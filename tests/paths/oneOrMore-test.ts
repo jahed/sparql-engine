@@ -2,8 +2,8 @@
 import { assert, expect } from "chai";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/rdf/bindings.ts";
+import { RDF } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
-import { dataFactory } from "../../src/utils/rdf.ts";
 
 describe("SPARQL property paths: One or More paths", () => {
   let engine: TestEngine;
@@ -29,28 +29,28 @@ describe("SPARQL property paths: One or More paths", () => {
       switch (b["s"].value) {
         case "http://example.org/Alice":
           expect(b["name"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Bob"),
-            dataFactory.namedNode("http://example.org/Carol"),
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Bob"),
+            RDF.namedNode("http://example.org/Carol"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Bob":
           expect(b["name"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Bob"),
-            dataFactory.namedNode("http://example.org/Carol"),
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Bob"),
+            RDF.namedNode("http://example.org/Carol"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Carol":
           expect(b["name"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Bob"),
-            dataFactory.namedNode("http://example.org/Carol"),
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Bob"),
+            RDF.namedNode("http://example.org/Carol"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Mallory":
           expect(b["name"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Eve"),
+            RDF.namedNode("http://example.org/Eve"),
           ]);
           break;
         default:
@@ -78,17 +78,17 @@ describe("SPARQL property paths: One or More paths", () => {
       switch (b["s"].value) {
         case "http://example.org/Alice":
           expect(b["name"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Carol"),
+            RDF.namedNode("http://example.org/Carol"),
           ]);
           break;
         case "http://example.org/Bob":
           expect(b["name"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Carol":
           expect(b["name"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Carol"),
+            RDF.namedNode("http://example.org/Carol"),
           ]);
           break;
         default:
@@ -116,25 +116,25 @@ describe("SPARQL property paths: One or More paths", () => {
       switch (b["s"].value) {
         case "http://example.org/Alice":
           expect(b["name"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Bob":
           expect(b["name"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Carol"),
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Carol"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Carol":
           expect(b["name"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Eve":
           expect(b["name"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Bob"),
-            dataFactory.namedNode("http://example.org/Carol"),
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Bob"),
+            RDF.namedNode("http://example.org/Carol"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
       }
@@ -160,19 +160,19 @@ describe("SPARQL property paths: One or More paths", () => {
       switch (b["s"].value) {
         case "http://example.org/Alice":
           expect(b["name"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Carol"),
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Carol"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Bob":
           expect(b["name"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Carol":
           expect(b["name"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Carol"),
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Carol"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         default:
@@ -201,25 +201,25 @@ describe("SPARQL property paths: One or More paths", () => {
       switch (b["s"].value) {
         case "http://example.org/Alice":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Bob":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Carol"),
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Carol"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Carol":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Eve":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Bob"),
-            dataFactory.namedNode("http://example.org/Carol"),
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Bob"),
+            RDF.namedNode("http://example.org/Carol"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
       }

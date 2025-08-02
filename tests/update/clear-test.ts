@@ -2,11 +2,11 @@
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { termToString } from "rdf-string";
-import { dataFactory } from "../../src/utils/rdf.ts";
+import { RDF } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
-const GRAPH_A_IRI = dataFactory.namedNode("http://example.org#some-graph-a");
-const GRAPH_B_IRI = dataFactory.namedNode("http://example.org#some-graph-b");
+const GRAPH_A_IRI = RDF.namedNode("http://example.org#some-graph-a");
+const GRAPH_B_IRI = RDF.namedNode("http://example.org#some-graph-b");
 
 describe("SPARQL UPDATE: CLEAR queries", () => {
   let engine: TestEngine;

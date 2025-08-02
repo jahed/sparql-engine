@@ -24,7 +24,7 @@ import type { ExecutionContext } from "@jahed/sparql-engine/engine/context/execu
 import type { PipelineInput } from "@jahed/sparql-engine/engine/pipeline/pipeline-engine.js";
 import SparqlEngineGraph from "@jahed/sparql-engine/rdf/graph.js";
 import HashMapDataset from "@jahed/sparql-engine/rdf/hashmap-dataset.js";
-import { dataFactory } from "@jahed/sparql-engine/utils/rdf.js";
+import { RDF } from "@jahed/sparql-engine/utils/rdf.js";
 import type { EngineTriple } from "@jahed/sparql-engine/types.js";
 
 export class MySparqlGraph extends SparqlEngineGraph {
@@ -32,10 +32,10 @@ export class MySparqlGraph extends SparqlEngineGraph {
     triple: EngineTriple,
     context: ExecutionContext
   ): PipelineInput<EngineTriple> {
-    yield dataFactory.quad(
-      dataFactory.namedNode("subject"),
-      dataFactory.namedNode("predicate"),
-      dataFactory.namedNode("object")
+    yield RDF.quad(
+      RDF.namedNode("subject"),
+      RDF.namedNode("predicate"),
+      RDF.namedNode("object")
     );
   }
   async insert(triple: EngineTriple): Promise<void> {}

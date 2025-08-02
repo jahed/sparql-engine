@@ -10,11 +10,11 @@ import { cacheEvalBGP } from "../../utils/evaluation.ts";
 import {
   createFloat,
   createInteger,
-  dataFactory,
   isBlank,
   isIRI,
   isLiteral,
   isVariable,
+  RDF,
 } from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import { parseHints } from "../context/query-hints.ts";
@@ -200,7 +200,7 @@ export default class BGPStageBuilder extends StageBuilder {
     function rewrite<T extends EngineTripleValue>(term: T): T | VariableTerm {
       let res: T | VariableTerm = term;
       if (isBlank(term)) {
-        res = dataFactory.variable(term.value);
+        res = RDF.variable(term.value);
         if (!newVariables.some((v) => v.equals(res))) {
           newVariables.push(res);
         }
@@ -208,7 +208,7 @@ export default class BGPStageBuilder extends StageBuilder {
       return res;
     }
     const newBGP = patterns.map((p) => {
-      return dataFactory.quad(
+      return RDF.quad(
         rewrite(p.subject),
         rewrite(p.predicate),
         rewrite(p.object)

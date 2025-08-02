@@ -3,7 +3,7 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/rdf/bindings.ts";
-import { dataFactory } from "../../src/utils/rdf.ts";
+import { RDF } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL property paths: sequence paths", () => {
@@ -26,13 +26,13 @@ describe("SPARQL property paths: sequence paths", () => {
       assert.ok(bindings instanceof Bindings);
       const b = bindings.toObject();
       expect(b["s"]).to.be.deep.oneOf([
-        dataFactory.namedNode("http://example.org/Alice"),
-        dataFactory.namedNode("http://example.org/Bob"),
-        dataFactory.namedNode("http://example.org/Carol"),
+        RDF.namedNode("http://example.org/Alice"),
+        RDF.namedNode("http://example.org/Bob"),
+        RDF.namedNode("http://example.org/Carol"),
       ]);
       expect(b["o"]).to.be.deep.oneOf([
-        dataFactory.namedNode("http://example.org/Man"),
-        dataFactory.namedNode("http://example.org/Woman"),
+        RDF.namedNode("http://example.org/Man"),
+        RDF.namedNode("http://example.org/Woman"),
       ]);
       results.push(b);
     }
@@ -52,8 +52,8 @@ describe("SPARQL property paths: sequence paths", () => {
       assert.ok(bindings instanceof Bindings);
       const b = bindings.toObject();
       expect(b["s"]).to.be.deep.oneOf([
-        dataFactory.namedNode("http://example.org/Alice"),
-        dataFactory.namedNode("http://example.org/Carol"),
+        RDF.namedNode("http://example.org/Alice"),
+        RDF.namedNode("http://example.org/Carol"),
       ]);
       results.push(b);
     }
@@ -76,13 +76,11 @@ describe("SPARQL property paths: sequence paths", () => {
       expect(b).to.have.property("o");
       switch (b["s"].value) {
         case "http://example.org/Bob":
-          expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("tel:0645123549"),
-          ]);
+          expect(b["o"]).to.be.deep.oneOf([RDF.namedNode("tel:0645123549")]);
           break;
         case "http://example.org/Eve":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("mailto:bob@example"),
+            RDF.namedNode("mailto:bob@example"),
           ]);
           break;
       }

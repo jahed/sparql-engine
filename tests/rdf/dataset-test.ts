@@ -7,7 +7,7 @@ import Dataset from "../../src/rdf/dataset.ts";
 import Graph from "../../src/rdf/graph.ts";
 import HashMapDataset from "../../src/rdf/hashmap-dataset.ts";
 import type { EngineIRI, EngineTriple } from "../../src/types.ts";
-import { dataFactory } from "../../src/utils/rdf.ts";
+import { RDF } from "../../src/utils/rdf.ts";
 
 describe("Dataset", () => {
   class TestDataset extends Dataset {
@@ -64,21 +64,21 @@ describe("Dataset", () => {
 
   it('should enforce subclasses to implement a "addNamedGraph" method', () => {
     const d = new TestDataset();
-    expect(() =>
-      d.addNamedGraph(dataFactory.namedNode(""), new TestGraph())
-    ).to.throw(Error);
+    expect(() => d.addNamedGraph(RDF.namedNode(""), new TestGraph())).to.throw(
+      Error
+    );
   });
 
   it('should enforce subclasses to implement a "getNamedGraph" method', () => {
     const d = new TestDataset();
-    expect(() => d.getNamedGraph(dataFactory.namedNode(""))).to.throw(Error);
+    expect(() => d.getNamedGraph(RDF.namedNode(""))).to.throw(Error);
   });
 
   it('should provides a generic "getAllGraphs()" implementation', () => {
     const gA = new TestGraph();
     const gB = new TestGraph();
-    const GRAPH_A_IRI = dataFactory.namedNode("http://example.org#A");
-    const GRAPH_B_IRI = dataFactory.namedNode("http://example.org#B");
+    const GRAPH_A_IRI = RDF.namedNode("http://example.org#A");
+    const GRAPH_B_IRI = RDF.namedNode("http://example.org#B");
     const d = new HashMapDataset(GRAPH_A_IRI, gA);
     d.addNamedGraph(GRAPH_B_IRI, gB);
     const all = d.getAllGraphs();
@@ -91,8 +91,8 @@ describe("Dataset", () => {
   describe("#getUnionGraph", () => {
     const gA = new TestGraph();
     const gB = new TestGraph();
-    const GRAPH_A_IRI = dataFactory.namedNode("http://example.org#A");
-    const GRAPH_B_IRI = dataFactory.namedNode("http://example.org#B");
+    const GRAPH_A_IRI = RDF.namedNode("http://example.org#A");
+    const GRAPH_B_IRI = RDF.namedNode("http://example.org#B");
     const d = new HashMapDataset(GRAPH_A_IRI, gA);
     d.addNamedGraph(GRAPH_B_IRI, gB);
 

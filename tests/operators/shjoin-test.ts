@@ -4,13 +4,13 @@ import { describe, it } from "node:test";
 import { from } from "rxjs";
 import symHashJoin from "../../src/operators/join/shjoin.ts";
 import { BindingBase } from "../../src/rdf/bindings.ts";
-import { dataFactory } from "../../src/utils/rdf.ts";
+import { RDF } from "../../src/utils/rdf.ts";
 
 describe("Symmetric Hash Join operator", () => {
   it("should perform a join between two sources of bindings", async () => {
-    const toto = dataFactory.namedNode("http://example.org#toto");
-    const titi = dataFactory.namedNode("http://example.org#titi");
-    const tata = dataFactory.namedNode("http://example.org#tata");
+    const toto = RDF.namedNode("http://example.org#toto");
+    const titi = RDF.namedNode("http://example.org#titi");
+    const tata = RDF.namedNode("http://example.org#tata");
 
     let nbResults = 0;
     let nbEach = new Map();
@@ -24,23 +24,23 @@ describe("Symmetric Hash Join operator", () => {
     const right = from([
       BindingBase.fromObject({
         x: toto,
-        y: dataFactory.literal("1"),
+        y: RDF.literal("1"),
       }),
       BindingBase.fromObject({
         x: toto,
-        y: dataFactory.literal("2"),
+        y: RDF.literal("2"),
       }),
       BindingBase.fromObject({
         x: toto,
-        y: dataFactory.literal("3"),
+        y: RDF.literal("3"),
       }),
       BindingBase.fromObject({
         x: titi,
-        y: dataFactory.literal("4"),
+        y: RDF.literal("4"),
       }),
       BindingBase.fromObject({
         x: tata,
-        y: dataFactory.literal("5"),
+        y: RDF.literal("5"),
       }),
     ]);
 
@@ -51,16 +51,16 @@ describe("Symmetric Hash Join operator", () => {
 
       if (b["x"].equals(toto)) {
         expect(b["y"]).to.be.deep.oneOf([
-          dataFactory.literal("1"),
-          dataFactory.literal("2"),
-          dataFactory.literal("3"),
+          RDF.literal("1"),
+          RDF.literal("2"),
+          RDF.literal("3"),
         ]);
         nbEach.set(toto, nbEach.get(toto) + 1);
         return;
       }
 
       if (b["x"].equals(titi)) {
-        expect(b["y"]).to.be.deep.oneOf([dataFactory.literal("4")]);
+        expect(b["y"]).to.be.deep.oneOf([RDF.literal("4")]);
         nbEach.set(titi, nbEach.get(titi) + 1);
         return;
       }

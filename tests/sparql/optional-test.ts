@@ -4,7 +4,7 @@ import assert from "node:assert";
 import { beforeEach, describe, it } from "node:test";
 import type { BindingsRecord } from "../../src/rdf/bindings.ts";
 import { Bindings } from "../../src/rdf/bindings.ts";
-import { createInteger, dataFactory, UNBOUND } from "../../src/utils/rdf.ts";
+import { createInteger, RDF, UNBOUND } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL queries with OPTIONAL", () => {
@@ -55,13 +55,11 @@ describe("SPARQL queries with OPTIONAL", () => {
       const b = bindings.toObject();
       expect(b).to.have.keys("s", "article");
       expect(b["s"]).to.be.deep.oneOf([
-        dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas"),
-        dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas_2"),
+        RDF.namedNode("https://dblp.org/pers/m/Minier:Thomas"),
+        RDF.namedNode("https://dblp.org/pers/m/Minier:Thomas_2"),
       ]);
       if (
-        b["s"].equals(
-          dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas_2")
-        )
+        b["s"].equals(RDF.namedNode("https://dblp.org/pers/m/Minier:Thomas_2"))
       ) {
         expect(b["article"]).to.deep.equal(UNBOUND);
       } else {
@@ -114,13 +112,11 @@ describe("SPARQL queries with OPTIONAL", () => {
       const b = bindings.toObject();
       expect(b).to.have.keys("s", "article");
       expect(b["s"]).to.be.deep.oneOf([
-        dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas"),
-        dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas_2"),
+        RDF.namedNode("https://dblp.org/pers/m/Minier:Thomas"),
+        RDF.namedNode("https://dblp.org/pers/m/Minier:Thomas_2"),
       ]);
       if (
-        b["s"].equals(
-          dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas_2")
-        )
+        b["s"].equals(RDF.namedNode("https://dblp.org/pers/m/Minier:Thomas_2"))
       ) {
         expect(b["article"]).to.deep.equal(UNBOUND);
       } else {
@@ -154,8 +150,8 @@ describe("SPARQL queries with OPTIONAL", () => {
     expect(results.length).to.equal(2);
     results.forEach((b) => {
       expect(b["title"]).to.be.deep.oneOf([
-        dataFactory.literal("SPARQL Tutorial"),
-        dataFactory.literal("The Semantic Web"),
+        RDF.literal("SPARQL Tutorial"),
+        RDF.literal("The Semantic Web"),
       ]);
       expect(b["price"]).to.be.deep.oneOf([
         createInteger(42),
@@ -190,8 +186,8 @@ describe("SPARQL queries with OPTIONAL", () => {
     expect(results.length).to.equal(2);
     results.map((b) => {
       expect(b["title"]).to.be.deep.oneOf([
-        dataFactory.literal("SPARQL Tutorial"),
-        dataFactory.literal("The Semantic Web"),
+        RDF.literal("SPARQL Tutorial"),
+        RDF.literal("The Semantic Web"),
       ]);
       expect(b["price"]).to.be.deep.oneOf([
         createInteger(42),
@@ -223,8 +219,8 @@ describe("SPARQL queries with OPTIONAL", () => {
     expect(results.length).to.equal(2);
     results.map((b) => {
       expect(b["title"]).to.be.deep.oneOf([
-        dataFactory.literal("SPARQL Tutorial"),
-        dataFactory.literal("The Semantic Web"),
+        RDF.literal("SPARQL Tutorial"),
+        RDF.literal("The Semantic Web"),
       ]);
       expect(b["price"]).to.be.deep.oneOf([createInteger(42), UNBOUND]);
     });
@@ -255,8 +251,8 @@ describe("SPARQL queries with OPTIONAL", () => {
     expect(results.length).to.equal(2);
     results.map((b) => {
       expect(b["title"]).to.be.deep.oneOf([
-        dataFactory.literal("SPARQL Tutorial"),
-        dataFactory.literal("The Semantic Web"),
+        RDF.literal("SPARQL Tutorial"),
+        RDF.literal("The Semantic Web"),
       ]);
       expect(b["price"]).to.be.deep.oneOf([createInteger(42), UNBOUND]);
     });

@@ -2,8 +2,8 @@
 import { assert, expect } from "chai";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/rdf/bindings.ts";
+import { RDF } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
-import { dataFactory } from "../../src/utils/rdf.ts";
 
 describe("SPARQL property paths: Negated property sets", () => {
   let engine: TestEngine;
@@ -88,49 +88,49 @@ describe("SPARQL property paths: Negated property sets", () => {
       switch (b["s"].value) {
         case "http://example.org/Alice":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Woman"),
-            dataFactory.literal("Alice"),
-            dataFactory.namedNode("tel:0604651478"),
-            dataFactory.literal("skypeAlice"),
-            dataFactory.namedNode("http://example.org/Didier"),
-            dataFactory.namedNode("mailto:alice@example"),
+            RDF.namedNode("http://example.org/Woman"),
+            RDF.literal("Alice"),
+            RDF.namedNode("tel:0604651478"),
+            RDF.literal("skypeAlice"),
+            RDF.namedNode("http://example.org/Didier"),
+            RDF.namedNode("mailto:alice@example"),
           ]);
           break;
         case "http://example.org/Bob":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Man"),
-            dataFactory.literal("Bob"),
-            dataFactory.literal("skypeBob"),
-            dataFactory.namedNode("mailto:bob@example"),
-            dataFactory.namedNode("http://example.org/Carol"),
+            RDF.namedNode("http://example.org/Man"),
+            RDF.literal("Bob"),
+            RDF.literal("skypeBob"),
+            RDF.namedNode("mailto:bob@example"),
+            RDF.namedNode("http://example.org/Carol"),
           ]);
           break;
         case "http://example.org/Carol":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Woman"),
-            dataFactory.literal("Carol"),
-            dataFactory.namedNode("tel:0645123549"),
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("http://example.org/Woman"),
+            RDF.literal("Carol"),
+            RDF.namedNode("tel:0645123549"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Woman":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Person"),
+            RDF.namedNode("http://example.org/Person"),
           ]);
           break;
         case "http://example.org/Man":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Person"),
+            RDF.namedNode("http://example.org/Person"),
           ]);
           break;
         case "http://example.org/Person":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Human"),
+            RDF.namedNode("http://example.org/Human"),
           ]);
           break;
         case "http://example.org/Eve":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Bob"),
+            RDF.namedNode("http://example.org/Bob"),
           ]);
           break;
       }
@@ -156,41 +156,41 @@ describe("SPARQL property paths: Negated property sets", () => {
       switch (b["s"].value) {
         case "http://example.org/Alice":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("tel:0604651478"),
-            dataFactory.literal("skypeAlice"),
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("tel:0604651478"),
+            RDF.literal("skypeAlice"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Bob":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.literal("skypeBob"),
-            dataFactory.namedNode("http://example.org/Carol"),
+            RDF.literal("skypeBob"),
+            RDF.namedNode("http://example.org/Carol"),
           ]);
           break;
         case "http://example.org/Carol":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("tel:0645123549"),
-            dataFactory.namedNode("http://example.org/Didier"),
+            RDF.namedNode("tel:0645123549"),
+            RDF.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Woman":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Person"),
+            RDF.namedNode("http://example.org/Person"),
           ]);
           break;
         case "http://example.org/Man":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Person"),
+            RDF.namedNode("http://example.org/Person"),
           ]);
           break;
         case "http://example.org/Person":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Human"),
+            RDF.namedNode("http://example.org/Human"),
           ]);
           break;
         case "http://example.org/Eve":
           expect(b["o"]).to.be.deep.oneOf([
-            dataFactory.namedNode("http://example.org/Bob"),
+            RDF.namedNode("http://example.org/Bob"),
           ]);
           break;
       }

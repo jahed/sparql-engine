@@ -7,7 +7,7 @@ import {
   Bindings,
   type BindingsRecord,
 } from "../../src/rdf/bindings.ts";
-import { dataFactory } from "../../src/utils/rdf.ts";
+import { RDF } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL MINUS", () => {
@@ -31,8 +31,8 @@ describe("SPARQL MINUS", () => {
       const b = bindings.toObject();
       expect(b).to.have.keys("s", "p", "o");
       expect(b["s"]).to.be.deep.oneOf([
-        dataFactory.namedNode("https://dblp.uni-trier.de/pers/m/Minier:Thomas"),
-        dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas.nt"),
+        RDF.namedNode("https://dblp.uni-trier.de/pers/m/Minier:Thomas"),
+        RDF.namedNode("https://dblp.org/pers/m/Minier:Thomas.nt"),
       ]);
       nbResults++;
     }

@@ -5,7 +5,7 @@ import ExecutionContext from "../../src/engine/context/execution-context.ts";
 import type { PipelineInput } from "../../src/engine/pipeline/pipeline-engine.ts";
 import Graph from "../../src/rdf/graph.ts";
 import type { EngineTriple } from "../../src/types.ts";
-import { dataFactory } from "../../src/utils/rdf.ts";
+import { RDF } from "../../src/utils/rdf.ts";
 
 describe("Graph", () => {
   class TestGraph extends Graph {
@@ -27,11 +27,7 @@ describe("Graph", () => {
   }
 
   function testQuad() {
-    return dataFactory.quad(
-      dataFactory.namedNode("s"),
-      dataFactory.namedNode("p"),
-      dataFactory.namedNode("o")
-    );
+    return RDF.quad(RDF.namedNode("s"), RDF.namedNode("p"), RDF.namedNode("o"));
   }
 
   it('should enforce subclasses to implement an "insert" method', () => {

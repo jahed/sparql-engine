@@ -23,7 +23,7 @@ import { BindingBase, Bindings } from "../rdf/bindings.ts";
 import Dataset from "../rdf/dataset.ts";
 import type { EngineTriple } from "../types.ts";
 import { deepApplyBindings, extendByBindings } from "../utils.ts";
-import { dataFactory, isVariable } from "../utils/rdf.ts";
+import { RDF, isVariable } from "../utils/rdf.ts";
 import type { BGPCache } from "./cache/bgp-cache.ts";
 import ExecutionContext from "./context/execution-context.ts";
 import ContextSymbols from "./context/symbols.ts";
@@ -229,10 +229,10 @@ export class PlanBuilder {
         },
       ];
       query.variables.forEach((v: any) => {
-        const triple = dataFactory.quad(
+        const triple = RDF.quad(
           v,
-          dataFactory.variable(`pred__describe__${v}`),
-          dataFactory.variable(`obj__describe__${v}`)
+          RDF.variable(`pred__describe__${v}`),
+          RDF.variable(`obj__describe__${v}`)
         );
         template.push(triple);
         where[0].triples.push(triple);

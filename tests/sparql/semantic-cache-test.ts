@@ -4,7 +4,7 @@ import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/rdf/bindings.ts";
 import {
-  dataFactory,
+  RDF,
   VARIABLE_o,
   VARIABLE_p,
   VARIABLE_s,
@@ -35,7 +35,7 @@ describe("Semantic caching for SPARQL queries", () => {
     expect(results.length).to.equal(34);
     // check for cache hits
     const bgp = {
-      patterns: [dataFactory.quad(VARIABLE_s, VARIABLE_p, VARIABLE_o)],
+      patterns: [RDF.quad(VARIABLE_s, VARIABLE_p, VARIABLE_o)],
       graphIRI: engine.defaultGraphIRI(),
     };
     const cache = engine._builder._currentCache!;
@@ -63,7 +63,7 @@ describe("Semantic caching for SPARQL queries", () => {
     expect(results.length).to.equal(10);
     // assert that the cache is empty for this BGP
     const bgp = {
-      patterns: [dataFactory.quad(VARIABLE_s, VARIABLE_p, VARIABLE_o)],
+      patterns: [RDF.quad(VARIABLE_s, VARIABLE_p, VARIABLE_o)],
       graphIRI: engine.defaultGraphIRI(),
     };
     const cache = engine._builder._currentCache!;
@@ -89,7 +89,7 @@ describe("Semantic caching for SPARQL queries", () => {
     expect(results.length).to.equal(24);
     // assert that the cache is empty for this BGP
     const bgp = {
-      patterns: [dataFactory.quad(VARIABLE_s, VARIABLE_p, VARIABLE_o)],
+      patterns: [RDF.quad(VARIABLE_s, VARIABLE_p, VARIABLE_o)],
       graphIRI: engine.defaultGraphIRI(),
     };
     const cache = engine._builder._currentCache!;

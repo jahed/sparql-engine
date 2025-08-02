@@ -3,7 +3,7 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/rdf/bindings.ts";
-import { dataFactory } from "../../src/utils/rdf.ts";
+import { RDF } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL queries with LIMIT/OFFSET", () => {
@@ -27,11 +27,9 @@ describe("SPARQL queries with LIMIT/OFFSET", () => {
       }
       OFFSET 2`,
       results: [
-        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18"),
-        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18a"),
-        dataFactory.namedNode(
-          "https://dblp.org/rec/journals/corr/abs-1806-00227"
-        ),
+        RDF.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18"),
+        RDF.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+        RDF.namedNode("https://dblp.org/rec/journals/corr/abs-1806-00227"),
       ],
     },
     {
@@ -47,8 +45,8 @@ describe("SPARQL queries with LIMIT/OFFSET", () => {
       }
       LIMIT 2`,
       results: [
-        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17"),
-        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17a"),
+        RDF.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17"),
+        RDF.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17a"),
       ],
     },
     {
@@ -65,8 +63,8 @@ describe("SPARQL queries with LIMIT/OFFSET", () => {
       OFFSET 3
       LIMIT 2`,
       results: [
-        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18"),
-        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+        RDF.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18"),
+        RDF.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18a"),
       ],
     },
   ];

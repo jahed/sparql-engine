@@ -4,7 +4,7 @@ import ExecutionContext from "../engine/context/execution-context.ts";
 import type { PipelineInput } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import type { EngineTriple } from "../types.ts";
-import { dataFactory } from "../utils/rdf.ts";
+import { RDF } from "../utils/rdf.ts";
 import Graph from "./graph.ts";
 
 /**
@@ -23,9 +23,7 @@ export default class UnionGraph extends Graph {
    */
   constructor(graphs: Graph[]) {
     super();
-    this.iri = dataFactory.namedNode(
-      graphs.map((g) => termToString(g.iri)).join("+")
-    );
+    this.iri = RDF.namedNode(graphs.map((g) => termToString(g.iri)).join("+"));
     this._graphs = graphs;
   }
 

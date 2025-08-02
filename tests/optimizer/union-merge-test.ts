@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { describe, it } from "node:test";
 import type { BgpPattern, Pattern, SelectQuery, UnionPattern } from "sparqljs";
 import UnionMerge from "../../src/optimizer/visitors/union-merge.ts";
-import { createLangLiteral, dataFactory } from "../../src/utils/rdf.ts";
+import { createLangLiteral, RDF } from "../../src/utils/rdf.ts";
 
 describe("Union merge optimization", () => {
   it("should merge several unions into a single top-level union", () => {
@@ -23,9 +23,9 @@ describe("Union merge optimization", () => {
       return {
         type: "bgp",
         triples: [
-          dataFactory.quad(
-            dataFactory.variable(s),
-            dataFactory.namedNode("http://example.org#foo"),
+          RDF.quad(
+            RDF.variable(s),
+            RDF.namedNode("http://example.org#foo"),
             createLangLiteral("food", "en")
           ),
         ],
