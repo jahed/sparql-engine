@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
+import type { QueryOutput } from "@jahed/sparql-engine/engine/plan-builder.ts";
 import { expect } from "chai";
 import { before, describe, it } from "node:test";
-import type { QueryOutput } from "../../src/engine/plan-builder.ts";
 import { createGraph, TestEngine } from "../utils.ts";
 
 describe("FILTER SPARQL queries", () => {

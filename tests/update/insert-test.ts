@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
+import { RDF } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { stringToTerm, termToString } from "rdf-string";
-import { RDF } from "../../src/utils/rdf.ts";
 import { createGraph, TestEngine, type TestGraph } from "../utils.ts";
 
 const GRAPH_IRI = RDF.namedNode("htpp://example.org#some-graph");

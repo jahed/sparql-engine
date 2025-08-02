@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
+import { tsvFormatter } from "@jahed/sparql-engine/formatters/csv-tsv-formatter.ts";
 import { expect } from "chai";
 import { before, describe, it } from "node:test";
-import { tsvFormatter } from "../../src/formatters/csv-tsv-formatter.ts";
 import { createGraph, TestEngine } from "../utils.ts";
 
 describe("W3C TSV formatter", () => {

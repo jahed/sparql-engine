@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
+import ExecutionContext from "@jahed/sparql-engine/engine/context/execution-context.ts";
+import type { PipelineInput } from "@jahed/sparql-engine/engine/pipeline/pipeline-engine.ts";
+import Graph from "@jahed/sparql-engine/rdf/graph.ts";
+import type { EngineTriple } from "@jahed/sparql-engine/types.ts";
+import { RDF } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
 import { describe, it } from "node:test";
-import ExecutionContext from "../../src/engine/context/execution-context.ts";
-import type { PipelineInput } from "../../src/engine/pipeline/pipeline-engine.ts";
-import Graph from "../../src/rdf/graph.ts";
-import type { EngineTriple } from "../../src/types.ts";
-import { RDF } from "../../src/utils/rdf.ts";
 
 describe("Graph", () => {
   class TestGraph extends Graph {

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
+import { Bindings } from "@jahed/sparql-engine/rdf/bindings.ts";
+import { RDF } from "@jahed/sparql-engine/utils/rdf.ts";
 import { assert, expect } from "chai";
 import { before, describe, it } from "node:test";
-import { Bindings } from "../../src/rdf/bindings.ts";
-import { RDF } from "../../src/utils/rdf.ts";
 import { createGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL property paths: inverse paths", () => {

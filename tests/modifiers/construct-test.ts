@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
+import { createLangLiteral, RDF } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
-import { createLangLiteral, RDF } from "../../src/utils/rdf.ts";
 import { createGraph, TestEngine } from "../utils.ts";
 
 describe("CONSTRUCT SPARQL queries", () => {

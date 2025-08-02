@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
+import bind from "@jahed/sparql-engine/operators/bind.ts";
+import { BindingBase, Bindings } from "@jahed/sparql-engine/rdf/bindings.ts";
+import { createInteger, RDF } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
 import assert from "node:assert";
 import { describe, it } from "node:test";
 import { from } from "rxjs";
 import type { OperationExpression } from "sparqljs";
-import bind from "../../src/operators/bind.ts";
-import { BindingBase, Bindings } from "../../src/rdf/bindings.ts";
-import { createInteger, RDF } from "../../src/utils/rdf.ts";
 
 describe("Bind operator", () => {
   it("should bind results of valid SPARQL expression to a variable", async () => {

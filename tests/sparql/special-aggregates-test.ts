@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
+import {
+  Bindings,
+  type BindingsRecord,
+} from "@jahed/sparql-engine/rdf/bindings.ts";
+import { createFloat } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
-import { Bindings, type BindingsRecord } from "../../src/rdf/bindings.ts";
-import { createFloat } from "../../src/utils/rdf.ts";
 import { createGraph, TestEngine } from "../utils.ts";
 
 describe("Non standard SPARQL aggregates", () => {

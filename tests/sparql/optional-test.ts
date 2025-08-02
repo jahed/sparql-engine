@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
+import type { BindingsRecord } from "@jahed/sparql-engine/rdf/bindings.ts";
+import { Bindings } from "@jahed/sparql-engine/rdf/bindings.ts";
+import { createInteger, RDF, UNBOUND } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
 import assert from "node:assert";
 import { beforeEach, describe, it } from "node:test";
-import type { BindingsRecord } from "../../src/rdf/bindings.ts";
-import { Bindings } from "../../src/rdf/bindings.ts";
-import { createInteger, RDF, UNBOUND } from "../../src/utils/rdf.ts";
 import { createGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL queries with OPTIONAL", () => {

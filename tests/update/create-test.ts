@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
+import { RDF } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { termToString } from "rdf-string";
-import { RDF } from "../../src/utils/rdf.ts";
 import { createGraph, N3Graph, TestEngine } from "../utils.ts";
 
 describe("SPARQL UPDATE: CREATE queries", () => {

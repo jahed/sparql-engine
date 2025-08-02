@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
+import jsonFormatter from "@jahed/sparql-engine/formatters/json-formatter.ts";
 import { expect } from "chai";
 import fs from "node:fs";
 import { before, describe, it } from "node:test";
-import jsonFormatter from "../../src/formatters/json-formatter.ts";
 import { createGraph, TestEngine } from "../utils.ts";
 
 describe("W3C JSON formatter", () => {

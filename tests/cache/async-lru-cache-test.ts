@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
-import { AsyncLRUCache } from "../../src/engine/cache/cache-base.ts";
+import { AsyncLRUCache } from "@jahed/sparql-engine/engine/cache/cache-base.ts";
 
 describe("AsyncLRUCache", () => {
   let cache: AsyncLRUCache<number, number | string, unknown>;

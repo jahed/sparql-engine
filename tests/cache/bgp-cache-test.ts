@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
+import { LRUBGPCache } from "@jahed/sparql-engine/engine/cache/bgp-cache.ts";
+import { BindingBase } from "@jahed/sparql-engine/rdf/bindings.ts";
+import type { EngineTriple } from "@jahed/sparql-engine/types.ts";
+import { RDF, VARIABLE_s } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
-import { LRUBGPCache } from "../../src/engine/cache/bgp-cache.ts";
-import { BindingBase } from "../../src/rdf/bindings.ts";
-import type { EngineTriple } from "../../src/types.ts";
-import { RDF, VARIABLE_s } from "../../src/utils/rdf.ts";
 
 /**
  * Format a BGP to the format expected by a BGPCache: an object

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
+import symHashJoin from "@jahed/sparql-engine/operators/join/shjoin.ts";
+import { BindingBase } from "@jahed/sparql-engine/rdf/bindings.ts";
+import { RDF } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
 import { describe, it } from "node:test";
 import { from } from "rxjs";
-import symHashJoin from "../../src/operators/join/shjoin.ts";
-import { BindingBase } from "../../src/rdf/bindings.ts";
-import { RDF } from "../../src/utils/rdf.ts";
 
 describe("Symmetric Hash Join operator", () => {
   it("should perform a join between two sources of bindings", async () => {

@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
-import { expect } from "chai";
-import assert from "node:assert";
-import { before, describe, it } from "node:test";
-import { LRUBGPCache } from "../../src/engine/cache/bgp-cache.ts";
-import { Bindings } from "../../src/rdf/bindings.ts";
+import { LRUBGPCache } from "@jahed/sparql-engine/engine/cache/bgp-cache.ts";
+import { Bindings } from "@jahed/sparql-engine/rdf/bindings.ts";
 import {
   RDF,
   VARIABLE_o,
   VARIABLE_p,
   VARIABLE_s,
-} from "../../src/utils/rdf.ts";
+} from "@jahed/sparql-engine/utils/rdf.ts";
+import { expect } from "chai";
+import assert from "node:assert";
+import { before, describe, it } from "node:test";
 import { createGraph, TestEngine } from "../utils.ts";
 
 describe("Semantic caching for SPARQL queries", () => {

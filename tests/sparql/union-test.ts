@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
+import { Bindings } from "@jahed/sparql-engine/rdf/bindings.ts";
 import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
-import { Bindings } from "../../src/rdf/bindings.ts";
 import { createGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL UNION", () => {

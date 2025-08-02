@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
+import UnionMerge from "@jahed/sparql-engine/optimizer/visitors/union-merge.ts";
+import { createLangLiteral, RDF } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
 import { describe, it } from "node:test";
 import type { BgpPattern, Pattern, SelectQuery, UnionPattern } from "sparqljs";
-import UnionMerge from "../../src/optimizer/visitors/union-merge.ts";
-import { createLangLiteral, RDF } from "../../src/utils/rdf.ts";
 
 describe("Union merge optimization", () => {
   it("should merge several unions into a single top-level union", () => {

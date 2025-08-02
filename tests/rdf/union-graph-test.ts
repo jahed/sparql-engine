@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
+import ExecutionContext from "@jahed/sparql-engine/engine/context/execution-context.ts";
+import RxjsPipeline from "@jahed/sparql-engine/engine/pipeline/rxjs-pipeline.ts";
+import UnionGraph from "@jahed/sparql-engine/rdf/union-graph.ts";
+import { RDF } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { stringToTerm, termToString } from "rdf-string";
-import ExecutionContext from "../../src/engine/context/execution-context.ts";
-import RxjsPipeline from "../../src/engine/pipeline/rxjs-pipeline.ts";
-import UnionGraph from "../../src/rdf/union-graph.ts";
-import { RDF } from "../../src/utils/rdf.ts";
 import { createGraph, type TestGraph } from "../utils.ts";
 
 const GRAPH_A_IRI = RDF.namedNode("http://example.org#some-graph-a");

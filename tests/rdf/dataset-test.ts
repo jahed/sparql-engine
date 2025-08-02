@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
+import type ExecutionContext from "@jahed/sparql-engine/engine/context/execution-context.ts";
+import type { PipelineInput } from "@jahed/sparql-engine/engine/pipeline/pipeline-engine.ts";
+import Dataset from "@jahed/sparql-engine/rdf/dataset.ts";
+import Graph from "@jahed/sparql-engine/rdf/graph.ts";
+import HashMapDataset from "@jahed/sparql-engine/rdf/hashmap-dataset.ts";
+import type { EngineIRI, EngineTriple } from "@jahed/sparql-engine/types.ts";
+import { RDF } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
 import { describe, it } from "node:test";
-import type ExecutionContext from "../../src/engine/context/execution-context.ts";
-import type { PipelineInput } from "../../src/engine/pipeline/pipeline-engine.ts";
-import Dataset from "../../src/rdf/dataset.ts";
-import Graph from "../../src/rdf/graph.ts";
-import HashMapDataset from "../../src/rdf/hashmap-dataset.ts";
-import type { EngineIRI, EngineTriple } from "../../src/types.ts";
-import { RDF } from "../../src/utils/rdf.ts";
 
 describe("Dataset", () => {
   class TestDataset extends Dataset {

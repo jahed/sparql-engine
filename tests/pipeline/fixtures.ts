@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
+import type { PipelineEngine } from "@jahed/sparql-engine/engine/pipeline/pipeline-engine.ts";
 import { expect } from "chai";
 import { describe, it } from "node:test";
-import type { PipelineEngine } from "../../src/engine/pipeline/pipeline-engine.ts";
 
 export default function testPipelineEngine(pipeline: PipelineEngine) {
   // empty method
