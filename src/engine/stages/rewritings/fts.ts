@@ -1,6 +1,20 @@
 import type { VariableTerm } from "sparqljs";
 import type { EngineTriple } from "../../../types.ts";
-import { SES, isIRI, isVariable } from "../../../utils/rdf.ts";
+import { isIRI, isVariable } from "../../../utils/rdf.ts";
+
+const SES_PREFIX = "https://callidon.github.io/sparql-engine/search#";
+function SES(suffix: string): string {
+  return `${SES_PREFIX}${suffix}`;
+}
+
+export const SES_search = SES("search");
+export const SES_matchAllTerms = SES("matchAllTerms");
+export const SES_minRelevance = SES("minRelevance");
+export const SES_maxRelevance = SES("maxRelevance");
+export const SES_minRank = SES("minRank");
+export const SES_maxRank = SES("maxRank");
+export const SES_relevance = SES("relevance");
+export const SES_rank = SES("rank");
 
 /**
  * A Full Text Search query
@@ -38,10 +52,12 @@ export function extractFullTextSearchQueries(
   // find, validate and group all magic triples per query variable
   const patterns: EngineTriple[] = [];
   const magicGroups = new Map<string, EngineTriple[]>();
-  const prefix = SES("");
   bgp.forEach((triple) => {
     // A magic triple is an IRI prefixed by 'https://callidon.github.io/sparql-engine/search#'
-    if (isIRI(triple.predicate) && triple.predicate.value.startsWith(prefix)) {
+    if (
+      isIRI(triple.predicate) &&
+      triple.predicate.value.startsWith(SES_PREFIX)
+    ) {
       // assert that the magic triple's subject is a variable
       if (!isVariable(triple.subject)) {
         throw new SyntaxError(

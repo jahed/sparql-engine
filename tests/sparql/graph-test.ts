@@ -4,16 +4,12 @@ import assert from "node:assert";
 import { beforeEach, describe, it } from "node:test";
 import { termToString } from "rdf-string";
 import { BindingBase, type BindingsRecord } from "../../src/rdf/bindings.ts";
-import {
-  createIRI,
-  createLangLiteral,
-  createLiteral,
-} from "../../src/utils/rdf.ts";
+import { createLangLiteral, dataFactory } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("GRAPH/FROM queries", () => {
-  const GRAPH_A_IRI = createIRI("http://example.org#some-graph-a");
-  const GRAPH_B_IRI = createIRI("http://example.org#some-graph-b");
+  const GRAPH_A_IRI = dataFactory.namedNode("http://example.org#some-graph-a");
+  const GRAPH_B_IRI = dataFactory.namedNode("http://example.org#some-graph-b");
   let engine: TestEngine;
   beforeEach(() => {
     const gA = getGraph("./tests/data/dblp.nt");
@@ -44,12 +40,12 @@ describe("GRAPH/FROM queries", () => {
       nbResults: 2,
       testFun: function (b) {
         expect(b["s"]).to.deep.equal(
-          createIRI("https://dblp.org/pers/g/Grall:Arnaud")
+          dataFactory.namedNode("https://dblp.org/pers/g/Grall:Arnaud")
         );
-        expect(b["name"]).to.deep.equal(createLiteral("Arnaud Grall"));
+        expect(b["name"]).to.deep.equal(dataFactory.literal("Arnaud Grall"));
         expect(b["article"]).to.be.deep.oneOf([
-          createIRI("https://dblp.org/rec/conf/semweb/GrallSM18"),
-          createIRI("https://dblp.org/rec/conf/esws/GrallFMSMSV17"),
+          dataFactory.namedNode("https://dblp.org/rec/conf/semweb/GrallSM18"),
+          dataFactory.namedNode("https://dblp.org/rec/conf/esws/GrallFMSMSV17"),
         ]);
       },
     },
@@ -72,27 +68,43 @@ describe("GRAPH/FROM queries", () => {
         switch (b["s"].value) {
           case "https://dblp.org/pers/g/Grall:Arnaud":
             expect(b["s"]).to.deep.equal(
-              createIRI("https://dblp.org/pers/g/Grall:Arnaud")
+              dataFactory.namedNode("https://dblp.org/pers/g/Grall:Arnaud")
             );
-            expect(b["name"]).to.deep.equal(createLiteral("Arnaud Grall"));
+            expect(b["name"]).to.deep.equal(
+              dataFactory.literal("Arnaud Grall")
+            );
             expect(b["article"]).to.be.deep.oneOf([
-              createIRI("https://dblp.org/rec/conf/semweb/GrallSM18"),
-              createIRI("https://dblp.org/rec/conf/esws/GrallFMSMSV17"),
+              dataFactory.namedNode(
+                "https://dblp.org/rec/conf/semweb/GrallSM18"
+              ),
+              dataFactory.namedNode(
+                "https://dblp.org/rec/conf/esws/GrallFMSMSV17"
+              ),
             ]);
             break;
           case "https://dblp.org/pers/m/Minier:Thomas":
             expect(b["s"]).to.deep.equal(
-              createIRI("https://dblp.org/pers/m/Minier:Thomas")
+              dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas")
             );
             expect(b["name"]).to.deep.equal(
               createLangLiteral("Thomas Minier", "en")
             );
             expect(b["article"]).to.be.deep.oneOf([
-              createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a"),
-              createIRI("https://dblp.org/rec/conf/esws/MinierSMV18"),
-              createIRI("https://dblp.org/rec/journals/corr/abs-1806-00227"),
-              createIRI("https://dblp.org/rec/conf/esws/MinierMSM17"),
-              createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
+              dataFactory.namedNode(
+                "https://dblp.org/rec/conf/esws/MinierSMV18a"
+              ),
+              dataFactory.namedNode(
+                "https://dblp.org/rec/conf/esws/MinierSMV18"
+              ),
+              dataFactory.namedNode(
+                "https://dblp.org/rec/journals/corr/abs-1806-00227"
+              ),
+              dataFactory.namedNode(
+                "https://dblp.org/rec/conf/esws/MinierMSM17"
+              ),
+              dataFactory.namedNode(
+                "https://dblp.org/rec/conf/esws/MinierMSM17a"
+              ),
             ]);
             break;
           default:
@@ -118,16 +130,16 @@ describe("GRAPH/FROM queries", () => {
       nbResults: 3,
       testFun: function (b) {
         expect(b["s"]).to.deep.equal(
-          createIRI("https://dblp.org/pers/m/Minier:Thomas")
+          dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas")
         );
         expect(b["s2"]).to.deep.equal(
-          createIRI("https://dblp.org/pers/g/Grall:Arnaud")
+          dataFactory.namedNode("https://dblp.org/pers/g/Grall:Arnaud")
         );
-        expect(b["name"]).to.deep.equal(createLiteral("Arnaud Grall"));
+        expect(b["name"]).to.deep.equal(dataFactory.literal("Arnaud Grall"));
         expect(b["coCreator"]).to.be.deep.oneOf([
-          createIRI("https://dblp.org/pers/m/Molli:Pascal"),
-          createIRI("https://dblp.org/pers/m/Montoya:Gabriela"),
-          createIRI("https://dblp.org/pers/s/Skaf=Molli:Hala"),
+          dataFactory.namedNode("https://dblp.org/pers/m/Molli:Pascal"),
+          dataFactory.namedNode("https://dblp.org/pers/m/Montoya:Gabriela"),
+          dataFactory.namedNode("https://dblp.org/pers/s/Skaf=Molli:Hala"),
         ]);
       },
     },
@@ -149,17 +161,17 @@ describe("GRAPH/FROM queries", () => {
       nbResults: 3,
       testFun: function (b) {
         expect(b["s"]).to.deep.equal(
-          createIRI("https://dblp.org/pers/m/Minier:Thomas")
+          dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas")
         );
         expect(b["s2"]).to.deep.equal(
-          createIRI("https://dblp.org/pers/g/Grall:Arnaud")
+          dataFactory.namedNode("https://dblp.org/pers/g/Grall:Arnaud")
         );
         expect(b["g"]).to.be.deep.oneOf([GRAPH_A_IRI, GRAPH_B_IRI]);
-        expect(b["name"]).to.deep.equal(createLiteral("Arnaud Grall"));
+        expect(b["name"]).to.deep.equal(dataFactory.literal("Arnaud Grall"));
         expect(b["coCreator"]).to.be.deep.oneOf([
-          createIRI("https://dblp.org/pers/m/Molli:Pascal"),
-          createIRI("https://dblp.org/pers/m/Montoya:Gabriela"),
-          createIRI("https://dblp.org/pers/s/Skaf=Molli:Hala"),
+          dataFactory.namedNode("https://dblp.org/pers/m/Molli:Pascal"),
+          dataFactory.namedNode("https://dblp.org/pers/m/Montoya:Gabriela"),
+          dataFactory.namedNode("https://dblp.org/pers/s/Skaf=Molli:Hala"),
         ]);
       },
     },
@@ -180,31 +192,31 @@ describe("GRAPH/FROM queries", () => {
       nbResults: 7,
       testFun: function (b) {
         expect(b["s"]).to.deep.equal(
-          createIRI("https://dblp.org/pers/m/Minier:Thomas")
+          dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas")
         );
         expect(b["g"]).to.be.deep.oneOf([GRAPH_A_IRI, GRAPH_B_IRI]);
         if (b["g"].equals(GRAPH_A_IRI)) {
           expect(b["s2"]).to.deep.equal(
-            createIRI("https://dblp.org/pers/m/Minier:Thomas")
+            dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas")
           );
           expect(b["name"]).to.deep.equal(
             createLangLiteral("Thomas Minier", "en")
           );
           expect(b["coCreator"]).to.be.deep.oneOf([
-            createIRI("https://dblp.org/pers/m/Molli:Pascal"),
-            createIRI("https://dblp.org/pers/m/Montoya:Gabriela"),
-            createIRI("https://dblp.org/pers/s/Skaf=Molli:Hala"),
-            createIRI("https://dblp.org/pers/v/Vidal:Maria=Esther"),
+            dataFactory.namedNode("https://dblp.org/pers/m/Molli:Pascal"),
+            dataFactory.namedNode("https://dblp.org/pers/m/Montoya:Gabriela"),
+            dataFactory.namedNode("https://dblp.org/pers/s/Skaf=Molli:Hala"),
+            dataFactory.namedNode("https://dblp.org/pers/v/Vidal:Maria=Esther"),
           ]);
         } else {
           expect(b["s2"]).to.deep.equal(
-            createIRI("https://dblp.org/pers/g/Grall:Arnaud")
+            dataFactory.namedNode("https://dblp.org/pers/g/Grall:Arnaud")
           );
-          expect(b["name"]).to.deep.equal(createLiteral("Arnaud Grall"));
+          expect(b["name"]).to.deep.equal(dataFactory.literal("Arnaud Grall"));
           expect(b["coCreator"]).to.be.deep.oneOf([
-            createIRI("https://dblp.org/pers/m/Molli:Pascal"),
-            createIRI("https://dblp.org/pers/m/Montoya:Gabriela"),
-            createIRI("https://dblp.org/pers/s/Skaf=Molli:Hala"),
+            dataFactory.namedNode("https://dblp.org/pers/m/Molli:Pascal"),
+            dataFactory.namedNode("https://dblp.org/pers/m/Montoya:Gabriela"),
+            dataFactory.namedNode("https://dblp.org/pers/s/Skaf=Molli:Hala"),
           ]);
         }
       },
@@ -226,17 +238,17 @@ describe("GRAPH/FROM queries", () => {
       nbResults: 3,
       testFun: function (b) {
         expect(b["s"]).to.deep.equal(
-          createIRI("https://dblp.org/pers/m/Minier:Thomas")
+          dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas")
         );
         expect(b["s2"]).to.deep.equal(
-          createIRI("https://dblp.org/pers/g/Grall:Arnaud")
+          dataFactory.namedNode("https://dblp.org/pers/g/Grall:Arnaud")
         );
         expect(b["g"]).to.deep.equal(GRAPH_B_IRI);
-        expect(b["name"]).to.deep.equal(createLiteral("Arnaud Grall"));
+        expect(b["name"]).to.deep.equal(dataFactory.literal("Arnaud Grall"));
         expect(b["coCreator"]).to.be.deep.oneOf([
-          createIRI("https://dblp.org/pers/m/Molli:Pascal"),
-          createIRI("https://dblp.org/pers/m/Montoya:Gabriela"),
-          createIRI("https://dblp.org/pers/s/Skaf=Molli:Hala"),
+          dataFactory.namedNode("https://dblp.org/pers/m/Molli:Pascal"),
+          dataFactory.namedNode("https://dblp.org/pers/m/Montoya:Gabriela"),
+          dataFactory.namedNode("https://dblp.org/pers/s/Skaf=Molli:Hala"),
         ]);
       },
     },

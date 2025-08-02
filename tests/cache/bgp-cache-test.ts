@@ -4,7 +4,7 @@ import { beforeEach, describe, it } from "node:test";
 import { LRUBGPCache } from "../../src/engine/cache/bgp-cache.ts";
 import { BindingBase } from "../../src/rdf/bindings.ts";
 import type { EngineTriple } from "../../src/types.ts";
-import { createIRI, dataFactory } from "../../src/utils/rdf.ts";
+import { dataFactory, VARIABLE_s } from "../../src/utils/rdf.ts";
 
 /**
  * Format a BGP to the format expected by a BGPCache: an object
@@ -13,7 +13,7 @@ import { createIRI, dataFactory } from "../../src/utils/rdf.ts";
  * @param {*} graphIRI - Graph's IRI
  */
 function formatBGP(patterns: EngineTriple[], graphIRI: string) {
-  return { patterns, graphIRI: createIRI(graphIRI) };
+  return { patterns, graphIRI: dataFactory.namedNode(graphIRI) };
 }
 
 describe("LRUBGPCache", () => {
@@ -27,20 +27,20 @@ describe("LRUBGPCache", () => {
       const writerID = "1";
       const patterns = [
         dataFactory.quad(
-          dataFactory.variable("s"),
-          createIRI("rdf:type"),
+          VARIABLE_s,
+          dataFactory.namedNode("rdf:type"),
           dataFactory.variable("type")
         ),
       ];
       const bgp = formatBGP(patterns, "http://example.org#graphA");
       const bindings = [
         BindingBase.fromObject({
-          s: createIRI(":s1"),
-          type: createIRI(":c1"),
+          s: dataFactory.namedNode(":s1"),
+          type: dataFactory.namedNode(":c1"),
         }),
         BindingBase.fromObject({
-          s: createIRI(":s2"),
-          type: createIRI(":c2"),
+          s: dataFactory.namedNode(":s2"),
+          type: dataFactory.namedNode(":c2"),
         }),
       ];
       cache.update(bgp, bindings[0], writerID);
@@ -58,28 +58,28 @@ describe("LRUBGPCache", () => {
       // populate cache
       const subsetPatterns = [
         dataFactory.quad(
-          dataFactory.variable("s"),
-          createIRI("rdf:type"),
+          VARIABLE_s,
+          dataFactory.namedNode("rdf:type"),
           dataFactory.variable("type")
         ),
       ];
       const subsetBGP = formatBGP(subsetPatterns, "http://example.org#graphA");
       cache.update(
         subsetBGP,
-        BindingBase.fromObject({ s: createIRI(":s1") }),
+        BindingBase.fromObject({ s: dataFactory.namedNode(":s1") }),
         "1"
       );
       cache.commit(subsetBGP, "1");
       // search for subset
       const patterns = [
         dataFactory.quad(
-          dataFactory.variable("s"),
-          createIRI("rdf:type"),
+          VARIABLE_s,
+          dataFactory.namedNode("rdf:type"),
           dataFactory.variable("type")
         ),
         dataFactory.quad(
-          dataFactory.variable("s"),
-          createIRI("foaf:name"),
+          VARIABLE_s,
+          dataFactory.namedNode("foaf:name"),
           dataFactory.variable("name")
         ),
       ];
@@ -93,28 +93,28 @@ describe("LRUBGPCache", () => {
       // populate cache
       const subsetPatterns = [
         dataFactory.quad(
-          dataFactory.variable("s"),
-          createIRI("rdf:type"),
+          VARIABLE_s,
+          dataFactory.namedNode("rdf:type"),
           dataFactory.variable("type")
         ),
       ];
       const subsetBGP = formatBGP(subsetPatterns, "http://example.org#graphA");
       cache.update(
         subsetBGP,
-        BindingBase.fromObject({ s: createIRI(":s1") }),
+        BindingBase.fromObject({ s: dataFactory.namedNode(":s1") }),
         "1"
       );
       cache.commit(subsetBGP, "1");
       // search for subset
       const patterns = [
         dataFactory.quad(
-          dataFactory.variable("s"),
-          createIRI("foaf:knows"),
+          VARIABLE_s,
+          dataFactory.namedNode("foaf:knows"),
           dataFactory.variable("type")
         ),
         dataFactory.quad(
-          dataFactory.variable("s"),
-          createIRI("foaf:name"),
+          VARIABLE_s,
+          dataFactory.namedNode("foaf:name"),
           dataFactory.variable("name")
         ),
       ];
@@ -128,20 +128,20 @@ describe("LRUBGPCache", () => {
       // populate cache
       const subsetPatterns_a = [
         dataFactory.quad(
-          dataFactory.variable("s"),
-          createIRI("rdf:type"),
+          VARIABLE_s,
+          dataFactory.namedNode("rdf:type"),
           dataFactory.variable("type")
         ),
       ];
       const subsetPatterns_b = [
         dataFactory.quad(
-          dataFactory.variable("s"),
-          createIRI("rdf:type"),
+          VARIABLE_s,
+          dataFactory.namedNode("rdf:type"),
           dataFactory.variable("type")
         ),
         dataFactory.quad(
-          dataFactory.variable("s"),
-          createIRI("foaf:name"),
+          VARIABLE_s,
+          dataFactory.namedNode("foaf:name"),
           dataFactory.variable("name")
         ),
       ];
@@ -155,31 +155,31 @@ describe("LRUBGPCache", () => {
       );
       cache.update(
         subsetBGP_a,
-        BindingBase.fromObject({ s: createIRI(":s1") }),
+        BindingBase.fromObject({ s: dataFactory.namedNode(":s1") }),
         "1"
       );
       cache.commit(subsetBGP_a, "1");
       cache.update(
         subsetBGP_b,
-        BindingBase.fromObject({ s: createIRI(":s2") }),
+        BindingBase.fromObject({ s: dataFactory.namedNode(":s2") }),
         "1"
       );
       cache.commit(subsetBGP_b, "1");
       // search for subset
       const patterns = [
         dataFactory.quad(
-          dataFactory.variable("s"),
-          createIRI("rdf:type"),
+          VARIABLE_s,
+          dataFactory.namedNode("rdf:type"),
           dataFactory.variable("type")
         ),
         dataFactory.quad(
-          dataFactory.variable("s"),
-          createIRI("foaf:knows"),
+          VARIABLE_s,
+          dataFactory.namedNode("foaf:knows"),
           dataFactory.variable("type")
         ),
         dataFactory.quad(
-          dataFactory.variable("s"),
-          createIRI("foaf:name"),
+          VARIABLE_s,
+          dataFactory.namedNode("foaf:name"),
           dataFactory.variable("name")
         ),
       ];

@@ -15,14 +15,23 @@ import {
   isIRI,
   isLiteral,
   isVariable,
-  SES,
 } from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import { parseHints } from "../context/query-hints.ts";
 import ContextSymbols from "../context/symbols.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import { Pipeline } from "../pipeline/pipeline.ts";
-import { extractFullTextSearchQueries } from "./rewritings/fts.ts";
+import {
+  extractFullTextSearchQueries,
+  SES_matchAllTerms,
+  SES_maxRank,
+  SES_maxRelevance,
+  SES_minRank,
+  SES_minRelevance,
+  SES_rank,
+  SES_relevance,
+  SES_search,
+} from "./rewritings/fts.ts";
 import StageBuilder from "./stage-builder.ts";
 
 /**
@@ -271,7 +280,7 @@ export default class BGPStageBuilder extends StageBuilder {
       }
       switch (triple.predicate.value) {
         // keywords: ?o ses:search “neil gaiman”
-        case SES("search"): {
+        case SES_search: {
           if (!isLiteral(triple.object)) {
             throw new SyntaxError(
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
@@ -281,13 +290,13 @@ export default class BGPStageBuilder extends StageBuilder {
           break;
         }
         // match all keywords: ?o ses:matchAllTerms "true"
-        case SES("matchAllTerms"): {
+        case SES_matchAllTerms: {
           const value = triple.object.value.toLowerCase();
           matchAll = value === "true" || value === "1";
           break;
         }
         // min relevance score: ?o ses:minRelevance “0.25”
-        case SES("minRelevance"): {
+        case SES_minRelevance: {
           if (!isLiteral(triple.object)) {
             throw new SyntaxError(
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
@@ -303,7 +312,7 @@ export default class BGPStageBuilder extends StageBuilder {
           break;
         }
         // max relevance score: ?o ses:maxRelevance “0.75”
-        case SES("maxRelevance"): {
+        case SES_maxRelevance: {
           if (!isLiteral(triple.object)) {
             throw new SyntaxError(
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
@@ -319,7 +328,7 @@ export default class BGPStageBuilder extends StageBuilder {
           break;
         }
         // min rank: ?o ses:minRank "5" .
-        case SES("minRank"): {
+        case SES_minRank: {
           if (!isLiteral(triple.object)) {
             throw new SyntaxError(
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
@@ -335,7 +344,7 @@ export default class BGPStageBuilder extends StageBuilder {
           break;
         }
         // max rank: ?o ses:maxRank “1000” .
-        case SES("maxRank"): {
+        case SES_maxRank: {
           if (!isLiteral(triple.object)) {
             throw new SyntaxError(
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a RDF Literal.`
@@ -351,7 +360,7 @@ export default class BGPStageBuilder extends StageBuilder {
           break;
         }
         // include relevance score: ?o ses:relevance ?score .
-        case SES("relevance"): {
+        case SES_relevance: {
           if (!isVariable(triple.object)) {
             throw new SyntaxError(
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a SPARQL variable.`
@@ -362,7 +371,7 @@ export default class BGPStageBuilder extends StageBuilder {
           break;
         }
         // include rank: ?o ses:rank ?rank .
-        case SES("rank"): {
+        case SES_rank: {
           if (!isVariable(triple.object)) {
             throw new SyntaxError(
               `Invalid Full Text Search query: the object of the magic triple ${triple} must be a SPARQL variable.`

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 import { BinarySearchTree } from "@seald-io/binary-search-tree";
 import { differenceWith, findIndex, maxBy } from "lodash-es";
+import { termToString } from "rdf-string";
 import { Bindings } from "../../rdf/bindings.ts";
 import type { EngineIRI, EngineTriple } from "../../types.ts";
-import { hashTriple, termToValue, tripleEquals } from "../../utils/rdf.ts";
+import { termToValue, tripleEquals } from "../../utils/rdf.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import { Pipeline } from "../pipeline/pipeline.ts";
 import { type AsyncCacheEntry, AsyncLRUCache } from "./cache-base.ts";
@@ -17,6 +18,10 @@ export interface BasicGraphPattern {
 interface SavedBGP {
   bgp: BasicGraphPattern;
   key: string;
+}
+
+function hashTriple(triple: EngineTriple): string {
+  return `s=${termToString(triple.subject)}&p=${termToString(triple.predicate)}&o=${termToString(triple.object)}`;
 }
 
 function hashBasicGraphPattern(bgp: BasicGraphPattern): string {

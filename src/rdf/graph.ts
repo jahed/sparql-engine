@@ -9,7 +9,7 @@ import type {
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
 import indexJoin from "../operators/join/index-join.ts";
 import type { EngineTriple } from "../types.ts";
-import { countVariables, dataFactory } from "../utils/rdf.ts";
+import { isVariable, UNBOUND } from "../utils/rdf.ts";
 import { leftLinearJoinOrdering } from "../utils/sparql.ts";
 import { BindingBase, Bindings } from "./bindings.ts";
 import { GRAPH_CAPABILITY, type GraphCapability } from "./graph_capability.ts";
@@ -34,6 +34,20 @@ function parseCapabilities(
   registry.set(GRAPH_CAPABILITY.UNION, proto.evalUnion != null);
 }
 
+function countVariables(triple: EngineTriple): number {
+  let count = 0;
+  if (isVariable(triple.subject)) {
+    count++;
+  }
+  if (isVariable(triple.predicate)) {
+    count++;
+  }
+  if (isVariable(triple.object)) {
+    count++;
+  }
+  return count;
+}
+
 /**
  * An abstract RDF Graph, accessed through a RDF Dataset
  * @abstract
@@ -43,7 +57,7 @@ export default abstract class Graph {
   private _capabilities: Map<GraphCapability, boolean>;
 
   constructor() {
-    this._iri = dataFactory.namedNode("");
+    this._iri = UNBOUND;
     this._capabilities = new Map();
     parseCapabilities(this._capabilities, Object.getPrototypeOf(this));
   }

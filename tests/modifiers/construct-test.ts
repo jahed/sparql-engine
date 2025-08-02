@@ -2,7 +2,7 @@
 import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
-import { createIRI, createLangLiteral } from "../../src/utils/rdf.ts";
+import { createLangLiteral, dataFactory } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("CONSTRUCT SPARQL queries", () => {
@@ -27,28 +27,32 @@ describe("CONSTRUCT SPARQL queries", () => {
       ?s dblp-rdf:authorOf ?article .
     }`;
     let expectedArticles = [
-      createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a"),
-      createIRI("https://dblp.org/rec/conf/esws/MinierSMV18"),
-      createIRI("https://dblp.org/rec/journals/corr/abs-1806-00227"),
-      createIRI("https://dblp.org/rec/conf/esws/MinierMSM17"),
-      createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
+      dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+      dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18"),
+      dataFactory.namedNode(
+        "https://dblp.org/rec/journals/corr/abs-1806-00227"
+      ),
+      dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17"),
+      dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17a"),
     ];
     const results = [];
 
     for await (const triple of engine.execute(query)) {
       assert.ok(typeof triple === "object" && "subject" in triple);
       expect(triple.subject).to.deep.equal(
-        createIRI("https://dblp.org/pers/m/Minier:Thomas")
+        dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas")
       );
       expect(triple.predicate).to.be.deep.oneOf([
-        createIRI(
+        dataFactory.namedNode(
           "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName"
         ),
-        createIRI("https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf"),
+        dataFactory.namedNode(
+          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf"
+        ),
       ]);
       if (
         triple.predicate.equals(
-          createIRI(
+          dataFactory.namedNode(
             "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName"
           )
         )

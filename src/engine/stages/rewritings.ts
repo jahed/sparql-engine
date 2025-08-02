@@ -10,7 +10,7 @@ import type {
   Triple,
 } from "sparqljs";
 import Dataset from "../../rdf/dataset.ts";
-import { dataFactory } from "../../utils/rdf.ts";
+import { VARIABLE_o, VARIABLE_p, VARIABLE_s } from "../../utils/rdf.ts";
 
 /**
  * Create a triple pattern that matches all RDF triples in a graph
@@ -19,9 +19,9 @@ import { dataFactory } from "../../utils/rdf.ts";
  */
 function allPattern(): Triple {
   return {
-    subject: dataFactory.variable("s"),
-    predicate: dataFactory.variable("p"),
-    object: dataFactory.variable("o"),
+    subject: VARIABLE_s,
+    predicate: VARIABLE_p,
+    object: VARIABLE_o,
   };
 }
 

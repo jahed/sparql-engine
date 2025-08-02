@@ -5,11 +5,7 @@ import { before, describe, it } from "node:test";
 import { termToString } from "rdf-string";
 import type { BindingsRecord } from "../../src/rdf/bindings.ts";
 import { Bindings } from "../../src/rdf/bindings.ts";
-import {
-  createInteger,
-  createIRI,
-  createLiteral,
-} from "../../src/utils/rdf.ts";
+import { createInteger, dataFactory } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL aggregates", () => {
@@ -181,7 +177,7 @@ describe("SPARQL aggregates", () => {
       const b = bindings.toObject();
       expect(b).to.have.keys("s", "nbSubjects");
       expect(b["s"]).to.deep.equal(
-        createIRI("https://dblp.org/pers/m/Minier:Thomas")
+        dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas")
       );
       expect(b["nbSubjects"]).to.deep.equal(createInteger(2));
       results.push(b);
@@ -293,13 +289,17 @@ describe("SPARQL aggregates", () => {
         switch (b["p"].value) {
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#primaryFullPersonName":
           case "http://www.w3.org/1999/02/22-rdf-syntax-ns#type":
-            expect(b["concat"]).to.deep.equal(createLiteral("10"));
+            expect(b["concat"]).to.deep.equal(dataFactory.literal("10"));
             break;
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf":
-            expect(b["concat"]).to.deep.equal(createLiteral("10.10.10.10.10"));
+            expect(b["concat"]).to.deep.equal(
+              dataFactory.literal("10.10.10.10.10")
+            );
             break;
           case "https://dblp.uni-trier.de/rdf/schema-2017-04-18#coCreatorWith":
-            expect(b["concat"]).to.deep.equal(createLiteral("10.10.10.10"));
+            expect(b["concat"]).to.deep.equal(
+              dataFactory.literal("10.10.10.10")
+            );
             break;
           default:
             expect.fail(`Unexpected predicate found: ${b["concat"]}`);

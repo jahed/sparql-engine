@@ -2,10 +2,10 @@
 import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { termToString } from "rdf-string";
-import { createIRI } from "../../src/utils/rdf.ts";
+import { dataFactory } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
-const GRAPH_IRI = createIRI("htpp://example.org#some-graph");
+const GRAPH_IRI = dataFactory.namedNode("htpp://example.org#some-graph");
 
 describe("SPARQL UPDATE: DELETE DATA queries", () => {
   let engine: TestEngine;

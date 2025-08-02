@@ -2,8 +2,8 @@
 import { assert, expect } from "chai";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/rdf/bindings.ts";
-import { createIRI } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
+import { dataFactory } from "../../src/utils/rdf.ts";
 
 describe("SPARQL property paths: inverse paths", () => {
   let engine: TestEngine;
@@ -25,7 +25,9 @@ describe("SPARQL property paths: inverse paths", () => {
       assert.ok(bindings instanceof Bindings);
       const b = bindings.toObject();
       expect(b).to.have.property("s");
-      expect(b["s"]).to.deep.equal(createIRI("http://example.org/Alice"));
+      expect(b["s"]).to.deep.equal(
+        dataFactory.namedNode("http://example.org/Alice")
+      );
       results.push(b);
     }
     expect(results.length).to.equal(1);
@@ -48,24 +50,24 @@ describe("SPARQL property paths: inverse paths", () => {
       switch (b["x"].value) {
         case "http://example.org/Alice":
           expect(b["y"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Carol"),
-            createIRI("http://example.org/Alice"),
+            dataFactory.namedNode("http://example.org/Carol"),
+            dataFactory.namedNode("http://example.org/Alice"),
           ]);
           break;
         case "http://example.org/Carol":
           expect(b["y"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Alice"),
-            createIRI("http://example.org/Carol"),
+            dataFactory.namedNode("http://example.org/Alice"),
+            dataFactory.namedNode("http://example.org/Carol"),
           ]);
           break;
         case "http://example.org/Bob":
           expect(b["y"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Bob"),
+            dataFactory.namedNode("http://example.org/Bob"),
           ]);
           break;
         case "http://example.org/Mallory":
           expect(b["y"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Mallory"),
+            dataFactory.namedNode("http://example.org/Mallory"),
           ]);
           break;
         default:
@@ -90,8 +92,12 @@ describe("SPARQL property paths: inverse paths", () => {
       const b = bindings.toObject();
       expect(b).to.have.property("s");
       expect(b).to.have.property("o");
-      expect(b["s"]).to.be.deep.oneOf([createIRI("tel:0645123549")]);
-      expect(b["o"]).to.be.deep.oneOf([createIRI("http://example.org/Bob")]);
+      expect(b["s"]).to.be.deep.oneOf([
+        dataFactory.namedNode("tel:0645123549"),
+      ]);
+      expect(b["o"]).to.be.deep.oneOf([
+        dataFactory.namedNode("http://example.org/Bob"),
+      ]);
       results.push(b);
     }
     expect(results.length).to.equal(1);
@@ -112,13 +118,13 @@ describe("SPARQL property paths: inverse paths", () => {
       expect(b).to.have.property("s");
       expect(b).to.have.property("o");
       expect(b["s"]).to.be.deep.oneOf([
-        createIRI("http://example.org/Didier"),
-        createIRI("http://example.org/Carol"),
+        dataFactory.namedNode("http://example.org/Didier"),
+        dataFactory.namedNode("http://example.org/Carol"),
       ]);
       expect(b["o"]).to.be.deep.oneOf([
-        createIRI("http://example.org/Bob"),
-        createIRI("http://example.org/Didier"),
-        createIRI("http://example.org/Carol"),
+        dataFactory.namedNode("http://example.org/Bob"),
+        dataFactory.namedNode("http://example.org/Didier"),
+        dataFactory.namedNode("http://example.org/Carol"),
       ]);
       results.push(b);
     }

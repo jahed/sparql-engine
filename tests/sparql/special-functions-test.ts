@@ -4,7 +4,7 @@ import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import type { BindingsRecord } from "../../src/rdf/bindings.ts";
 import { Bindings } from "../../src/rdf/bindings.ts";
-import { createFloat, createLiteral } from "../../src/utils/rdf.ts";
+import { createFloat, dataFactory } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("Non standard SPARQL functions", () => {
@@ -103,10 +103,10 @@ describe("Non standard SPARQL functions", () => {
       }`,
       results: [
         {
-          y: createLiteral("Thomas"),
+          y: dataFactory.literal("Thomas"),
         },
         {
-          y: createLiteral("Minier"),
+          y: dataFactory.literal("Minier"),
         },
       ],
     },

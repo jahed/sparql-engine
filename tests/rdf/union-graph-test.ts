@@ -5,11 +5,11 @@ import { stringToTerm, termToString } from "rdf-string";
 import ExecutionContext from "../../src/engine/context/execution-context.ts";
 import RxjsPipeline from "../../src/engine/pipeline/rxjs-pipeline.ts";
 import UnionGraph from "../../src/rdf/union-graph.ts";
-import { createIRI, dataFactory } from "../../src/utils/rdf.ts";
+import { dataFactory } from "../../src/utils/rdf.ts";
 import { getGraph } from "../utils.ts";
 
-const GRAPH_A_IRI = createIRI("http://example.org#some-graph-a");
-const GRAPH_B_IRI = createIRI("http://example.org#some-graph-b");
+const GRAPH_A_IRI = dataFactory.namedNode("http://example.org#some-graph-a");
+const GRAPH_B_IRI = dataFactory.namedNode("http://example.org#some-graph-b");
 
 describe("Union Graph", () => {
   let gA: ReturnType<typeof getGraph>;
@@ -25,9 +25,11 @@ describe("Union Graph", () => {
     it("should evaluates insertion of the left-most graphs of the Union", async () => {
       const union = new UnionGraph([gA, gB]);
       const triple = dataFactory.quad(
-        createIRI("http://example.org#toto"),
-        createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-        createIRI("http://example.org#Person")
+        dataFactory.namedNode("http://example.org#toto"),
+        dataFactory.namedNode(
+          "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+        ),
+        dataFactory.namedNode("http://example.org#Person")
       );
       await union.insert(triple);
       // check triples have been inserted in gA and not gB
@@ -55,9 +57,11 @@ describe("Union Graph", () => {
     it("should evaluates deletions on all graphs in the Union", async () => {
       const union = new UnionGraph([gA, gB]);
       const triple = dataFactory.quad(
-        createIRI("https://dblp.org/pers/m/Minier:Thomas"),
-        createIRI("https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf"),
-        createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a")
+        dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas"),
+        dataFactory.namedNode(
+          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf"
+        ),
+        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18a")
       );
       await union.delete(triple);
       // check triples have been inserted in gA and not gB
@@ -80,22 +84,28 @@ describe("Union Graph", () => {
     it("should searches for RDF triples in all graphs", async () => {
       const union = new UnionGraph([gA, gB]);
       const triple = dataFactory.quad(
-        createIRI("https://dblp.org/pers/m/Minier:Thomas"),
-        createIRI("https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf"),
+        dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas"),
+        dataFactory.namedNode(
+          "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf"
+        ),
         dataFactory.variable("article")
       );
       let nbResults = 0;
       let expectedArticles = [
-        createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a"),
-        createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a"),
-        createIRI("https://dblp.org/rec/conf/esws/MinierSMV18"),
-        createIRI("https://dblp.org/rec/conf/esws/MinierSMV18"),
-        createIRI("https://dblp.org/rec/journals/corr/abs-1806-00227"),
-        createIRI("https://dblp.org/rec/journals/corr/abs-1806-00227"),
-        createIRI("https://dblp.org/rec/conf/esws/MinierMSM17"),
-        createIRI("https://dblp.org/rec/conf/esws/MinierMSM17"),
-        createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
-        createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
+        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18"),
+        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18"),
+        dataFactory.namedNode(
+          "https://dblp.org/rec/journals/corr/abs-1806-00227"
+        ),
+        dataFactory.namedNode(
+          "https://dblp.org/rec/journals/corr/abs-1806-00227"
+        ),
+        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17"),
+        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17"),
+        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17a"),
+        dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17a"),
       ];
       for await (const b of new RxjsPipeline().from(
         union.find(triple, new ExecutionContext())

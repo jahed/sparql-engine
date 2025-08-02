@@ -4,13 +4,13 @@ import { describe, it } from "node:test";
 import { from } from "rxjs";
 import symHashJoin from "../../src/operators/join/shjoin.ts";
 import { BindingBase } from "../../src/rdf/bindings.ts";
-import { createIRI, createLiteral } from "../../src/utils/rdf.ts";
+import { dataFactory } from "../../src/utils/rdf.ts";
 
 describe("Symmetric Hash Join operator", () => {
   it("should perform a join between two sources of bindings", async () => {
-    const toto = createIRI("http://example.org#toto");
-    const titi = createIRI("http://example.org#titi");
-    const tata = createIRI("http://example.org#tata");
+    const toto = dataFactory.namedNode("http://example.org#toto");
+    const titi = dataFactory.namedNode("http://example.org#titi");
+    const tata = dataFactory.namedNode("http://example.org#tata");
 
     let nbResults = 0;
     let nbEach = new Map();
@@ -24,23 +24,23 @@ describe("Symmetric Hash Join operator", () => {
     const right = from([
       BindingBase.fromObject({
         x: toto,
-        y: createLiteral("1"),
+        y: dataFactory.literal("1"),
       }),
       BindingBase.fromObject({
         x: toto,
-        y: createLiteral("2"),
+        y: dataFactory.literal("2"),
       }),
       BindingBase.fromObject({
         x: toto,
-        y: createLiteral("3"),
+        y: dataFactory.literal("3"),
       }),
       BindingBase.fromObject({
         x: titi,
-        y: createLiteral("4"),
+        y: dataFactory.literal("4"),
       }),
       BindingBase.fromObject({
         x: tata,
-        y: createLiteral("5"),
+        y: dataFactory.literal("5"),
       }),
     ]);
 
@@ -51,16 +51,16 @@ describe("Symmetric Hash Join operator", () => {
 
       if (b["x"].equals(toto)) {
         expect(b["y"]).to.be.deep.oneOf([
-          createLiteral("1"),
-          createLiteral("2"),
-          createLiteral("3"),
+          dataFactory.literal("1"),
+          dataFactory.literal("2"),
+          dataFactory.literal("3"),
         ]);
         nbEach.set(toto, nbEach.get(toto) + 1);
         return;
       }
 
       if (b["x"].equals(titi)) {
-        expect(b["y"]).to.be.deep.oneOf([createLiteral("4")]);
+        expect(b["y"]).to.be.deep.oneOf([dataFactory.literal("4")]);
         nbEach.set(titi, nbEach.get(titi) + 1);
         return;
       }

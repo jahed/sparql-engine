@@ -6,9 +6,8 @@ import { BindingBase, type BindingsRecord } from "../../src/rdf/bindings.ts";
 import {
   createFloat,
   createInteger,
-  createIRI,
   createLangLiteral,
-  createLiteral,
+  dataFactory,
 } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
@@ -33,7 +32,7 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          s: createIRI("https://dblp.org/pers/m/Minier:Thomas"),
+          s: dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas"),
           name: createLangLiteral("Thomas Minier", "en"),
         },
       ],
@@ -50,7 +49,7 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          s: createIRI("https://dblp.org/pers/m/Minier:Thomas.nt"),
+          s: dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas.nt"),
         },
       ],
     },
@@ -69,7 +68,7 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          s: createIRI("https://dblp.org/pers/m/Minier:Thomas"),
+          s: dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas"),
           name: createLangLiteral("Thomas Minier", "en"),
           score: createFloat(0.5),
           rank: createInteger(0),
@@ -88,7 +87,7 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          o: createIRI("https://dblp.org/pers/m/Minier:Thomas"),
+          o: dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas"),
           score: createFloat(1),
         },
       ],
@@ -106,7 +105,7 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          o: createLiteral(
+          o: dataFactory.literal(
             "provenance information for RDF data of dblp person 'm/Minier:Thomas'"
           ),
           score: createFloat(0.111),
@@ -126,7 +125,7 @@ describe("Full Text Search SPARQL queries", () => {
       }`,
       results: [
         {
-          o: createIRI("https://dblp.org/pers/m/Minier:Thomas"),
+          o: dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas"),
           score: createFloat(1),
           rank: createInteger(0),
         },
@@ -136,7 +135,9 @@ describe("Full Text Search SPARQL queries", () => {
           rank: createInteger(1),
         },
         {
-          o: createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
+          o: dataFactory.namedNode(
+            "https://dblp.org/rec/conf/esws/MinierMSM17a"
+          ),
           score: createFloat(0.5),
           rank: createInteger(2),
         },
@@ -161,7 +162,9 @@ describe("Full Text Search SPARQL queries", () => {
           rank: createInteger(1),
         },
         {
-          o: createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
+          o: dataFactory.namedNode(
+            "https://dblp.org/rec/conf/esws/MinierMSM17a"
+          ),
           score: createFloat(0.5),
           rank: createInteger(2),
         },

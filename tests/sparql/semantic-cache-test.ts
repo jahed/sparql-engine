@@ -3,7 +3,12 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/rdf/bindings.ts";
-import { dataFactory } from "../../src/utils/rdf.ts";
+import {
+  dataFactory,
+  VARIABLE_o,
+  VARIABLE_p,
+  VARIABLE_s,
+} from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("Semantic caching for SPARQL queries", () => {
@@ -30,13 +35,7 @@ describe("Semantic caching for SPARQL queries", () => {
     expect(results.length).to.equal(34);
     // check for cache hits
     const bgp = {
-      patterns: [
-        dataFactory.quad(
-          dataFactory.variable("s"),
-          dataFactory.variable("p"),
-          dataFactory.variable("o")
-        ),
-      ],
+      patterns: [dataFactory.quad(VARIABLE_s, VARIABLE_p, VARIABLE_o)],
       graphIRI: engine.defaultGraphIRI(),
     };
     const cache = engine._builder._currentCache!;
@@ -64,13 +63,7 @@ describe("Semantic caching for SPARQL queries", () => {
     expect(results.length).to.equal(10);
     // assert that the cache is empty for this BGP
     const bgp = {
-      patterns: [
-        dataFactory.quad(
-          dataFactory.variable("s"),
-          dataFactory.variable("p"),
-          dataFactory.variable("o")
-        ),
-      ],
+      patterns: [dataFactory.quad(VARIABLE_s, VARIABLE_p, VARIABLE_o)],
       graphIRI: engine.defaultGraphIRI(),
     };
     const cache = engine._builder._currentCache!;
@@ -96,13 +89,7 @@ describe("Semantic caching for SPARQL queries", () => {
     expect(results.length).to.equal(24);
     // assert that the cache is empty for this BGP
     const bgp = {
-      patterns: [
-        dataFactory.quad(
-          dataFactory.variable("s"),
-          dataFactory.variable("p"),
-          dataFactory.variable("o")
-        ),
-      ],
+      patterns: [dataFactory.quad(VARIABLE_s, VARIABLE_p, VARIABLE_o)],
       graphIRI: engine.defaultGraphIRI(),
     };
     const cache = engine._builder._currentCache!;

@@ -3,7 +3,7 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/rdf/bindings.ts";
-import { createIRI } from "../../src/utils/rdf.ts";
+import { dataFactory } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL property paths: Zero or More paths", () => {
@@ -31,22 +31,22 @@ describe("SPARQL property paths: Zero or More paths", () => {
       switch (b["s"].value) {
         case "http://example.org/Woman":
           expect(b["type"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Woman"),
-            createIRI("http://example.org/Person"),
-            createIRI("http://example.org/Human"),
+            dataFactory.namedNode("http://example.org/Woman"),
+            dataFactory.namedNode("http://example.org/Person"),
+            dataFactory.namedNode("http://example.org/Human"),
           ]);
           break;
         case "http://example.org/Man":
           expect(b["type"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Man"),
-            createIRI("http://example.org/Person"),
-            createIRI("http://example.org/Human"),
+            dataFactory.namedNode("http://example.org/Man"),
+            dataFactory.namedNode("http://example.org/Person"),
+            dataFactory.namedNode("http://example.org/Human"),
           ]);
           break;
         case "http://example.org/Person":
           expect(b["type"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Person"),
-            createIRI("http://example.org/Human"),
+            dataFactory.namedNode("http://example.org/Person"),
+            dataFactory.namedNode("http://example.org/Human"),
           ]);
           break;
       }
@@ -72,19 +72,19 @@ describe("SPARQL property paths: Zero or More paths", () => {
       switch (b["s"].value) {
         case "http://example.org/Alice":
           expect(b["name"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Alice"),
-            createIRI("http://example.org/Carol"),
+            dataFactory.namedNode("http://example.org/Alice"),
+            dataFactory.namedNode("http://example.org/Carol"),
           ]);
           break;
         case "http://example.org/Bob":
           expect(b["name"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Didier"),
-            createIRI("http://example.org/Bob"),
+            dataFactory.namedNode("http://example.org/Didier"),
+            dataFactory.namedNode("http://example.org/Bob"),
           ]);
           break;
         case "http://example.org/Carol":
           expect(b["name"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Carol"),
+            dataFactory.namedNode("http://example.org/Carol"),
           ]);
           break;
       }
@@ -110,29 +110,29 @@ describe("SPARQL property paths: Zero or More paths", () => {
       switch (b["s"].value) {
         case "http://example.org/Alice":
           expect(b["name"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Alice"),
-            createIRI("http://example.org/Didier"),
+            dataFactory.namedNode("http://example.org/Alice"),
+            dataFactory.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Bob":
           expect(b["name"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Bob"),
-            createIRI("http://example.org/Carol"),
-            createIRI("http://example.org/Didier"),
+            dataFactory.namedNode("http://example.org/Bob"),
+            dataFactory.namedNode("http://example.org/Carol"),
+            dataFactory.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Carol":
           expect(b["name"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Carol"),
-            createIRI("http://example.org/Didier"),
+            dataFactory.namedNode("http://example.org/Carol"),
+            dataFactory.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Eve":
           expect(b["name"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Eve"),
-            createIRI("http://example.org/Bob"),
-            createIRI("http://example.org/Carol"),
-            createIRI("http://example.org/Didier"),
+            dataFactory.namedNode("http://example.org/Eve"),
+            dataFactory.namedNode("http://example.org/Bob"),
+            dataFactory.namedNode("http://example.org/Carol"),
+            dataFactory.namedNode("http://example.org/Didier"),
           ]);
           break;
       }
@@ -159,29 +159,29 @@ describe("SPARQL property paths: Zero or More paths", () => {
       switch (b["s"].value) {
         case "http://example.org/Alice":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Alice"),
-            createIRI("http://example.org/Didier"),
+            dataFactory.namedNode("http://example.org/Alice"),
+            dataFactory.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Bob":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Bob"),
-            createIRI("http://example.org/Carol"),
-            createIRI("http://example.org/Didier"),
+            dataFactory.namedNode("http://example.org/Bob"),
+            dataFactory.namedNode("http://example.org/Carol"),
+            dataFactory.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Carol":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Carol"),
-            createIRI("http://example.org/Didier"),
+            dataFactory.namedNode("http://example.org/Carol"),
+            dataFactory.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Eve":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Eve"),
-            createIRI("http://example.org/Bob"),
-            createIRI("http://example.org/Carol"),
-            createIRI("http://example.org/Didier"),
+            dataFactory.namedNode("http://example.org/Eve"),
+            dataFactory.namedNode("http://example.org/Bob"),
+            dataFactory.namedNode("http://example.org/Carol"),
+            dataFactory.namedNode("http://example.org/Didier"),
           ]);
           break;
       }

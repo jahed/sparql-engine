@@ -6,7 +6,7 @@ import { Bindings } from "../../src/rdf/bindings.ts";
 import {
   createInteger,
   createLangLiteral,
-  createLiteral,
+  dataFactory,
   UNBOUND,
 } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
@@ -101,7 +101,7 @@ describe("SPARQL BIND", () => {
       const b = bindings.toObject();
       expect(b).to.have.all.keys("s", "s2", "name", "undefined");
       expect(b["s2"]).to.deep.equal(b["s"]);
-      expect(b["name"]).to.deep.equal(createLiteral("Thomas Minier"));
+      expect(b["name"]).to.deep.equal(dataFactory.literal("Thomas Minier"));
       expect(b["undefined"]).to.deep.equal(UNBOUND);
       results.push(b);
     }

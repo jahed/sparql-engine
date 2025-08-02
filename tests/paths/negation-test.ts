@@ -2,8 +2,8 @@
 import { assert, expect } from "chai";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/rdf/bindings.ts";
-import { createIRI, createLiteral } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine } from "../utils.ts";
+import { dataFactory } from "../../src/utils/rdf.ts";
 
 describe("SPARQL property paths: Negated property sets", () => {
   let engine: TestEngine;
@@ -88,49 +88,49 @@ describe("SPARQL property paths: Negated property sets", () => {
       switch (b["s"].value) {
         case "http://example.org/Alice":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Woman"),
-            createLiteral("Alice"),
-            createIRI("tel:0604651478"),
-            createLiteral("skypeAlice"),
-            createIRI("http://example.org/Didier"),
-            createIRI("mailto:alice@example"),
+            dataFactory.namedNode("http://example.org/Woman"),
+            dataFactory.literal("Alice"),
+            dataFactory.namedNode("tel:0604651478"),
+            dataFactory.literal("skypeAlice"),
+            dataFactory.namedNode("http://example.org/Didier"),
+            dataFactory.namedNode("mailto:alice@example"),
           ]);
           break;
         case "http://example.org/Bob":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Man"),
-            createLiteral("Bob"),
-            createLiteral("skypeBob"),
-            createIRI("mailto:bob@example"),
-            createIRI("http://example.org/Carol"),
+            dataFactory.namedNode("http://example.org/Man"),
+            dataFactory.literal("Bob"),
+            dataFactory.literal("skypeBob"),
+            dataFactory.namedNode("mailto:bob@example"),
+            dataFactory.namedNode("http://example.org/Carol"),
           ]);
           break;
         case "http://example.org/Carol":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Woman"),
-            createLiteral("Carol"),
-            createIRI("tel:0645123549"),
-            createIRI("http://example.org/Didier"),
+            dataFactory.namedNode("http://example.org/Woman"),
+            dataFactory.literal("Carol"),
+            dataFactory.namedNode("tel:0645123549"),
+            dataFactory.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Woman":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Person"),
+            dataFactory.namedNode("http://example.org/Person"),
           ]);
           break;
         case "http://example.org/Man":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Person"),
+            dataFactory.namedNode("http://example.org/Person"),
           ]);
           break;
         case "http://example.org/Person":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Human"),
+            dataFactory.namedNode("http://example.org/Human"),
           ]);
           break;
         case "http://example.org/Eve":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Bob"),
+            dataFactory.namedNode("http://example.org/Bob"),
           ]);
           break;
       }
@@ -156,41 +156,41 @@ describe("SPARQL property paths: Negated property sets", () => {
       switch (b["s"].value) {
         case "http://example.org/Alice":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("tel:0604651478"),
-            createLiteral("skypeAlice"),
-            createIRI("http://example.org/Didier"),
+            dataFactory.namedNode("tel:0604651478"),
+            dataFactory.literal("skypeAlice"),
+            dataFactory.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Bob":
           expect(b["o"]).to.be.deep.oneOf([
-            createLiteral("skypeBob"),
-            createIRI("http://example.org/Carol"),
+            dataFactory.literal("skypeBob"),
+            dataFactory.namedNode("http://example.org/Carol"),
           ]);
           break;
         case "http://example.org/Carol":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("tel:0645123549"),
-            createIRI("http://example.org/Didier"),
+            dataFactory.namedNode("tel:0645123549"),
+            dataFactory.namedNode("http://example.org/Didier"),
           ]);
           break;
         case "http://example.org/Woman":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Person"),
+            dataFactory.namedNode("http://example.org/Person"),
           ]);
           break;
         case "http://example.org/Man":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Person"),
+            dataFactory.namedNode("http://example.org/Person"),
           ]);
           break;
         case "http://example.org/Person":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Human"),
+            dataFactory.namedNode("http://example.org/Human"),
           ]);
           break;
         case "http://example.org/Eve":
           expect(b["o"]).to.be.deep.oneOf([
-            createIRI("http://example.org/Bob"),
+            dataFactory.namedNode("http://example.org/Bob"),
           ]);
           break;
       }

@@ -5,11 +5,11 @@ import { beforeEach, describe, it } from "node:test";
 import { termToString } from "rdf-string";
 import type { BindingsRecord } from "../../src/rdf/bindings.ts";
 import { BindingBase } from "../../src/rdf/bindings.ts";
-import { createIRI, createLangLiteral } from "../../src/utils/rdf.ts";
+import { createLangLiteral, dataFactory } from "../../src/utils/rdf.ts";
 import { getGraph, TestEngine, type TestGraph } from "../utils.ts";
 
-const GRAPH_A_IRI = createIRI("http://example.org#some-graph-a");
-const GRAPH_B_IRI = createIRI("http://example.org#some-graph-b");
+const GRAPH_A_IRI = dataFactory.namedNode("http://example.org#some-graph-a");
+const GRAPH_B_IRI = dataFactory.namedNode("http://example.org#some-graph-b");
 
 describe("SERVICE queries (using bound joins)", () => {
   let engine: TestEngine;
@@ -53,11 +53,13 @@ describe("SERVICE queries (using bound joins)", () => {
           createLangLiteral("Thomas Minier", "en")
         );
         expect(b["article"]).to.be.deep.oneOf([
-          createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a"),
-          createIRI("https://dblp.org/rec/conf/esws/MinierSMV18"),
-          createIRI("https://dblp.org/rec/journals/corr/abs-1806-00227"),
-          createIRI("https://dblp.org/rec/conf/esws/MinierMSM17"),
-          createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
+          dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+          dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18"),
+          dataFactory.namedNode(
+            "https://dblp.org/rec/journals/corr/abs-1806-00227"
+          ),
+          dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17"),
+          dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17a"),
         ]);
       },
     },
@@ -76,7 +78,7 @@ describe("SERVICE queries (using bound joins)", () => {
       nbResults: 1,
       testFun: function (b) {
         expect(b["s"]).to.deep.equal(
-          createIRI("https://dblp.org/pers/m/Minier:Thomas")
+          dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas")
         );
       },
     },
@@ -96,14 +98,16 @@ describe("SERVICE queries (using bound joins)", () => {
       nbResults: 5,
       testFun: function (b) {
         expect(b["s"]).to.deep.equal(
-          createIRI("https://dblp.org/pers/m/Minier:Thomas")
+          dataFactory.namedNode("https://dblp.org/pers/m/Minier:Thomas")
         );
         expect(b["article"]).to.be.deep.oneOf([
-          createIRI("https://dblp.org/rec/conf/esws/MinierSMV18a"),
-          createIRI("https://dblp.org/rec/conf/esws/MinierSMV18"),
-          createIRI("https://dblp.org/rec/journals/corr/abs-1806-00227"),
-          createIRI("https://dblp.org/rec/conf/esws/MinierMSM17"),
-          createIRI("https://dblp.org/rec/conf/esws/MinierMSM17a"),
+          dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18a"),
+          dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierSMV18"),
+          dataFactory.namedNode(
+            "https://dblp.org/rec/journals/corr/abs-1806-00227"
+          ),
+          dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17"),
+          dataFactory.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17a"),
         ]);
       },
     },

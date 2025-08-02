@@ -12,7 +12,14 @@ import type {
   EngineTriple,
   EngineTripleValue,
 } from "../../../types.ts";
-import { dataFactory, isVariable, UNBOUND } from "../../../utils/rdf.ts";
+import {
+  dataFactory,
+  isVariable,
+  UNBOUND,
+  VARIABLE_o,
+  VARIABLE_p,
+  VARIABLE_s,
+} from "../../../utils/rdf.ts";
 import ExecutionContext from "../../context/execution-context.ts";
 import PathStageBuilder from "../path-stage-builder.ts";
 import { Automaton, Transition } from "./automaton.ts";
@@ -186,20 +193,16 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
         (forward && transition.reverse) || (!forward && !transition.reverse);
       let bgp: Array<EngineTriple> = [
         dataFactory.quad(
-          reverse
-            ? dataFactory.variable("o")
-            : (lastStep.node as EngineSubject),
-          transition.negation
-            ? dataFactory.variable("p")
-            : transition.predicates[0],
-          reverse ? lastStep.node : dataFactory.variable("o")
+          reverse ? VARIABLE_o : (lastStep.node as EngineSubject),
+          transition.negation ? VARIABLE_p : transition.predicates[0],
+          reverse ? lastStep.node : VARIABLE_o
         ),
       ];
       return engine.mergeMap(
         engine.from(graph.evalBGP(bgp, context)),
         (binding: Bindings) => {
-          let p = binding.get("p");
-          let o = binding.get("o")!;
+          let p = binding.get(VARIABLE_p.value);
+          let o = binding.get(VARIABLE_o.value)!;
           if (p ? !transition.hasPredicate(p) : true) {
             let newStep;
             if (forward) {
@@ -254,18 +257,14 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
       return engine.of(result);
     } else if (isVariable(subject) && isVariable(obj)) {
       let bgp: Array<EngineTriple> = [
-        dataFactory.quad(
-          dataFactory.variable("s"),
-          dataFactory.variable("p"),
-          dataFactory.variable("o")
-        ),
+        dataFactory.quad(VARIABLE_s, VARIABLE_p, VARIABLE_o),
       ];
       return engine.distinct(
         engine.mergeMap(
           engine.from(graph.evalBGP(bgp, context)),
           (binding: Bindings) => {
-            let s = binding.get("s")!;
-            let o = binding.get("o")!;
+            let s = binding.get(VARIABLE_s.value)!;
+            let o = binding.get(VARIABLE_o.value)!;
             let t1: EngineTriple = dataFactory.quad(
               s as EngineSubject,
               UNBOUND,
@@ -328,13 +327,11 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
         dataFactory.quad(
           reverse
             ? isVariable(obj)
-              ? dataFactory.variable("o")
+              ? VARIABLE_o
               : (obj as EngineSubject)
             : subject,
-          transition.negation
-            ? dataFactory.variable("p")
-            : transition.predicates[0],
-          reverse ? subject : isVariable(obj) ? dataFactory.variable("o") : obj
+          transition.negation ? VARIABLE_p : transition.predicates[0],
+          reverse ? subject : isVariable(obj) ? VARIABLE_o : obj
         ),
       ];
 
@@ -342,8 +339,8 @@ export default class GlushkovStageBuilder extends PathStageBuilder {
         engine.from(graph.evalBGP(bgp, context)),
         (binding: Bindings) => {
           let s = isVariable(subject) ? binding.get(subject.value)! : subject;
-          let p = binding.get("p");
-          let o = isVariable(obj) ? binding.get("o")! : obj;
+          let p = binding.get(VARIABLE_p.value);
+          let o = isVariable(obj) ? binding.get(VARIABLE_o.value)! : obj;
           if (p ? !transition.hasPredicate(p) : true) {
             let path = new ResultPath();
             if (forward) {

@@ -11,15 +11,13 @@ import type { EngineTripleValue } from "../../types.ts";
 import { parseISO8601 } from "../../utils/date.ts";
 import {
   asJS,
-  createBNode,
   createBoolean,
   createDate,
   createDecimal,
   createInteger,
-  createIRI,
   createLangLiteral,
-  createLiteral,
   createTypedLiteral,
+  dataFactory,
   literalIsBoolean,
   literalIsDate,
   literalIsNumeric,
@@ -28,14 +26,14 @@ import {
   termIsIRI,
   termIsLiteral,
   UNBOUND,
-  XSD,
+  XSD_integer,
 } from "../../utils/rdf.ts";
 
 type Term = EngineTripleValue;
 
 function digestOperation(hashType: string): (v: Term) => Promise<Term> {
   return async (v) => {
-    return createLiteral(
+    return dataFactory.literal(
       toHex(
         await crypto.subtle.digest(hashType, new TextEncoder().encode(v.value))
       )
@@ -109,7 +107,7 @@ export default {
       }
       return createTypedLiteral(valueA + valueB, a.datatype.value);
     }
-    return createLiteral(asJS(a.value, null) + asJS(b.value, null));
+    return dataFactory.literal(asJS(a.value, null) + asJS(b.value, null));
   },
 
   "-": function (a: Term, b: Term): Term {
@@ -295,32 +293,32 @@ export default {
   },
 
   str: function (a: Term): Term {
-    return createLiteral(a.value);
+    return dataFactory.literal(a.value);
   },
 
   lang: function (a: Term): Term {
     if (termIsLiteral(a)) {
-      return createLiteral(a.language.toLowerCase());
+      return dataFactory.literal(a.language.toLowerCase());
     }
-    return createLiteral("");
+    return dataFactory.literal("");
   },
 
   datatype: function (a: Term): Term {
     if (termIsLiteral(a)) {
       return a.datatype;
     }
-    return createLiteral("");
+    return dataFactory.literal("");
   },
 
   iri: function (a: Term): Term {
-    return createIRI(a.value);
+    return dataFactory.namedNode(a.value);
   },
 
   bnode: function (a?: Term): Term {
     if (a === undefined) {
-      return createBNode();
+      return dataFactory.blankNode();
     }
-    return createBNode(a.value);
+    return dataFactory.blankNode(a.value);
   },
 
   strdt: function (x: Term, datatype: Term): Term {
@@ -332,11 +330,11 @@ export default {
   },
 
   uuid: function (): Term {
-    return createIRI(`urn:uuid:${crypto.randomUUID()}`);
+    return dataFactory.namedNode(`urn:uuid:${crypto.randomUUID()}`);
   },
 
   struuid: function (): Term {
-    return createLiteral(crypto.randomUUID());
+    return dataFactory.literal(crypto.randomUUID());
   },
 
   /*
@@ -348,7 +346,7 @@ export default {
   },
 
   substr: function (str: Term, index: Term, length?: Term): Term {
-    const indexValue = asJS(index.value, XSD("integer"));
+    const indexValue = asJS(index.value, XSD_integer);
     if (indexValue < 1) {
       throw new SyntaxError(
         "SPARQL SUBSTR error: the index of the first character in a string is 1 (according to the SPARQL W3C specs)"
@@ -356,7 +354,7 @@ export default {
     }
     let value = str.value.substring(indexValue - 1);
     if (length !== undefined) {
-      const lengthValue = asJS(length.value, XSD("integer"));
+      const lengthValue = asJS(length.value, XSD_integer);
       value = value.substring(0, lengthValue);
     }
     return shallowCloneTerm(str, value);
@@ -402,14 +400,14 @@ export default {
   },
 
   encode_for_uri: function (a: Term): Term {
-    return createLiteral(encodeURIComponent(a.value));
+    return dataFactory.literal(encodeURIComponent(a.value));
   },
 
   concat: function (a: Term, b: Term): Term {
     if (termIsLiteral(a) && termIsLiteral(b)) {
       return shallowCloneTerm(a, a.value + b.value);
     }
-    return createLiteral(a.value + b.value);
+    return dataFactory.literal(a.value + b.value);
   },
 
   langmatches: function (langTag: Term, langRange: Term): Term {
@@ -443,9 +441,9 @@ export default {
         : new RegExp(pattern.value, flags.value);
     const newValue = arg.value.replace(regexp, replacement.value);
     if (termIsIRI(arg)) {
-      return createIRI(newValue);
+      return dataFactory.namedNode(newValue);
     } else if (termIsBNode(arg)) {
-      return createBNode(newValue);
+      return dataFactory.blankNode(newValue);
     }
     return shallowCloneTerm(arg, newValue);
   },
@@ -555,7 +553,7 @@ export default {
 
   tz: function (a: Term): Term {
     if (termIsLiteral(a) && literalIsDate(a)) {
-      return createLiteral(parseISO8601(a.value).timezone);
+      return dataFactory.literal(parseISO8601(a.value).timezone);
     }
     throw new SyntaxError(
       `SPARQL expression error: cannot compute the timezone of the RDF Term ${a}, as it is not a date`
@@ -567,7 +565,7 @@ export default {
   */
 
   md5: async function (a: Term): Promise<Term> {
-    return createLiteral((await import("js-md5")).md5.hex(a.value));
+    return dataFactory.literal((await import("js-md5")).md5.hex(a.value));
   },
   sha1: digestOperation("SHA-1"),
   sha256: digestOperation("SHA-256"),

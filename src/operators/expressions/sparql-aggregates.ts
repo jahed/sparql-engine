@@ -6,7 +6,7 @@ import type { EngineTripleValue } from "../../types.ts";
 import {
   asJS,
   createInteger,
-  createLiteral,
+  dataFactory,
   literalIsNumeric,
   termIsLiteral,
 } from "../../utils/rdf.ts";
@@ -83,7 +83,7 @@ export default {
     sep: string = ""
   ): Term {
     const value = rows[variable.value].map((v: Term) => v.value).join(sep);
-    return createLiteral(value);
+    return dataFactory.literal(value);
   },
 
   sample: function (variable: VariableTerm, rows: TermRows): Term {
