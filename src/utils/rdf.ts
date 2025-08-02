@@ -187,34 +187,37 @@ export function isBlank(value: EngineTripleValue): value is BlankNode {
   return "termType" in value && value.termType === "BlankNode";
 }
 
-const XSD = (suffix: string): string => {
-  return `http://www.w3.org/2001/XMLSchema#${suffix}`;
-};
-export const XSD_integer = XSD("integer");
-export const XSD_byte = XSD("byte");
-export const XSD_short = XSD("short");
-export const XSD_int = XSD("int");
-export const XSD_unsignedByte = XSD("unsignedByte");
-export const XSD_unsignedShort = XSD("unsignedShort");
-export const XSD_unsignedInt = XSD("unsignedInt");
-export const XSD_number = XSD("number");
-export const XSD_float = XSD("float");
-export const XSD_decimal = XSD("decimal");
-export const XSD_double = XSD("double");
-export const XSD_long = XSD("long");
-export const XSD_unsignedLong = XSD("unsignedLong");
-export const XSD_positiveInteger = XSD("positiveInteger");
-export const XSD_nonPositiveInteger = XSD("nonPositiveInteger");
-export const XSD_negativeInteger = XSD("negativeInteger");
-export const XSD_nonNegativeInteger = XSD("nonNegativeInteger");
-export const XSD_boolean = XSD("boolean");
-export const XSD_dateTime = XSD("dateTime");
-export const XSD_dateTimeStamp = XSD("dateTimeStamp");
-export const XSD_date = XSD("date");
-export const XSD_time = XSD("time");
-export const XSD_duration = XSD("duration");
-export const XSD_hexBinary = XSD("hexBinary");
-export const XSD_base64Binary = XSD("base64Binary");
+export const XSD_integer = "http://www.w3.org/2001/XMLSchema#integer";
+export const XSD_byte = "http://www.w3.org/2001/XMLSchema#byte";
+export const XSD_short = "http://www.w3.org/2001/XMLSchema#short";
+export const XSD_int = "http://www.w3.org/2001/XMLSchema#int";
+export const XSD_unsignedByte = "http://www.w3.org/2001/XMLSchema#unsignedByte";
+export const XSD_unsignedShort =
+  "http://www.w3.org/2001/XMLSchema#unsignedShort";
+export const XSD_unsignedInt = "http://www.w3.org/2001/XMLSchema#unsignedInt";
+export const XSD_number = "http://www.w3.org/2001/XMLSchema#number";
+export const XSD_float = "http://www.w3.org/2001/XMLSchema#float";
+export const XSD_decimal = "http://www.w3.org/2001/XMLSchema#decimal";
+export const XSD_double = "http://www.w3.org/2001/XMLSchema#double";
+export const XSD_long = "http://www.w3.org/2001/XMLSchema#long";
+export const XSD_unsignedLong = "http://www.w3.org/2001/XMLSchema#unsignedLong";
+export const XSD_positiveInteger =
+  "http://www.w3.org/2001/XMLSchema#positiveInteger";
+export const XSD_nonPositiveInteger =
+  "http://www.w3.org/2001/XMLSchema#nonPositiveInteger";
+export const XSD_negativeInteger =
+  "http://www.w3.org/2001/XMLSchema#negativeInteger";
+export const XSD_nonNegativeInteger =
+  "http://www.w3.org/2001/XMLSchema#nonNegativeInteger";
+export const XSD_boolean = "http://www.w3.org/2001/XMLSchema#boolean";
+export const XSD_dateTime = "http://www.w3.org/2001/XMLSchema#dateTime";
+export const XSD_dateTimeStamp =
+  "http://www.w3.org/2001/XMLSchema#dateTimeStamp";
+export const XSD_date = "http://www.w3.org/2001/XMLSchema#date";
+export const XSD_time = "http://www.w3.org/2001/XMLSchema#time";
+export const XSD_duration = "http://www.w3.org/2001/XMLSchema#duration";
+export const XSD_hexBinary = "http://www.w3.org/2001/XMLSchema#hexBinary";
+export const XSD_base64Binary = "http://www.w3.org/2001/XMLSchema#base64Binary";
 
 export const UNBOUND = Object.freeze(RDF.namedNode("UNBOUND"));
 export const VARIABLE_s = Object.freeze(RDF.variable("s"));

@@ -3,18 +3,22 @@ import type { EngineTriple } from "../../../types.ts";
 import { isIRI, isVariable } from "../../../utils/rdf.ts";
 
 const SES_PREFIX = "https://callidon.github.io/sparql-engine/search#";
-function SES(suffix: string): string {
-  return `${SES_PREFIX}${suffix}`;
-}
 
-export const SES_search = SES("search");
-export const SES_matchAllTerms = SES("matchAllTerms");
-export const SES_minRelevance = SES("minRelevance");
-export const SES_maxRelevance = SES("maxRelevance");
-export const SES_minRank = SES("minRank");
-export const SES_maxRank = SES("maxRank");
-export const SES_relevance = SES("relevance");
-export const SES_rank = SES("rank");
+export const SES_search =
+  "https://callidon.github.io/sparql-engine/search#search";
+export const SES_matchAllTerms =
+  "https://callidon.github.io/sparql-engine/search#matchAllTerms";
+export const SES_minRelevance =
+  "https://callidon.github.io/sparql-engine/search#minRelevance";
+export const SES_maxRelevance =
+  "https://callidon.github.io/sparql-engine/search#maxRelevance";
+export const SES_minRank =
+  "https://callidon.github.io/sparql-engine/search#minRank";
+export const SES_maxRank =
+  "https://callidon.github.io/sparql-engine/search#maxRank";
+export const SES_relevance =
+  "https://callidon.github.io/sparql-engine/search#relevance";
+export const SES_rank = "https://callidon.github.io/sparql-engine/search#rank";
 
 /**
  * A Full Text Search query
