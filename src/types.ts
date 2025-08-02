@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import type { Literal, NamedNode, Quad, Variable } from "@rdfjs/types";
 import type { Expression, PropertyPath } from "sparqljs";
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import type { BGPCache } from "../engine/cache/bgp-cache.ts";
 import ExecutionContext from "../engine/context/execution-context.ts";
 import ContextSymbols from "../engine/context/symbols.ts";

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 export function parseISO8601(dateString: string) {
   const matches =
     /(\d\d\d\d)-?(\d\d)-?(\d\d)T(\d\d):?(\d\d):?(\d\d(?:\.\d+)?)(Z|(?:[+-].*))?$/.exec(

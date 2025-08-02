@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 declare module "@seald-io/binary-search-tree" {
   export interface BSTOptions<K, T> {
     unique?: boolean;

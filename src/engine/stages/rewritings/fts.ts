@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import type { VariableTerm } from "sparqljs";
 import type { EngineTriple } from "../../../types.ts";
 import { isIRI, isVariable } from "../../../utils/rdf.ts";
