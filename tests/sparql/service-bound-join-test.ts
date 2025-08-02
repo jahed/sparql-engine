@@ -6,25 +6,17 @@ import { termToString } from "rdf-string";
 import type { BindingsRecord } from "../../src/rdf/bindings.ts";
 import { BindingBase } from "../../src/rdf/bindings.ts";
 import { createLangLiteral, RDF } from "../../src/utils/rdf.ts";
-import { getGraph, TestEngine, type TestGraph } from "../utils.ts";
-
-const GRAPH_A_IRI = RDF.namedNode("http://example.org#some-graph-a");
-const GRAPH_B_IRI = RDF.namedNode("http://example.org#some-graph-b");
+import { createGraph, TestEngine } from "../utils.ts";
 
 describe("SERVICE queries (using bound joins)", () => {
+  const GRAPH_A_IRI = RDF.namedNode("http://example.org#some-graph-a");
+  const GRAPH_B_IRI = RDF.namedNode("http://example.org#some-graph-b");
+  const gA = createGraph("./tests/data/dblp.nt", true, GRAPH_A_IRI);
+  const gB = createGraph("./tests/data/dblp2.nt", true, GRAPH_B_IRI);
   let engine: TestEngine;
-  let gA: TestGraph;
-  let gB: TestGraph;
   beforeEach(() => {
-    gA = getGraph("./tests/data/dblp.nt", true);
-    gB = getGraph("./tests/data/dblp2.nt", true);
-    engine = new TestEngine(gA, GRAPH_A_IRI);
-    engine._dataset.setGraphFactory((iri) => {
-      if (iri.equals(GRAPH_B_IRI)) {
-        return gB;
-      }
-      return gA;
-    });
+    engine = new TestEngine(gA);
+    engine._dataset.setGraphFactory((iri) => (iri.equals(gB.iri) ? gB : gA));
   });
 
   const data: {
@@ -41,7 +33,7 @@ describe("SERVICE queries (using bound joins)", () => {
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
       SELECT ?name ?article WHERE {
         ?s rdf:type dblp-rdf:Person .
-        SERVICE <${termToString(GRAPH_A_IRI)}> {
+        SERVICE <${termToString(gA.iri)}> {
           ?s dblp-rdf:primaryFullPersonName ?name .
           ?s dblp-rdf:authorOf ?article .
         }
@@ -69,7 +61,7 @@ describe("SERVICE queries (using bound joins)", () => {
       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
       SELECT * WHERE {
         ?s rdf:type dblp-rdf:Person .
-        SERVICE <${termToString(GRAPH_A_IRI)}> {
+        SERVICE <${termToString(gA.iri)}> {
           ?s dblp-rdf:primaryFullPersonName "Thomas Minier"@en .
         }
       }`,
@@ -89,7 +81,7 @@ describe("SERVICE queries (using bound joins)", () => {
       SELECT ?s ?article WHERE {
         ?s rdf:type dblp-rdf:Person .
         ?s dblp-rdf:authorOf ?article .
-        SERVICE <${termToString(GRAPH_A_IRI)}> {
+        SERVICE <${termToString(gA.iri)}> {
           ?s dblp-rdf:primaryFullPersonName "Thomas Minier"@en .
         }
       }`,

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 import { expect } from "chai";
 import { before, describe, it } from "node:test";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL ASK queries", () => {
   let engine: TestEngine;
   before(() => {
-    const g = getGraph("./tests/data/dblp.nt");
+    const g = createGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);
   });
 

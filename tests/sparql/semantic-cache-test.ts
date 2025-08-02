@@ -9,12 +9,12 @@ import {
   VARIABLE_p,
   VARIABLE_s,
 } from "../../src/utils/rdf.ts";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine } from "../utils.ts";
 
 describe("Semantic caching for SPARQL queries", () => {
   let engine: TestEngine;
   before(() => {
-    const g = getGraph("./tests/data/dblp.nt");
+    const g = createGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);
   });
 

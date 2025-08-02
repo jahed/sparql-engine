@@ -11,7 +11,7 @@ import {
   termToValue,
   UNBOUND,
 } from "../../src/utils/rdf.ts";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL custom operators", () => {
   it("should allow for custom functions in BIND", async () => {
@@ -22,8 +22,8 @@ describe("SPARQL custom operators", () => {
       },
     };
 
-    const g = getGraph("./tests/data/dblp.nt");
-    const engine = new TestEngine(g, undefined, customFunctions);
+    const g = createGraph("./tests/data/dblp.nt");
+    const engine = new TestEngine(g, customFunctions);
 
     const query = `
     PREFIX test: <http://test.com#>
@@ -54,8 +54,8 @@ describe("SPARQL custom operators", () => {
         return createBoolean(a.value.toLowerCase().indexOf("thomas") >= 0);
       },
     };
-    const g = getGraph("./tests/data/dblp.nt");
-    const engine = new TestEngine(g, undefined, customFunctions);
+    const g = createGraph("./tests/data/dblp.nt");
+    const engine = new TestEngine(g, customFunctions);
 
     const query = `
     PREFIX test: <http://test.com#>
@@ -83,8 +83,8 @@ describe("SPARQL custom operators", () => {
         return createBoolean(value % 2 === 0);
       },
     };
-    const g = getGraph("./tests/data/dblp.nt");
-    const engine = new TestEngine(g, undefined, customFunctions);
+    const g = createGraph("./tests/data/dblp.nt");
+    const engine = new TestEngine(g, customFunctions);
 
     const query = `
     PREFIX test: <http://test.com#>
@@ -118,8 +118,8 @@ describe("SPARQL custom operators", () => {
       },
     };
 
-    const g = getGraph("./tests/data/dblp.nt");
-    const engine = new TestEngine(g, undefined, customFunctions);
+    const g = createGraph("./tests/data/dblp.nt");
+    const engine = new TestEngine(g, customFunctions);
 
     const query = `
     PREFIX test: <http://test.com#>
@@ -142,7 +142,7 @@ describe("SPARQL custom operators", () => {
   });
 
   it("should fail if the custom function does not exist", async () => {
-    const g = getGraph("./tests/data/dblp.nt");
+    const g = createGraph("./tests/data/dblp.nt");
     const engine = new TestEngine(g);
 
     const query = `

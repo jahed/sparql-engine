@@ -3,12 +3,12 @@ import { expect } from "chai";
 import fs from "node:fs";
 import { before, describe, it } from "node:test";
 import jsonFormatter from "../../src/formatters/json-formatter.ts";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine } from "../utils.ts";
 
 describe("W3C JSON formatter", () => {
   let engine: TestEngine;
   before(() => {
-    const g = getGraph("./tests/data/dblp.nt");
+    const g = createGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);
   });
 

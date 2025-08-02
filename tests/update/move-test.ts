@@ -3,18 +3,19 @@ import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { termToString } from "rdf-string";
 import { RDF } from "../../src/utils/rdf.ts";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine, type TestGraph } from "../utils.ts";
 
 const GRAPH_A_IRI = RDF.namedNode("http://example.org#some-graph-a");
 const GRAPH_B_IRI = RDF.namedNode("http://example.org#some-graph-b");
 
 describe("SPARQL UPDATE: MOVE queries", () => {
   let engine: TestEngine;
+  let gA: TestGraph;
   beforeEach(() => {
-    const gA = getGraph("./tests/data/dblp.nt");
-    const gB = getGraph("./tests/data/dblp2.nt");
-    engine = new TestEngine(gA, GRAPH_A_IRI);
-    engine.addNamedGraph(GRAPH_B_IRI, gB);
+    gA = createGraph("./tests/data/dblp.nt", undefined, GRAPH_A_IRI);
+    const gB = createGraph("./tests/data/dblp2.nt", undefined, GRAPH_B_IRI);
+    engine = new TestEngine(gA);
+    engine.addNamedGraph(gB);
   });
 
   const data = [
@@ -32,7 +33,7 @@ describe("SPARQL UPDATE: MOVE queries", () => {
           ._store.getTriples("https://dblp.org/pers/g/Grall:Arnaud");
         expect(triples.length).to.equal(0);
         // source graph should be empty
-        triples = engine._graph._store.getTriples();
+        triples = gA._store.getTriples();
         expect(triples.length).to.equal(0);
       },
     },
@@ -41,13 +42,11 @@ describe("SPARQL UPDATE: MOVE queries", () => {
       query: `MOVE <${termToString(GRAPH_B_IRI)}> TO DEFAULT`,
       testFun: () => {
         // destination graph should only contains data from the source
-        let triples = engine._graph._store.getTriples(
+        let triples = gA._store.getTriples(
           "https://dblp.org/pers/g/Grall:Arnaud"
         );
         expect(triples.length).to.equal(10);
-        triples = engine._graph._store.getTriples(
-          "https://dblp.org/pers/m/Minier:Thomas"
-        );
+        triples = gA._store.getTriples("https://dblp.org/pers/m/Minier:Thomas");
         expect(triples.length).to.equal(0);
         // source graph should be empty
         triples = engine.getNamedGraph(GRAPH_B_IRI)._store.getTriples();

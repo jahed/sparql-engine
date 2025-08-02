@@ -48,7 +48,7 @@ export default class ServiceStageBuilder extends StageBuilder {
       !this.dataset.hasNamedGraph(iri)
     ) {
       const graph = this.dataset.createGraph(iri);
-      this.dataset.addNamedGraph(iri, graph);
+      this.dataset.addNamedGraph(graph);
     }
     let handler = undefined;
     if (node.silent) {

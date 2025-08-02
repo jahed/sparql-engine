@@ -22,8 +22,7 @@ export default class UnionGraph extends Graph {
    * @param graphs - Set of RDF graphs
    */
   constructor(graphs: Graph[]) {
-    super();
-    this.iri = RDF.namedNode(graphs.map((g) => termToString(g.iri)).join("+"));
+    super(RDF.namedNode(graphs.map((g) => termToString(g.iri)).join("+")));
     this._graphs = graphs;
   }
 

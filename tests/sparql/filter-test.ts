@@ -2,12 +2,12 @@
 import { expect } from "chai";
 import { before, describe, it } from "node:test";
 import type { QueryOutput } from "../../src/engine/plan-builder.ts";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine } from "../utils.ts";
 
 describe("FILTER SPARQL queries", () => {
   let engine: TestEngine;
   before(() => {
-    const g = getGraph("./tests/data/dblp.nt");
+    const g = createGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);
   });
 

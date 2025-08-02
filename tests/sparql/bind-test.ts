@@ -9,12 +9,12 @@ import {
   RDF,
   UNBOUND,
 } from "../../src/utils/rdf.ts";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL BIND", () => {
   let engine: TestEngine;
   before(() => {
-    const g = getGraph("./tests/data/dblp.nt");
+    const g = createGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);
   });
 

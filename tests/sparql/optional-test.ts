@@ -5,12 +5,12 @@ import { beforeEach, describe, it } from "node:test";
 import type { BindingsRecord } from "../../src/rdf/bindings.ts";
 import { Bindings } from "../../src/rdf/bindings.ts";
 import { createInteger, RDF, UNBOUND } from "../../src/utils/rdf.ts";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL queries with OPTIONAL", () => {
   let engine: TestEngine;
   beforeEach(() => {
-    const g = getGraph("./tests/data/dblp_opt.nt");
+    const g = createGraph("./tests/data/dblp_opt.nt");
     engine = new TestEngine(g);
   });
 
@@ -128,7 +128,7 @@ describe("SPARQL queries with OPTIONAL", () => {
   });
 
   it("should not get an extra result when an OPTIONAL value exists", async () => {
-    const graph = getGraph("./tests/data/SPARQL-Query-1.1-6.2.ttl");
+    const graph = createGraph("./tests/data/SPARQL-Query-1.1-6.2.ttl");
     engine = new TestEngine(graph);
     const query = `
     # this is a modified example is from section 6.2 of the SPARQL Spec. It should only product 2 results
@@ -161,7 +161,7 @@ describe("SPARQL queries with OPTIONAL", () => {
   });
 
   it("should not get an extra result when an OPTIONAL value exists and multiple OPTIONAL clauses are used", async () => {
-    const graph = getGraph("./tests/data/SPARQL-Query-1.1-6.2.ttl");
+    const graph = createGraph("./tests/data/SPARQL-Query-1.1-6.2.ttl");
     engine = new TestEngine(graph);
     const query = `
     # this is a modified example is from section 6.2 of the SPARQL Spec. It should only produce 2 results
@@ -197,7 +197,7 @@ describe("SPARQL queries with OPTIONAL", () => {
   });
 
   it("should get the correct number of results when an OPTIONAL results in an UNBOUND", async () => {
-    const graph = getGraph("./tests/data/SPARQL-Query-1.1-6.2.ttl");
+    const graph = createGraph("./tests/data/SPARQL-Query-1.1-6.2.ttl");
     engine = new TestEngine(graph);
     const query = `
     # this is a modified example is from section 6.2 of the SPARQL Spec. It should only produce 2 results
@@ -227,7 +227,7 @@ describe("SPARQL queries with OPTIONAL", () => {
   });
 
   it("should get the correct number of results when an OPTIONAL results in an UNBOUND value with multiple OPTIONAL clauses", async () => {
-    const graph = getGraph("./tests/data/SPARQL-Query-1.1-6.2.ttl");
+    const graph = createGraph("./tests/data/SPARQL-Query-1.1-6.2.ttl");
     engine = new TestEngine(graph);
     const query = `
     # this is a modified example is from section 6.2 of the SPARQL Spec. It should only produce 2 results

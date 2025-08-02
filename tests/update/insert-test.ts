@@ -3,17 +3,18 @@ import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { stringToTerm, termToString } from "rdf-string";
 import { RDF } from "../../src/utils/rdf.ts";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine, type TestGraph } from "../utils.ts";
 
 const GRAPH_IRI = RDF.namedNode("htpp://example.org#some-graph");
 
 describe("SPARQL UPDATE: INSERT DATA queries", () => {
   let engine: TestEngine;
+  let gA: TestGraph;
   beforeEach(() => {
-    const gA = getGraph(null);
-    const gB = getGraph(null);
+    gA = createGraph();
+    const gB = createGraph(undefined, undefined, GRAPH_IRI);
     engine = new TestEngine(gA);
-    engine.addNamedGraph(GRAPH_IRI, gB);
+    engine.addNamedGraph(gB);
   });
 
   it("should evaluate INSERT DATA queries without a named Graph", async () => {
@@ -23,11 +24,7 @@ describe("SPARQL UPDATE: INSERT DATA queries", () => {
 
     for await (const b of engine.execute(query)) {
     }
-    const triples = engine._graph._store.getTriples(
-      "http://example/book1",
-      null,
-      null
-    );
+    const triples = gA._store.getTriples("http://example/book1", null, null);
     expect(triples.length).to.equal(1);
     expect(stringToTerm(triples[0].subject)).to.deep.equal(
       RDF.namedNode("http://example/book1")

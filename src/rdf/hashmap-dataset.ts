@@ -9,18 +9,17 @@ import Graph from "./graph.ts";
  * @extends Dataset
  */
 export default class HashMapDataset<
-  G extends Graph = Graph,
-> extends Dataset<G> {
-  private _defaultGraph: G;
-  private readonly _namedGraphs: Map<string, G>;
+  TGraph extends Graph = Graph,
+> extends Dataset<TGraph> {
+  private _defaultGraph: TGraph;
+  private readonly _namedGraphs: Map<string, TGraph>;
   /**
    * Constructor
    * @param defaultGraphIRI - IRI of the Default Graph
    * @param defaultGraph     - Default Graph
    */
-  constructor(defaultGraphIRI: IriTerm, defaultGraph: G) {
+  constructor(defaultGraph: TGraph) {
     super();
-    defaultGraph.iri = defaultGraphIRI;
     this._defaultGraph = defaultGraph;
     this._namedGraphs = new Map();
   }
@@ -29,20 +28,19 @@ export default class HashMapDataset<
     return Array.from(this._namedGraphs.values().map((g) => g.iri));
   }
 
-  setDefaultGraph(g: G): void {
-    this._defaultGraph = g;
+  setDefaultGraph(graph: TGraph): void {
+    this._defaultGraph = graph;
   }
 
-  getDefaultGraph(): G {
+  getDefaultGraph(): TGraph {
     return this._defaultGraph;
   }
 
-  addNamedGraph(iri: IriTerm, g: G): void {
-    g.iri = iri;
-    this._namedGraphs.set(termToString(iri), g);
+  addNamedGraph(graph: TGraph): void {
+    this._namedGraphs.set(termToString(graph.iri), graph);
   }
 
-  getNamedGraph(iri: IriTerm): G {
+  getNamedGraph(iri: IriTerm): TGraph {
     if (iri.equals(this._defaultGraph.iri)) {
       return this.getDefaultGraph();
     }

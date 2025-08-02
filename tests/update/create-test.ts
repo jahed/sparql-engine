@@ -3,25 +3,28 @@ import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { termToString } from "rdf-string";
 import { RDF } from "../../src/utils/rdf.ts";
-import { getGraph, N3Graph, TestEngine } from "../utils.ts";
-
-const GRAPH_A_IRI = RDF.namedNode("http://example.org#some-graph-a");
-const GRAPH_B_IRI = RDF.namedNode("http://example.org#some-graph-b");
+import { createGraph, N3Graph, TestEngine } from "../utils.ts";
 
 describe("SPARQL UPDATE: CREATE queries", () => {
   let engine: TestEngine;
   beforeEach(() => {
-    const gA = getGraph("./tests/data/dblp.nt");
-    engine = new TestEngine(gA, GRAPH_A_IRI);
-    engine._dataset.setGraphFactory((iri) => new N3Graph());
+    const defaultGraph = createGraph(
+      "./tests/data/dblp.nt",
+      undefined,
+      RDF.namedNode("http://example.org#some-graph-a")
+    );
+    engine = new TestEngine(defaultGraph);
+    engine._dataset.setGraphFactory((iri) => new N3Graph(iri));
   });
+
+  const createdGraphIri = RDF.namedNode("http://example.org#create-graph-iri");
 
   const data = [
     {
       name: "CREATE GRAPH",
-      query: `CREATE GRAPH <${termToString(GRAPH_B_IRI)}>`,
+      query: `CREATE GRAPH <${termToString(createdGraphIri)}>`,
       testFun: () => {
-        expect(engine.hasNamedGraph(GRAPH_B_IRI)).to.equal(true);
+        expect(engine.hasNamedGraph(createdGraphIri)).to.equal(true);
       },
     },
   ];

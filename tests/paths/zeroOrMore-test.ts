@@ -4,12 +4,12 @@ import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/rdf/bindings.ts";
 import { RDF } from "../../src/utils/rdf.ts";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine } from "../utils.ts";
 
 describe("SPARQL property paths: Zero or More paths", () => {
   let engine: TestEngine;
   before(() => {
-    const g = getGraph("./tests/data/paths.ttl");
+    const g = createGraph("./tests/data/paths.ttl");
     engine = new TestEngine(g);
   });
 

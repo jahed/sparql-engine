@@ -3,13 +3,14 @@ import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { stringToTerm } from "rdf-string";
 import { createLangLiteral, RDF } from "../../src/utils/rdf.ts";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine, type TestGraph } from "../utils.ts";
 
 describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
-  let engine: TestEngine<ReturnType<typeof getGraph>>;
+  let engine: TestEngine;
+  let graph: TestGraph;
   beforeEach(() => {
-    const g = getGraph("./tests/data/dblp.nt");
-    engine = new TestEngine(g);
+    graph = createGraph("./tests/data/dblp.nt");
+    engine = new TestEngine(graph);
   });
 
   it("should evaluate basic INSERT queries", async () => {
@@ -27,7 +28,7 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
 
     for await (const b of engine.execute(query)) {
     }
-    const triples = engine._graph._store.getTriples(
+    const triples = graph._store.getTriples(
       "https://dblp.org/pers/m/Minier:Thomas",
       "http://purl.org/dc/elements/1.1/name",
       null
@@ -56,7 +57,7 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
 
     for await (const b of engine.execute(query)) {
     }
-    const triples = engine._graph._store.getTriples(
+    const triples = graph._store.getTriples(
       "https://dblp.org/pers/m/Minier:Thomas",
       "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       null
@@ -76,7 +77,7 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
 
     for await (const b of engine.execute(query)) {
     }
-    const triples = engine._graph._store.getTriples(
+    const triples = graph._store.getTriples(
       "https://dblp.org/pers/m/Minier:Thomas",
       "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       null
@@ -105,7 +106,7 @@ describe("SPARQL UPDATE: INSERT/DELETE queries", () => {
 
     for await (const b of engine.execute(query)) {
     }
-    const triples = engine._graph._store.getTriples(
+    const triples = graph._store.getTriples(
       "https://dblp.org/pers/m/Minier:Thomas",
       "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       null

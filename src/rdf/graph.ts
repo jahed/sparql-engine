@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
+import type { NamedNode, Variable } from "@rdfjs/types";
 import { isNull, mean, orderBy, round, sortBy } from "lodash-es";
-import type { IriTerm, VariableTerm } from "sparqljs";
 import ExecutionContext from "../engine/context/execution-context.ts";
 import type {
   PipelineInput,
@@ -53,29 +53,13 @@ function countVariables(triple: EngineTriple): number {
  * @abstract
  */
 export default abstract class Graph {
-  private _iri: IriTerm;
+  public iri: NamedNode;
   private _capabilities: Map<GraphCapability, boolean>;
 
-  constructor() {
-    this._iri = UNBOUND;
+  constructor(iri: NamedNode = UNBOUND) {
+    this.iri = iri;
     this._capabilities = new Map();
     parseCapabilities(this._capabilities, Object.getPrototypeOf(this));
-  }
-
-  /**
-   * Get the IRI of the Graph
-   * @return The IRI of the Graph
-   */
-  get iri(): IriTerm {
-    return this._iri;
-  }
-
-  /**
-   * Set the IRI of the Graph
-   * @param value - The new IRI of the Graph
-   */
-  set iri(value: IriTerm) {
-    this._iri = value;
   }
 
   /**
@@ -156,7 +140,7 @@ export default abstract class Graph {
    */
   fullTextSearch(
     pattern: EngineTriple,
-    variable: VariableTerm,
+    variable: Variable,
     keywords: string[],
     matchAll: boolean,
     minRelevance: number | null,

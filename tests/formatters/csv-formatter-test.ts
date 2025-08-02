@@ -2,12 +2,12 @@
 import { expect } from "chai";
 import { before, describe, it } from "node:test";
 import { csvFormatter } from "../../src/formatters/csv-tsv-formatter.ts";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine } from "../utils.ts";
 
 describe("W3C CSV formatter", () => {
   let engine: TestEngine;
   before(() => {
-    const g = getGraph("./tests/data/dblp.nt");
+    const g = createGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);
   });
 

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
-import type { IriTerm } from "sparqljs";
+import type { NamedNode } from "@rdfjs/types";
+import { termToString } from "rdf-string";
 import Graph from "./graph.ts";
 import UnionGraph from "./union-graph.ts";
 
@@ -8,7 +9,7 @@ import UnionGraph from "./union-graph.ts";
  * @abstract
  */
 export default abstract class Dataset<G extends Graph = Graph> {
-  private _graphFactory: (iri: IriTerm) => G | null;
+  private _graphFactory: (iri: NamedNode) => G | null;
 
   /**
    * Constructor
@@ -17,7 +18,7 @@ export default abstract class Dataset<G extends Graph = Graph> {
     this._graphFactory = () => null;
   }
 
-  abstract get iris(): IriTerm[];
+  abstract get iris(): NamedNode[];
   /**
    * Set the Default Graph of the Dataset
    * @param g - Default Graph
@@ -35,27 +36,27 @@ export default abstract class Dataset<G extends Graph = Graph> {
    * @param iri - IRI of the Named Graph
    * @param g   - RDF Graph
    */
-  abstract addNamedGraph(iri: IriTerm, g: G): void;
+  abstract addNamedGraph(g: G): void;
 
   /**
    * Get a Named Graph using its IRI
    * @param  iri - IRI of the Named Graph to retrieve
    * @return The corresponding Named Graph
    */
-  abstract getNamedGraph(iri: IriTerm): G;
+  abstract getNamedGraph(iri: NamedNode): G;
 
   /**
    * Delete a Named Graph using its IRI
    * @param  iri - IRI of the Named Graph to delete
    */
-  abstract deleteNamedGraph(iri: IriTerm): void;
+  abstract deleteNamedGraph(iri: NamedNode): void;
 
   /**
    * Return True if the Dataset contains a Named graph with the provided IRI
    * @param  iri - IRI of the Named Graph
    * @return True if the Dataset contains a Named graph with the provided IRI
    */
-  abstract hasNamedGraph(iri: IriTerm): boolean;
+  abstract hasNamedGraph(iri: NamedNode): boolean;
 
   /**
    * Get an UnionGraph, i.e., the dynamic union of several graphs,
@@ -64,7 +65,10 @@ export default abstract class Dataset<G extends Graph = Graph> {
    * @param  includeDefault - True if the default graph should be included
    * @return The dynamic union of several graphs in the Dataset
    */
-  getUnionGraph(iris: IriTerm[], includeDefault: boolean = false): UnionGraph {
+  getUnionGraph(
+    iris: NamedNode[],
+    includeDefault: boolean = false
+  ): UnionGraph {
     let graphs: G[] = [];
     if (includeDefault) {
       graphs.push(this.getDefaultGraph());
@@ -93,7 +97,7 @@ export default abstract class Dataset<G extends Graph = Graph> {
    * Set the Graph Factory used by te dataset to create new RDF graphs on-demand
    * @param  factory - Graph Factory
    */
-  setGraphFactory(factory: (iri: IriTerm) => G) {
+  setGraphFactory(factory: (iri: NamedNode) => G) {
     this._graphFactory = factory;
   }
 
@@ -103,12 +107,21 @@ export default abstract class Dataset<G extends Graph = Graph> {
    * @param  iri - IRI of the graph to create
    * @return A new RDF Graph
    */
-  createGraph(iri: IriTerm): G {
+  createGraph(iri: NamedNode): G {
     const graph = this._graphFactory(iri);
-    if (graph === null) {
+    if (!graph) {
       throw new Error(
         `Impossible to create a new Graph with IRI "${iri}". The RDF dataset does not seems to have a graph factory. Please set it using the "setGraphFactory" method.`
       );
+    }
+    if (!graph.iri.equals(iri)) {
+      const error = new Error("graph.iri must match given iri.");
+      console.log({
+        error,
+        iri: termToString(iri),
+        graphIri: termToString(graph.iri),
+      });
+      throw error;
     }
     return graph;
   }

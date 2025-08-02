@@ -9,12 +9,12 @@ import {
   createLangLiteral,
   RDF,
 } from "../../src/utils/rdf.ts";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine } from "../utils.ts";
 
 describe("Full Text Search SPARQL queries", () => {
   let engine: TestEngine;
   before(() => {
-    const g = getGraph(["./tests/data/dblp.nt", "./tests/data/dblp2.nt"]);
+    const g = createGraph(["./tests/data/dblp.nt", "./tests/data/dblp2.nt"]);
     engine = new TestEngine(g);
   });
 

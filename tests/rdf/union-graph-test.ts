@@ -6,18 +6,18 @@ import ExecutionContext from "../../src/engine/context/execution-context.ts";
 import RxjsPipeline from "../../src/engine/pipeline/rxjs-pipeline.ts";
 import UnionGraph from "../../src/rdf/union-graph.ts";
 import { RDF } from "../../src/utils/rdf.ts";
-import { getGraph } from "../utils.ts";
+import { createGraph, type TestGraph } from "../utils.ts";
 
 const GRAPH_A_IRI = RDF.namedNode("http://example.org#some-graph-a");
 const GRAPH_B_IRI = RDF.namedNode("http://example.org#some-graph-b");
 
 describe("Union Graph", () => {
-  let gA: ReturnType<typeof getGraph>;
-  let gB: ReturnType<typeof getGraph>;
+  let gA: TestGraph;
+  let gB: TestGraph;
   beforeEach(() => {
-    gA = getGraph("./tests/data/dblp.nt");
+    gA = createGraph("./tests/data/dblp.nt");
     gA.iri = GRAPH_A_IRI;
-    gB = getGraph("./tests/data/dblp.nt");
+    gB = createGraph("./tests/data/dblp.nt");
     gB.iri = GRAPH_B_IRI;
   });
 

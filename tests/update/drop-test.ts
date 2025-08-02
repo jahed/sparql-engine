@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { termToString } from "rdf-string";
 import { RDF } from "../../src/utils/rdf.ts";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine } from "../utils.ts";
 
 const GRAPH_A_IRI = RDF.namedNode("http://example.org#some-graph-a");
 const GRAPH_B_IRI = RDF.namedNode("http://example.org#some-graph-b");
@@ -11,10 +11,10 @@ const GRAPH_B_IRI = RDF.namedNode("http://example.org#some-graph-b");
 describe("SPARQL UPDATE: DROP queries", () => {
   let engine: TestEngine;
   beforeEach(() => {
-    const gA = getGraph("./tests/data/dblp.nt");
-    const gB = getGraph("./tests/data/dblp.nt");
-    engine = new TestEngine(gA, GRAPH_A_IRI);
-    engine.addNamedGraph(GRAPH_B_IRI, gB);
+    const gA = createGraph("./tests/data/dblp.nt", undefined, GRAPH_A_IRI);
+    const gB = createGraph("./tests/data/dblp.nt", undefined, GRAPH_B_IRI);
+    engine = new TestEngine(gA);
+    engine.addNamedGraph(gB);
   });
 
   const data = [

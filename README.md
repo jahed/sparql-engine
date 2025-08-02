@@ -43,12 +43,12 @@ export class MySparqlGraph extends SparqlEngineGraph {
   async clear(): Promise<void> {}
 }
 
-const sparqlGraph = new MySparqlGraph(graph);
-const dataset = new HashMapDataset(sparqlGraph.graphBase, sparqlGraph);
+const defaultGraph = new MySparqlGraph();
+const dataset = new HashMapDataset(defaultGraph);
 const planner = new PlanBuilder(dataset);
 
 try {
-  for await (const bindings of planner.build(query)) {
+  for await (const row of planner.build(query)) {
     // row found
   }
   // query completed

@@ -2,6 +2,7 @@
 import fs from "fs";
 import { isArray } from "lodash-es";
 import n3 from "n3";
+import type { NamedNode } from "rdf-data-factory";
 import { stringQuadToQuad, termToString } from "rdf-string";
 import type { Query } from "sparqljs";
 import type ExecutionContext from "../src/engine/context/execution-context.ts";
@@ -18,15 +19,16 @@ const { Parser, Store } = n3;
 
 export type TestGraph = N3Graph | UnionN3Graph;
 
-export function getGraph(
-  filePaths?: string | string[] | null,
-  isUnion = false
+export function createGraph(
+  filePaths?: string | string[],
+  isUnion = false,
+  iri?: NamedNode
 ) {
   let graph: TestGraph;
   if (isUnion) {
-    graph = new UnionN3Graph();
+    graph = new UnionN3Graph(iri);
   } else {
-    graph = new N3Graph();
+    graph = new N3Graph(iri);
   }
   if (typeof filePaths === "string") {
     graph.parse(filePaths);
@@ -56,8 +58,8 @@ export class N3Graph extends Graph {
   public readonly _store: n3.N3StoreWriter;
   public readonly _parser: n3.N3Parser;
 
-  constructor() {
-    super();
+  constructor(iri?: NamedNode) {
+    super(iri);
     this._store = Store()!;
     this._parser = Parser()!;
   }
@@ -129,8 +131,8 @@ export class N3Graph extends Graph {
 }
 
 class UnionN3Graph extends N3Graph {
-  constructor() {
-    super();
+  constructor(iri?: NamedNode) {
+    super(iri);
   }
 
   evalUnion(patterns: EngineTriple[][], context: ExecutionContext) {
@@ -141,19 +143,11 @@ class UnionN3Graph extends N3Graph {
 }
 
 export class TestEngine<G extends Graph = TestGraph> {
-  public readonly _graph: G;
-  public readonly _defaultGraphIRI: EngineIRI;
   public readonly _dataset: HashMapDataset<G>;
   public readonly _builder: PlanBuilder;
 
-  constructor(
-    graph: G,
-    defaultGraphIRI?: EngineIRI,
-    customOperations: CustomFunctions = {}
-  ) {
-    this._graph = graph;
-    this._defaultGraphIRI = defaultGraphIRI || this._graph.iri;
-    this._dataset = new HashMapDataset(this._defaultGraphIRI, this._graph);
+  constructor(graph: G, customOperations: CustomFunctions = {}) {
+    this._dataset = new HashMapDataset(graph);
     this._builder = new PlanBuilder(this._dataset, {}, customOperations);
   }
 
@@ -161,8 +155,8 @@ export class TestEngine<G extends Graph = TestGraph> {
     return this._dataset.getDefaultGraph().iri;
   }
 
-  addNamedGraph(iri: EngineIRI, db: G) {
-    this._dataset.addNamedGraph(iri, db);
+  addNamedGraph(graph: G) {
+    this._dataset.addNamedGraph(graph);
   }
 
   getNamedGraph(iri: EngineIRI): G {

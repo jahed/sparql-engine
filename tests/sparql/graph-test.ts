@@ -5,17 +5,25 @@ import { beforeEach, describe, it } from "node:test";
 import { termToString } from "rdf-string";
 import { BindingBase, type BindingsRecord } from "../../src/rdf/bindings.ts";
 import { createLangLiteral, RDF } from "../../src/utils/rdf.ts";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine } from "../utils.ts";
 
 describe("GRAPH/FROM queries", () => {
   const GRAPH_A_IRI = RDF.namedNode("http://example.org#some-graph-a");
   const GRAPH_B_IRI = RDF.namedNode("http://example.org#some-graph-b");
   let engine: TestEngine;
   beforeEach(() => {
-    const gA = getGraph("./tests/data/dblp.nt");
-    const gB = getGraph("./tests/data/dblp2.nt");
-    engine = new TestEngine(gA, GRAPH_A_IRI);
-    engine.addNamedGraph(GRAPH_B_IRI, gB);
+    const gA = createGraph(
+      "./tests/data/dblp.nt",
+      false,
+      RDF.namedNode("http://example.org#some-graph-a")
+    );
+    const gB = createGraph(
+      "./tests/data/dblp2.nt",
+      false,
+      RDF.namedNode("http://example.org#some-graph-b")
+    );
+    engine = new TestEngine(gA);
+    engine.addNamedGraph(gB);
   });
 
   const data: {

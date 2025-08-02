@@ -77,10 +77,7 @@ export default class UpdateStageBuilder extends StageBuilder {
                 return new NoopConsumer();
               }
               return new ActionConsumer(() => {
-                this._dataset.addNamedGraph(
-                  iri,
-                  this._dataset.createGraph(iri)
-                );
+                this._dataset.addNamedGraph(this._dataset.createGraph(iri));
               });
             }
             case "drop": {

@@ -3,12 +3,12 @@ import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
 import { Bindings } from "../../src/rdf/bindings.ts";
-import { getGraph, TestEngine } from "../utils.ts";
+import { createGraph, TestEngine } from "../utils.ts";
 
 describe("Queries with Turtle notation", () => {
   let engine: TestEngine;
   before(() => {
-    const g = getGraph("./tests/data/dblp.nt");
+    const g = createGraph("./tests/data/dblp.nt");
     engine = new TestEngine(g);
   });
 

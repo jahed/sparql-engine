@@ -3,17 +3,18 @@ import { expect } from "chai";
 import { beforeEach, describe, it } from "node:test";
 import { termToString } from "rdf-string";
 import { RDF } from "../../src/utils/rdf.ts";
-import { getGraph, TestEngine } from "../utils.ts";
-
-const GRAPH_IRI = RDF.namedNode("htpp://example.org#some-graph");
+import { createGraph, TestEngine, type TestGraph } from "../utils.ts";
 
 describe("SPARQL UPDATE: DELETE DATA queries", () => {
+  const GRAPH_IRI = RDF.namedNode("http://example.org#some-graph");
+
   let engine: TestEngine;
+  let gA: TestGraph;
   beforeEach(() => {
-    const gA = getGraph(null);
-    const gB = getGraph(null);
+    gA = createGraph();
+    const gB = createGraph(undefined, undefined, GRAPH_IRI);
     engine = new TestEngine(gA);
-    engine.addNamedGraph(GRAPH_IRI, gB);
+    engine.addNamedGraph(gB);
   });
 
   it("should evaluate DELETE DATA queries without a named Graph", async () => {
@@ -22,7 +23,7 @@ describe("SPARQL UPDATE: DELETE DATA queries", () => {
       <https://dblp.org/pers/m/Minier:Thomas> <https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf> <https://dblp.org/rec/conf/esws/MinierSMV18a>
     }`;
 
-    engine._graph._store.addTriple(
+    gA._store.addTriple(
       "https://dblp.org/pers/m/Minier:Thomas",
       "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf",
       "https://dblp.org/rec/conf/esws/MinierSMV18a"
@@ -30,7 +31,7 @@ describe("SPARQL UPDATE: DELETE DATA queries", () => {
 
     for await (const b of engine.execute(query)) {
     }
-    const triples = engine._graph._store.getTriples(
+    const triples = gA._store.getTriples(
       "https://dblp.org/pers/m/Minier:Thomas",
       "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf",
       "https://dblp.org/rec/conf/esws/MinierSMV18a"
