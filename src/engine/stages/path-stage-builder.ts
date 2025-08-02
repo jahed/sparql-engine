@@ -54,7 +54,7 @@ export default abstract class PathStageBuilder extends StageBuilder {
    * @param  iris - List of Graph's iris
    * @return An RDF Graph
    */
-  _getGraph(iris: EngineIRI[]): Graph {
+  async _getGraph(iris: EngineIRI[]): Promise<Graph> {
     if (iris.length === 0) {
       return this._dataset.getDefaultGraph();
     } else if (iris.length === 1) {
@@ -78,10 +78,10 @@ export default abstract class PathStageBuilder extends StageBuilder {
     // create a join pipeline between all property paths using an index join
     const engine = Pipeline.getInstance();
     return triples.reduce((iter, triple) => {
-      return engine.mergeMap(iter, (bindings) => {
+      return engine.mergeMapAsync(iter, async (bindings) => {
         const bounded = boundPathTriple(triple, bindings);
         return engine.map(
-          this._buildIterator(
+          await this._buildIterator(
             bounded.subject,
             bounded.predicate,
             bounded.object,
@@ -101,15 +101,15 @@ export default abstract class PathStageBuilder extends StageBuilder {
    * @param  context - Execution context
    * @return A {@link PipelineStage} which yield set of bindings
    */
-  _buildIterator(
+  async _buildIterator(
     subject: EngineSubject,
     path: PropertyPath,
     obj: EngineObject,
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     const graph =
       context.defaultGraphs.length > 0
-        ? this._getGraph(context.defaultGraphs)
+        ? await this._getGraph(context.defaultGraphs)
         : this._dataset.getDefaultGraph();
     const evaluator = this._executePropertyPath(
       subject,

@@ -50,7 +50,10 @@ export default class GraphStageBuilder extends StageBuilder {
       if (context.namedGraphs.length > 0) {
         namedGraphs = context.namedGraphs;
       } else {
-        namedGraphs = this._dataset.getAllGraphs(true).map((g) => g.iri);
+        namedGraphs = [];
+        for await (const graph of this._dataset.getAllGraphs(true)) {
+          namedGraphs.push(graph.iri);
+        }
       }
       // build a pipeline stage that allows to peek on the first set of input bindings
       return Pipeline.getInstance().peekIf(

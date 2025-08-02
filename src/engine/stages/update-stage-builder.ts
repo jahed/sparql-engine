@@ -90,7 +90,7 @@ export default class UpdateStageBuilder extends StageBuilder {
           const dropNode = update;
           // handle DROP DEFAULT queries
           if ("default" in dropNode.graph && dropNode.graph.default) {
-            return new ActionConsumer(() => {
+            return new ActionConsumer(async () => {
               const defaultGraphIRI = this._dataset.getDefaultGraph().iri;
               if (this._dataset.iris.length < 1) {
                 return new ErrorConsumable(
@@ -101,7 +101,7 @@ export default class UpdateStageBuilder extends StageBuilder {
                 (iri) => !iri.equals(defaultGraphIRI)
               )!;
               this._dataset.setDefaultGraph(
-                this._dataset.getNamedGraph(newDefaultGraphIRI)
+                await this._dataset.getNamedGraph(newDefaultGraphIRI)
               );
             });
           }
@@ -141,7 +141,7 @@ export default class UpdateStageBuilder extends StageBuilder {
           // A COPY query is rewritten into a sequence [CLEAR query, INSERT query]
           const queries = rewriteCopy(update, this._dataset);
           return new ManyConsumers([
-            this._handleClearQuery(queries[0]),
+            await this._handleClearQuery(queries[0]),
             await this._handleInsertDelete(queries[1], context),
           ]);
         }
@@ -149,9 +149,9 @@ export default class UpdateStageBuilder extends StageBuilder {
           // A MOVE query is rewritten into a sequence [CLEAR query, INSERT query, CLEAR query]
           const queries = rewriteMove(update, this._dataset);
           return new ManyConsumers([
-            this._handleClearQuery(queries[0]),
+            await this._handleClearQuery(queries[0]),
             await this._handleInsertDelete(queries[1], context),
-            this._handleClearQuery(queries[2]),
+            await this._handleClearQuery(queries[2]),
           ]);
         }
         default:
@@ -182,7 +182,7 @@ export default class UpdateStageBuilder extends StageBuilder {
     if (update.updateType === "insertdelete") {
       graph =
         "graph" in update && update.graph
-          ? this._dataset.getNamedGraph(update.graph)
+          ? await this._dataset.getNamedGraph(update.graph)
           : null;
       // evaluate the WHERE clause as a classic SELECT query
       const node: Query = {
@@ -202,20 +202,16 @@ export default class UpdateStageBuilder extends StageBuilder {
 
     // build consumers to evaluate DELETE clauses
     if ("delete" in update && update.delete!.length > 0) {
-      consumables = consumables.concat(
-        update.delete!.map((v) => {
-          return this._buildDeleteConsumer(source, v, graph);
-        })
-      );
+      for (const v of update.delete!) {
+        consumables.push(await this._buildDeleteConsumer(source, v, graph));
+      }
     }
 
     // build consumers to evaluate INSERT clauses
     if ("insert" in update && update.insert!.length > 0) {
-      consumables = consumables.concat(
-        update.insert!.map((v) => {
-          return this._buildInsertConsumer(source, v, graph);
-        })
-      );
+      for (const v of update.insert!) {
+        consumables.push(await this._buildInsertConsumer(source, v, graph));
+      }
     }
     return new ManyConsumers(consumables);
   }
@@ -228,16 +224,16 @@ export default class UpdateStageBuilder extends StageBuilder {
    * @param graph - RDF Graph used to insert data
    * @return A consumer used to evaluate a SPARQL INSERT clause
    */
-  _buildInsertConsumer(
+  async _buildInsertConsumer(
     source: PipelineStage<Bindings>,
     group: BgpPattern | GraphQuads,
     graph: Graph | null
-  ): InsertConsumer<Bindings> {
+  ): Promise<InsertConsumer<Bindings>> {
     const tripleSource = construct(source, { template: group.triples });
     if (!graph) {
       graph =
         group.type === "graph" && "name" in group
-          ? this._dataset.getNamedGraph(group.name as IriTerm)
+          ? await this._dataset.getNamedGraph(group.name as IriTerm)
           : this._dataset.getDefaultGraph();
     }
     return new InsertConsumer(tripleSource, graph);
@@ -251,16 +247,16 @@ export default class UpdateStageBuilder extends StageBuilder {
    * @param  graph - RDF Graph used to delete data
    * @return A consumer used to evaluate a SPARQL DELETE clause
    */
-  _buildDeleteConsumer(
+  async _buildDeleteConsumer(
     source: PipelineStage<Bindings>,
     group: BgpPattern | GraphQuads,
     graph: Graph | null
-  ): DeleteConsumer<Bindings> {
+  ): Promise<DeleteConsumer<Bindings>> {
     const tripleSource = construct(source, { template: group.triples });
     if (!graph) {
       graph =
         group.type === "graph" && "name" in group
-          ? this._dataset.getNamedGraph(group.name as IriTerm)
+          ? await this._dataset.getNamedGraph(group.name as IriTerm)
           : this._dataset.getDefaultGraph();
     }
     return new DeleteConsumer(tripleSource, graph);
@@ -272,17 +268,19 @@ export default class UpdateStageBuilder extends StageBuilder {
    * @param query - Parsed query
    * @return A Consumer used to evaluate CLEAR queries
    */
-  _handleClearQuery(query: ClearDropOperation): ClearConsumer<Bindings> {
+  async _handleClearQuery(
+    query: ClearDropOperation
+  ): Promise<ClearConsumer<Bindings>> {
     let graph = null;
     const iris = this._dataset.iris;
     if (query.graph.default) {
       graph = this._dataset.getDefaultGraph();
     } else if (query.graph.all) {
-      graph = this._dataset.getUnionGraph(iris, true);
+      graph = await this._dataset.getUnionGraph(iris, true);
     } else if (query.graph.named) {
-      graph = this._dataset.getUnionGraph(iris, false);
+      graph = await this._dataset.getUnionGraph(iris, false);
     } else {
-      graph = this._dataset.getNamedGraph(query.graph.name!);
+      graph = await this._dataset.getNamedGraph(query.graph.name!);
     }
     return new ClearConsumer(graph);
   }

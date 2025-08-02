@@ -162,7 +162,7 @@ export class TestEngine<G extends Graph = TestGraph> {
     this._dataset.addNamedGraph(graph);
   }
 
-  getNamedGraph(iri: EngineIRI): G {
+  async getNamedGraph(iri: EngineIRI): Promise<G> {
     return this._dataset.getNamedGraph(iri);
   }
 

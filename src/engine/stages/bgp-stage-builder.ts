@@ -83,7 +83,7 @@ export default class BGPStageBuilder extends StageBuilder {
    * @param  iris - List of Graph's iris
    * @return An RDF Graph
    */
-  _getGraph(iris: IriTerm[]): Graph {
+  async _getGraph(iris: IriTerm[]): Promise<Graph> {
     if (iris.length === 0) {
       return this.dataset.getDefaultGraph();
     } else if (iris.length === 1) {
@@ -129,9 +129,12 @@ export default class BGPStageBuilder extends StageBuilder {
       return engine.mergeMapAsync(source, async (value: Bindings) => {
         const iri = value.get(context.defaultGraphs[0].value);
         // if the graph doesn't exist in the dataset, then create one with the createGraph factrory
-        const graphs = this.dataset
-          .getAllGraphs()
-          .filter((g) => g.iri.equals(iri));
+        const graphs = [];
+        for await (const graph of this.dataset.getAllGraphs()) {
+          if (graph.iri.equals(iri)) {
+            graphs.push(graph);
+          }
+        }
         const graph =
           graphs.length > 0
             ? graphs[0]
@@ -161,7 +164,7 @@ export default class BGPStageBuilder extends StageBuilder {
     // select the graph to use for BGP evaluation
     const graph =
       context.defaultGraphs.length > 0
-        ? this._getGraph(context.defaultGraphs)
+        ? await this._getGraph(context.defaultGraphs)
         : this.dataset.getDefaultGraph();
     let iterator = this._buildIterator(source, graph, bgp, context);
 

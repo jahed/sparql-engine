@@ -45,7 +45,7 @@ export default abstract class Dataset<G extends Graph = Graph> {
    * @param  iri - IRI of the Named Graph to retrieve
    * @return The corresponding Named Graph
    */
-  abstract getNamedGraph(iri: NamedNode): G;
+  abstract getNamedGraph(iri: NamedNode): Promise<G>;
 
   /**
    * Delete a Named Graph using its IRI
@@ -67,15 +67,17 @@ export default abstract class Dataset<G extends Graph = Graph> {
    * @param  includeDefault - True if the default graph should be included
    * @return The dynamic union of several graphs in the Dataset
    */
-  getUnionGraph(
+  async getUnionGraph(
     iris: NamedNode[],
     includeDefault: boolean = false
-  ): UnionGraph {
+  ): Promise<UnionGraph> {
     let graphs: G[] = [];
     if (includeDefault) {
       graphs.push(this.getDefaultGraph());
     }
-    graphs = graphs.concat(iris.map((iri) => this.getNamedGraph(iri)));
+    for (const iri of iris) {
+      graphs.push(await this.getNamedGraph(iri));
+    }
     return new UnionGraph(graphs);
   }
 
@@ -84,15 +86,13 @@ export default abstract class Dataset<G extends Graph = Graph> {
    * @param  includeDefault - True if the default graph should be included
    * @return The list of all graphs in the Dataset
    */
-  getAllGraphs(includeDefault: boolean = true): G[] {
-    const graphs: G[] = [];
+  async *getAllGraphs(includeDefault: boolean = true): AsyncGenerator<G> {
     if (includeDefault) {
-      graphs.push(this.getDefaultGraph());
+      yield this.getDefaultGraph();
     }
-    this.iris.forEach((iri) => {
-      graphs.push(this.getNamedGraph(iri));
-    });
-    return graphs;
+    for (const iri of this.iris) {
+      yield this.getNamedGraph(iri);
+    }
   }
 
   /**

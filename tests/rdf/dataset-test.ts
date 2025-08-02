@@ -7,6 +7,7 @@ import HashMapDataset from "@jahed/sparql-engine/rdf/hashmap-dataset.ts";
 import type { EngineIRI, EngineTriple } from "@jahed/sparql-engine/types.ts";
 import { RDF } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
+import assert from "node:assert";
 import { describe, it } from "node:test";
 
 describe("Dataset", () => {
@@ -23,7 +24,7 @@ describe("Dataset", () => {
     addNamedGraph(g: Graph): void {
       throw new Error("Method not implemented.");
     }
-    getNamedGraph(iri: EngineIRI): Graph {
+    async getNamedGraph(iri: EngineIRI): Promise<Graph> {
       throw new Error("Method not implemented.");
     }
     deleteNamedGraph(iri: EngineIRI): void {
@@ -67,17 +68,23 @@ describe("Dataset", () => {
     expect(() => d.addNamedGraph(new TestGraph())).to.throw(Error);
   });
 
-  it('should enforce subclasses to implement a "getNamedGraph" method', () => {
+  it('should enforce subclasses to implement a "getNamedGraph" method', async () => {
     const d = new TestDataset();
-    expect(() => d.getNamedGraph(RDF.namedNode(""))).to.throw(Error);
+    try {
+      await d.getNamedGraph(RDF.namedNode(""));
+      assert.fail("Should throw error.");
+    } catch (error) {
+      assert(error instanceof Error);
+      expect(error.message).to.equal("Method not implemented.");
+    }
   });
 
-  it('should provides a generic "getAllGraphs()" implementation', () => {
+  it('should provides a generic "getAllGraphs()" implementation', async () => {
     const gA = new TestGraph(RDF.namedNode("http://example.org#A"));
     const gB = new TestGraph(RDF.namedNode("http://example.org#B"));
     const d = new HashMapDataset(gA);
     d.addNamedGraph(gB);
-    const all = d.getAllGraphs();
+    const all = await Array.fromAsync(d.getAllGraphs());
     expect(all.length).to.equal(2);
     all.forEach((g) => {
       expect(g.iri).to.be.oneOf([gA.iri, gB.iri]);
@@ -90,16 +97,16 @@ describe("Dataset", () => {
     const d = new HashMapDataset(gA);
     d.addNamedGraph(gB);
 
-    it("should provides an UnionGraph (including the Default Graph)", () => {
-      const union = d.getUnionGraph([gB.iri], true);
+    it("should provides an UnionGraph (including the Default Graph)", async () => {
+      const union = await d.getUnionGraph([gB.iri], true);
       expect(union._graphs.length).to.equal(2);
       union._graphs.forEach((g) => {
         expect(g.iri).to.be.oneOf([gA.iri, gB.iri]);
       });
     });
 
-    it("should provides an UnionGraph (excluding the Default Graph)", () => {
-      const union = d.getUnionGraph([gB.iri], false);
+    it("should provides an UnionGraph (excluding the Default Graph)", async () => {
+      const union = await d.getUnionGraph([gB.iri], false);
       expect(union._graphs.length).to.equal(1);
       expect(union._graphs[0].iri).to.equal(gB.iri);
     });

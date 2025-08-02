@@ -38,6 +38,7 @@
   ],
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.dist.json",
+    "prepack": "rm -f *.tgz && npm run build",
     "format": "prettier -w .",
     "lint": "tsc -p tsconfig.json",
     "test": "npm run test:file -- 'tests/**/*-test.ts'",
@@ -51,11 +52,25 @@
     "rxjs": "^8.0.0-alpha.14",
     "sparqljs": "^3.7.3"
   },
-  "optionalDependencies": {
+  "peerDependencies": {
     "@seald-io/binary-search-tree": "^1.0.3",
     "js-md5": "^0.8.3",
     "lru-cache": "^11.1.0",
     "xml": "^1.0.1"
+  },
+  "peerDependenciesMeta": {
+    "@seald-io/binary-search-tree": {
+      "optional": true
+    },
+    "js-md5": {
+      "optional": true
+    },
+    "lru-cache": {
+      "optional": true
+    },
+    "xml": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@rdfjs/types": "^2.0.1",

@@ -5,15 +5,16 @@ import { beforeEach, describe, it } from "node:test";
 import { termToString } from "rdf-string";
 import { createGraph, TestEngine, type TestGraph } from "../utils.ts";
 
-const GRAPH_A_IRI = RDF.namedNode("http://example.org#some-graph-a");
-const GRAPH_B_IRI = RDF.namedNode("http://example.org#some-graph-b");
-
 describe("SPARQL UPDATE: COPY queries", () => {
+  const GRAPH_A_IRI = RDF.namedNode("http://example.org#some-graph-a");
+  const GRAPH_B_IRI = RDF.namedNode("http://example.org#some-graph-b");
+
   let engine: TestEngine;
   let gA: TestGraph;
+  let gB: TestGraph;
   beforeEach(() => {
     gA = createGraph("./tests/data/dblp.nt", undefined, GRAPH_A_IRI);
-    const gB = createGraph("./tests/data/dblp2.nt", undefined, GRAPH_B_IRI);
+    gB = createGraph("./tests/data/dblp2.nt", undefined, GRAPH_B_IRI);
     engine = new TestEngine(gA);
     engine.addNamedGraph(gB);
   });
@@ -24,13 +25,11 @@ describe("SPARQL UPDATE: COPY queries", () => {
       query: `COPY DEFAULT TO <${termToString(GRAPH_B_IRI)}>`,
       testFun: () => {
         // destination graph should only contains data from the source
-        let triples = engine
-          .getNamedGraph(GRAPH_B_IRI)
-          ._store.getTriples("https://dblp.org/pers/m/Minier:Thomas");
+        let triples = gB._store.getTriples(
+          "https://dblp.org/pers/m/Minier:Thomas"
+        );
         expect(triples.length).to.equal(11);
-        triples = engine
-          .getNamedGraph(GRAPH_B_IRI)
-          ._store.getTriples("https://dblp.org/pers/g/Grall:Arnaud");
+        triples = gB._store.getTriples("https://dblp.org/pers/g/Grall:Arnaud");
         expect(triples.length).to.equal(0);
         // source graph should not be empty
         triples = gA._store.getTriples();
@@ -49,7 +48,7 @@ describe("SPARQL UPDATE: COPY queries", () => {
         triples = gA._store.getTriples("https://dblp.org/pers/m/Minier:Thomas");
         expect(triples.length).to.equal(0);
         // source graph should not be empty
-        triples = engine.getNamedGraph(GRAPH_B_IRI)._store.getTriples();
+        triples = gB._store.getTriples();
         expect(triples.length).to.not.equal(0);
       },
     },

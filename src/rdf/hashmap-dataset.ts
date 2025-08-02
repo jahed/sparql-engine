@@ -40,13 +40,15 @@ export default class HashMapDataset<
     this._namedGraphs.set(termToString(graph.iri), graph);
   }
 
-  getNamedGraph(iri: IriTerm): TGraph {
+  async getNamedGraph(iri: IriTerm): Promise<TGraph> {
     if (iri.equals(this._defaultGraph.iri)) {
       return this.getDefaultGraph();
     }
     const key = termToString(iri);
     if (!this._namedGraphs.has(key)) {
-      throw new Error(`Unknown graph with iri ${key}`);
+      const graph = await this.createGraph(iri);
+      this._namedGraphs.set(key, graph);
+      return graph;
     }
     return this._namedGraphs.get(key)!;
   }

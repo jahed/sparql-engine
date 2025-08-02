@@ -10,9 +10,10 @@ const GRAPH_IRI = RDF.namedNode("htpp://example.org#some-graph");
 describe("SPARQL UPDATE: INSERT DATA queries", () => {
   let engine: TestEngine;
   let gA: TestGraph;
+  let gB: TestGraph;
   beforeEach(() => {
     gA = createGraph();
-    const gB = createGraph(undefined, undefined, GRAPH_IRI);
+    gB = createGraph(undefined, undefined, GRAPH_IRI);
     engine = new TestEngine(gA);
     engine.addNamedGraph(gB);
   });
@@ -48,9 +49,7 @@ describe("SPARQL UPDATE: INSERT DATA queries", () => {
 
     for await (const b of engine.execute(query)) {
     }
-    const triples = engine
-      .getNamedGraph(GRAPH_IRI)
-      ._store.getTriples("http://example/book1", null, null);
+    const triples = gB._store.getTriples("http://example/book1", null, null);
     expect(triples.length).to.equal(1);
     expect(stringToTerm(triples[0].subject)).to.deep.equal(
       RDF.namedNode("http://example/book1")
