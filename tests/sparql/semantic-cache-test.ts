@@ -2,6 +2,7 @@
 import { expect } from "chai";
 import assert from "node:assert";
 import { before, describe, it } from "node:test";
+import { LRUBGPCache } from "../../src/engine/cache/bgp-cache.ts";
 import { Bindings } from "../../src/rdf/bindings.ts";
 import {
   RDF,
@@ -23,7 +24,7 @@ describe("Semantic caching for SPARQL queries", () => {
     SELECT ?s ?p ?o WHERE {
       { ?s ?p ?o } UNION { ?s ?p ?o }
     }`;
-    await engine._builder.useCache();
+    await engine._builder.useCache(new LRUBGPCache(500, 1200 * 60 * 60));
     const results = [];
     for await (const bindings of engine.execute(query)) {
       assert.ok(bindings instanceof Bindings);
@@ -51,7 +52,7 @@ describe("Semantic caching for SPARQL queries", () => {
     SELECT ?s ?p ?o WHERE {
       { ?s ?p ?o } UNION { ?s ?p ?o }
     } LIMIT 10`;
-    await engine._builder.useCache();
+    await engine._builder.useCache(new LRUBGPCache(500, 1200 * 60 * 60));
     const results = [];
     for await (const bindings of engine.execute(query)) {
       assert.ok(bindings instanceof Bindings);
@@ -77,7 +78,7 @@ describe("Semantic caching for SPARQL queries", () => {
     SELECT ?s ?p ?o WHERE {
       { ?s ?p ?o } UNION { ?s ?p ?o }
     } OFFSET 10`;
-    await engine._builder.useCache();
+    await engine._builder.useCache(new LRUBGPCache(500, 1200 * 60 * 60));
     const results = [];
     for await (const bindings of engine.execute(query)) {
       assert.ok(bindings instanceof Bindings);

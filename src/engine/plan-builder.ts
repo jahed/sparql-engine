@@ -141,25 +141,10 @@ export class PlanBuilder {
     this._stageBuilders.set(kind, stageBuilder);
   }
 
-  /**
-   * Enable Basic Graph Patterns semantic caching for SPARQL query evaluation.
-   * The parameter is optional and used to provide your own cache instance.
-   * If left undefined, the query engine will use a {@link LRUBGPCache} with
-   * a maximum of 500 items and a max age of 20 minutes.
-   * @param customCache - (optional) Custom cache instance
-   */
-  async useCache(customCache?: BGPCache): Promise<void> {
-    if (customCache === undefined) {
-      const { LRUBGPCache } = await import("./cache/bgp-cache.ts");
-      this._currentCache = new LRUBGPCache(500, 1200 * 60 * 60);
-    } else {
-      this._currentCache = customCache;
-    }
+  async useCache(cache: BGPCache): Promise<void> {
+    this._currentCache = cache;
   }
 
-  /**
-   * Disable Basic Graph Patterns semantic caching for SPARQL query evaluation.
-   */
   disableCache(): void {
     this._currentCache = null;
   }
