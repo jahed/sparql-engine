@@ -5,13 +5,13 @@ import { createInteger, RDF } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
 import assert from "node:assert";
 import { describe, it } from "node:test";
-import { from } from "rxjs";
 import type { OperationExpression } from "sparqljs";
+import { Pipeline } from "@jahed/sparql-engine/engine/pipeline/pipeline.ts";
 
 describe("Bind operator", () => {
   it("should bind results of valid SPARQL expression to a variable", async () => {
     let nbResults = 0;
-    const source = from([
+    const source = Pipeline.getInstance().from([
       BindingBase.fromObject({
         x: createInteger(1),
         y: createInteger(2),

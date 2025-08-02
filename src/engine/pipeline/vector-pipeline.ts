@@ -105,17 +105,22 @@ export default class VectorPipeline extends PipelineEngine {
     return new VectorStage<T>(Promise.resolve(values));
   }
 
-  from<T>(x: PipelineInput<T>): VectorStage<T> {
+  async getContent<T>(x: PipelineInput<T>): Promise<T[]> {
     if ("getContent" in x) {
-      return new VectorStage<T>((x as VectorStage<T>).getContent());
+      return (x as VectorStage<T>).getContent();
     } else if (Array.isArray(x)) {
-      return new VectorStage<T>(Promise.resolve(x));
-    } else if ("then" in x) {
-      return new VectorStage<T>((x as Promise<T>).then((v) => [v]));
+      return Promise.resolve(x);
+    } else if (x instanceof Promise) {
+      const v = await x;
+      return [v];
     } else if (Symbol.iterator in x) {
-      return new VectorStage<T>(Promise.resolve(Array.from(x as Iterable<T>)));
+      return Promise.resolve(Array.from(x));
     }
-    throw new Error("Invalid argument for VectorPipeline.from: " + x);
+    throw new Error("Invalid argument: " + x);
+  }
+
+  from<T>(x: PipelineInput<T>): VectorStage<T> {
+    return new VectorStage<T>(this.getContent(x));
   }
 
   fromAsync<T>(cb: (input: StreamPipelineInput<T>) => void): VectorStage<T> {
@@ -155,11 +160,13 @@ export default class VectorPipeline extends PipelineEngine {
     );
   }
 
-  merge<T>(...inputs: Array<VectorStage<T>>): VectorStage<T> {
+  merge<T>(
+    ...inputs: Array<VectorStage<T> | PipelineInput<T>>
+  ): VectorStage<T> {
     return new VectorStage<T>(
-      Promise.all(inputs.map((i) => i.getContent())).then((contents: T[][]) => {
-        return flatten(contents);
-      })
+      Promise.all(inputs.map((input) => this.getContent(input))).then(
+        (contents) => flatten(contents)
+      )
     );
   }
 

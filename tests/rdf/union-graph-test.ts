@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 import ExecutionContext from "@jahed/sparql-engine/engine/context/execution-context.ts";
-import RxjsPipeline from "@jahed/sparql-engine/engine/pipeline/rxjs-pipeline.ts";
+import { Pipeline } from "@jahed/sparql-engine/engine/pipeline/pipeline.ts";
 import UnionGraph from "@jahed/sparql-engine/rdf/union-graph.ts";
 import { RDF } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
@@ -101,7 +101,7 @@ describe("Union Graph", () => {
         RDF.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17a"),
         RDF.namedNode("https://dblp.org/rec/conf/esws/MinierMSM17a"),
       ];
-      for await (const b of new RxjsPipeline().from(
+      for await (const b of Pipeline.getInstance().from(
         union.find(triple, new ExecutionContext())
       )) {
         expect(b.subject).to.deep.equal(triple.subject);

@@ -4,7 +4,7 @@ import { BindingBase } from "@jahed/sparql-engine/rdf/bindings.ts";
 import { RDF } from "@jahed/sparql-engine/utils/rdf.ts";
 import { expect } from "chai";
 import { describe, it } from "node:test";
-import { from } from "rxjs";
+import { Pipeline } from "@jahed/sparql-engine/engine/pipeline/pipeline.ts";
 
 describe("Symmetric Hash Join operator", () => {
   it("should perform a join between two sources of bindings", async () => {
@@ -17,11 +17,11 @@ describe("Symmetric Hash Join operator", () => {
     nbEach.set(toto, 0);
     nbEach.set(titi, 0);
     nbEach.set(tata, 0);
-    const left = from([
+    const left = Pipeline.getInstance().from([
       BindingBase.fromObject({ x: toto }),
       BindingBase.fromObject({ x: titi }),
     ]);
-    const right = from([
+    const right = Pipeline.getInstance().from([
       BindingBase.fromObject({
         x: toto,
         y: RDF.literal("1"),
