@@ -46,6 +46,21 @@ export function termToValue<T = unknown>(term: EngineTripleValue): T {
   return term.value as T;
 }
 
+function hexToUint8(hex: string): Uint8Array {
+  return Uint8Array.from(
+    (hex.match(/.{1,2}/g) || []).map((byte) => parseInt(byte, 16))
+  );
+}
+
+function base64ToUint8(base64: string): Uint8Array {
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+}
+
 export function asJS(value: string, type: string | null): any {
   switch (type) {
     case XSD_integer:
@@ -75,9 +90,9 @@ export function asJS(value: string, type: string | null): any {
     case XSD_duration:
       return parseISO(value);
     case XSD_hexBinary:
-      return Buffer.from(value, "hex");
+      return hexToUint8(value);
     case XSD_base64Binary:
-      return Buffer.from(value, "base64");
+      return base64ToUint8(value);
     default:
       return value;
   }
