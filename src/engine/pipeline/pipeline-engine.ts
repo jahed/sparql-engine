@@ -458,11 +458,11 @@ export abstract class PipelineEngine {
     input: PipelineStage<T>,
     count: number,
     predicate: (values: T[]) => boolean,
-    ifCase: (values: T[]) => PipelineStage<O>,
-    elseCase: (values: T[]) => PipelineStage<O>
+    ifCase: (values: T[]) => Promise<PipelineStage<O>>,
+    elseCase: (values: T[]) => Promise<PipelineStage<O>>
   ): PipelineStage<O> {
     const peekable = this.limit(this.clone(input), count);
-    return this.mergeMap(this.collect(peekable), (values) => {
+    return this.mergeMapAsync(this.collect(peekable), (values) => {
       if (predicate(values)) {
         return ifCase(values);
       }

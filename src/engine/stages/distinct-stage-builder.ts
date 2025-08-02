@@ -9,10 +9,10 @@ import StageBuilder from "./stage-builder.ts";
  * A DistinctStageBuilder evaluates DISTINCT modifiers
  */
 export default class DistinctStageBuilder extends StageBuilder {
-  execute(
+  async execute(
     source: PipelineStage<Bindings>,
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     return sparqlDistinct(source);
   }
 }

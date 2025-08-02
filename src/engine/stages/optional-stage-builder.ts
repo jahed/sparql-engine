@@ -11,11 +11,11 @@ import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
  * A OptionalStageBuilder evaluates OPTIONAL clauses
  */
 export default class OptionalStageBuilder extends StageBuilder {
-  execute(
+  async execute(
     source: PipelineStage<Bindings>,
     node: OptionalPattern,
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     return optional(source, node.patterns, this.builder!, context);
   }
 }

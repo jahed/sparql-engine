@@ -9,13 +9,15 @@ import UnionGraph from "./union-graph.ts";
  * @abstract
  */
 export default abstract class Dataset<G extends Graph = Graph> {
-  private _graphFactory: (iri: NamedNode) => G | null;
+  private _graphFactory: (iri: NamedNode) => G | Promise<G>;
 
   /**
    * Constructor
    */
   constructor() {
-    this._graphFactory = () => null;
+    this._graphFactory = () => {
+      throw new Error("Named graphs not supported.");
+    };
   }
 
   abstract get iris(): NamedNode[];
@@ -97,7 +99,7 @@ export default abstract class Dataset<G extends Graph = Graph> {
    * Set the Graph Factory used by te dataset to create new RDF graphs on-demand
    * @param  factory - Graph Factory
    */
-  setGraphFactory(factory: (iri: NamedNode) => G) {
+  setGraphFactory(factory: (iri: NamedNode) => G | Promise<G>) {
     this._graphFactory = factory;
   }
 
@@ -107,13 +109,8 @@ export default abstract class Dataset<G extends Graph = Graph> {
    * @param  iri - IRI of the graph to create
    * @return A new RDF Graph
    */
-  createGraph(iri: NamedNode): G {
-    const graph = this._graphFactory(iri);
-    if (!graph) {
-      throw new Error(
-        `Impossible to create a new Graph with IRI "${iri}". The RDF dataset does not seems to have a graph factory. Please set it using the "setGraphFactory" method.`
-      );
-    }
+  async createGraph(iri: NamedNode): Promise<G> {
+    const graph = await this._graphFactory(iri);
     if (!graph.iri.equals(iri)) {
       const error = new Error("graph.iri must match given iri.");
       console.log({

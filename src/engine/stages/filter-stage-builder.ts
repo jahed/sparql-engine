@@ -13,12 +13,12 @@ import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
  * A FilterStageBuilder evaluates FILTER clauses
  */
 export default class FilterStageBuilder extends StageBuilder {
-  execute(
+  async execute(
     source: PipelineStage<Bindings>,
     filterNode: FilterPattern,
     customFunctions: CustomFunctions,
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     if ("operator" in filterNode.expression) {
       switch ((filterNode.expression as OperationExpression).operator) {
         case "exists":

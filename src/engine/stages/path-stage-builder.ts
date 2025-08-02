@@ -70,11 +70,11 @@ export default abstract class PathStageBuilder extends StageBuilder {
    * @param  context - Execution context
    * @return A {@link PipelineStage} which yield set of bindings from the pipeline of joins
    */
-  execute(
+  async execute(
     source: PipelineStage<Bindings>,
     triples: EnginePathTriple[],
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     // create a join pipeline between all property paths using an index join
     const engine = Pipeline.getInstance();
     return triples.reduce((iter, triple) => {

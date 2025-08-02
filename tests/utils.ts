@@ -171,6 +171,15 @@ export class TestEngine<G extends Graph = TestGraph> {
   }
 
   execute(query: string | Query): PipelineStage<QueryOutput> {
-    return this._builder.build(query);
+    return Pipeline.getInstance().fromAsync(async (input) => {
+      try {
+        for await (const data of await this._builder.build(query)) {
+          input.next(data);
+        }
+        input.complete();
+      } catch (error) {
+        input.error(error);
+      }
+    });
   }
 }

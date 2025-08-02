@@ -16,18 +16,18 @@ import { Bindings } from "../rdf/bindings.ts";
  * @param context - Execution context
  * @return A {@link PipelineStage} which evaluate the OPTIONAL operation
  */
-export default function optional(
+export default async function optional(
   source: PipelineStage<Bindings>,
   patterns: Pattern[],
   builder: PlanBuilder,
   context: ExecutionContext
-): PipelineStage<Bindings> {
+): Promise<PipelineStage<Bindings>> {
   const seenBefore: Bindings[] = [];
   const engine = Pipeline.getInstance();
   const start = engine.tap(source, (bindings: Bindings) => {
     seenBefore.push(bindings);
   });
-  let leftOp = builder._buildWhere(start, patterns, context);
+  let leftOp = await builder._buildWhere(start, patterns, context);
   leftOp = engine.tap(leftOp, (bindings: Bindings) => {
     // remove values that matches a results from seenBefore
     const index = seenBefore.findIndex((b: Bindings) => {

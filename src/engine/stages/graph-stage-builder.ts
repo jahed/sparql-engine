@@ -24,11 +24,11 @@ export default class GraphStageBuilder extends StageBuilder {
    * @param  options - Execution options
    * @return A {@link PipelineStage} used to evaluate a GRAPH clause
    */
-  execute(
+  async execute(
     source: PipelineStage<Bindings>,
     node: GraphPattern,
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     let subquery: Query;
     if (node.patterns[0].type === "query") {
       subquery = node.patterns[0] as Query;
@@ -59,21 +59,28 @@ export default class GraphStageBuilder extends StageBuilder {
         (values) => {
           return values[0].has(node.name.value);
         },
-        (values) => {
+        async (values) => {
           // if the input bindings bound the graph's variable, use it as graph IRI
           const graphIRI = values[0].get(node.name.value) as IriTerm;
           return this._buildIterator(source, graphIRI, subquery, context);
         },
-        () => {
+        async () => {
           // otherwise, execute the subquery using each graph, and bound the graph var to the graph iri
-          return Pipeline.getInstance().merge(
-            ...namedGraphs.map((iri) => {
-              const stage = this._buildIterator(source, iri, subquery, context);
-              return Pipeline.getInstance().map(stage, (bindings) => {
+          const results = [];
+          for (const iri of namedGraphs) {
+            const stage = await this._buildIterator(
+              source,
+              iri,
+              subquery,
+              context
+            );
+            results.push(
+              Pipeline.getInstance().map(stage, (bindings) => {
                 return bindings.extendMany([[node.name.value, iri]]);
-              });
-            })
-          );
+              })
+            );
+          }
+          return Pipeline.getInstance().merge(...results);
         }
       );
     }
@@ -94,7 +101,7 @@ export default class GraphStageBuilder extends StageBuilder {
     iri: IriTerm,
     subquery: Query,
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     const opts = context.clone();
     opts.defaultGraphs = [iri];
     return this._builder!._buildQueryPlan(subquery, opts, source);

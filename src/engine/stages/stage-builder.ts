@@ -32,5 +32,5 @@ export default abstract class StageBuilder {
     this._dataset = dataset;
   }
 
-  abstract execute(...args: any[]): PipelineStage<Bindings>;
+  abstract execute(...args: any[]): Promise<PipelineStage<Bindings>>;
 }

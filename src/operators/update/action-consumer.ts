@@ -13,9 +13,6 @@ export default class ActionConsumer<T> extends Consumable<T> {
   }
 
   execute(): Promise<void> {
-    return new Promise((resolve) => {
-      this._action();
-      resolve();
-    });
+    return Promise.resolve(this._action());
   }
 }

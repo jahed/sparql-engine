@@ -156,7 +156,10 @@ export class PlanBuilder {
    * @param  options  - Execution options
    * @return A {@link PipelineStage} or a {@link Consumable} that can be consumed to evaluate the query.
    */
-  build(query: any, context?: ExecutionContext): PipelineStage<QueryOutput> {
+  async build(
+    query: any,
+    context?: ExecutionContext
+  ): Promise<PipelineStage<QueryOutput>> {
     // If needed, parse the string query into a logical query execution plan
     if (typeof query === "string") {
       query = this._parser.parse(query);
@@ -192,11 +195,11 @@ export class PlanBuilder {
    * @param  source   - Input {@link PipelineStage}
    * @return A {@link PipelineStage} that can be consumed to evaluate the query.
    */
-  _buildQueryPlan(
+  async _buildQueryPlan(
     query: Query,
     context: ExecutionContext,
     source?: PipelineStage<Bindings>
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     const engine = Pipeline.getInstance();
     if (isNull(source) || isUndefined(source)) {
       // build pipeline starting iterator
@@ -248,7 +251,7 @@ export class PlanBuilder {
     // Handles WHERE clause
     let graphIterator: PipelineStage<Bindings>;
     if (query.where?.length) {
-      graphIterator = this._buildWhere(source, query.where, context);
+      graphIterator = await this._buildWhere(source, query.where, context);
     } else {
       graphIterator = engine.of(new BindingBase());
     }
@@ -272,27 +275,18 @@ export class PlanBuilder {
     // Handles SPARQL aggregations
     if ("group" in query || aggregates.length > 0) {
       // Handles GROUP BY
-      graphIterator = this._stageBuilders
+      graphIterator = await this._stageBuilders
         .get(SPARQL_OPERATION.AGGREGATE)!
-        .execute(
-          graphIterator,
-          query,
-          context,
-          this._customFunctions
-        ) as PipelineStage<Bindings>;
+        .execute(graphIterator, query, context, this._customFunctions);
     }
 
     if (aggregates.length > 0) {
       // Handles SPARQL aggregation functions
-      graphIterator = aggregates.reduce(
-        (prev: PipelineStage<Bindings>, agg) => {
-          const op = this._stageBuilders
-            .get(SPARQL_OPERATION.BIND)!
-            .execute(prev, agg, this._customFunctions, context);
-          return op as PipelineStage<Bindings>;
-        },
-        graphIterator
-      );
+      for (const agg of aggregates) {
+        graphIterator = await this._stageBuilders
+          .get(SPARQL_OPERATION.BIND)!
+          .execute(graphIterator, agg, this._customFunctions, context);
+      }
     }
 
     // Handles ORDER BY
@@ -302,9 +296,9 @@ export class PlanBuilder {
           "A PlanBuilder cannot evaluate SPARQL ORDER BY clauses without a StageBuilder for it"
         );
       }
-      graphIterator = this._stageBuilders
+      graphIterator = await this._stageBuilders
         .get(SPARQL_OPERATION.ORDER_BY)!
-        .execute(graphIterator, query.order!) as PipelineStage<Bindings>;
+        .execute(graphIterator, query.order!);
     }
 
     switch (query.queryType) {
@@ -337,9 +331,9 @@ export class PlanBuilder {
           "A PlanBuilder cannot evaluate a DISTINCT clause without a StageBuilder for it"
         );
       }
-      graphIterator = this._stageBuilders
+      graphIterator = await this._stageBuilders
         .get(SPARQL_OPERATION.DISTINCT)!
-        .execute(graphIterator, context) as PipelineStage<Bindings>;
+        .execute(graphIterator, context);
     }
 
     // Add offsets and limits if requested
@@ -360,11 +354,11 @@ export class PlanBuilder {
    * @param  options  - Execution options
    * @return A {@link PipelineStage} used to evaluate the WHERE clause
    */
-  _buildWhere(
+  async _buildWhere(
     source: PipelineStage<Bindings>,
     groups: Pattern[],
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     groups = sortBy(groups, (g) => {
       switch (g.type) {
         case "graph":
@@ -403,9 +397,11 @@ export class PlanBuilder {
     }
     groups = newGroups;
 
-    return groups.reduce((source, group) => {
-      return this._buildGroup(source, group, context);
-    }, source);
+    for (const group of groups) {
+      source = await this._buildGroup(source, group, context);
+    }
+
+    return source;
   }
 
   /**
@@ -415,11 +411,11 @@ export class PlanBuilder {
    * @param  options - Execution options
    * @return A {@link PipelineStage} used to evaluate the SPARQL Group
    */
-  _buildGroup(
+  async _buildGroup(
     source: PipelineStage<Bindings>,
     group: Pattern,
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     const engine = Pipeline.getInstance();
     // Reset flags on the options for child iterators
     let childContext = context.clone();
@@ -439,21 +435,15 @@ export class PlanBuilder {
               "A PlanBuilder cannot evaluate property paths without a Stage Builder for it"
             );
           }
-          source = this._stageBuilders
+          source = await this._stageBuilders
             .get(SPARQL_OPERATION.PROPERTY_PATH)!
-            .execute(source, pathTriples, context) as PipelineStage<Bindings>;
+            .execute(source, pathTriples, context);
         }
 
         // delegate remaining BGP evaluation to the dedicated executor
-        let iter = this._stageBuilders
+        return await this._stageBuilders
           .get(SPARQL_OPERATION.BGP)!
-          .execute(
-            source,
-            classicTriples,
-            childContext
-          ) as PipelineStage<Bindings>;
-
-        return iter;
+          .execute(source, classicTriples, childContext);
       case "query":
         return this._buildQueryPlan(group, childContext, source);
       case "graph":
@@ -465,7 +455,7 @@ export class PlanBuilder {
         // delegate GRAPH evaluation to an executor
         return this._stageBuilders
           .get(SPARQL_OPERATION.GRAPH)!
-          .execute(source, group, childContext) as PipelineStage<Bindings>;
+          .execute(source, group, childContext);
       case "service":
         if (!this._stageBuilders.has(SPARQL_OPERATION.SERVICE)) {
           throw new Error(
@@ -474,7 +464,7 @@ export class PlanBuilder {
         }
         return this._stageBuilders
           .get(SPARQL_OPERATION.SERVICE)!
-          .execute(source, group, childContext) as PipelineStage<Bindings>;
+          .execute(source, group, childContext);
       case "group":
         return this._buildWhere(source, group.patterns, childContext);
       case "optional":
@@ -485,7 +475,7 @@ export class PlanBuilder {
         }
         return this._stageBuilders
           .get(SPARQL_OPERATION.OPTIONAL)!
-          .execute(source, group, childContext) as PipelineStage<Bindings>;
+          .execute(source, group, childContext);
       case "union":
         if (!this._stageBuilders.has(SPARQL_OPERATION.UNION)) {
           throw new Error(
@@ -494,7 +484,7 @@ export class PlanBuilder {
         }
         return this._stageBuilders
           .get(SPARQL_OPERATION.UNION)!
-          .execute(source, group, childContext) as PipelineStage<Bindings>;
+          .execute(source, group, childContext);
       case "minus":
         if (!this._stageBuilders.has(SPARQL_OPERATION.MINUS)) {
           throw new Error(
@@ -503,7 +493,7 @@ export class PlanBuilder {
         }
         return this._stageBuilders
           .get(SPARQL_OPERATION.MINUS)!
-          .execute(source, group, childContext) as PipelineStage<Bindings>;
+          .execute(source, group, childContext);
       case "filter":
         if (!this._stageBuilders.has(SPARQL_OPERATION.FILTER)) {
           throw new Error(
@@ -512,12 +502,7 @@ export class PlanBuilder {
         }
         return this._stageBuilders
           .get(SPARQL_OPERATION.FILTER)!
-          .execute(
-            source,
-            group,
-            this._customFunctions,
-            childContext
-          ) as PipelineStage<Bindings>;
+          .execute(source, group, this._customFunctions, childContext);
       case "bind":
         if (!this._stageBuilders.has(SPARQL_OPERATION.BIND)) {
           throw new Error(
@@ -526,12 +511,7 @@ export class PlanBuilder {
         }
         return this._stageBuilders
           .get(SPARQL_OPERATION.BIND)!
-          .execute(
-            source,
-            group,
-            this._customFunctions,
-            childContext
-          ) as PipelineStage<Bindings>;
+          .execute(source, group, this._customFunctions, childContext);
       default:
         throw new Error(
           `Unsupported SPARQL group pattern found in query: ${group.type}`
@@ -548,27 +528,31 @@ export class PlanBuilder {
    * @param options - Execution options
    * @return A {@link PipelineStage} which evaluates a SPARQL query with VALUES clause(s)
    */
-  _buildValues(
+  async _buildValues(
     source: PipelineStage<Bindings>,
     groups: Pattern[],
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     let [values, others] = partition(groups, (g) => g.type === "values");
     const bindingsLists = values.map((g) => g.values);
     // for each VALUES clause
-    const iterators = bindingsLists.map((bList) => {
+    const iterators: PipelineStage<Bindings>[] = [];
+    for (const bList of bindingsLists) {
       // for each value to bind in the VALUES clause
-      const unionBranches = bList.map((b) => {
+      const unionBranches = [];
+      for (const b of bList) {
         const bindings = BindingBase.fromValuePatternRow(b);
         // BIND each group with the set of bindings and then evaluates it
         const temp = others.map((g) => deepApplyBindings(g, bindings));
-        return extendByBindings(
-          this._buildWhere(source, temp, context),
-          bindings
+        unionBranches.push(
+          extendByBindings(
+            await this._buildWhere(source, temp, context),
+            bindings
+          )
         );
-      });
-      return Pipeline.getInstance().merge(...unionBranches);
-    });
+      }
+      iterators.push(Pipeline.getInstance().merge(...unionBranches));
+    }
     // Users may use more than one VALUES clause
     if (iterators.length > 1) {
       return Pipeline.getInstance().merge(...iterators);

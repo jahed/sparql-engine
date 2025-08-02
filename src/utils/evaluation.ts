@@ -16,13 +16,13 @@ import type { EngineTriple } from "../types.ts";
  * @param cache - Cache used
  * @return A pipeline stage that produces the evaluation results
  */
-export function cacheEvalBGP(
+export async function cacheEvalBGP(
   patterns: EngineTriple[],
   graph: Graph,
   cache: BGPCache,
   builder: BGPStageBuilder,
   context: ExecutionContext
-): PipelineStage<Bindings> {
+): Promise<PipelineStage<Bindings>> {
   const bgp = {
     patterns,
     graphIRI: graph.iri,

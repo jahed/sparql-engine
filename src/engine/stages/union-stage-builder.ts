@@ -11,15 +11,17 @@ import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
  * A UnionStageBuilder evaluates UNION clauses
  */
 export default class UnionStageBuilder extends StageBuilder {
-  execute(
+  async execute(
     source: PipelineStage<Bindings>,
     node: GroupPattern,
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
-    return Pipeline.getInstance().merge(
-      ...node.patterns.map((patternToken) => {
-        return this.builder!._buildGroup(source, patternToken, context);
-      })
-    );
+  ): Promise<PipelineStage<Bindings>> {
+    const results: PipelineStage<Bindings>[] = [];
+    for (const patternToken of node.patterns) {
+      results.push(
+        await this.builder!._buildGroup(source, patternToken, context)
+      );
+    }
+    return Pipeline.getInstance().merge(...results);
   }
 }

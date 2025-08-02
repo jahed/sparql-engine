@@ -11,11 +11,11 @@ import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
  * A OrderByStageBuilder evaluates ORDER BY clauses
  */
 export default class OrderByStageBuilder extends StageBuilder {
-  execute(
+  async execute(
     source: PipelineStage<Bindings>,
     orders: Ordering[],
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     return orderby(source, orders);
   }
 }

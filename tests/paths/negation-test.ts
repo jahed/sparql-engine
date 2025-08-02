@@ -66,8 +66,15 @@ describe("SPARQL property paths: Negated property sets", () => {
   ];
 
   data.forEach((d) => {
-    it(`should not evaluate negated "${d.name}" `, () => {
-      expect(() => engine.execute(d.query)).to.throw();
+    it(`should not evaluate negated "${d.name}" `, async () => {
+      try {
+        for await (const data of engine.execute(d.query)) {
+        }
+        assert.fail("Expected error.");
+      } catch (error) {
+        assert(error instanceof Error);
+        expect(error.message).to.include("Parse error on line 6:");
+      }
     });
   });
 

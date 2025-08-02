@@ -24,11 +24,11 @@ export default class ServiceStageBuilder extends StageBuilder {
    * @param  options - Execution options
    * @return A {@link PipelineStage} used to evaluate a SERVICE clause
    */
-  execute(
+  async execute(
     source: PipelineStage<Bindings>,
     node: ServicePattern,
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     let subquery: Query;
     if (node.patterns[0].type === "query") {
       subquery = node.patterns[0] as Query;
@@ -42,12 +42,11 @@ export default class ServiceStageBuilder extends StageBuilder {
       };
     }
     const iri = node.name as IriTerm;
-    // auto-add the graph used to evaluate the SERVICE close if it is missing from the dataset
     if (
-      this.dataset.getDefaultGraph().iri !== iri &&
+      !this.dataset.getDefaultGraph().iri.equals(iri) &&
       !this.dataset.hasNamedGraph(iri)
     ) {
-      const graph = this.dataset.createGraph(iri);
+      const graph = await this.dataset.createGraph(iri);
       this.dataset.addNamedGraph(graph);
     }
     let handler = undefined;
@@ -57,7 +56,7 @@ export default class ServiceStageBuilder extends StageBuilder {
       };
     }
     return Pipeline.getInstance().catch<Bindings, Bindings>(
-      this._buildIterator(source, iri, subquery, context),
+      await this._buildIterator(source, iri, subquery, context),
       handler
     );
   }
@@ -71,12 +70,12 @@ export default class ServiceStageBuilder extends StageBuilder {
    * @param options   - Execution options
    * @return A {@link PipelineStage} used to evaluate a SERVICE clause
    */
-  _buildIterator(
+  async _buildIterator(
     source: PipelineStage<Bindings>,
     iri: IriTerm,
     subquery: Query,
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     const opts = context.clone();
     opts.defaultGraphs = [iri];
     return this._builder!._buildQueryPlan(subquery, opts, source);

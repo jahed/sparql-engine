@@ -78,7 +78,7 @@ function rewriteSolutions(
  * @param  context - Query execution context
  * @return A pipeline stage which evaluates the query.
  */
-export default function rewritingOp(
+export default async function rewritingOp(
   graph: Graph,
   bgpBucket: EngineTriple[][],
   rewritingTable: Map<number, Bindings>,
@@ -90,15 +90,15 @@ export default function rewritingOp(
     // partition the BGPs that can be evaluated using the cache from the others
     const stages: PipelineStage<Bindings>[] = [];
     const others: EngineTriple[][] = [];
-    bgpBucket.forEach((patterns) => {
+    for (const patterns of bgpBucket) {
       if (context.cache!.has({ patterns, graphIRI: graph.iri })) {
         stages.push(
-          cacheEvalBGP(patterns, graph, context.cache!, builder, context)
+          await cacheEvalBGP(patterns, graph, context.cache!, builder, context)
         );
       } else {
         others.push(patterns);
       }
-    });
+    }
     // merge all sources from the cache first, and then the evaluation of bgp that are not in the cache
     source = Pipeline.getInstance().merge(
       Pipeline.getInstance().merge(...stages),

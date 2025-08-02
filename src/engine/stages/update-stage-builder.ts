@@ -40,123 +40,127 @@ export default class UpdateStageBuilder extends StageBuilder {
    * @param options - Execution options
    * @return A Consumable used to evaluatethe set of update queries
    */
-  execute(
+  async execute(
     updates: Array<UpdateOperation>,
     context: ExecutionContext
-  ): Consumable<Bindings> {
-    let queries;
-    return new ManyConsumers(
-      updates.map((update) => {
-        if ("updateType" in update) {
-          switch (update.updateType) {
-            case "insert":
-            case "delete":
-            case "insertdelete":
-              return this._handleInsertDelete(update, context);
-            default:
-              return new ErrorConsumable(
-                `Unsupported SPARQL UPDATE query: ${update.updateType}`
-              );
+  ): Promise<Consumable<Bindings>> {
+    const results = [];
+    for (const update of updates) {
+      results.push(await this.executeUpdate(update, context));
+    }
+    return new ManyConsumers(results);
+  }
+
+  private async executeUpdate(
+    update: UpdateOperation,
+    context: ExecutionContext
+  ): Promise<Consumable<Bindings>> {
+    if ("updateType" in update) {
+      switch (update.updateType) {
+        case "insert":
+        case "delete":
+        case "insertdelete":
+          return this._handleInsertDelete(update, context);
+        default:
+          return new ErrorConsumable(
+            `Unsupported SPARQL UPDATE query: ${update.updateType}`
+          );
+      }
+    } else if ("type" in update) {
+      switch (update.type) {
+        case "create": {
+          const createNode = update;
+          const iri = createNode.graph.name ? createNode.graph.name : undefined;
+          if (!iri) {
+            return new NoopConsumer();
           }
-        } else if ("type" in update) {
-          switch (update.type) {
-            case "create": {
-              const createNode = update;
-              const iri = createNode.graph.name
-                ? createNode.graph.name
-                : undefined;
-              if (!iri) {
-                return new NoopConsumer();
-              }
-              if (this._dataset.hasNamedGraph(iri)) {
-                if (!createNode.silent) {
-                  return new ErrorConsumable(
-                    `Cannot create the Graph with iri ${iri} as it already exists in the RDF dataset`
-                  );
-                }
-                return new NoopConsumer();
-              }
-              return new ActionConsumer(() => {
-                this._dataset.addNamedGraph(this._dataset.createGraph(iri));
-              });
-            }
-            case "drop": {
-              const dropNode = update;
-              // handle DROP DEFAULT queries
-              if ("default" in dropNode.graph && dropNode.graph.default) {
-                return new ActionConsumer(() => {
-                  const defaultGraphIRI = this._dataset.getDefaultGraph().iri;
-                  if (this._dataset.iris.length < 1) {
-                    return new ErrorConsumable(
-                      `Cannot drop the default Graph with iri ${iri} as it would leaves the RDF dataset empty without a default graph`
-                    );
-                  }
-                  const newDefaultGraphIRI = this._dataset.iris.find(
-                    (iri) => iri !== defaultGraphIRI
-                  )!;
-                  this._dataset.setDefaultGraph(
-                    this._dataset.getNamedGraph(newDefaultGraphIRI)
-                  );
-                });
-              }
-              // handle DROP ALL queries
-              if ("all" in dropNode.graph && dropNode.graph.all) {
-                return new ActionConsumer(() => {
-                  this._dataset.iris.forEach((iri) =>
-                    this._dataset.deleteNamedGraph(iri)
-                  );
-                });
-              }
-              // handle DROP GRAPH queries
-              const iri = dropNode.graph.name;
-              if (!iri) {
-                return new NoopConsumer();
-              }
-              if (!this._dataset.hasNamedGraph(iri)) {
-                if (!dropNode.silent) {
-                  return new ErrorConsumable(
-                    `Cannot drop the Graph with iri ${iri} as it doesn't exists in the RDF dataset`
-                  );
-                }
-                return new NoopConsumer();
-              }
-              return new ActionConsumer(() => {
-                this._dataset.deleteNamedGraph(iri);
-              });
-            }
-            case "clear":
-              return this._handleClearQuery(update);
-            case "add":
-              return this._handleInsertDelete(
-                rewriteAdd(update, this._dataset),
-                context
-              );
-            case "copy":
-              // A COPY query is rewritten into a sequence [CLEAR query, INSERT query]
-              queries = rewriteCopy(update, this._dataset);
-              return new ManyConsumers([
-                this._handleClearQuery(queries[0]),
-                this._handleInsertDelete(queries[1], context),
-              ]);
-            case "move":
-              // A MOVE query is rewritten into a sequence [CLEAR query, INSERT query, CLEAR query]
-              queries = rewriteMove(update, this._dataset);
-              return new ManyConsumers([
-                this._handleClearQuery(queries[0]),
-                this._handleInsertDelete(queries[1], context),
-                this._handleClearQuery(queries[2]),
-              ]);
-            default:
+          if (this._dataset.hasNamedGraph(iri)) {
+            if (!createNode.silent) {
               return new ErrorConsumable(
-                `Unsupported SPARQL UPDATE query: ${update.type}`
+                `Cannot create the Graph with iri ${iri} as it already exists in the RDF dataset`
               );
+            }
+            return new NoopConsumer();
           }
+          return new ActionConsumer(async () => {
+            this._dataset.addNamedGraph(await this._dataset.createGraph(iri));
+          });
         }
-        return new ErrorConsumable(
-          `Unsupported SPARQL UPDATE query: ${update}`
-        );
-      })
-    );
+        case "drop": {
+          const dropNode = update;
+          // handle DROP DEFAULT queries
+          if ("default" in dropNode.graph && dropNode.graph.default) {
+            return new ActionConsumer(() => {
+              const defaultGraphIRI = this._dataset.getDefaultGraph().iri;
+              if (this._dataset.iris.length < 1) {
+                return new ErrorConsumable(
+                  `Cannot drop the default Graph with iri ${iri} as it would leaves the RDF dataset empty without a default graph`
+                );
+              }
+              const newDefaultGraphIRI = this._dataset.iris.find(
+                (iri) => !iri.equals(defaultGraphIRI)
+              )!;
+              this._dataset.setDefaultGraph(
+                this._dataset.getNamedGraph(newDefaultGraphIRI)
+              );
+            });
+          }
+          // handle DROP ALL queries
+          if ("all" in dropNode.graph && dropNode.graph.all) {
+            return new ActionConsumer(() => {
+              this._dataset.iris.forEach((iri) =>
+                this._dataset.deleteNamedGraph(iri)
+              );
+            });
+          }
+          // handle DROP GRAPH queries
+          const iri = dropNode.graph.name;
+          if (!iri) {
+            return new NoopConsumer();
+          }
+          if (!this._dataset.hasNamedGraph(iri)) {
+            if (!dropNode.silent) {
+              return new ErrorConsumable(
+                `Cannot drop the Graph with iri ${iri} as it doesn't exists in the RDF dataset`
+              );
+            }
+            return new NoopConsumer();
+          }
+          return new ActionConsumer(() => {
+            this._dataset.deleteNamedGraph(iri);
+          });
+        }
+        case "clear":
+          return this._handleClearQuery(update);
+        case "add":
+          return this._handleInsertDelete(
+            rewriteAdd(update, this._dataset),
+            context
+          );
+        case "copy": {
+          // A COPY query is rewritten into a sequence [CLEAR query, INSERT query]
+          const queries = rewriteCopy(update, this._dataset);
+          return new ManyConsumers([
+            this._handleClearQuery(queries[0]),
+            await this._handleInsertDelete(queries[1], context),
+          ]);
+        }
+        case "move": {
+          // A MOVE query is rewritten into a sequence [CLEAR query, INSERT query, CLEAR query]
+          const queries = rewriteMove(update, this._dataset);
+          return new ManyConsumers([
+            this._handleClearQuery(queries[0]),
+            await this._handleInsertDelete(queries[1], context),
+            this._handleClearQuery(queries[2]),
+          ]);
+        }
+        default:
+          return new ErrorConsumable(
+            `Unsupported SPARQL UPDATE query: ${update.type}`
+          );
+      }
+    }
+    return new ErrorConsumable(`Unsupported SPARQL UPDATE query: ${update}`);
   }
 
   /**
@@ -166,10 +170,10 @@ export default class UpdateStageBuilder extends StageBuilder {
    * @param options - Execution options
    * @return A Consumer used to evaluate SPARQL UPDATE queries
    */
-  _handleInsertDelete(
+  async _handleInsertDelete(
     update: InsertDeleteOperation,
     context: ExecutionContext
-  ): Consumable<Bindings> {
+  ): Promise<Consumable<Bindings>> {
     const engine = Pipeline.getInstance();
     let source: PipelineStage<Bindings> = engine.of(new BindingBase());
     let graph: Graph | null = null;
@@ -190,7 +194,7 @@ export default class UpdateStageBuilder extends StageBuilder {
         // copy the FROM clause from the original UPDATE query
         from: update.using,
       };
-      source = this._builder!._buildQueryPlan(node, context);
+      source = await this._builder!._buildQueryPlan(node, context);
     }
 
     // clone the source first
@@ -230,7 +234,7 @@ export default class UpdateStageBuilder extends StageBuilder {
     graph: Graph | null
   ): InsertConsumer<Bindings> {
     const tripleSource = construct(source, { template: group.triples });
-    if (graph === null) {
+    if (!graph) {
       graph =
         group.type === "graph" && "name" in group
           ? this._dataset.getNamedGraph(group.name as IriTerm)
@@ -253,7 +257,7 @@ export default class UpdateStageBuilder extends StageBuilder {
     graph: Graph | null
   ): DeleteConsumer<Bindings> {
     const tripleSource = construct(source, { template: group.triples });
-    if (graph === null) {
+    if (!graph) {
       graph =
         group.type === "graph" && "name" in group
           ? this._dataset.getNamedGraph(group.name as IriTerm)

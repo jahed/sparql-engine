@@ -30,8 +30,8 @@ export default function exists(
   const defaultValue: Bindings = new BindingBase();
   defaultValue.setProperty("exists", false);
   const engine = Pipeline.getInstance();
-  let evaluator = engine.mergeMap(source, (bindings: Bindings) => {
-    let op = builder._buildWhere(engine.of(bindings), groups, context);
+  let evaluator = engine.mergeMapAsync(source, async (bindings: Bindings) => {
+    let op = await builder._buildWhere(engine.of(bindings), groups, context);
     op = engine.defaultValues(op, defaultValue);
     op = engine.first(op);
     return engine.map(op, (b: Bindings) => {

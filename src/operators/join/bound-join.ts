@@ -58,9 +58,9 @@ export default function boundJoin(
   if (context.hasProperty(ContextSymbols.BOUND_JOIN_BUFFER_SIZE)) {
     bufferSize = context.getProperty(ContextSymbols.BOUND_JOIN_BUFFER_SIZE);
   }
-  return Pipeline.getInstance().mergeMap(
+  return Pipeline.getInstance().mergeMapAsync(
     Pipeline.getInstance().bufferCount(source, bufferSize),
-    (bucket) => {
+    async (bucket) => {
       // simple case: first join in the pipeline
       if (bucket.length === 1 && bucket[0].isEmpty) {
         if (context.cachingEnabled()) {
@@ -115,7 +115,7 @@ export default function boundJoin(
 
         // first, evaluates the bucket of partially bounded BGPs using a bound join
         if (bgpBucket.length > 0) {
-          boundJoinStage = rewritingOp(
+          boundJoinStage = await rewritingOp(
             graph,
             bgpBucket,
             rewritingTable,

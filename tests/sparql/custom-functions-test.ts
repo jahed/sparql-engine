@@ -154,6 +154,16 @@ describe("SPARQL custom operators", () => {
       BIND(test:REVERSE(?thomas) as ?reversed) .
     }
     `;
-    expect(() => engine.execute(query)).to.throw(Error);
+
+    try {
+      for await (const data of engine.execute(query)) {
+      }
+      assert.fail("Expected error.");
+    } catch (error) {
+      assert(error instanceof Error);
+      expect(error.message).to.equal(
+        "Custom function could not be found: http://test.com#REVERSE"
+      );
+    }
   });
 });

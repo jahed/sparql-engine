@@ -11,12 +11,12 @@ import StageBuilder from "./stage-builder.ts";
  * A BindStageBuilder evaluates BIND clauses
  */
 export default class BindStageBuilder extends StageBuilder {
-  execute(
+  async execute(
     source: PipelineStage<Bindings>,
     bindNode: BindPattern,
     customFunctions: CustomFunctions,
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     return bind(
       source,
       bindNode.variable,

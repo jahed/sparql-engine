@@ -12,13 +12,13 @@ import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
  * A MinusStageBuilder evaluates MINUS clauses
  */
 export default class MinusStageBuilder extends StageBuilder {
-  execute(
+  async execute(
     source: PipelineStage<Bindings>,
     node: GroupPattern,
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     const engine = Pipeline.getInstance();
-    const rightSource = this.builder!._buildWhere(
+    const rightSource = await this.builder!._buildWhere(
       engine.of(new BindingBase()),
       node.patterns,
       context

@@ -47,12 +47,12 @@ function bgpEvaluation(
   context: ExecutionContext
 ) {
   const engine = Pipeline.getInstance();
-  return engine.mergeMap(source, (bindings: Bindings) => {
+  return engine.mergeMapAsync(source, async (bindings: Bindings) => {
     let boundedBGP = bgp.map((t) => bindings.bound(t));
     // check the cache
     let iterator;
     if (context.cachingEnabled()) {
-      iterator = cacheEvalBGP(
+      iterator = await cacheEvalBGP(
         boundedBGP,
         graph,
         context.cache!,
@@ -99,11 +99,11 @@ export default class BGPStageBuilder extends StageBuilder {
    * @param  options   - Execution options
    * @return A {@link PipelineStage} used to evaluate a Basic Graph pattern
    */
-  execute(
+  async execute(
     source: PipelineStage<Bindings>,
     patterns: EngineTriple[],
     context: ExecutionContext
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     // avoids sending a request with an empty array
     if (patterns.length === 0) return source;
 
@@ -126,15 +126,17 @@ export default class BGPStageBuilder extends StageBuilder {
       isVariable(context.defaultGraphs[0])
     ) {
       const engine = Pipeline.getInstance();
-      return engine.mergeMap(source, (value: Bindings) => {
+      return engine.mergeMapAsync(source, async (value: Bindings) => {
         const iri = value.get(context.defaultGraphs[0].value);
         // if the graph doesn't exist in the dataset, then create one with the createGraph factrory
-        const graphs = this.dataset.getAllGraphs().filter((g) => g.iri === iri);
+        const graphs = this.dataset
+          .getAllGraphs()
+          .filter((g) => g.iri.equals(iri));
         const graph =
           graphs.length > 0
             ? graphs[0]
             : iri && isIRI(iri)
-              ? this.dataset.createGraph(iri)
+              ? await this.dataset.createGraph(iri)
               : null;
         if (graph) {
           let iterator = this._buildIterator(

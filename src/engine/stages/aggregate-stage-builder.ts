@@ -23,12 +23,12 @@ export default class AggregateStageBuilder extends StageBuilder {
    * @param options - Execution options
    * @return A {@link PipelineStage} which evaluate SPARQL aggregations
    */
-  execute(
+  async execute(
     source: PipelineStage<Bindings>,
     query: Query,
     context: ExecutionContext,
     customFunctions?: CustomFunctions
-  ): PipelineStage<Bindings> {
+  ): Promise<PipelineStage<Bindings>> {
     let iterator = source;
     // group bindings using the GROUP BY clause
     // WARNING: an empty GROUP BY clause will create a single group with all bindings
