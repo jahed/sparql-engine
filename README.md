@@ -5,8 +5,6 @@
 
 SPARQL query engine for servers and web browsers.
 
-## Acknowledgements
-
 This project is a continuation of [Callidon/sparql-engine](https://github.com/Callidon/sparql-engine) which is no longer maintained. For additional history, check out that project's repository.
 
 The aim of this project is to use newer Web APIs, language features, and make the project easier to use and maintain.
@@ -15,6 +13,18 @@ The aim of this project is to use newer Web APIs, language features, and make th
 
 ```sh
 npm install @jahed/sparql-engine
+```
+
+Override `rdf-data-factory` to use v2 in your `package.json`.
+
+```json
+{
+  "overrides": {
+    "sparqljs": {
+      "rdf-data-factory": "^2"
+    }
+  }
+}
 ```
 
 ## Usage
