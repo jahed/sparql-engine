@@ -49,13 +49,13 @@
     "lodash-es": "^4.17.21",
     "rdf-data-factory": "^2.0.2",
     "rdf-string": "^2.0.1",
-    "rxjs": "^8.0.0-alpha.14",
     "sparqljs": "^3.7.3"
   },
   "peerDependencies": {
     "@seald-io/binary-search-tree": "^1.0.3",
     "js-md5": "^0.8.3",
     "lru-cache": "^11.1.0",
+    "rxjs": "^8.0.0-alpha.14",
     "xml": "^1.0.1"
   },
   "peerDependenciesMeta": {
@@ -66,6 +66,9 @@
       "optional": true
     },
     "lru-cache": {
+      "optional": true
+    },
+    "rxjs": {
       "optional": true
     },
     "xml": {

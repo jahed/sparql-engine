@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 import { PipelineEngine } from "./pipeline-engine.ts";
-import RxjsPipeline from "./rxjs-pipeline.ts";
+import VectorPipeline from "./vector-pipeline.ts";
 
 // current pipeline engine used for processing bindings
-let _currentEngine: PipelineEngine = new RxjsPipeline();
+let _currentEngine: PipelineEngine = new VectorPipeline();
 
 /**
  * Singleton class used to access the current pipeline engine

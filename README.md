@@ -67,6 +67,18 @@ try {
 }
 ```
 
+## Alternative Pipelines
+
+Pipelines are used to process results. To use an alternative pipeline, change it before doing anything else with the engine.
+
+```ts
+import { Pipeline } from "@jahed/sparql-engine/engine/pipeline/pipeline.ts"
+import RxjsPipeline from from "@jahed/sparql-engine/engine/pipeline/rxjs-pipeline.ts"
+
+// Install rxjs to use the RxjsPipeline.
+Pipeline.setInstance(new RxjsPipeline());
+```
+
 ## License
 
 [MIT](LICENSE).
