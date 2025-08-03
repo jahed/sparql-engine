@@ -44,7 +44,7 @@
     "test:file": "node --disable-warning=ExperimentalWarning --experimental-strip-types --experimental-test-isolation=none --test-timeout=5000 --test"
   },
   "engines": {
-    "node": ">=20.9.0"
+    "node": ">=22.11.0"
   },
   "dependencies": {
     "date-fns": "^4.1.0",
