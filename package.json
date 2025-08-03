@@ -41,7 +41,8 @@
     "format": "prettier -w .",
     "lint": "tsc -p tsconfig.json",
     "test": "npm run test:file -- 'tests/**/*-test.ts'",
-    "test:file": "node --disable-warning=ExperimentalWarning --experimental-strip-types --experimental-test-isolation=none --test-timeout=5000 --test"
+    "test:file": "node --disable-warning=ExperimentalWarning --experimental-strip-types --experimental-test-isolation=none --test-timeout=5000 --test",
+    "version": "./scripts/version.sh"
   },
   "engines": {
     "node": ">=22.11.0"
