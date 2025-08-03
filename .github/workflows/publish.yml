@@ -22,6 +22,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           artifact-ids: ${{ needs.build.outputs.artifact-id }}
+          path: ./
+      - run: du -a .
       - run: npm publish --provenance --access public package.tgz
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
