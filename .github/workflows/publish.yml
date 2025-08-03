@@ -9,6 +9,7 @@ jobs:
     uses: ./.github/workflows/build.yml
   publish:
     needs: [build]
+    environment: publish
     permissions:
       contents: write # release
       id-token: write # provenance
