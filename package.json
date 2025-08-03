@@ -37,12 +37,14 @@
     "AUTHORS"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsc -p tsconfig.dist.json",
-    "prepack": "rm -f *.tgz && npm run build",
+    "build": "tsc -p tsconfig.dist.json",
     "format": "prettier -w .",
     "lint": "tsc -p tsconfig.json",
     "test": "npm run test:file -- 'tests/**/*-test.ts'",
     "test:file": "node --disable-warning=ExperimentalWarning --experimental-strip-types --experimental-test-isolation=none --test-timeout=5000 --test"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "dependencies": {
     "date-fns": "^4.1.0",
@@ -90,7 +92,12 @@
     "chai-xml": "^0.4.1",
     "n3": "^0.11.3",
     "prettier": "^3.6.2",
-    "typescript": "5.8.x"
+    "typescript": "5.8.x",
+    "@seald-io/binary-search-tree": "^1.0.3",
+    "js-md5": "^0.8.3",
+    "lru-cache": "^11.1.0",
+    "rxjs": "^8.0.0-alpha.14",
+    "xml": "^1.0.1"
   },
   "overrides": {
     "sparqljs": {
