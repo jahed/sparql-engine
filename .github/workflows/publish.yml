@@ -1,3 +1,4 @@
+name: publish
 on:
   workflow_dispatch:
   push:
@@ -23,7 +24,6 @@ jobs:
         with:
           artifact-ids: ${{ needs.build.outputs.artifact-id }}
           path: ./
-      - run: du -a .
       - run: npm publish --provenance --access public ./artifacts/package.tgz
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
