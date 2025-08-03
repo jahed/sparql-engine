@@ -24,7 +24,6 @@ import Dataset from "../rdf/dataset.ts";
 import type { EngineTriple } from "../types.ts";
 import { deepApplyBindings, extendByBindings } from "../utils.ts";
 import { RDF, isVariable } from "../utils/rdf.ts";
-import type { BGPCache } from "./cache/bgp-cache.ts";
 import ExecutionContext from "./context/execution-context.ts";
 import ContextSymbols from "./context/symbols.ts";
 import AggregateStageBuilder from "./stages/aggregate-stage-builder.ts";
@@ -42,6 +41,7 @@ import ServiceStageBuilder from "./stages/service-stage-builder.ts";
 import StageBuilder from "./stages/stage-builder.ts";
 import UnionStageBuilder from "./stages/union-stage-builder.ts";
 import UpdateStageBuilder from "./stages/update-stage-builder.ts";
+import type { BGPCache } from "./cache/types.ts";
 
 export type QueryOutput = Bindings | EngineTriple | boolean;
 

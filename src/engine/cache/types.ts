@@ -1,4 +1,18 @@
 // SPDX-License-Identifier: MIT
+import { Bindings } from "../../rdf/bindings.ts";
+import type { EngineIRI, EngineTriple } from "../../types.ts";
+import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+
+export interface BasicGraphPattern {
+  patterns: EngineTriple[];
+  graphIRI: EngineIRI;
+}
+
+export interface SavedBGP {
+  bgp: BasicGraphPattern;
+  key: string;
+}
+
 /**
  * A cache is a vue that materializes data for latter re-use
  */
@@ -85,4 +99,44 @@ export interface AsyncCache<K, T, I> {
    * @return The number of items currently in the cache
    */
   count(): number;
+}
+
+/**
+ * Data-structure used for the base implementation of an asynchronous cache.
+ */
+export interface AsyncCacheEntry<T, I> {
+  /** The cache entry's content */
+  content: Array<T>;
+  /** The ID of the writer that is allowed to edit the cache entry */
+  writerID: I;
+  /** All reads that wait for this cache entry to be committed */
+  pendingReaders: Array<(items: Array<T>) => void>;
+  /** Whether the cache entry is availbale for read or not */
+  isComplete: boolean;
+}
+
+/**
+ * An async cache that stores the solution bindings from BGP evaluation
+ */
+export interface BGPCache
+  extends AsyncCache<BasicGraphPattern, Bindings, string> {
+  /**
+   * Search for a BGP in the cache that is a subset of the input BGP
+   * This method enable the user to use the Semantic caching technique,
+   * to evaluate a BGP using one of its cached subset.
+   * @param bgp - Basic Graph pattern
+   * @return A pair [subset BGP, set of patterns not in cache]
+   */
+  findSubset(bgp: BasicGraphPattern): [EngineTriple[], EngineTriple[]];
+
+  /**
+   * Access the cache and returns a pipeline stage that returns the content of the cache for a given BGP
+   * @param bgp - Cache key, i.e., a Basic Graph pattern
+   * @param onCancel - Callback invoked when the cache entry is deleted before being committed, so we can produce an alternative pipeline stage to continue query processing. Typically, it is the pipeline stage used to evaluate the BGP without the cache.
+   * @return A pipeline stage that returns the content of the cache entry for the given BGP
+   */
+  getAsPipeline(
+    bgp: BasicGraphPattern,
+    onCancel?: () => PipelineStage<Bindings>
+  ): PipelineStage<Bindings>;
 }

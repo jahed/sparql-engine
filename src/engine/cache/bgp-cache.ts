@@ -3,22 +3,17 @@ import { BinarySearchTree } from "@seald-io/binary-search-tree";
 import { differenceWith, findIndex, maxBy } from "lodash-es";
 import { termToString } from "rdf-string";
 import { Bindings } from "../../rdf/bindings.ts";
-import type { EngineIRI, EngineTriple } from "../../types.ts";
+import type { EngineTriple } from "../../types.ts";
 import { termToValue, tripleEquals } from "../../utils/rdf.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import { Pipeline } from "../pipeline/pipeline.ts";
-import { type AsyncCacheEntry, AsyncLRUCache } from "./cache-base.ts";
-import type { AsyncCache } from "./cache-interfaces.ts";
-
-export interface BasicGraphPattern {
-  patterns: EngineTriple[];
-  graphIRI: EngineIRI;
-}
-
-interface SavedBGP {
-  bgp: BasicGraphPattern;
-  key: string;
-}
+import { AsyncLRUCache } from "./cache-base.ts";
+import type {
+  AsyncCacheEntry,
+  BasicGraphPattern,
+  BGPCache,
+  SavedBGP,
+} from "./types.ts";
 
 function hashTriple(triple: EngineTriple): string {
   return `s=${termToString(triple.subject)}&p=${termToString(triple.predicate)}&o=${termToString(triple.object)}`;
@@ -26,32 +21,6 @@ function hashTriple(triple: EngineTriple): string {
 
 function hashBasicGraphPattern(bgp: BasicGraphPattern): string {
   return `${bgp.patterns.map(hashTriple).join(";")}&graph-iri=${termToValue(bgp.graphIRI)}`;
-}
-
-/**
- * An async cache that stores the solution bindings from BGP evaluation
- */
-export interface BGPCache
-  extends AsyncCache<BasicGraphPattern, Bindings, string> {
-  /**
-   * Search for a BGP in the cache that is a subset of the input BGP
-   * This method enable the user to use the Semantic caching technique,
-   * to evaluate a BGP using one of its cached subset.
-   * @param bgp - Basic Graph pattern
-   * @return A pair [subset BGP, set of patterns not in cache]
-   */
-  findSubset(bgp: BasicGraphPattern): [EngineTriple[], EngineTriple[]];
-
-  /**
-   * Access the cache and returns a pipeline stage that returns the content of the cache for a given BGP
-   * @param bgp - Cache key, i.e., a Basic Graph pattern
-   * @param onCancel - Callback invoked when the cache entry is deleted before being committed, so we can produce an alternative pipeline stage to continue query processing. Typically, it is the pipeline stage used to evaluate the BGP without the cache.
-   * @return A pipeline stage that returns the content of the cache entry for the given BGP
-   */
-  getAsPipeline(
-    bgp: BasicGraphPattern,
-    onCancel?: () => PipelineStage<Bindings>
-  ): PipelineStage<Bindings>;
 }
 
 /**

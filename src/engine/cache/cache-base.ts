@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 import { LRUCache } from "lru-cache";
-import type { AsyncCache, Cache } from "./cache-interfaces.ts";
+import type { AsyncCache, AsyncCacheEntry, Cache } from "./types.ts";
 
 /**
  * An in-memory LRU cache
@@ -47,20 +47,6 @@ export class BaseLRUCache<K extends {}, T extends {}> implements Cache<K, T> {
   count(): number {
     return this._content.size;
   }
-}
-
-/**
- * Data-structure used for the base implementation of an asynchronous cache.
- */
-export interface AsyncCacheEntry<T, I> {
-  /** The cache entry's content */
-  content: Array<T>;
-  /** The ID of the writer that is allowed to edit the cache entry */
-  writerID: I;
-  /** All reads that wait for this cache entry to be committed */
-  pendingReaders: Array<(items: Array<T>) => void>;
-  /** Whether the cache entry is availbale for read or not */
-  isComplete: boolean;
 }
 
 /**
