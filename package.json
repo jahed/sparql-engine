@@ -1,6 +1,6 @@
 {
   "name": "@jahed/sparql-engine",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "SPARQL query engine for servers and web browsers.",
   "author": "Jahed Ahmed",
   "license": "MIT",
