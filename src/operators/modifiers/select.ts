@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
-import { Wildcard, type Query, type Variable } from "sparqljs";
+import type { Query, Variable } from "sparqljs";
 import type { PipelineStage } from "../../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../../engine/pipeline/pipeline.ts";
-
 import type { Bindings } from "../../rdf/bindings.ts";
-import { UNBOUND } from "../../utils/rdf.ts";
+import { isWildcard, UNBOUND } from "../../utils/rdf.ts";
 
 /**
  * Evaluates a SPARQL SELECT operation, i.e., perform a selection over sets of solutions bindings
@@ -17,7 +16,7 @@ export default function select(source: PipelineStage<Bindings>, query: Query) {
   if (!("variables" in query)) {
     throw new Error("Not a select query.");
   }
-  if (query.variables[0] instanceof Wildcard) {
+  if (isWildcard(query.variables[0])) {
     return Pipeline.getInstance().map(source, (bindings: Bindings) => {
       // return bindings.mapValues((k, v) => (rdf.isVariable(k) ? v : null));
       return bindings;

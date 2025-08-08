@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
-import {
-  Wildcard,
-  type BgpPattern,
-  type ClearDropOperation,
-  type GraphQuads,
-  type InsertDeleteOperation,
-  type IriTerm,
-  type Query,
-  type UpdateOperation,
+import type {
+  BgpPattern,
+  ClearDropOperation,
+  GraphQuads,
+  InsertDeleteOperation,
+  IriTerm,
+  Query,
+  UpdateOperation,
 } from "sparqljs";
+import { Wildcard } from "sparqljs";
 import construct from "../../operators/modifiers/construct.ts";
 import ActionConsumer from "../../operators/update/action-consumer.ts";
 import ClearConsumer from "../../operators/update/clear-consumer.ts";

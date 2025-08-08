@@ -1,17 +1,12 @@
 // SPDX-License-Identifier: MIT
-import StageBuilder from "./stage-builder.ts";
-
-import {
-  Wildcard,
-  type IriTerm,
-  type Query,
-  type ServicePattern,
-} from "sparqljs";
+import type { IriTerm, Query, ServicePattern } from "sparqljs";
+import { Wildcard } from "sparqljs";
 import type { Bindings } from "../../rdf/bindings.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import ContextSymbols from "../context/symbols.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
 import { Pipeline } from "../pipeline/pipeline.ts";
+import StageBuilder from "./stage-builder.ts";
 
 /**
  * A ServiceStageBuilder is responsible for evaluation a SERVICE clause in a SPARQL query.

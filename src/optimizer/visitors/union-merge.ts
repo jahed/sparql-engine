@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 import { cloneDeep, partition } from "lodash-es";
-
 import type { Pattern, UnionPattern } from "sparqljs";
 import PlanVisitor from "../plan-visitor.ts";
 
@@ -9,7 +8,7 @@ import PlanVisitor from "../plan-visitor.ts";
  * should be merged as one single UNION clause.
  */
 export default class UnionMerge extends PlanVisitor {
-  visitUnion(node: UnionPattern): Pattern {
+  visitUnion(node: UnionPattern): UnionPattern {
     const newNode = cloneDeep(node);
     const parts = partition(
       newNode.patterns,

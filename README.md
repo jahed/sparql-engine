@@ -12,7 +12,7 @@ The aim of this project is to use newer Web APIs, language features, and make th
 ## Installation
 
 ```sh
-npm install @jahed/sparql-engine
+npm install @jahed/sparql-engine sparqljs
 ```
 
 Override `rdf-data-factory` to use v2 in your `package.json`.
@@ -36,6 +36,7 @@ import SparqlEngineGraph from "@jahed/sparql-engine/rdf/graph.js";
 import HashMapDataset from "@jahed/sparql-engine/rdf/hashmap-dataset.js";
 import { RDF } from "@jahed/sparql-engine/utils/rdf.js";
 import type { EngineTriple } from "@jahed/sparql-engine/types.js";
+import { Parser } from "sparqljs";
 
 export class MySparqlGraph extends SparqlEngineGraph {
   *find(
@@ -56,6 +57,8 @@ export class MySparqlGraph extends SparqlEngineGraph {
 const defaultGraph = new MySparqlGraph();
 const dataset = new HashMapDataset(defaultGraph);
 const planner = new PlanBuilder(dataset);
+const parser = new Parser({ factory: RDF });
+const query = parser.parse("<sparql>");
 
 try {
   for await (const row of planner.build(query)) {

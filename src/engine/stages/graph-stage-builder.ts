@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: MIT
-import {
-  Wildcard,
-  type GraphPattern,
-  type IriTerm,
-  type Query,
-} from "sparqljs";
+import type { GraphPattern, IriTerm, Query } from "sparqljs";
+import { Wildcard } from "sparqljs";
 import type { Bindings } from "../../rdf/bindings.ts";
 import { isVariable } from "../../utils/rdf.ts";
 import ExecutionContext from "../context/execution-context.ts";

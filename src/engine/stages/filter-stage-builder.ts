@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
-import exists from "../../operators/exists.ts";
-import sparqlFilter from "../../operators/sparql-filter.ts";
-import StageBuilder from "./stage-builder.ts";
-
 import type { FilterPattern, OperationExpression } from "sparqljs";
+import exists from "../../operators/exists.ts";
 import type { CustomFunctions } from "../../operators/expressions/sparql-expression.ts";
+import sparqlFilter from "../../operators/sparql-filter.ts";
 import type { Bindings } from "../../rdf/bindings.ts";
 import ExecutionContext from "../context/execution-context.ts";
 import type { PipelineStage } from "../pipeline/pipeline-engine.ts";
+import StageBuilder from "./stage-builder.ts";
 
 /**
  * A FilterStageBuilder evaluates FILTER clauses

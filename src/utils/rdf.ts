@@ -203,6 +203,10 @@ export function isBlank(value: EngineTripleValue): value is BlankNode {
   return "termType" in value && value.termType === "BlankNode";
 }
 
+export function isWildcard(value: object): value is Wildcard {
+  return "termType" in value && value.termType === "Wildcard";
+}
+
 export const XSD_integer = "http://www.w3.org/2001/XMLSchema#integer";
 export const XSD_byte = "http://www.w3.org/2001/XMLSchema#byte";
 export const XSD_short = "http://www.w3.org/2001/XMLSchema#short";

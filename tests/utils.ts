@@ -10,15 +10,14 @@ import type { CustomFunctions } from "@jahed/sparql-engine/operators/expressions
 import Graph from "@jahed/sparql-engine/rdf/graph.ts";
 import HashMapDataset from "@jahed/sparql-engine/rdf/hashmap-dataset.ts";
 import type { EngineIRI, EngineTriple } from "@jahed/sparql-engine/types.ts";
-import { isVariable } from "@jahed/sparql-engine/utils/rdf.ts";
+import { isVariable, RDF } from "@jahed/sparql-engine/utils/rdf.ts";
 import fs from "fs";
 import { isArray } from "lodash-es";
 import n3 from "n3";
 import type { NamedNode } from "rdf-data-factory";
 import { stringQuadToQuad, termToString } from "rdf-string";
-import type { Query } from "sparqljs";
-
-const { Parser, Store } = n3;
+import type { SparqlParser } from "sparqljs";
+import { Parser } from "sparqljs";
 
 export type TestGraph = N3Graph | UnionN3Graph;
 
@@ -63,8 +62,8 @@ export class N3Graph extends Graph {
 
   constructor(iri?: NamedNode) {
     super(iri);
-    this._store = Store()!;
-    this._parser = Parser()!;
+    this._store = n3.Store()!;
+    this._parser = n3.Parser()!;
   }
 
   parse(file: string) {
@@ -148,10 +147,14 @@ class UnionN3Graph extends N3Graph {
 export class TestEngine<G extends Graph = TestGraph> {
   public readonly _dataset: HashMapDataset<G>;
   public readonly _builder: PlanBuilder;
+  public readonly _parser: SparqlParser;
 
   constructor(graph: G, customOperations: CustomFunctions = {}) {
     this._dataset = new HashMapDataset(graph);
-    this._builder = new PlanBuilder(this._dataset, {}, customOperations);
+    this._builder = new PlanBuilder(this._dataset, customOperations);
+    this._parser = new Parser({
+      factory: RDF,
+    });
   }
 
   defaultGraphIRI() {
@@ -170,10 +173,12 @@ export class TestEngine<G extends Graph = TestGraph> {
     return this._dataset.hasNamedGraph(iri);
   }
 
-  execute(query: string | Query): PipelineStage<QueryOutput> {
+  execute(query: string): PipelineStage<QueryOutput> {
     return Pipeline.getInstance().fromAsync(async (input) => {
       try {
-        for await (const data of await this._builder.build(query)) {
+        for await (const data of await this._builder.build(
+          this._parser.parse(query)
+        )) {
           input.next(data);
         }
         input.complete();

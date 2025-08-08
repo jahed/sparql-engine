@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-import type { Pattern } from "sparqljs";
+import type { SparqlQuery } from "sparqljs";
 import PlanVisitor from "./plan-visitor.ts";
 import UnionMerge from "./visitors/union-merge.ts";
 
@@ -36,7 +36,7 @@ export default class Optimizer {
    * @param  plan - SPARQL query expression tree to iptimize
    * @return Optimized SPARQL query expression tree
    */
-  optimize(plan: Pattern): Pattern {
+  optimize(plan: SparqlQuery): SparqlQuery {
     return this._visitors.reduce((current, v) => v.visit(current), plan);
   }
 }

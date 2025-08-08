@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
 import { isNull, isUndefined, partition, some, sortBy } from "lodash-es";
-import {
-  Parser,
-  type BgpPattern,
-  type ConstructQuery,
-  type Pattern,
-  type Query,
-  type SparqlParser,
-  type Triple,
-  type Variable,
-  type VariableExpression,
+import type {
+  BgpPattern,
+  ConstructQuery,
+  Pattern,
+  Query,
+  SparqlQuery,
+  Triple,
+  Variable,
+  VariableExpression,
 } from "sparqljs";
 import type { PipelineStage } from "../engine/pipeline/pipeline-engine.ts";
 import { Pipeline } from "../engine/pipeline/pipeline.ts";
@@ -24,6 +23,7 @@ import Dataset from "../rdf/dataset.ts";
 import type { EngineTriple } from "../types.ts";
 import { deepApplyBindings, extendByBindings } from "../utils.ts";
 import { RDF, isVariable } from "../utils/rdf.ts";
+import type { BGPCache } from "./cache/types.ts";
 import ExecutionContext from "./context/execution-context.ts";
 import ContextSymbols from "./context/symbols.ts";
 import AggregateStageBuilder from "./stages/aggregate-stage-builder.ts";
@@ -41,7 +41,6 @@ import ServiceStageBuilder from "./stages/service-stage-builder.ts";
 import StageBuilder from "./stages/stage-builder.ts";
 import UnionStageBuilder from "./stages/union-stage-builder.ts";
 import UpdateStageBuilder from "./stages/update-stage-builder.ts";
-import type { BGPCache } from "./cache/types.ts";
 
 export type QueryOutput = Bindings | EngineTriple | boolean;
 
@@ -62,38 +61,20 @@ export const SPARQL_OPERATION = {
   UNION: 12,
 };
 
-/**
- * A PlanBuilder builds a physical query execution plan of a SPARQL query,
- * i.e., an iterator that can be consumed to get query results.
- * Internally, it implements a Builder design pattern, where various {@link StageBuilder} are used
- * for building each part of the query execution plan.
- */
 export class PlanBuilder {
-  private readonly _parser: SparqlParser;
   private _optimizer: Optimizer;
   private _stageBuilders: Map<SparqlOperation, StageBuilder>;
   public _currentCache: BGPCache | null; // Public for tests.
   private _dataset: Dataset;
   private _customFunctions?: CustomFunctions;
 
-  /**
-   * Constructor
-   * @param _dataset - RDF Dataset used for query execution
-   * @param _prefixes - Optional prefixes to use during query processing
-   */
-  constructor(
-    dataset: Dataset,
-    prefixes: any = {},
-    customFunctions?: CustomFunctions
-  ) {
+  constructor(dataset: Dataset, customFunctions?: CustomFunctions) {
     this._dataset = dataset;
     this._customFunctions = customFunctions;
-    this._parser = new Parser(prefixes);
     this._optimizer = Optimizer.getDefault();
     this._currentCache = null;
     this._stageBuilders = new Map();
 
-    // add default stage builders
     this.use(
       SPARQL_OPERATION.AGGREGATE,
       new AggregateStageBuilder(this._dataset)
@@ -121,21 +102,11 @@ export class PlanBuilder {
     this.use(SPARQL_OPERATION.UPDATE, new UpdateStageBuilder(this._dataset));
   }
 
-  /**
-   * Set a new {@link Optimizer} uszed to optimize logical SPARQL query execution plans
-   * @param  opt - New optimizer to use
-   */
   set optimizer(opt: Optimizer) {
     this._optimizer = opt;
   }
 
-  /**
-   * Register a Stage Builder to evaluate a class of SPARQL operations
-   * @param  kind         - Class of SPARQL operations handled by the Stage Builder
-   * @param  stageBuilder - New Stage Builder
-   */
   use(kind: SparqlOperation, stageBuilder: StageBuilder) {
-    // complete handshake
     stageBuilder.builder = null;
     stageBuilder.builder = this;
     this._stageBuilders.set(kind, stageBuilder);
@@ -149,28 +120,15 @@ export class PlanBuilder {
     this._currentCache = null;
   }
 
-  /**
-   * Build the physical query execution of a SPARQL 1.1 query
-   * and returns a {@link PipelineStage} or a {@link Consumable} that can be consumed to evaluate the query.
-   * @param  query    - SPARQL query to evaluated
-   * @param  options  - Execution options
-   * @return A {@link PipelineStage} or a {@link Consumable} that can be consumed to evaluate the query.
-   */
   async build(
-    query: any,
+    query: SparqlQuery,
     context?: ExecutionContext
   ): Promise<PipelineStage<QueryOutput>> {
-    // If needed, parse the string query into a logical query execution plan
-    if (typeof query === "string") {
-      query = this._parser.parse(query);
-    }
     if (isNull(context) || isUndefined(context)) {
       context = new ExecutionContext();
       context.cache = this._currentCache;
     }
-    // Optimize the logical query execution plan
     query = this._optimizer.optimize(query);
-    // build physical query execution plan, depending on the query type
     switch (query.type) {
       case "query":
         return this._buildQueryPlan(query, context);
@@ -184,17 +142,10 @@ export class PlanBuilder {
           .get(SPARQL_OPERATION.UPDATE)!
           .execute(query.updates, context);
       default:
-        throw new SyntaxError(`Unsupported SPARQL query type: ${query.type}`);
+        throw new SyntaxError("Unsupported SPARQL query type");
     }
   }
 
-  /**
-   * Build the physical query execution of a SPARQL query
-   * @param  query    - Parsed SPARQL query
-   * @param  options  - Execution options
-   * @param  source   - Input {@link PipelineStage}
-   * @return A {@link PipelineStage} that can be consumed to evaluate the query.
-   */
   async _buildQueryPlan(
     query: Query,
     context: ExecutionContext,
@@ -347,13 +298,6 @@ export class PlanBuilder {
     return graphIterator;
   }
 
-  /**
-   * Optimize a WHERE clause and build the corresponding physical plan
-   * @param  source  - Input {@link PipelineStage}
-   * @param  groups   - WHERE clause to process
-   * @param  options  - Execution options
-   * @return A {@link PipelineStage} used to evaluate the WHERE clause
-   */
   async _buildWhere(
     source: PipelineStage<Bindings>,
     groups: Pattern[],
